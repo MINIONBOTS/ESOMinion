@@ -337,9 +337,8 @@ end
 -- Gets called when a navmesh is done loading/building
 function mm.NavMeshUpdate()
 	d("New Mesh loaded..")
-	mc_datamanager.UpdateLevelMap()
-	
-	-- try loading questprofile
+		
+	--[[ try loading questprofile
 	if ( gBotMode == GetString("grindMode") or gBotMode == GetString("exploreMode")) then
 		local mapname = mc_datamanager.GetMapName( Player.localmapid)
 		if ( mapname ~= nil and mapname ~= "" and mapname ~= "none" ) then
@@ -349,10 +348,10 @@ function mm.NavMeshUpdate()
 				ml_quest_mgr.UpdateCurrentProfileData()
 			end
 		end
-	end
+	end]]
 	
 	if ( TableSize(ml_quest_mgr.QuestList) == 0 and (gBotMode == GetString("grindMode") or gBotMode == GetString("exploreMode"))) then
-		mc_questmanager.GenerateMapExploreProfile()
+		--mc_questmanager.GenerateMapExploreProfile()
 	end
 	
 	eso_global.ResetBot()

@@ -42,22 +42,32 @@ function Dev.ModuleInit()
 	GUI_NewField("Dev","IsBossMonster","TIsBoss","EntityInfo")	
 	chartarg = "Player"
 	
-	-- Abilities & Casting
-	GUI_NewComboBox("Dev","Player/TargetInfo","ABchartarg","AbilityInfo","Player,Target");
-	GUI_NewField("Dev","IsCasting","ABIsCast","AbilityInfo")
-	GUI_NewField("Dev","IsChanneling","ABIsChannel","AbilityInfo")
-	GUI_NewField("Dev","Ability","CABility","AbilityInfo")
-	GUI_NewField("Dev","AbilityID","CAbiliID","AbilityInfo")
-	GUI_NewField("Dev","StartTime","CAbiStar","AbilityInfo")
-	GUI_NewField("Dev","EndTime","CAbiEnd","AbilityInfo")
-	GUI_NewField("Dev","ABIsChanneling","CABIsChann","AbilityInfo")
+	-- CastInfo
+	GUI_NewComboBox("Dev","Player/TargetInfo","ABchartarg","CastInfo","Player,Target");
+	GUI_NewField("Dev","IsCasting","ABIsCast","CastInfo")
+	GUI_NewField("Dev","IsChanneling","ABIsChannel","CastInfo")
+	GUI_NewField("Dev","Ability","CABility","CastInfo")
+	GUI_NewField("Dev","AbilityID","CAbiliID","CastInfo")
+	GUI_NewField("Dev","StartTime","CAbiStar","CastInfo")
+	GUI_NewField("Dev","EndTime","CAbiEnd","CastInfo")
+	GUI_NewField("Dev","ABIsChanneling","CABIsChann","CastInfo")
 	
+	-- AbilityInfo
 	ABchartarg = "Player"	
 	GUI_NewNumeric("Dev","AbiliyListEntry","abilitySlot","AbilityInfo","0","999");
 	GUI_NewField("Dev","Ptr","ABPtr","AbilityInfo")
 	GUI_NewField("Dev","ID","ABID","AbilityInfo")
 	GUI_NewField("Dev","Name","ABName","AbilityInfo")
+	GUI_NewField("Dev","IsUsable","ABUsable","AbilityInfo")
+	GUI_NewField("Dev","IsGroundTargeted","ABGround","AbilityInfo")	
+	GUI_NewField("Dev","PowerType","ABType","AbilityInfo")	
+	GUI_NewField("Dev","PowerCost","ABCost","AbilityInfo")
+	GUI_NewField("Dev","Casttime","ABCastT","AbilityInfo")
+	GUI_NewField("Dev","Channeltime","ABChanT","AbilityInfo")
+	GUI_NewField("Dev","Range","ABRange","AbilityInfo")
+	GUI_NewField("Dev","Radius","ABRadius","AbilityInfo")				
 	GUI_NewField("Dev","CanCast","ABCanCa","AbilityInfo")
+	GUI_NewField("Dev","IsTargetInRange","ABInRange","AbilityInfo")
 	abilitySlot = 0	
 	GUI_NewButton("Dev","Cast","AB_Cast","AbilityInfo")
 	RegisterEventHandler("AB_Cast", Dev.Func)
@@ -142,6 +152,8 @@ function Dev.Test1()
 	d(Dev.running)
 end
 
+Dev.Obstacles = {}
+Dev.AvoidanceAreas = {}
 function Dev.Mov ( arg ) 
 	if ( arg == "Dev.playerPosition") then
 		local p = Player
@@ -190,7 +202,7 @@ function Dev.Mov ( arg )
 			smoothturns = true
 		end
 		d("Navigating to "..tostring(tb_xPos).." "..tostring(tb_yPos).." "..tostring(tb_zPos))
-		tb_nRes = tostring(Player:MoveTo(tonumber(tb_xPos),tonumber(tb_yPos),tonumber(tb_zPos),1.5,navsystem,navpath,smoothturns))
+		tb_nRes = tostring(Player:MoveTo(tonumber(tb_xPos),tonumber(tb_yPos),tonumber(tb_zPos),0.5,navsystem,navpath,smoothturns))
 	elseif ( arg == "Dev.Teleport") then
 		if (tonumber(tb_xPos) ~= nil ) then
 			d(Player:Teleport(tonumber(tb_xPos),tonumber(tb_yPos),tonumber(tb_zPos)))
@@ -277,10 +289,10 @@ function Dev.UpdateWindow()
 		TName = mytarget.name
 		TClass = mytarget.class
 		THP = tostring(mytarget.hp.current.." / "..mytarget.hp.max.." / "..mytarget.hp.percent.."%")
-		TPos = (math.floor(mytarget.pos.x * 100) / 100).." / "..(math.floor(mytarget.pos.y * 100) / 100).." / "..(math.floor(mytarget.pos.z * 100) / 100)
+		TPos = (math.floor(mytarget.pos.x * 10) / 10).." / "..(math.floor(mytarget.pos.y * 10) / 10).." / "..(math.floor(mytarget.pos.z * 10) / 10)
 		TOnMesh = tostring(mytarget.onmesh)
 		TOnMeshExact = tostring(mytarget.onmeshexact)
-		TDist = (math.floor(mytarget.distance * 100) / 100)
+		TDist = mytarget.distance --(math.floor(mytarget.distance * 100) / 100)
 		TPDist = (math.floor(mytarget.pathdistance * 100) / 100)
 		THead = mytarget.pos.facingangle
 		TIAT = mytarget.interacttype
@@ -357,15 +369,33 @@ function Dev.UpdateWindow()
 	if ( id and ab ) then
 		if (mytarget ~= nil) then
 			ABCanCa = AbilityList:CanCast(ab.id,mytarget.id)
+			ABInRange = tostring(AbilityList:IsTargetInRange(ab.id,mytarget.id))	
 		end
 		ABPtr = ab.ptr
 		ABID = ab.id
 		ABName = ab.name
+		ABUsable = tostring(ab.isusable)
+		ABGround = tostring(ab.isgroundtarget)
+		ABType = ab.type
+		ABCost = ab.cost
+		ABCastT = ab.casttime
+		ABChanT = ab.channeltime
+		ABRange = ab.range
+		ABRadius= ab.radius		
 	else
 		ABPtr = 0
 		ABID = 0
 		ABName = 0
 		ABCanCa = "false"
+		ABUsable = "false"
+		ABGround = "false"
+		ABType = 0
+		ABCost = 0
+		ABCastT = 0
+		ABChanT = 0
+		ABRange = 0
+		ABRadius= 0
+		ABInRange = "false"
 	end
 	
 	-- Movement & Navigation	

@@ -17,23 +17,30 @@ function eso_global.moduleinit()
 	if ( Settings.ESOMinion.gBotMode == nil ) then
         Settings.ESOMinion.gBotMode = GetString("grindMode")
     end
+	if ( Settings.ESOMinion.gAttackRange == nil ) then
+        Settings.ESOMinion.gAttackRange = GetString("aAutomatic")
+    end
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(eso_global.window.name,eso_global.window.x,eso_global.window.y,eso_global.window.width,eso_global.window.height)
 	GUI_NewButton(eso_global.window.name,GetString("startStop"),"eso_global.startStop")
-		
+			
 	GUI_NewButton(eso_global.window.name,GetString("showradar"),"Radar.toggle")
 	RegisterEventHandler("eso_global.startStop", eso_global.eventhandler)
 	GUI_NewCheckbox(eso_global.window.name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
 	GUI_NewComboBox(eso_global.window.name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
-			
+	GUI_NewField(eso_global.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
+	
+	
 	GUI_NewNumeric(eso_global.window.name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
+	GUI_NewComboBox(eso_global.window.name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
 	
 	GUI_NewButton(eso_global.window.name, GetString("advancedSettings"), "AdvancedSettings.toggle")
 	RegisterEventHandler("AdvancedSettings.toggle", eso_global.ToggleAdvMenu)
 	
 	-- ADVANCED SETTINGS WINDOW
 	GUI_NewWindow(eso_global.advwindow.name,eso_global.advwindow.x,eso_global.advwindow.y,eso_global.advwindow.width,eso_global.advwindow.height,"",false)
+	GUI_NewButton(eso_global.advwindow.name, GetString("skillManager"), "SkillManager.toggle")
 	GUI_NewButton(eso_global.advwindow.name, GetString("meshManager"), "ToggleMeshmgr")
 	
 	GUI_WindowVisible(eso_global.advwindow.name,false)
@@ -54,6 +61,7 @@ function eso_global.moduleinit()
 	
 	gBotRunning = "0"
 	gPulseTime = Settings.ESOMinion.gPulseTime	
+	gAttackRange = Settings.ESOMinion.gAttackRange
 	
 	GUI_UnFoldGroup(eso_global.window.name,GetString("botStatus") );		
 end
@@ -83,6 +91,9 @@ function eso_global.onupdate( event, tickcount )
 					end
 				end
 				
+				-- Unstuck OnUpdate
+				--mc_ai_unstuck:OnUpdate( tickcount )
+				
 				GUI_SetStatusBar(ml_GetTraceString())
 			end
 		end
@@ -93,6 +104,20 @@ function eso_global.onupdate( event, tickcount )
 		GUI_SetStatusBar("BOT: Not Running")
 	end
 	
+	-- Mesher OnUpdate
+	mm.OnUpdate( tickcount )
+		
+	-- SkillManager OnUpdate
+	eso_skillmanager.OnUpdate( tickcount )
+	
+	-- PartyManager OnUpdate
+	--mc_multibotmanager.OnUpdate( tickcount )
+	
+	-- BlackList OnUpdate
+	--mc_blacklist.OnUpdate( tickcount )
+	
+	-- FollowBot OnUpdate
+	--mc_followbot.OnUpdate( tickcount )
 end
 
 
@@ -152,12 +177,12 @@ function eso_global.togglebot(arg)
 		eso_global.running = true
 		ml_task_hub.shouldRun = true
 		gBotRunning = "1"
-		mc_meshrotation.currentMapTime = eso_global.now
+		--mc_meshrotation.currentMapTime = eso_global.now
 	end
 end
 
 function eso_global.UpdateGlobals()
-	--eso_global.AttackRange = mc_skillmanager.GetAttackRange()
+	eso_global.AttackRange = eso_skillmanager.GetAttackRange()
 	
 	
 	
@@ -167,7 +192,7 @@ end
 
 function eso_global.ResetBot()
 
-	--Player:StopMovement()
+	Player:Stop()
 	--Player:ClearTarget()
 end
 
