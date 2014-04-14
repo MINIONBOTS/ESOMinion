@@ -375,7 +375,7 @@ function eso_skillmanager.CreateNewProfile()
 end
 
 function eso_skillmanager.AutoDetectSkills()
-	eso_skillmanager.RecordSkillTmr = eso_global.now
+	eso_skillmanager.RecordSkillTmr = ml_global_information.Now
 	eso_skillmanager.SkillRecordingActive = true
 end
 
@@ -590,9 +590,9 @@ function eso_skillmanager.GetAttackRange()
 	
 	local maxrange = 5 -- 5 is the melee sword attack range
 	
-	if ( gAttackRange ) == GetString("aRange") then
+	if ( gAttackRange == GetString("aRange")) then
 		maxrange = 28
-	elseif ( gAttackRange ) == GetString("aAutomatic") then
+	elseif ( gAttackRange == GetString("aAutomatic")) then
 		-- go through all current skills and grab the one which is in our skillmanagerprofile + set to "Set Attackrange"
 		local ABList = AbilityList("")
 		if (ABList) then
@@ -600,13 +600,11 @@ function eso_skillmanager.GetAttackRange()
 			while (id and skill ) do			
 				
 				if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
-					local sID = skill.skillID
+					local sID = skill.id
 					for k,v in pairs(eso_skillmanager.SkillProfile) do					
-						if ( v.skillID == sID) then						
-							--d("Adding skill "..tostring(sID) .." WTF "..tostring(v.skillID) .." to index "..tostring(i))						
-							--eso_skillmanager.cskills[i] = skill
-							--eso_skillmanager.cskills[i].slot = GW2.SKILLBARSLOT["Slot_" .. i]
-							--eso_skillmanager.cskills[i].prio = v.prio
+						--d("skill "..tostring(sID) .." vs "..tostring(v.skillID) .." "..v.name)						
+						if ( v.skillID == sID) then					
+							
 							-- Get Max Attack Range for global use
 							if (v.atkrng == "1" ) then
 								--d(skill.name.." "..tostring(skill.maxRange).." "..tostring(v.name).." "..tostring(v.maxRange))
@@ -627,6 +625,31 @@ function eso_skillmanager.GetAttackRange()
 	return maxrange
 end
 
+-- goes through our skilllist and checks if we can attack the enemy with our current attackrange
+function eso_skillmanager.CanAttackTarget( TargetID )
+	local ABList = AbilityList("")
+	
+	if (ABList) then
+		local id,skill = next(ABList)
+		while (id and skill ) do			
+			
+			if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
+				local sID = skill.id
+				for k,v in pairs(eso_skillmanager.SkillProfile) do					
+					--d("skill "..tostring(sID) .." vs "..tostring(v.skillID) .." "..v.name)						
+					if ( v.skillID == sID) then						
+						if ( AbilityList:CanCast(sID,TargetID) == 10 ) then
+							return true
+						end
+						break
+					end
+				end
+			end	
+			id,skill = next(ABList,id)
+		end	
+	end
+	return false
+end
 
 function eso_skillmanager.AttackTarget( TargetID )	
 	local fastcastcount = 0
@@ -642,7 +665,7 @@ function eso_skillmanager.AttackTarget( TargetID )
 	end
 	
 		
-	if ( target and TargetID and target.attackable ) then	
+	if ( target and TargetID > 0 and target.attackable ) then	
 		local mybuffs = nil --Player.buffs		
 		local targetbuffs = nil
 		--[[if ( target.isCharacter) then
@@ -725,7 +748,7 @@ function eso_skillmanager.AttackTarget( TargetID )
                     end
 					
 										
-					d("Casting.."..ab.name.." at "..target.name)								
+					d("Casting.."..ab.name.." at "..target.name.."Result: "..tostring(AbilityList:CanCast(ab.id,TargetID)))								
 					if ( AbilityList:Cast(ab.id,TargetID) ) then
 						--d("Casting on Target: "..tostring(eso_skillmanager.cskills[currentSlot].name))
 						eso_skillmanager.prevSkillID = ab.id															
@@ -733,26 +756,31 @@ function eso_skillmanager.AttackTarget( TargetID )
 						
 					if ( skill.channel > 0 ) then
 						-- Add a tiny delay so "iscasting" gets true for this spell, not interrupting it on the next pulse
-						eso_global.lasttick = eso_global.lasttick + skill.channel - 500
+						ml_global_information.lasttick = ml_global_information.lasttick + skill.channel - 500
 						return true
 					else										
 						fastcastcount = fastcastcount + 1 
 						if ( fastcastcount > 1) then
 							
 							--[[Swap Weapon check			
-							if ( eso_global.AttackRange < 300 and target.distance > eso_global.AttackRange ) then
+							if ( ml_global_information.AttackRange < 300 and target.distance > ml_global_information.AttackRange ) then
 								eso_skillmanager.SwapWeaponCheck("Range")
 							else	 
 								eso_skillmanager.SwapWeaponCheck("CoolDown")
 							end]]
 							return true
 						end
+						ml_global_information.Wait(250)
 					end				
 				end				
 			end
 		end
 	end
 	return false
+end
+
+function eso_skillmanager.HealMe()
+	ml_log("ADD SM HEALME")
 end
 
 RegisterEventHandler("SkillManager.toggle", eso_skillmanager.ToggleMenu)

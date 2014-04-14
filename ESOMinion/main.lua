@@ -1,15 +1,15 @@
-eso_global = { }
-eso_global.window = { name="MinionBot", x=50, y=50, width=200, height=300 }
-eso_global.advwindow = { name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
-eso_global.advwindowvisible = false
-eso_global.path = GetStartupPath()
-eso_global.now = 0
-eso_global.lasttick = 0
-eso_global.running = false
-eso_global.BotModes = {}
+ml_global_information = { }
+ml_global_information.window = { name="MinionBot", x=50, y=50, width=200, height=300 }
+ml_global_information.advwindow = { name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
+ml_global_information.advwindowvisible = false
+ml_global_information.path = GetStartupPath()
+ml_global_information.Now = 0
+ml_global_information.lasttick = 0
+ml_global_information.running = false
+ml_global_information.BotModes = {}
 
 
-function eso_global.moduleinit()
+function ml_global_information.moduleinit()
 	
 	if ( Settings.ESOMinion.gPulseTime == nil ) then
 		Settings.ESOMinion.gPulseTime = "150"
@@ -20,65 +20,70 @@ function eso_global.moduleinit()
 	if ( Settings.ESOMinion.gAttackRange == nil ) then
         Settings.ESOMinion.gAttackRange = GetString("aAutomatic")
     end
+	if ( Settings.ESOMinion.gGather == nil ) then
+		Settings.ESOMinion.gGather = "1"
+	end
 	
 	-- MAIN WINDOW
-	GUI_NewWindow(eso_global.window.name,eso_global.window.x,eso_global.window.y,eso_global.window.width,eso_global.window.height)
-	GUI_NewButton(eso_global.window.name,GetString("startStop"),"eso_global.startStop")
+	GUI_NewWindow(ml_global_information.window.name,ml_global_information.window.x,ml_global_information.window.y,ml_global_information.window.width,ml_global_information.window.height)
+	GUI_NewButton(ml_global_information.window.name,GetString("startStop"),"ml_global_information.startStop")
 			
-	GUI_NewButton(eso_global.window.name,GetString("showradar"),"Radar.toggle")
-	RegisterEventHandler("eso_global.startStop", eso_global.eventhandler)
-	GUI_NewCheckbox(eso_global.window.name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
-	GUI_NewComboBox(eso_global.window.name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
-	GUI_NewField(eso_global.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
+	GUI_NewButton(ml_global_information.window.name,GetString("showradar"),"Radar.toggle")
+	RegisterEventHandler("ml_global_information.startStop", ml_global_information.eventhandler)
+	GUI_NewCheckbox(ml_global_information.window.name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
+	GUI_NewComboBox(ml_global_information.window.name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
+	GUI_NewField(ml_global_information.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
 	
 	
-	GUI_NewNumeric(eso_global.window.name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
-	GUI_NewComboBox(eso_global.window.name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
+	GUI_NewNumeric(ml_global_information.window.name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
+	GUI_NewComboBox(ml_global_information.window.name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
+	GUI_NewCheckbox(ml_global_information.window.name,GetString("gatherMode"),"gGather",GetString("settings"))
 	
-	GUI_NewButton(eso_global.window.name, GetString("advancedSettings"), "AdvancedSettings.toggle")
-	RegisterEventHandler("AdvancedSettings.toggle", eso_global.ToggleAdvMenu)
+	GUI_NewButton(ml_global_information.window.name, GetString("advancedSettings"), "AdvancedSettings.toggle")
+	RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
 	
 	-- ADVANCED SETTINGS WINDOW
-	GUI_NewWindow(eso_global.advwindow.name,eso_global.advwindow.x,eso_global.advwindow.y,eso_global.advwindow.width,eso_global.advwindow.height,"",false)
-	GUI_NewButton(eso_global.advwindow.name, GetString("skillManager"), "SkillManager.toggle")
-	GUI_NewButton(eso_global.advwindow.name, GetString("meshManager"), "ToggleMeshmgr")
+	GUI_NewWindow(ml_global_information.advwindow.name,ml_global_information.advwindow.x,ml_global_information.advwindow.y,ml_global_information.advwindow.width,ml_global_information.advwindow.height,"",false)
+	GUI_NewButton(ml_global_information.advwindow.name, GetString("skillManager"), "SkillManager.toggle")
+	GUI_NewButton(ml_global_information.advwindow.name, GetString("meshManager"), "ToggleMeshmgr")
 	
-	GUI_WindowVisible(eso_global.advwindow.name,false)
+	GUI_WindowVisible(ml_global_information.advwindow.name,false)
 	
 	-- setup bot mode
     local botModes = "None"
-    if ( TableSize(eso_global.BotModes) > 0) then
-        local i,entry = next ( eso_global.BotModes )
+    if ( TableSize(ml_global_information.BotModes) > 0) then
+        local i,entry = next ( ml_global_information.BotModes )
         while i and entry do
             botModes = botModes..","..i
-            i,entry = next ( eso_global.BotModes,i)
+            i,entry = next ( ml_global_information.BotModes,i)
         end
     end
 	
     gBotMode_listitems = botModes    
     gBotMode = Settings.ESOMinion.gBotMode	
-	eso_global.UpdateMode()
+	ml_global_information.UpdateMode()
 	
 	gBotRunning = "0"
 	gPulseTime = Settings.ESOMinion.gPulseTime	
 	gAttackRange = Settings.ESOMinion.gAttackRange
+	gGather = Settings.ESOMinion.gGather
 	
-	GUI_UnFoldGroup(eso_global.window.name,GetString("botStatus") );		
+	GUI_UnFoldGroup(ml_global_information.window.name,GetString("botStatus") );		
 end
 
-function eso_global.onupdate( event, tickcount )
-	eso_global.now = tickcount
+function ml_global_information.onupdate( event, tickcount )
+	ml_global_information.Now = tickcount
 	
-	if ( eso_global.running ) then		
-		if ( tickcount - eso_global.lasttick > tonumber(gPulseTime) ) then
-			eso_global.lasttick = tickcount
+	if ( ml_global_information.running ) then		
+		if ( tickcount - ml_global_information.lasttick > tonumber(gPulseTime) ) then
+			ml_global_information.lasttick = tickcount
 			
 			-- Update global variables
-			eso_global.UpdateGlobals()
+			ml_global_information.UpdateGlobals()
 			
 			
 			-- Let the bot tick ;)
-			if ( eso_global.BotModes[gBotMode] ) then
+			if ( ml_global_information.BotModes[gBotMode] ) then
 												
 				if( ml_task_hub:CurrentTask() ~= nil) then
 					ml_log(ml_task_hub:CurrentTask().name.." :")
@@ -98,8 +103,8 @@ function eso_global.onupdate( event, tickcount )
 			end
 		end
 	
-	elseif ( eso_global.running == false and gAutostartbot == "1" ) then
-		eso_global.togglebot(1)
+	elseif ( ml_global_information.running == false and gAutostartbot == "1" ) then
+		ml_global_information.togglebot(1)
 	else
 		GUI_SetStatusBar("BOT: Not Running")
 	end
@@ -121,98 +126,99 @@ function eso_global.onupdate( event, tickcount )
 end
 
 
-function eso_global.eventhandler(arg)
-	if ( arg == "eso_global.startStop" or arg == "ESOMinion.toggle") then
+function ml_global_information.eventhandler(arg)
+	if ( arg == "ml_global_information.startStop" or arg == "ESOMinion.toggle") then
 		if ( gBotRunning == "1" ) then
 			gAutostartbot = "0"
-			eso_global.togglebot("0")			
+			ml_global_information.togglebot("0")			
 		else
 			gAutostartbot = "1"
-			eso_global.togglebot("1")
+			ml_global_information.togglebot("1")
 		end
 	end
 end
 
-function eso_global.guivarupdate(Event, NewVals, OldVals)
+function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 	for k,v in pairs(NewVals) do
-		if (k == "gEnableLog" )
-						
+		if (k == "gEnableLog" or
+			k == "gGather"
+		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
 		
 		elseif ( k == "gBotRunning" ) then
-			eso_global.togglebot(v)			
+			ml_global_information.togglebot(v)			
 		elseif ( k == "gBotMode") then        
 			Settings.ESOMinion[tostring(k)] = v
-			eso_global.UpdateMode()
+			ml_global_information.UpdateMode()
 			--mm.NavMeshUpdate()
 		
 		end
 	end
-	GUI_RefreshWindow(eso_global.window.name)
+	GUI_RefreshWindow(ml_global_information.window.name)
 end
 
-function eso_global.UpdateMode()
+function ml_global_information.UpdateMode()
 	if (gBotMode == "None") then	
 		ml_task_hub:ClearQueues()
 	else	
-		local task = eso_global.BotModes[gBotMode]
+		local task = ml_global_information.BotModes[gBotMode]
 		if (task ~= nil) then
 			ml_task_hub:Add(task.Create(), LONG_TERM_GOAL, TP_ASAP)
 		end
     end
 end
 
-function eso_global.togglebot(arg)
+function ml_global_information.togglebot(arg)
 	if arg == "0" then	
 		d("Stopping Bot..")
-		eso_global.running = false
+		ml_global_information.running = false
 		ml_task_hub.shouldRun = false		
 		gBotRunning = "0"
-		eso_global.ResetBot()
+		ml_global_information.ResetBot()
 		ml_task_hub:ClearQueues()
-		eso_global.UpdateMode()
+		ml_global_information.UpdateMode()
 	else
 		d("Starting Bot..")
-		eso_global.running = true
+		ml_global_information.running = true
 		ml_task_hub.shouldRun = true
 		gBotRunning = "1"
-		--mc_meshrotation.currentMapTime = eso_global.now
+		--mc_meshrotation.currentMapTime = ml_global_information.Now
 	end
 end
 
-function eso_global.UpdateGlobals()
-	eso_global.AttackRange = eso_skillmanager.GetAttackRange()
+function ml_global_information.UpdateGlobals()
+	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange()
 	
 	
 	
 	-- Update Debug fields	
-	dAttackRange = eso_global.AttackRange	
+	dAttackRange = ml_global_information.AttackRange	
 end
 
-function eso_global.ResetBot()
+function ml_global_information.ResetBot()
 
 	Player:Stop()
 	--Player:ClearTarget()
 end
 
-function eso_global.Wait( seconds ) 
-	eso_global.lasttick = eso_global.lasttick + seconds
+function ml_global_information.Wait( seconds ) 
+	ml_global_information.lasttick = ml_global_information.lasttick + seconds
 end
 
-function eso_global.ToggleAdvMenu()
-    if (eso_global.advwindowvisible) then
-        GUI_WindowVisible(eso_global.advwindow.name,false)	
-        eso_global.advwindowvisible = false
+function ml_global_information.ToggleAdvMenu()
+    if (ml_global_information.advwindowvisible) then
+        GUI_WindowVisible(ml_global_information.advwindow.name,false)	
+        ml_global_information.advwindowvisible = false
     else
 		local wnd = GUI_GetWindowInfo("MinionBot")	
-        GUI_MoveWindow( eso_global.advwindow.name, wnd.x,wnd.y+wnd.height)
-		GUI_WindowVisible(eso_global.advwindow.name,true)	
-        eso_global.advwindowvisible = true
+        GUI_MoveWindow( ml_global_information.advwindow.name, wnd.x,wnd.y+wnd.height)
+		GUI_WindowVisible(ml_global_information.advwindow.name,true)	
+        ml_global_information.advwindowvisible = true
     end
 end
 
-RegisterEventHandler("Module.Initalize",eso_global.moduleinit)
-RegisterEventHandler("Gameloop.Update",eso_global.onupdate)
-RegisterEventHandler("GUI.Update",eso_global.guivarupdate)
-RegisterEventHandler("ESOMinion.toggle", eso_global.eventhandler)
+RegisterEventHandler("Module.Initalize",ml_global_information.moduleinit)
+RegisterEventHandler("Gameloop.Update",ml_global_information.onupdate)
+RegisterEventHandler("GUI.Update",ml_global_information.guivarupdate)
+RegisterEventHandler("ESOMinion.toggle", ml_global_information.eventhandler)

@@ -51,7 +51,7 @@ function mm.ModuleInit()
 	RegisterEventHandler("newMeshEvent",mm.ClearNavMesh)
 	GUI_NewCheckbox(mm.mainwindow.name,GetString("recmesh"),"gMeshrec",GetString("editor"))
 	GUI_NewComboBox(mm.mainwindow.name,GetString("recAreaType"),"gRecAreaType",GetString("editor"),"Road,Lowdanger,Highdanger")-- enum 1,2,3
-	GUI_NewNumeric(mm.mainwindow.name,GetString("recAreaSize"),"gRecAreaSize",GetString("editor"),"1","500")
+	GUI_NewNumeric(mm.mainwindow.name,GetString("recAreaSize"),"gRecAreaSize",GetString("editor"),"1","75")
 	GUI_NewCheckbox(mm.mainwindow.name,GetString("changeMesh"),"gMeshChange",GetString("editor"))
 	GUI_NewComboBox(mm.mainwindow.name,GetString("changeAreaType"),"gChangeAreaType",GetString("editor"),"Delete,Road,Lowdanger,Highdanger")
 	GUI_NewNumeric(mm.mainwindow.name,GetString("changeAreaSize"),"gChangeAreaSize",GetString("editor"),"1","10")
@@ -120,8 +120,8 @@ function mm.ClearNavMesh()
 end
 
 function mm.SaveMesh()
-	if (eso_global.now- mm.lastSaveTime > 5000) then
-		mm.lastSaveTime = eso_global.now
+	if (ml_global_information.Now- mm.lastSaveTime > 5000) then
+		mm.lastSaveTime = ml_global_information.Now
 		d("Saving NavMesh...")	
 		gMeshrec = "0"
 		gMeshChange = "0"
@@ -354,11 +354,11 @@ function mm.NavMeshUpdate()
 		--mc_questmanager.GenerateMapExploreProfile()
 	end
 	
-	eso_global.ResetBot()
+	ml_global_information.ResetBot()
 	if ( Maprotation_Active == "1") then
 		ml_task_hub:ClearQueues()
 	end
-	eso_global.UpdateMode()	
+	ml_global_information.UpdateMode()	
 end
 
 -- add offmesh connection

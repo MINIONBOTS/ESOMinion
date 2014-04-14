@@ -9,14 +9,16 @@ function Dev.ModuleInit()
 	GUI_NewComboBox("Dev","Player/TargetInfo","chartarg","EntityInfo","Player,Target,Nearest");
 	GUI_NewField("Dev","Ptr","TargetPtr","EntityInfo")
 	GUI_NewField("Dev","EListID","TID","EntityInfo")
-	GUI_NewField("Dev","ServerID","SID","EntityInfo")
+	GUI_NewField("Dev","ServerID","SID","EntityInfo")	
 	GUI_NewField("Dev","Type","TType","EntityInfo")	
 	GUI_NewField("Dev","ContentID","TCID","EntityInfo")
+	GUI_NewField("Dev","TargetID","TTarID","EntityInfo")	
 	GUI_NewField("Dev","Class","TClass","EntityInfo")	
 	GUI_NewField("Dev","Name","TName","EntityInfo")	
 	GUI_NewField("Dev","Health","THP","EntityInfo")
 	GUI_NewField("Dev","Position","TPos","EntityInfo")
 	GUI_NewField("Dev","Heading","THead","EntityInfo")
+	GUI_NewField("Dev","Radius","THRad","EntityInfo")
 	GUI_NewField("Dev","OnMesh","TOnMesh","EntityInfo")
 	GUI_NewField("Dev","OnMeshExact","TOnMeshExact","EntityInfo")
 	GUI_NewField("Dev","Distance","TDist","EntityInfo")
@@ -25,6 +27,8 @@ function Dev.ModuleInit()
 	GUI_NewField("Dev","InteractActionType","TIAT","EntityInfo")
 	GUI_NewField("Dev","InteractActionName","TIATName","EntityInfo")
 	GUI_NewField("Dev","Attitude","TAtt","EntityInfo")
+	GUI_NewField("Dev","IsAlive","TIsAlive","EntityInfo")
+	GUI_NewField("Dev","IsDead","TIsDead","EntityInfo")
 	GUI_NewField("Dev","IsFriendly","TIsF","EntityInfo")
 	GUI_NewField("Dev","IsHostile","TIHost","EntityInfo")
 	GUI_NewField("Dev","IsAttackable","TAtta","EntityInfo")
@@ -39,7 +43,8 @@ function Dev.ModuleInit()
 	GUI_NewField("Dev","IsGhost","TIsGhost","EntityInfo")
 	GUI_NewField("Dev","IsCritter","TIsCrit","EntityInfo")	
 	GUI_NewField("Dev","IsWerewolf","TIsWere","EntityInfo")
-	GUI_NewField("Dev","IsBossMonster","TIsBoss","EntityInfo")	
+	GUI_NewField("Dev","IsBossMonster","TIsBoss","EntityInfo")
+	GUI_NewField("Dev","IsQuestInteraction","TIsQI","EntityInfo")
 	chartarg = "Player"
 	
 	-- CastInfo
@@ -274,8 +279,8 @@ function Dev.UpdateWindow()
 		mytarget = Player:GetTarget()
 	else
 		local EList = EntityList("nearest")
-		if ( EList ) then
-			local id,mytarget = next (EList)
+		if ( EList ) then			
+			id,mytarget = next (EList)
 		end
 	end
 		
@@ -288,6 +293,7 @@ function Dev.UpdateWindow()
 		TCID = mytarget.contentID
 		TName = mytarget.name
 		TClass = mytarget.class
+		TTarID = mytarget.targetid
 		THP = tostring(mytarget.hp.current.." / "..mytarget.hp.max.." / "..mytarget.hp.percent.."%")
 		TPos = (math.floor(mytarget.pos.x * 10) / 10).." / "..(math.floor(mytarget.pos.y * 10) / 10).." / "..(math.floor(mytarget.pos.z * 10) / 10)
 		TOnMesh = tostring(mytarget.onmesh)
@@ -298,6 +304,8 @@ function Dev.UpdateWindow()
 		TIAT = mytarget.interacttype
 		TIATName = mytarget.interactname
 		TAtt = mytarget.attitude
+		TIsAlive = tostring(mytarget.alive)
+		TIsDead = tostring(mytarget.dead)
 		TIsF = tostring(mytarget.friendly)
 		TIHost = tostring(mytarget.hostile)
 		TAtta = tostring(mytarget.attackable)
