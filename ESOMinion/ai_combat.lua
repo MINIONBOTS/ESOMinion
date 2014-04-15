@@ -36,8 +36,8 @@ function ai_combatAttack:Init()
 	
     self:AddTaskCheckCEs()
 end
-function ai_combatAttack:task_complete_eval()	
-	if ( Player.isswimming == true or ( TableSize(EntityList:Get(ml_task_hub:CurrentTask().targetID)) == 0 and c_Aggro:evaluate() == false) ) then 
+function ai_combatAttack:task_complete_eval()
+	if ( Player.isswimming == true or (c_GotoAndKill:evaluate() == false and c_Aggro:evaluate() == false) ) then 
 		Player:Stop()
 		return true
 	end
@@ -109,7 +109,7 @@ end
 c_Aggro = inheritsFrom( ml_cause )
 e_Aggro = inheritsFrom( ml_effect )
 function c_Aggro:evaluate()
-    return Player.isswimming == false and TableSize(EntityList("nearest,alive,aggro,attackable,maxdistance=28,onmesh")) > 0 
+    return Player.isswimming == false and TableSize(EntityList("nearest,alive,aggro,attackable,targetable,maxdistance=28,onmesh")) > 0 
 end
 function e_Aggro:execute()
 	ml_log("e_Aggro ")
@@ -146,7 +146,7 @@ function e_resting:execute()
 		Player:Stop()
 	end
 	
-	mc_skillmanager.HealMe()
+	eso_skillmanager.HealMe()
 	return
 end
 
@@ -159,7 +159,7 @@ e_GotoAndKill.ismoving = false
 function c_GotoAndKill:evaluate()
 	local target = EntityList:Get(ml_task_hub:CurrentTask().targetID)
 	if ( TableSize( target ) > 0 ) then
-		return (Player.isswimming == false and target.alive and target.attackable and target.onmesh)
+		return (Player.isswimming == false and target.alive and target.attackable and target.onmesh)		
 	end	
 	return false
 end
@@ -170,22 +170,22 @@ function e_GotoAndKill:execute()
 	
 		local tpos = target.pos
 		
-		if ( target.distance > ml_global_information.AttackRange or not target.los or not eso_skillmanager.CanAttackTarget( target.id )) then
+		if ( target.distance > ml_global_information.AttackRange or not target.los ) then		
 			-- Player:MoveTo(x,y,z,stoppingdistance,navsystem(normal/follow),navpath(straight/random),smoothturns)
-			local navResult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,0.25+(target.radius/2),false,true,false))
+			local navResult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,0.5+(target.radius),false,true,false))
 			if (tonumber(navResult) < 0) then
 				ml_log("CombatMovement result: "..tostring(navResult))
 			end
 			e_GotoAndKill.ismoving = true
 			
 		else
-			if ( e_GotoAndKill.ismoving == true )then
-				Player:SetTarget(target.id)
+			if ( e_GotoAndKill.ismoving == true )then				
 				Player:Stop()
 				e_GotoAndKill.ismoving = false
 			end
 			
-			Player:SetFacing(tpos.x,tpos.y,tpos.z)
+			Player:SetTarget(target.id)
+			Player:SetFacing(tpos.x,tpos.y+(tpos.height/2),tpos.z)
 			eso_skillmanager.AttackTarget( target.id )
 			ml_log(true)
 			--DoCombatMovement()
@@ -201,7 +201,7 @@ end
 c_GetNextTarget = inheritsFrom( ml_cause )
 e_GetNextTarget = inheritsFrom( ml_effect )
 function c_GetNextTarget:evaluate()
-	local target = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh")		
+	local target = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance=35")		
 	return target ~= nil
 end
 
@@ -220,7 +220,7 @@ function e_GetNextTarget:execute()
 		
 	-- Then nearest attackable Target
 	--TList = ( EntityList("attackable,alive,nearest,onmesh,maxdistance=3500,exclude_contentid="..mc_blacklist.GetExcludeString(GetString("monsters"))))
-	TList = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh")
+	TList = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance==35")
 	if ( TableSize( TList ) > 0 ) then
 		local id, E  = next( TList )
 		if ( id ~= nil and id ~= 0 and E ~= nil ) then

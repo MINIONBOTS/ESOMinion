@@ -90,7 +90,7 @@ function ml_global_information.onupdate( event, tickcount )
 				end
 				
 				if ( ml_task_hub.shouldRun ) then
-				
+										
 					if (not ml_task_hub:Update() ) then
 						ml_error("No task queued, please select a valid bot mode in the Settings drop-down menu")
 					end
@@ -127,7 +127,7 @@ end
 
 
 function ml_global_information.eventhandler(arg)
-	if ( arg == "ml_global_information.startStop" or arg == "ESOMinion.toggle") then
+	if ( arg == "ml_global_information.startStop" or arg == "MINION.toggle") then
 		if ( gBotRunning == "1" ) then
 			gAutostartbot = "0"
 			ml_global_information.togglebot("0")			
@@ -221,4 +221,4 @@ end
 RegisterEventHandler("Module.Initalize",ml_global_information.moduleinit)
 RegisterEventHandler("Gameloop.Update",ml_global_information.onupdate)
 RegisterEventHandler("GUI.Update",ml_global_information.guivarupdate)
-RegisterEventHandler("ESOMinion.toggle", ml_global_information.eventhandler)
+RegisterEventHandler("MINION.toggle", ml_global_information.eventhandler)

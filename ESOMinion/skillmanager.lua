@@ -593,6 +593,10 @@ function eso_skillmanager.GetAttackRange()
 	if ( gAttackRange == GetString("aRange")) then
 		maxrange = 28
 	elseif ( gAttackRange == GetString("aAutomatic")) then
+		
+		-- check if we have a target to check our skills against
+		target = Player:GetTarget()
+				
 		-- go through all current skills and grab the one which is in our skillmanagerprofile + set to "Set Attackrange"
 		local ABList = AbilityList("")
 		if (ABList) then
@@ -609,9 +613,18 @@ function eso_skillmanager.GetAttackRange()
 							if (v.atkrng == "1" ) then
 								--d(skill.name.." "..tostring(skill.maxRange).." "..tostring(v.name).." "..tostring(v.maxRange))
 								--TODO ADD CD CHECK if ( skill.cooldown == 0 and v.maxRange > maxrange) then
-								if ( v.maxRange > maxrange) then
-									maxrange = v.maxRange
-								end							
+								if ( target ) then
+									if ( AbilityList:CanCast(sID,target.id) == 10) then
+										if ( v.maxRange > maxrange) then
+											maxrange = v.maxRange
+										end
+									end
+								else
+								
+									if ( v.maxRange > maxrange) then
+										maxrange = v.maxRange
+									end
+								end
 							end						
 							break
 						end
@@ -625,31 +638,6 @@ function eso_skillmanager.GetAttackRange()
 	return maxrange
 end
 
--- goes through our skilllist and checks if we can attack the enemy with our current attackrange
-function eso_skillmanager.CanAttackTarget( TargetID )
-	local ABList = AbilityList("")
-	
-	if (ABList) then
-		local id,skill = next(ABList)
-		while (id and skill ) do			
-			
-			if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
-				local sID = skill.id
-				for k,v in pairs(eso_skillmanager.SkillProfile) do					
-					--d("skill "..tostring(sID) .." vs "..tostring(v.skillID) .." "..v.name)						
-					if ( v.skillID == sID) then						
-						if ( AbilityList:CanCast(sID,TargetID) == 10 ) then
-							return true
-						end
-						break
-					end
-				end
-			end	
-			id,skill = next(ABList,id)
-		end	
-	end
-	return false
-end
 
 function eso_skillmanager.AttackTarget( TargetID )	
 	local fastcastcount = 0
@@ -770,7 +758,7 @@ function eso_skillmanager.AttackTarget( TargetID )
 							end]]
 							return true
 						end
-						ml_global_information.Wait(250)
+						ml_global_information.Wait(350)
 					end				
 				end				
 			end

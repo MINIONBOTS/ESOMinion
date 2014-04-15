@@ -74,9 +74,12 @@ e_Gathering = inheritsFrom( ml_effect )
 function c_Gathering:evaluate()
 		
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) == 0 ) then
-		local _,gatherable = next(EntityList("onmesh,nearest,gatherable"))
+		local _,gatherable = next(EntityList("onmesh,nearest,gatherable,maxdistance=50"))
 		if (gatherable) then
-			ml_task_hub:CurrentTask().tPos = gatherable.pos			
+			local gPos = gatherable.pos
+			if ( TableSize(gPos) > 0 ) then
+				ml_task_hub:CurrentTask().tPos = gatherable.pos
+			end
 		end
 	else		
 		return true
