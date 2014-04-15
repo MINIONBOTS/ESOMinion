@@ -92,7 +92,6 @@ end
 
 e_Gathering.tmr = 0
 e_Gathering.threshold = 500
-e_Gathering.ismoving = false
 function e_Gathering:execute()
 	ml_log("e_Gathering ")
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) > 0 ) then
@@ -112,7 +111,6 @@ function e_Gathering:execute()
 					e_Gathering.threshold = math.random(1000,3000)
 					eso_skillmanager.HealMe()
 				end
-				e_Gathering.ismoving = true
 				ml_log("MoveToGatherable..")
 				return true
 			end
@@ -123,13 +121,6 @@ function e_Gathering:execute()
 				local _,gatherable = next(GList)				
 				if (gatherable) then
 					local gPos = gatherable.pos
-					
-					
-					if ( e_Gathering.ismoving == true ) then
-						Player:Stop()
-						Player:SetFacing(gPos.x,gPos.y,gPos.z)
-						e_Gathering.ismoving = false
-					end
 					Player:Interact( gatherable.id )
 					ml_log("Gathering..")
 					ml_global_information.Wait(500)					
@@ -180,8 +171,7 @@ function e_Loot:execute()
 				end
 			else
 				-- Grab that thing
-				Player:Stop()
-				Player:SetFacing(tPos.x,tPos.y,tPos.z)							
+				Player:Stop()				
 				Player:Interact( entity.id )
 				ml_log("Looting..")
 				ml_global_information.Wait(500)

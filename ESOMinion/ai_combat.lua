@@ -185,7 +185,7 @@ function e_GotoAndKill:execute()
 			end
 			
 			Player:SetTarget(target.id)
-			Player:SetFacing(tpos.x,tpos.y+(tpos.height/2),tpos.z)
+			--Player:SetFacing(tpos.x,tpos.y+(tpos.height/2),tpos.z)
 			eso_skillmanager.AttackTarget( target.id )
 			ml_log(true)
 			--DoCombatMovement()
