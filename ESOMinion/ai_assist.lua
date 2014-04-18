@@ -25,17 +25,17 @@ function eso_ai_assist:Process()
 	--ml_log("AssistMode_Process->")
 		
 	if ( not Player.dead ) then
-		--[[if ( ml_global_information.Now - c_AoELoot.lastused >1050 and Inventory.freeSlotCount > 0) then
-			c_AoELoot.lastused = ml_global_information.Now
-			Player:AoELoot()
-		end
+		
+		
+		-- LootAll
+		if ( c_LootAll:evaluate() ) then e_LootAll:execute() end
 
 		
 		if ( ml_global_information.Now - eso_ai_assist.tmr > eso_ai_assist.threshold and Player:IsMoving()) then
 			eso_ai_assist.tmr = ml_global_information.Now
 			eso_ai_assist.threshold = math.random(500,1000)
 			eso_skillmanager.HealMe()
-		end	--]]
+		end
 		
 		if ( sMtargetmode == "None" ) then 
 			eso_skillmanager.AttackTarget( nil ) 

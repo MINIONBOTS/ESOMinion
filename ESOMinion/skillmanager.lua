@@ -15,7 +15,7 @@ eso_skillmanager.DefaultProfiles = {
 	[1] = "DragonKnight",
 	[2] = "Sorcerer",
 	[3] = "Nightblade",
-	[4] = "Templar",
+	[6] = "Templar",
 }
 
 function eso_skillmanager.ModuleInit() 	
@@ -412,20 +412,25 @@ function eso_skillmanager.UpdateProfiles()
 	gSMprofile_listitems = profiles
 	
 	-- try to load default profiles
-	--[[if ( found == "None" ) then
-		local defaultprofile = eso_skillmanager.DefaultProfiles[tonumber(Player.profession)]
-		if ( defaultprofile ) then
-			d("Loading default Profile for our profession")	
-			eso_skillmanager.SkillRecordingActive = false				
-			GUI_WindowVisible(eso_skillmanager.editwindow.name,false)
-			GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
-			eso_skillmanager.SkillProfile = {}
-			eso_skillmanager.UpdateCurrentProfileData()
-			Settings.ESOMinion.gSMprofile = tostring(defaultprofile)
-			gSMprofile = defaultprofile
-			return
+	if ( found == "None" ) then
+		local classID = tonumber(e("GetUnitClassId(player)"))
+		if ( classID ~= nil ) then
+			local defaultprofile = eso_skillmanager.DefaultProfiles[classID]
+			if ( defaultprofile ) then
+				d("Loading default Profile for our profession")	
+				eso_skillmanager.SkillRecordingActive = false				
+				GUI_WindowVisible(eso_skillmanager.editwindow.name,false)
+				GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
+				eso_skillmanager.SkillProfile = {}
+				eso_skillmanager.UpdateCurrentProfileData()
+				Settings.ESOMinion.gSMprofile = tostring(defaultprofile)
+				gSMprofile = defaultprofile
+				return
+			end
+		else
+			d("Unknown ClassID , please report back the ClassID :" ..tostring(classID))
 		end
-	end]]
+	end
 	
 	gSMprofile = found
 end
@@ -718,7 +723,7 @@ function eso_skillmanager.AttackTarget( TargetID )
 					end]]
 					-- TARGET AE CHECK
 					if ( skill.tecount > 0 and skill.terange > 0) then
-						if ( TableSize(EntityList("alive,attackable,maxdistance="..skill.terange..",distanceto="..target.id)) < skill.tecount) then continue end
+						if ( TableSize(EntityList("alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..target.id)) < skill.tecount) then continue end
 					end
 					--[[ TARGET #CONDITIONS CHECK
 					if ( skill.tcondc > 0 and targetbuffs ) then

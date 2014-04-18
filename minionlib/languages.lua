@@ -4,7 +4,10 @@ strings =
 {
     ["us"] =
     {
-        startStop                       = "StartStop",
+        aLogin    		                = "LoginName",
+		aPassword  		                = "Password",
+		aAutologin 		                = "Autologin",
+		startStop                       = "StartStop",
         doPulse                         = "Pulse(Debug)",
         pulseTime                       = "Pulse Time (ms)",
         enableLog                       = "Enable Log",
@@ -349,6 +352,9 @@ strings =
     ["cn"] =                            
     {                               
         -- gw2.lua
+		aLogin    		                = "LoginName",
+		aPassword  		                = "Password",
+		aAutologin 		                = "Autologin",
         startStop                       = "开始/停止",
         doPulse                         = "暂停(调试)",
         pulseTime                       = "暂停时间 (ms)",
@@ -703,6 +709,9 @@ strings =
 	},
     ["jp"] =
     {
+		aLogin    		                = "LoginName",
+		aPassword  		                = "Password",
+		aAutologin 		                = "Autologin",
         startStop                       = "実行停止",
         doPulse                         = "パルス(デバッグ)",
         pulseTime                       = "パルス幅 (ms)",
@@ -1046,6 +1055,9 @@ strings =
 	},   
     ["de"] =
     {
+		aLogin    		                = "LoginName",
+		aPassword  		                = "Password",
+		aAutologin 		                = "Autologin",
         startStop                       = "StartStop",
         doPulse                         = "Pulse(Debug)",
         pulseTime                       = "Pulse Time (ms)",
@@ -1389,6 +1401,9 @@ strings =
 	},     
     ["fr"] =
     {
+		aLogin    		                = "LoginName",
+		aPassword  		                = "Password",
+		aAutologin 		                = "Autologin",
         startStop                       = "StartStop",
         doPulse                         = "Pulse(Debug)",
         pulseTime                       = "Pulse Time (ms)",
@@ -1732,6 +1747,9 @@ strings =
 	},       
     ["ru"] =
     {
+		aLogin    		                = "LoginName",
+		aPassword  		                = "Password",
+		aAutologin 		                = "Autologin",
         startStop                       = "StartStop",
         doPulse                         = "Pulse(Debug)",
         pulseTime                       = "Pulse Time (ms)",

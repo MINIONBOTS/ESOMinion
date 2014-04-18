@@ -23,8 +23,11 @@ end
 function ai_combatAttack:Init()
 		
 	-- Dead?
-	--self:add(ml_element:create( "Dead", c_dead, e_dead, 225 ), self.process_elements)
-		
+	self:add(ml_element:create( "Dead", c_dead, e_dead, 300 ), self.process_elements)
+	
+	-- LootAll
+	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
+	
 	-- Looting
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 	
@@ -52,7 +55,7 @@ c_CombatTask = inheritsFrom( ml_cause )
 e_CombatTask = inheritsFrom( ml_effect )
 function c_CombatTask:evaluate()
 	local target = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh")		
-	return target ~= nil
+	return Player.isswimming == false and target ~= nil
 end
 function e_CombatTask:execute()
 	ml_log("e_CombatTask ")
@@ -183,7 +186,7 @@ function e_GotoAndKill:execute()
 				Player:Stop()
 				e_GotoAndKill.ismoving = false
 			end
-			
+			Player:SetFacing(tpos.x,tpos.y,tpos.z,false)
 			Player:SetTarget(target.id)
 			--Player:SetFacing(tpos.x,tpos.y+(tpos.height/2),tpos.z)
 			eso_skillmanager.AttackTarget( target.id )

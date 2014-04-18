@@ -13,6 +13,7 @@ function c_dead:evaluate()
 end
 function e_dead:execute()
 	ml_log("e_dead ")
+	ml_global_information.Wait( 2000 ) 
+	e("Release()")
 	
-	ml_log("TODO! HandleDeath")
 end

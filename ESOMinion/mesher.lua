@@ -15,8 +15,31 @@ mm.OMC = 0
 function mm.ModuleInit()
 
 	if (Settings.ESOMinion.DefaultMaps == nil) then
-		Settings.ESOMinion.DefaultMaps = {
-		
+		Settings.ESOMinion.DefaultMaps = {			
+			[1] = "Tamriel",
+			[2] = "Glenumbra",
+			[3] = "Rivenspire",
+			[4] = "Stormhaven",
+			[5] = "AlikrDeser",
+			[6] = "Bangkorai",
+			[7] = "Grathwood",
+			[8] = "MalabalTor",
+			[9] = "Shadowfen",
+			[10] = "Deshaan",
+			[11] = "Stonefalls",
+			[12] = "TheRift",
+			[13] = "Eastmarch",
+			[14] = "Cyrodiil",
+			[15] = "Auridon",
+			[16] = "Greenshade",
+			[17] = "ReapersMarch",
+			[18] = "BalFoyen",
+			[19] = "StrosMKai",
+			[20] = "Betnikh",
+			[21] = "KhenarthisRoost",
+			[22] = "BleakrockIsle",
+			[23] = "Coldharbour",			
+			[24] = "Oblivion",
 		}
 	end
 	
@@ -31,27 +54,15 @@ function mm.ModuleInit()
 	GUI_NewCheckbox(mm.mainwindow.name,GetString("showPath"),"gShowPath",GetString("generalSettings"))
 	GUI_UnFoldGroup(mm.mainwindow.name,GetString("generalSettings"))
 	
-	--Grab all meshfiles in our Navigation directory
-	local meshlist = "none"
-	local mapid = Player.localmapid
-	local meshfilelist = dirlist(mm.navmeshfilepath,".*obj")
-	if ( TableSize(meshfilelist) > 0) then
-		local i,meshname = next ( meshfilelist)
-		while i and meshname do
-			meshname = string.gsub(meshname, ".obj", "")
-			table.insert(mm.meshfiles, meshname)
-			meshlist = meshlist..","..meshname
-			i,meshname = next ( meshfilelist,i)
-		end
-	end		
-
+	
+	
 	GUI_NewCheckbox(mm.mainwindow.name,GetString("showMesh"),"gShowMesh",GetString("editor"))
 	GUI_NewField(mm.mainwindow.name,GetString("newMeshName"),"gnewmeshname",GetString("editor"))
 	GUI_NewButton(mm.mainwindow.name,GetString("newMesh"),"newMeshEvent",GetString("editor"))
 	RegisterEventHandler("newMeshEvent",mm.ClearNavMesh)
 	GUI_NewCheckbox(mm.mainwindow.name,GetString("recmesh"),"gMeshrec",GetString("editor"))
 	GUI_NewComboBox(mm.mainwindow.name,GetString("recAreaType"),"gRecAreaType",GetString("editor"),"Road,Lowdanger,Highdanger")-- enum 1,2,3
-	GUI_NewNumeric(mm.mainwindow.name,GetString("recAreaSize"),"gRecAreaSize",GetString("editor"),"1","75")
+	GUI_NewNumeric(mm.mainwindow.name,GetString("recAreaSize"),"gRecAreaSize",GetString("editor"),"1","35")
 	GUI_NewCheckbox(mm.mainwindow.name,GetString("changeMesh"),"gMeshChange",GetString("editor"))
 	GUI_NewComboBox(mm.mainwindow.name,GetString("changeAreaType"),"gChangeAreaType",GetString("editor"),"Delete,Road,Lowdanger,Highdanger")
 	GUI_NewNumeric(mm.mainwindow.name,GetString("changeAreaSize"),"gChangeAreaSize",GetString("editor"),"1","10")
@@ -86,9 +97,29 @@ function mm.ModuleInit()
 	RegisterEventHandler("saveMeshEvent",mm.SaveMesh)   
 		
 	
-
+	--Grab all meshfiles in our Navigation directory
+	if ( GetGameState() == 2 ) then --GAMESTATE_INGAME
+		local meshlist = "none"
+		local mapid = e("GetCurrentMapIndex()")
+		local meshfilelist = dirlist(mm.navmeshfilepath,".*obj")
+		if ( TableSize(meshfilelist) > 0) then
+			local i,meshname = next ( meshfilelist)
+			while i and meshname do
+				meshname = string.gsub(meshname, ".obj", "")
+				table.insert(mm.meshfiles, meshname)
+				meshlist = meshlist..","..meshname
+				i,meshname = next ( meshfilelist,i)
+			end
+		end	
+		
+		pName = e("GetMapName()")
+		pName = pName:gsub('%W','') -- only alphanumeric
+		gnewmeshname = pName
+	else
+		gnewmeshname = ""	
+	end
 	gmeshname_listitems = meshlist
-	gnewmeshname = ""
+	
 	
 	
 	--GUI_NewButton(mm.mainwindow.name,"ChangeMeshRenderDepth","mm.ChangeMDepth")
@@ -188,7 +219,7 @@ function mm.ChangeNavMesh(newmesh)
 				d("Error loading Navmesh: "..path)
 			else
 				mm.reloadMeshPending = false
-				local mapid = Player.localmapid
+				local mapid = e("GetCurrentMapIndex()")
 				if ( mapid ~= nil and mapid~=0 ) then
 					d("Setting default Mesh for this Zone..(ID :"..tostring(mapid).." Meshname: "..newmesh)
 					Settings.ESOMinion.DefaultMaps[mapid] = newmesh
@@ -322,7 +353,7 @@ function mm.OnUpdate( tickcount )
 		end
 		
 		-- Check if we switched maps
-		local mapid = Player.localmapid
+		local mapid = e("GetCurrentMapIndex()")
 		if ( not mm.reloadMeshPending and mapid ~= nil and mm.mapID ~= mapid ) then
 			if (Settings.ESOMinion.DefaultMaps[mapid] ~= nil and (Settings.ESOMinion.DefaultMaps[mapid] ~= "none")) then
 				d("Autoloading Navmesh for this Zone: "..Settings.ESOMinion.DefaultMaps[mapid])
@@ -340,7 +371,7 @@ function mm.NavMeshUpdate()
 		
 	--[[ try loading questprofile
 	if ( gBotMode == GetString("grindMode") or gBotMode == GetString("exploreMode")) then
-		local mapname = mc_datamanager.GetMapName( Player.localmapid)
+		local mapname = mc_datamanager.GetMapName(e("GetCurrentMapIndex()"))
 		if ( mapname ~= nil and mapname ~= "" and mapname ~= "none" ) then
 			mapname = mapname:gsub('%W','') -- only alphanumeric
 			if ( mapname ~= nil and mapname ~= "" ) then

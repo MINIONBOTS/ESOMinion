@@ -1,12 +1,15 @@
 ml_global_information = { }
 ml_global_information.window = { name="MinionBot", x=50, y=50, width=200, height=300 }
 ml_global_information.advwindow = { name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
+ml_global_information.login = { name="AutoLogin", x=100, y=100 , width=230, height=140 }
 ml_global_information.advwindowvisible = false
 ml_global_information.path = GetStartupPath()
 ml_global_information.Now = 0
 ml_global_information.lasttick = 0
 ml_global_information.running = false
 ml_global_information.BotModes = {}
+ml_global_information.lastgamestate = 0
+ml_global_information.gamestatechanged = false
 
 
 function ml_global_information.moduleinit()
@@ -23,6 +26,16 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gGather == nil ) then
 		Settings.ESOMinion.gGather = "1"
 	end
+	
+	if ( Settings.ESOMinion.aLogin == nil ) then
+		Settings.ESOMinion.aLogin = ""
+	end
+	if ( Settings.ESOMinion.aPassword == nil ) then
+		Settings.ESOMinion.aPassword = ""
+	end
+	if ( Settings.ESOMinion.gAutoLogin == nil ) then
+		Settings.ESOMinion.gAutoLogin = ""
+	end	
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.window.name,ml_global_information.window.x,ml_global_information.window.y,ml_global_information.window.width,ml_global_information.window.height)
@@ -49,6 +62,18 @@ function ml_global_information.moduleinit()
 	
 	GUI_WindowVisible(ml_global_information.advwindow.name,false)
 	
+	-- LOGIN WINDOW
+	GUI_NewWindow(ml_global_information.login.name,ml_global_information.login.x,ml_global_information.login.y,ml_global_information.login.width,ml_global_information.login.height,"",true)
+	GUI_NewField(ml_global_information.login.name,GetString("aLogin"),"aLogin",GetString("settings"))
+	GUI_NewField(ml_global_information.login.name,GetString("aPassword"),"aPassword",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.login.name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
+	
+	GUI_UnFoldGroup(ml_global_information.login.name,GetString("settings") )	
+	
+	aLogin = Settings.ESOMinion.aLogin	
+	aPassword = Settings.ESOMinion.aPassword	
+	gAutoLogin = Settings.ESOMinion.gAutoLogin	
+	
 	-- setup bot mode
     local botModes = "None"
     if ( TableSize(ml_global_information.BotModes) > 0) then
@@ -68,16 +93,80 @@ function ml_global_information.moduleinit()
 	gAttackRange = Settings.ESOMinion.gAttackRange
 	gGather = Settings.ESOMinion.gGather
 	
-	GUI_UnFoldGroup(ml_global_information.window.name,GetString("botStatus") );		
+	GUI_UnFoldGroup(ml_global_information.window.name,GetString("botStatus") )
+	
 end
-
+	
 function ml_global_information.onupdate( event, tickcount )
 	ml_global_information.Now = tickcount
 	
+	local gamestate = GetGameState()
+	
+	if (ml_global_information.lastgamestate ~= gamestate) then
+		d("GameState changed...")
+		ml_global_information.lastgamestate = gamestate
+		ml_global_information.gamestatechanged = true
+		GUI_WindowVisible(ml_global_information.advwindow.name,false)
+		GUI_WindowVisible(ml_global_information.window.name,false)
+		GUI_WindowVisible(mm.mainwindow.name,false)
+		GUI_WindowVisible("Dev",false)
+		GUI_ToggleConsole(false)
+		GUI_WindowVisible(ml_global_information.login.name,false)
+	end
+	
+	if ( gamestate == 2 ) then --GAMESTATE_INGAME
+		ml_global_information.InGameOnUpdate( event, tickcount )
+	elseif (gamestate == 3 ) then --GAMESTATE_INCHARACTERSELECTSCREEN
+		ml_log("GAMESTATE_INCHARACTERSELECTSCREEN")	
+	elseif (gamestate == 4 ) then --GAMESTATE_INTITLESCREEN
+		ml_global_information.InTitleScreenOnUpdate( event, tickcount )
+	elseif (gamestate == 5 ) then --GAMESTATE_INLOADINGSCREEN
+		ml_log("GAMESTATE_INLOADINGSCREEN")
+	elseif (gamestate == 1 ) then --GAMESTATE_UNKNOWN
+		ml_log("GAMESTATE_UNKNOWN")
+	end
+		
+end
+
+function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
+	ml_global_information.Now = tickcount
+	
+	-- show/hide correct windows for gamestate
+	if ( ml_global_information.gamestatechanged == true ) then
+		GUI_WindowVisible(ml_global_information.login.name,true)		
+		ml_global_information.gamestatechanged = false			
+	end	
+				
+	if ( tickcount - ml_global_information.lasttick > 5000 ) then
+		ml_global_information.lasttick = tickcount
+		
+
+			
+		if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1") then
+			d("Trying to login....")			
+			e("PregameLogin("..aLogin..","..aPassword..")")
+			-- TODO: PROPER EVENT REGISTERING AND CHECKING THE ERROR MSGS!
+			
+		end	
+		-- Update the Statusbar on the left/bottom screen
+		GUI_SetStatusBar(ml_GetTraceString())		
+	end
+end
+
+
+function ml_global_information.InGameOnUpdate( event, tickcount )
+	ml_global_information.Now = tickcount
+	
+	-- show/hide correct windows for gamestate
+	if ( ml_global_information.gamestatechanged == true ) then
+		GUI_WindowVisible(ml_global_information.window.name,true)
+		ml_global_information.gamestatechanged = false
+	end
+
 	if ( ml_global_information.running ) then		
 		if ( tickcount - ml_global_information.lasttick > tonumber(gPulseTime) ) then
 			ml_global_information.lasttick = tickcount
-			
+		
 			-- Update global variables
 			ml_global_information.UpdateGlobals()
 			
@@ -97,9 +186,10 @@ function ml_global_information.onupdate( event, tickcount )
 				end
 				
 				-- Unstuck OnUpdate
-				--mc_ai_unstuck:OnUpdate( tickcount )
-				
-				GUI_SetStatusBar(ml_GetTraceString())
+				ai_unstuck:OnUpdate( tickcount )
+					
+				-- Update the Statusbar on the left/bottom screen
+				GUI_SetStatusBar(ml_GetTraceString())					
 			end
 		end
 	
@@ -126,6 +216,8 @@ function ml_global_information.onupdate( event, tickcount )
 end
 
 
+
+
 function ml_global_information.eventhandler(arg)
 	if ( arg == "ml_global_information.startStop" or arg == "MINION.toggle") then
 		if ( gBotRunning == "1" ) then
@@ -141,7 +233,10 @@ end
 function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 	for k,v in pairs(NewVals) do
 		if (k == "gEnableLog" or
-			k == "gGather"
+			k == "gGather" or
+			k == "aLogin" or
+			k == "aPassword" or
+			k == "gAutoLogin"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
