@@ -95,6 +95,26 @@ function ml_global_information.moduleinit()
 	
 	GUI_UnFoldGroup(ml_global_information.window.name,GetString("botStatus") )
 	
+	
+	--d("TEST")
+	--local ev = g("EVENT_MANAGER")
+	--d("Tablesize:"..tostring(TableSize(ev)))
+	--d(tostring(type(ev)))
+	--d(tostring(ev))
+	
+	--local eee = RegisterForEvent("test")
+
+	--d(tostring(type(eee)))
+	--d(tostring(eee))
+	--tt = {}
+	--setmetatable (tt, eee) 
+	--DT(tt)
+	--local ev = e("ZO_Debug_EventNotification(0,true,true)")
+	
+	
+end
+function tttt()
+	d("DOWN LOL")
 end
 	
 function ml_global_information.onupdate( event, tickcount )
@@ -117,7 +137,7 @@ function ml_global_information.onupdate( event, tickcount )
 	if ( gamestate == 2 ) then --GAMESTATE_INGAME
 		ml_global_information.InGameOnUpdate( event, tickcount )
 	elseif (gamestate == 3 ) then --GAMESTATE_INCHARACTERSELECTSCREEN
-		ml_log("GAMESTATE_INCHARACTERSELECTSCREEN")	
+		ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount )
 	elseif (gamestate == 4 ) then --GAMESTATE_INTITLESCREEN
 		ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 	elseif (gamestate == 5 ) then --GAMESTATE_INLOADINGSCREEN
@@ -137,15 +157,20 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 		ml_global_information.gamestatechanged = false			
 	end	
 				
-	if ( tickcount - ml_global_information.lasttick > 5000 ) then
+	if ( tickcount - ml_global_information.lasttick > 10000 ) then
 		ml_global_information.lasttick = tickcount
 		
+		ml_log("InTitleScreen: ")
 
 			
 		if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1") then
 			d("Trying to login....")			
-			e("PregameLogin("..aLogin..","..aPassword..")")
-			-- TODO: PROPER EVENT REGISTERING AND CHECKING THE ERROR MSGS!
+			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
+				e("PregameLogin("..aLogin..","..aPassword..")")
+			else
+				ml_log("Login Error detected....trying again..")
+				e("ZO_Dialogs_ReleaseAllDialogs(true)")
+			end
 			
 		end	
 		-- Update the Statusbar on the left/bottom screen
@@ -153,6 +178,27 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 	end
 end
 
+function ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount )
+	ml_global_information.Now = tickcount
+	
+	-- show/hide correct windows for gamestate
+	if ( ml_global_information.gamestatechanged == true ) then
+		GUI_WindowVisible(ml_global_information.login.name,true)		
+		ml_global_information.gamestatechanged = false			
+	end	
+				
+	if ( tickcount - ml_global_information.lasttick > 10000 ) then
+		ml_global_information.lasttick = tickcount
+		ml_log("InCharacterSelectScreen: ")
+
+		
+		ml_log("TODO: Select character and login! ")
+		
+		
+		-- Update the Statusbar on the left/bottom screen
+		GUI_SetStatusBar(ml_GetTraceString())		
+	end
+end
 
 function ml_global_information.InGameOnUpdate( event, tickcount )
 	ml_global_information.Now = tickcount

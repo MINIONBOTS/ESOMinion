@@ -180,10 +180,20 @@ function e_Gathering:execute()
 			end
 		else
 			-- Grab that thing			
-			local GList = EntityList("onmesh,nearest,gatherable,maxdistance=10")
+			local GList = EntityList("onmesh,nearest,gatherable,maxdistance=5")
 			if ( TableSize(GList)>0) then
 				local _,gatherable = next(GList)				
 				if (gatherable) then
+					-- another check if we may picked up a different gatherable/old one is gone meanwhile
+					local tPos = gatherable.pos
+					local dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
+					if (dist > 2) then
+						-- set new gatherable position
+						d("Different gatherable found, setting new position..")
+						ml_task_hub:CurrentTask().tPos = pos
+						return ml_log(true)
+					end
+				
 					Player:Interact( gatherable.id )
 					ml_log("Gathering..")
 					ml_global_information.Wait(500)					

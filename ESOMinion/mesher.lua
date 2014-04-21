@@ -98,21 +98,20 @@ function mm.ModuleInit()
 		
 	
 	--Grab all meshfiles in our Navigation directory
-	if ( GetGameState() == 2 ) then --GAMESTATE_INGAME
-		local meshlist = "none"
-		local mapid = e("GetCurrentMapIndex()")
-		local meshfilelist = dirlist(mm.navmeshfilepath,".*obj")
-		if ( TableSize(meshfilelist) > 0) then
-			local i,meshname = next ( meshfilelist)
-			while i and meshname do
-				meshname = string.gsub(meshname, ".obj", "")
-				table.insert(mm.meshfiles, meshname)
-				meshlist = meshlist..","..meshname
-				i,meshname = next ( meshfilelist,i)
-			end
-		end	
+	local meshlist = "none"	
+	local meshfilelist = dirlist(mm.navmeshfilepath,".*obj")
+	if ( TableSize(meshfilelist) > 0) then
+		local i,meshname = next ( meshfilelist)
+		while i and meshname do
+			meshname = string.gsub(meshname, ".obj", "")
+			table.insert(mm.meshfiles, meshname)
+			meshlist = meshlist..","..meshname
+			i,meshname = next ( meshfilelist,i)
+		end
+	end	
 		
-		pName = e("GetMapName()")
+	pName = e("GetMapName()")	
+	if ( pName ~= nil and pName ~= "") then
 		pName = pName:gsub('%W','') -- only alphanumeric
 		gnewmeshname = pName
 	else
@@ -122,15 +121,18 @@ function mm.ModuleInit()
 	
 	
 	
-	--GUI_NewButton(mm.mainwindow.name,"ChangeMeshRenderDepth","mm.ChangeMDepth")
-	--RegisterEventHandler("mm.ChangeMDepth",mm.ChangeMDepth) 
+	GUI_NewButton(mm.mainwindow.name,"ChangeMeshRenderDepth","mm.ChangeMDepth")
+	RegisterEventHandler("mm.ChangeMDepth",mm.ChangeMDepth) 
 		
 	GUI_SizeWindow(mm.mainwindow.name,mm.mainwindow.w,mm.mainwindow.h)
 	GUI_WindowVisible(mm.mainwindow.name,false)
 	
 	-- load default mesh if available
-	if ( Settings.ESOMinion.DefaultMaps[tonumber(mapid)] ) then
-		mm.ChangeNavMesh(Settings.ESOMinion.DefaultMaps[tonumber(mapid)])
+	local mapid = e("GetCurrentMapIndex()")
+	if ( mapid ~= nil and tonumber(mapid)~=nil) then
+		if ( Settings.ESOMinion.DefaultMaps[tonumber(mapid)] ) then
+			mm.ChangeNavMesh(Settings.ESOMinion.DefaultMaps[tonumber(mapid)])
+		end
 	end
 end
 
