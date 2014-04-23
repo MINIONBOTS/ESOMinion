@@ -190,13 +190,15 @@ function e_Gathering:execute()
 					if (dist > 2) then
 						-- set new gatherable position
 						d("Different gatherable found, setting new position..")
-						ml_task_hub:CurrentTask().tPos = pos
+						ml_task_hub:CurrentTask().tPos = tPos
 						return ml_log(true)
 					end
-				
-					Player:Interact( gatherable.id )
-					ml_log("Gathering..")
-					ml_global_information.Wait(500)					
+					
+					if ( not e("IsInteractionPending()") ) then --or try IsPlayerInteractingWithObject()
+						Player:Interact( gatherable.id )
+						ml_log("Gathering..")
+						ml_global_information.Wait(500)					
+					end
 					
 					return ml_log(true)
 					

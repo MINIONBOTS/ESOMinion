@@ -6,7 +6,8 @@ ai_unstuck.idlecounter = 0
 ai_unstuck.respawntimer = 0
 ai_unstuck.ismoving = false
 ai_unstuck.lastpos = nil
-
+ai_unstuck.Obstacles = {}
+ai_unstuck.AvoidanceAreas = {}
 
 function ai_unstuck:OnUpdate( tick )
 	
@@ -27,14 +28,14 @@ function ai_unstuck:OnUpdate( tick )
 	-- Stuck check for movement stucks
 	if ( Player:IsMoving()) then
 		local movedirs = Player:GetMovement()
-		if ( not movedirs.backward and tick - ai_unstuck.stucktimer > 750 ) then
+		if ( not movedirs.backward and tick - ai_unstuck.stucktimer > 500 ) then
 			ai_unstuck.stucktimer = tick
 			local pPos = Player.pos
 			if ( pPos ) then
-				--d(Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x, ai_unstuck.lastpos.y))				
-				local bcheck = Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y) < 0.85
-				if ( ai_unstuck.ismoving == true ) then
-					bcheck = Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y) < 1.2
+				--d(Distance3D ( pPos.x, pPos.y, pPos.z, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y, ai_unstuck.lastpos.z))		
+				local bcheck = Distance3D ( pPos.x, pPos.y, pPos.z, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y, ai_unstuck.lastpos.z) < 2.50 --4.1 normal by foot
+				if ( Player.stealthstate ~= 0 ) then
+					bcheck = Distance3D ( pPos.x, pPos.y, pPos.z, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y, ai_unstuck.lastpos.z) < 1.75 --2.4 crouched
 				end
 				
 				if ( bcheck ) then					
@@ -89,9 +90,17 @@ end
 
 function ai_unstuck.HandleStuck()	
 	d("TODO: Handle stuck")
+	-- Setting an avoidancearea at this point to hopefully find a way around it
+	local pPos = Player.pos
+	if ( pPos ) then
+		table.insert(ai_unstuck.AvoidanceAreas, { x=pPos.x, y=pPos.y, z=pPos.z, r=2 })
+		d("adding AvoidanceArea with size "..tostring(2))
+		NavigationManager:SetAvoidanceAreas(ai_unstuck.AvoidanceAreas)
+	end
+	Player.Stop() -- force recreation of path
+	
 	ai_unstuck.stuckcounter = 0	
 end
-
 
 function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 	

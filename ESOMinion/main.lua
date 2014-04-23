@@ -2,6 +2,7 @@ ml_global_information = { }
 ml_global_information.window = { name="MinionBot", x=50, y=50, width=200, height=300 }
 ml_global_information.advwindow = { name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
 ml_global_information.login = { name="AutoLogin", x=100, y=100 , width=230, height=140 }
+ml_global_information.characterselect = { name="CharacterSelect", x=100, y=100 , width=250, height=150 }
 ml_global_information.advwindowvisible = false
 ml_global_information.path = GetStartupPath()
 ml_global_information.Now = 0
@@ -31,7 +32,9 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gGather == nil ) then
 		Settings.ESOMinion.gGather = "1"
 	end
-	
+	if ( Settings.ESOMinion.gMount == nil ) then
+		Settings.ESOMinion.gMount = "1"
+	end	
 	if ( Settings.ESOMinion.aLogin == nil ) then
 		Settings.ESOMinion.aLogin = ""
 	end
@@ -40,7 +43,7 @@ function ml_global_information.moduleinit()
 	end
 	if ( Settings.ESOMinion.gAutoLogin == nil ) then
 		Settings.ESOMinion.gAutoLogin = ""
-	end	
+	end
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.window.name,ml_global_information.window.x,ml_global_information.window.y,ml_global_information.window.width,ml_global_information.window.height)
@@ -50,14 +53,14 @@ function ml_global_information.moduleinit()
 	RegisterEventHandler("ml_global_information.startStop", ml_global_information.eventhandler)
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
 	GUI_NewComboBox(ml_global_information.window.name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
-	GUI_NewField(ml_global_information.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
+	GUI_NewField(ml_global_information.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))	
 	
 	GUI_NewField(ml_global_information.window.name,GetString("markerName"),"gStatusMarkerName",GetString("botStatus") );
 	GUI_NewField(ml_global_information.window.name,GetString("markerTime"),"gStatusMarkerTime",GetString("botStatus") );
-	
 	GUI_NewNumeric(ml_global_information.window.name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
 	GUI_NewComboBox(ml_global_information.window.name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("gatherMode"),"gGather",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.window.name,GetString("gatherMode"),"gGather",GetString("settings"))	
+	GUI_NewCheckbox(ml_global_information.window.name,GetString("useMount"),"gMount",GetString("settings"))
 	
 	GUI_NewButton(ml_global_information.window.name, GetString("advancedSettings"), "AdvancedSettings.toggle")
 	RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
@@ -65,8 +68,7 @@ function ml_global_information.moduleinit()
 	-- ADVANCED SETTINGS WINDOW
 	GUI_NewWindow(ml_global_information.advwindow.name,ml_global_information.advwindow.x,ml_global_information.advwindow.y,ml_global_information.advwindow.width,ml_global_information.advwindow.height,"",false)
 	GUI_NewButton(ml_global_information.advwindow.name, GetString("skillManager"), "SkillManager.toggle")
-	GUI_NewButton(ml_global_information.advwindow.name, GetString("meshManager"), "ToggleMeshmgr")
-	
+	GUI_NewButton(ml_global_information.advwindow.name, GetString("meshManager"), "ToggleMeshmgr")	
 	GUI_WindowVisible(ml_global_information.advwindow.name,false)
 	
 	-- LOGIN WINDOW
@@ -74,12 +76,17 @@ function ml_global_information.moduleinit()
 	GUI_NewField(ml_global_information.login.name,GetString("aLogin"),"aLogin",GetString("settings"))
 	GUI_NewField(ml_global_information.login.name,GetString("aPassword"),"aPassword",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.login.name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
-	
 	GUI_UnFoldGroup(ml_global_information.login.name,GetString("settings") )	
-	
 	aLogin = Settings.ESOMinion.aLogin	
 	aPassword = Settings.ESOMinion.aPassword	
-	gAutoLogin = Settings.ESOMinion.gAutoLogin	
+	
+
+	-- CHARACTERSELECT WINDOW
+	GUI_NewWindow(ml_global_information.characterselect.name,ml_global_information.characterselect.x,ml_global_information.characterselect.y,ml_global_information.characterselect.width,ml_global_information.characterselect.height,"",true)
+	--GUI_NewComboBox(ml_global_information.characterselect.name,GetString("aCharacter"),"gAutoCharacterSelect",GetString("settings"),"None")	
+	GUI_NewCheckbox(ml_global_information.characterselect.name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
+	GUI_UnFoldGroup(ml_global_information.characterselect.name,GetString("settings") )
+	gAutoLogin = Settings.ESOMinion.gAutoLogin
 	
 	-- setup bot mode
     local botModes = "None"
@@ -99,42 +106,26 @@ function ml_global_information.moduleinit()
 	gPulseTime = Settings.ESOMinion.gPulseTime	
 	gAttackRange = Settings.ESOMinion.gAttackRange
 	gGather = Settings.ESOMinion.gGather
+	gMount = Settings.ESOMinion.gMount
 	
 	GUI_UnFoldGroup(ml_global_information.window.name,GetString("botStatus") )
-	
+		
 	-- setup marker manager callbacks and vars
 	ml_marker_mgr.GetPosition = 	function () return Player.pos end
 	ml_marker_mgr.GetLevel = 		function () return e("GetUnitLevel(player)") end
 	ml_marker_mgr.DrawMarker =		mm.DrawMarker
 	
-	--d("TEST")
-	--local ev = g("EVENT_MANAGER")
-	--d("Tablesize:"..tostring(TableSize(ev)))
-	--d(tostring(type(ev)))
-	--d(tostring(ev))
-	
-	--local eee = RegisterForEvent("test")
+	ml_globals.RegisterLuaEventCallbackHandlers()	
+end
 
-	--d(tostring(type(eee)))
-	--d(tostring(eee))
-	--tt = {}
-	--setmetatable (tt, eee) 
-	--DT(tt)
-	--local ev = e("ZO_Debug_EventNotification(0,true,true)")
-	
-	
-end
-function tttt()
-	d("DOWN LOL")
-end
-	
+
 function ml_global_information.onupdate( event, tickcount )
 	ml_global_information.Now = tickcount
 	
 	local gamestate = GetGameState()
-	
+	-- Reset all windows
 	if (ml_global_information.lastgamestate ~= gamestate) then
-		d("GameState changed...")
+		d("GameState changed to "..tostring(gamestate))
 		ml_global_information.lastgamestate = gamestate
 		ml_global_information.gamestatechanged = true
 		GUI_WindowVisible(ml_global_information.advwindow.name,false)
@@ -143,8 +134,10 @@ function ml_global_information.onupdate( event, tickcount )
 		GUI_WindowVisible("Dev",false)
 		GUI_ToggleConsole(false)
 		GUI_WindowVisible(ml_global_information.login.name,false)
+		GUI_WindowVisible(ml_global_information.characterselect.name,false)
 	end
 	
+	-- Switch according to the gamestate
 	if ( gamestate == 2 ) then --GAMESTATE_INGAME
 		ml_global_information.InGameOnUpdate( event, tickcount )
 	elseif (gamestate == 3 ) then --GAMESTATE_INCHARACTERSELECTSCREEN
@@ -187,12 +180,12 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 		ml_log("InTitleScreen: ")
 
 			
-		if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1") then
+		if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "AccountLogin") then
 			d("Trying to login....")			
 			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
 				e("PregameLogin("..aLogin..","..aPassword..")")
 			else
-				ml_log("Login Error detected....trying again..")
+				ml_log("Login Error detected....trying again in 10 seconds..")
 				e("ZO_Dialogs_ReleaseAllDialogs(true)")
 			end
 			
@@ -207,17 +200,29 @@ function ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount
 	
 	-- show/hide correct windows for gamestate
 	if ( ml_global_information.gamestatechanged == true ) then
-		GUI_WindowVisible(ml_global_information.login.name,true)		
-		ml_global_information.gamestatechanged = false			
+		GUI_WindowVisible(ml_global_information.characterselect.name,true)		
+		ml_global_information.gamestatechanged = false
+		
+		--TODO: get #chars and set the wanted accordingly
+		--local charcount = e("GetNumCharacters()")
+		
+		-- populate char-dropdown-list				
+		--gAutoCharacterSelect_listitems = 
 	end	
 				
 	if ( tickcount - ml_global_information.lasttick > 10000 ) then
 		ml_global_information.lasttick = tickcount
 		ml_log("InCharacterSelectScreen: ")
-
 		
-		ml_log("TODO: Select character and login! ")
-		
+		if ( gAutoLogin == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "CharacterSelect") then
+			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
+				ml_log("Select character and login! ")
+				e("ZO_CharacterSelect_Login(false)")
+			else
+				ml_log("Login Error detected....trying again in 10 seconds..")
+				e("RequestCharacterList()")
+			end
+		end		
 		
 		-- Update the Statusbar on the left/bottom screen
 		GUI_SetStatusBar(ml_GetTraceString())		
@@ -238,7 +243,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			ml_global_information.lasttick = tickcount
 		
 			-- Update global variables
-			ml_global_information.UpdateGlobals()
+			ml_globals.UpdateGlobals()
 			
 			
 			-- Let the bot tick ;)
@@ -304,13 +309,15 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 	for k,v in pairs(NewVals) do
 		if (k == "gEnableLog" or
 			k == "gGather" or
+			k == "gMount" or
 			k == "aLogin" or
-			k == "aPassword" or
-			k == "gAutoLogin"
+			k == "aPassword"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
-		
+		elseif ( k == "gAutoLogin" ) then
+			ml_global_information.lasttick = 0
+			Settings.ESOMinion[tostring(k)] = v		
 		elseif ( k == "gBotRunning" ) then
 			ml_global_information.togglebot(v)			
 		elseif ( k == "gBotMode") then        
@@ -352,14 +359,7 @@ function ml_global_information.togglebot(arg)
 	end
 end
 
-function ml_global_information.UpdateGlobals()
-	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange()
-	
-	
-	
-	-- Update Debug fields	
-	dAttackRange = ml_global_information.AttackRange	
-end
+
 
 function ml_global_information.ResetBot()
 
