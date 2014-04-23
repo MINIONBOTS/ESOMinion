@@ -121,7 +121,7 @@ function mm.ModuleInit()
 	
 	
 	
-	GUI_NewButton(mm.mainwindow.name,"ChangeMeshRenderDepth","mm.ChangeMDepth")
+	GUI_NewButton(mm.mainwindow.name,"CTRL+M:ChangeMeshRenderDepth","mm.ChangeMDepth")
 	RegisterEventHandler("mm.ChangeMDepth",mm.ChangeMDepth) 
 		
 	GUI_SizeWindow(mm.mainwindow.name,mm.mainwindow.w,mm.mainwindow.h)
@@ -435,5 +435,6 @@ RegisterEventHandler("ToggleMeshmgr", mm.ToggleMenu)
 RegisterEventHandler("GUI.Update",mm.GUIVarUpdate)
 RegisterEventHandler("Module.Initalize",mm.ModuleInit)
 RegisterEventHandler("Gameloop.NavmeshLoaded",mm.NavMeshUpdate)
+RegisterEventHandler("ChangeMeshDepth",mm.ChangeMDepth)
 
 

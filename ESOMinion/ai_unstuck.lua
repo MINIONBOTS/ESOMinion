@@ -27,14 +27,14 @@ function ai_unstuck:OnUpdate( tick )
 	-- Stuck check for movement stucks
 	if ( Player:IsMoving()) then
 		local movedirs = Player:GetMovement()
-		if ( not movedirs.backward and tick - ai_unstuck.stucktimer > 750 ) then
+		if ( not movedirs.backward and tick - ai_unstuck.stucktimer > 500 ) then
 			ai_unstuck.stucktimer = tick
 			local pPos = Player.pos
 			if ( pPos ) then
-				--d(Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x, ai_unstuck.lastpos.y))				
-				local bcheck = Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y) < 0.85
-				if ( ai_unstuck.ismoving == true ) then
-					bcheck = Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y) < 1.2
+				d(Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x, ai_unstuck.lastpos.y))				
+				local bcheck = Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y) < 1.75
+				if ( Player.stealthstate ~= 0 ) then
+					bcheck = Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y) < 1.25
 				end
 				
 				if ( bcheck ) then					

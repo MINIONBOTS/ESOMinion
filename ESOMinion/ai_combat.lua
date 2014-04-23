@@ -37,6 +37,9 @@ function ai_combatAttack:Init()
 	-- Check for other Targets
 	self:add(ml_element:create( "GetNextTarget", c_GetNextTarget, e_GetNextTarget, 75 ), self.process_elements)
 	
+	-- use Mount
+	self:add(ml_element:create( "UseMount", c_UseMount, e_UseMount,120 ), self.process_elements)
+	
     self:AddTaskCheckCEs()
 end
 function ai_combatAttack:task_complete_eval()
@@ -154,7 +157,33 @@ function e_resting:execute()
 end
 
 
+---------
+c_UseMount = inheritsFrom( ml_cause )
+e_UseMount = inheritsFrom( ml_effect )
 
+function c_UseMount:evaluate()
+	if(gMount == "1") then
+		if ( (Player.isswimming == false) and (e("IsMounted()") == false) and (Player.iscasting == false) ) then
+			local target = EntityList:Get(ml_task_hub:CurrentTask().targetID)
+			if ( TableSize( target ) > 0) then
+				if ( target.distance > 35 ) then
+					return true
+				end
+			end		
+		end	
+	end
+	return false
+end
+function e_UseMount:execute()
+	ml_log("e_useMount.. ")
+		
+	if ( Player:IsMoving() ) then
+		Player:Stop()
+	end
+	e("ToggleMount()")
+	ml_global_information.Wait(500)
+	return
+end
 ---------
 c_GotoAndKill = inheritsFrom( ml_cause )
 e_GotoAndKill = inheritsFrom( ml_effect )
