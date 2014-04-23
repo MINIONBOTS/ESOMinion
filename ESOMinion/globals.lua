@@ -40,7 +40,8 @@ end
 
 -- Global vars which are used very often and we can just reduce the hammering by getting them once per frame
 function ml_globals.UpdateGlobals()
-	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange()
+	
+	if (eso_skillmanager) then 	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() end
 	ml_global_information.CurrentMapID = e("GetCurrentMapIndex()")
 	
 	ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
