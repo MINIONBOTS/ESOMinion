@@ -115,7 +115,7 @@ end
 c_Aggro = inheritsFrom( ml_cause )
 e_Aggro = inheritsFrom( ml_effect )
 function c_Aggro:evaluate()
-    return Player.isswimming == false and TableSize(EntityList("nearest,alive,aggro,attackable,targetable,maxdistance=28,onmesh")) > 0 
+    return Player.isswimming == false and TableSize(EntityList("nearest,alive,aggro,attackable,targetable,maxdistance=28,onmesh")) > 0 and ml_global_information.Player_InCombat
 end
 function e_Aggro:execute()
 	ml_log("e_Aggro ")
@@ -163,7 +163,7 @@ e_UseMount = inheritsFrom( ml_effect )
 
 function c_UseMount:evaluate()
 	if(gMount == "1") then
-		if ( (Player.isswimming == false) and (e("IsMounted()") == false) and (Player.iscasting == false) ) then
+		if ( (Player.isswimming == false) and (e("IsMounted()") == false) and (Player.iscasting == false) and e("GetNumStableSlots()") > 0 ) then
 			local target = EntityList:Get(ml_task_hub:CurrentTask().targetID)
 			if ( TableSize( target ) > 0) then
 				if ( target.distance > 35 ) then

@@ -102,44 +102,9 @@ function ml_global_information.moduleinit()
 	gMount = Settings.ESOMinion.gMount
 	
 	GUI_UnFoldGroup(ml_global_information.window.name,GetString("botStatus") )
-	
-	
-	RegisterLuaEventCallbackHandlers()	
-end
-
--- our version of EVENT_MANAGER:RegisterForEvent("Globals_Common", EVENT_GLOBAL_MOUSE_DOWN, OnGlobalMouseDown)
-function RegisterLuaEventCallbackHandlers()	
-	d("Registering Events..")
-	
-	--mycode = [[
-	--eventManager = GetEventManager()
-	--eventManager:RegisterForAllEvents("ZO_Debug_EventNotification", function(...) eventcallback(...) end)	
-	--]]
-	--eDoString(mycode)
 		
-	-- Register for the ESO Event:
-	RegisterForEvent("EVENT_PLAYER_COMBAT_STATE", true)
-	RegisterForEvent("EVENT_CHARACTER_LIST_RECEIVED", true)
-	-- Register a handler on our side:
-	RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE",LuaEventHandler)
-	RegisterEventHandler("GAME_EVENT_CHARACTER_LIST_RECEIVED",LuaEventHandler)
-	d("Done registering Event..")
-end
-
-function LuaEventHandler(...)
-	local args = { ... }    
-    local numArgs = #args
 	
-	--for i=1,#args do
-	--	d(args[i])
-	--end
-	
-	if ( args[1] == "GAME_EVENT_PLAYER_COMBAT_STATE" ) then
-		d("EVENT_PLAYER_COMBAT_STATE : "..tostring( args[2] ))
-	elseif (args[1] == "GAME_EVENT_CHARACTER_LIST_RECEIVED" ) then
-		d("EVENT_CHARACTER_LIST_RECEIVED : "..tostring( args[2] ))
-
-	end
+	ml_globals.RegisterLuaEventCallbackHandlers()	
 end
 
 
@@ -191,7 +156,7 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 		ml_log("InTitleScreen: ")
 
 			
-		if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1") then
+		if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "AccountLogin") then
 			d("Trying to login....")			
 			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
 				e("PregameLogin("..aLogin..","..aPassword..")")
@@ -225,7 +190,7 @@ function ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount
 		ml_global_information.lasttick = tickcount
 		ml_log("InCharacterSelectScreen: ")
 		
-		if ( gAutoLogin == "1") then
+		if ( gAutoLogin == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "CharacterSelect") then
 			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
 				ml_log("Select character and login! ")
 				e("ZO_CharacterSelect_Login(false)")
@@ -254,7 +219,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			ml_global_information.lasttick = tickcount
 		
 			-- Update global variables
-			ml_global_information.UpdateGlobals()
+			ml_globals.UpdateGlobals()
 			
 			
 			-- Let the bot tick ;)
@@ -370,14 +335,7 @@ function ml_global_information.togglebot(arg)
 	end
 end
 
-function ml_global_information.UpdateGlobals()
-	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange()
-	
-	
-	
-	-- Update Debug fields	
-	dAttackRange = ml_global_information.AttackRange	
-end
+
 
 function ml_global_information.ResetBot()
 

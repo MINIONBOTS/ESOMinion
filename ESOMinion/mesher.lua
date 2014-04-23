@@ -128,7 +128,7 @@ function mm.ModuleInit()
 	GUI_WindowVisible(mm.mainwindow.name,false)
 	
 	-- load default mesh if available
-	local mapid = e("GetCurrentMapIndex()")
+	local mapid = ml_global_information.CurrentMapID
 	if ( mapid ~= nil and tonumber(mapid)~=nil) then
 		if ( Settings.ESOMinion.DefaultMaps[tonumber(mapid)] ) then
 			mm.ChangeNavMesh(Settings.ESOMinion.DefaultMaps[tonumber(mapid)])
@@ -221,7 +221,7 @@ function mm.ChangeNavMesh(newmesh)
 				d("Error loading Navmesh: "..path)
 			else
 				mm.reloadMeshPending = false
-				local mapid = e("GetCurrentMapIndex()")
+				local mapid = ml_global_information.CurrentMapID
 				if ( mapid ~= nil and mapid~=0 ) then
 					d("Setting default Mesh for this Zone..(ID :"..tostring(mapid).." Meshname: "..newmesh)
 					Settings.ESOMinion.DefaultMaps[mapid] = newmesh
@@ -347,21 +347,23 @@ function mm.OnUpdate( tickcount )
 					d("Deleting cell result: "..tostring(MeshManager:DeleteRasterTriangle(mousepos)))
 				end
 			end	
-			
-		--(re-)Loading Navmesh
-		if (mm.reloadMeshPending and mm.lasttick - mm.reloadMeshTmr > 2000 and mm.reloadMeshName ~= "") then
-			mm.reloadMeshTmr = mm.lasttick
-			mm.ChangeNavMesh(mm.reloadMeshName)
-		end
 		
-		-- Check if we switched maps
-		local mapid = e("GetCurrentMapIndex()")
-		if ( not mm.reloadMeshPending and mapid ~= nil and mm.mapID ~= mapid ) then
-			if (Settings.ESOMinion.DefaultMaps[mapid] ~= nil and (Settings.ESOMinion.DefaultMaps[mapid] ~= "none")) then
-				d("Autoloading Navmesh for this Zone: "..Settings.ESOMinion.DefaultMaps[mapid])
-				mm.reloadMeshPending = true
+		if ( gMeshrec == "0") then
+			--(re-)Loading Navmesh
+			if (mm.reloadMeshPending and mm.lasttick - mm.reloadMeshTmr > 2000 and mm.reloadMeshName ~= "") then
 				mm.reloadMeshTmr = mm.lasttick
-				mm.reloadMeshName = Settings.ESOMinion.DefaultMaps[mapid]
+				mm.ChangeNavMesh(mm.reloadMeshName)
+			end
+			
+			-- Check if we switched maps
+			local mapid = ml_global_information.CurrentMapID
+			if ( not mm.reloadMeshPending and mapid ~= nil and mm.mapID ~= mapid ) then
+				if (Settings.ESOMinion.DefaultMaps[mapid] ~= nil and (Settings.ESOMinion.DefaultMaps[mapid] ~= "none")) then
+					d("Autoloading Navmesh for this Zone: "..Settings.ESOMinion.DefaultMaps[mapid])
+					mm.reloadMeshPending = true
+					mm.reloadMeshTmr = mm.lasttick
+					mm.reloadMeshName = Settings.ESOMinion.DefaultMaps[mapid]
+				end
 			end
 		end
 	end
@@ -370,10 +372,16 @@ end
 -- Gets called when a navmesh is done loading/building
 function mm.NavMeshUpdate()
 	d("New Mesh loaded..")
-		
+	
+	-- Reset for a new loaded mesh
+	NavigationManager:ClearNavObstacles()
+	NavigationManager:ClearAvoidanceAreas()
+	ai_unstuck.Obstacles = {}
+	ai_unstuck.AvoidanceAreas = {}
+	
 	--[[ try loading questprofile
 	if ( gBotMode == GetString("grindMode") or gBotMode == GetString("exploreMode")) then
-		local mapname = mc_datamanager.GetMapName(e("GetCurrentMapIndex()"))
+		local mapname = mc_datamanager.GetMapName(ml_global_information.CurrentMapID))
 		if ( mapname ~= nil and mapname ~= "" and mapname ~= "none" ) then
 			mapname = mapname:gsub('%W','') -- only alphanumeric
 			if ( mapname ~= nil and mapname ~= "" ) then
