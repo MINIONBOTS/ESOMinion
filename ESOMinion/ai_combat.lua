@@ -204,14 +204,43 @@ end
 c_GetNextTarget = inheritsFrom( ml_cause )
 e_GetNextTarget = inheritsFrom( ml_effect )
 function c_GetNextTarget:evaluate()
-	local target = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance=35")		
-	return target ~= nil
+	local minLevel = ml_global_information.MarkerMinLevel
+    local maxLevel = ml_global_information.MarkerMaxLevel
+    local whitelist = GetWhitelistIDString()
+    local blacklist = GetBlacklistIDString()
+	
+	local el = nil;
+	if (whitelist and whitelist ~= "") then
+		el = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance=35,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
+    elseif (blacklist and blacklist ~= "") then
+		el = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance=35,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist)		
+	else
+		el = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance=35,minlevel="..minLevel..",maxlevel="..maxLevel)
+	end
+	if(ValidTable(el)) then
+		e_GetNextTarget.TList
+	else
+		return false
 end
 
 function e_GetNextTarget:execute()
 	ml_log("e_GetNextTarget ")
-	-- Weakest Aggro in CombatRange first	
-	local TList = ( EntityList("lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance="..ml_global_information.AttackRange) )
+		
+	local minLevel = ml_global_information.MarkerMinLevel
+    local maxLevel = ml_global_information.MarkerMaxLevel
+    local whitelist = GetWhitelistIDString()
+    local blacklist = GetBlacklistIDString()
+	local TList = nil
+	
+	-- Weakest Aggro in CombatRange first
+	if (whitelist and whitelist ~= "") then	
+		TList = EntityList("lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance="..ml_global_information.AttackRange..",minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
+	elseif (blacklist and blacklist ~= "") then
+		TList = EntityList("lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance="..ml_global_information.AttackRange..",minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist)
+	else
+		TList = EntityList("lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance="..ml_global_information.AttackRange..",minlevel="..minLevel..",maxlevel="..maxLevel)		
+	end
+	
 	if ( TableSize( TList ) > 0 ) then
 		local id, E  = next( TList )
 		if ( id ~= nil and id ~= 0 and E ~= nil ) then
@@ -222,8 +251,15 @@ function e_GetNextTarget:execute()
 	end
 		
 	-- Then nearest attackable Target
+	if (whitelist and whitelist ~= "") then	
+		TList = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance=35,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
+	elseif (blacklist and blacklist ~= "") then
+		TList = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance=35,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..blacklist)
+	else
+		TList = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance=35,minlevel="..minLevel..",maxlevel="..maxLevel)	
+	end
 	--TList = ( EntityList("attackable,alive,nearest,onmesh,maxdistance=3500,exclude_contentid="..mc_blacklist.GetExcludeString(GetString("monsters"))))
-	TList = EntityList("attackable,targetable,alive,nocritter,nearest,onmesh,maxdistance==35")
+
 	if ( TableSize( TList ) > 0 ) then
 		local id, E  = next( TList )
 		if ( id ~= nil and id ~= 0 and E ~= nil ) then

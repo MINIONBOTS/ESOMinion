@@ -10,6 +10,11 @@ ml_global_information.running = false
 ml_global_information.BotModes = {}
 ml_global_information.lastgamestate = 0
 ml_global_information.gamestatechanged = false
+ml_global_information.MarkerMinLevel = 1
+ml_global_information.MarkerMaxLevel = 50
+ml_global_information.BlacklistContentID = ""
+ml_global_information.WhitelistContentID = ""
+ml_global_information.MarkerTime = 0
 
 
 function ml_global_information.moduleinit()
@@ -47,6 +52,8 @@ function ml_global_information.moduleinit()
 	GUI_NewComboBox(ml_global_information.window.name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
 	GUI_NewField(ml_global_information.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
 	
+	GUI_NewField(ml_global_information.window.name,GetString("markerName"),"gStatusMarkerName",GetString("botStatus") );
+	GUI_NewField(ml_global_information.window.name,GetString("markerTime"),"gStatusMarkerTime",GetString("botStatus") );
 	
 	GUI_NewNumeric(ml_global_information.window.name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
 	GUI_NewComboBox(ml_global_information.window.name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
@@ -95,6 +102,10 @@ function ml_global_information.moduleinit()
 	
 	GUI_UnFoldGroup(ml_global_information.window.name,GetString("botStatus") )
 	
+	-- setup marker manager callbacks and vars
+	ml_marker_mgr.GetPosition = 	function () return Player.pos end
+	ml_marker_mgr.GetLevel = 		function () return e("GetUnitLevel(player)") end
+	ml_marker_mgr.DrawMarker =		mm.DrawMarker
 	
 	--d("TEST")
 	--local ev = g("EVENT_MANAGER")
@@ -144,6 +155,19 @@ function ml_global_information.onupdate( event, tickcount )
 		ml_log("GAMESTATE_INLOADINGSCREEN")
 	elseif (gamestate == 1 ) then --GAMESTATE_UNKNOWN
 		ml_log("GAMESTATE_UNKNOWN")
+	end
+	
+	--update marker status
+	if (	gBotMode == GetString("grindMode") and 
+			(ValidTable(GetCurrentMarker())) and
+			ml_task_hub.shouldRun )
+	then
+		local timesince = TimeSince(ml_global_information.MarkerTime)
+		local timeleft = ((GetCurrentMarker():GetTime() * 1000) - timesince) / 1000
+		gStatusMarkerTime = tostring(round(timeleft, 1))
+	else
+		gStatusMarkerName = ""
+		gStatusMarkerTime = ""
 	end
 		
 end
