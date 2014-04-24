@@ -30,7 +30,10 @@ function ai_grind:Init()
 			
 	-- Aggro
 	self:add(ml_element:create( "Aggro", c_Aggro, e_Aggro, 250 ), self.process_elements) --reactive queue
-			
+	
+	--Vendoring
+	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
+				
 	-- Resting
 	self:add(ml_element:create( "Resting", c_resting, e_resting, 225 ), self.process_elements)	
 
@@ -67,6 +70,8 @@ e_randomPt = inheritsFrom( ml_effect )
 function c_randomPt:evaluate()
 	if ( not Player:IsMoving() ) then
 		return true
+	else
+		ml_log(" Moving to random position ")
 	end
 	return false
 end
@@ -93,6 +98,8 @@ function e_randomPt:execute()
 	return ml_log(false)
 end
 
+
+-------
 c_nextgrindmarker = inheritsFrom( ml_cause )
 e_nextgrindmarker = inheritsFrom( ml_effect )
 function c_nextgrindmarker:evaluate()
@@ -123,14 +130,16 @@ function c_nextgrindmarker:evaluate()
         
         -- last check if our time has run out
         if (marker == nil) then
-            local time = ml_task_hub:CurrentTask().currentMarker:GetTime()
-			if (time and time ~= 0 and TimeSince(ml_task_hub:CurrentTask().markerTime) > time * 1000) then
-				--ml_debug("Marker timer: "..tostring(TimeSince(ml_task_hub:CurrentTask().markerTime)) .."seconds of " ..tostring(time)*1000)
-                ml_debug("Getting Next Marker, TIME IS UP!")
-                marker = ml_marker_mgr.GetNextMarker(ml_task_hub:CurrentTask().currentMarker:GetType(), ml_task_hub:CurrentTask().filterLevel)
-            else
-                return false
-            end
+			if (ValidTable(ml_task_hub:CurrentTask().currentMarker)) then
+				local time = ml_task_hub:CurrentTask().currentMarker:GetTime()
+				if (time and time ~= 0 and TimeSince(ml_task_hub:CurrentTask().markerTime) > time * 1000) then
+					--ml_debug("Marker timer: "..tostring(TimeSince(ml_task_hub:CurrentTask().markerTime)) .."seconds of " ..tostring(time)*1000)
+					ml_debug("Getting Next Marker, TIME IS UP!")
+					marker = ml_marker_mgr.GetNextMarker(ml_task_hub:CurrentTask().currentMarker:GetType(), ml_task_hub:CurrentTask().filterLevel)
+				else
+					return false
+				end
+			end
         end
         
         if (ValidTable(marker)) then
@@ -142,15 +151,16 @@ function c_nextgrindmarker:evaluate()
     return false
 end
 function e_nextgrindmarker:execute()
+	ml_log(" e_nextgrindmarker ")
     ml_task_hub:CurrentTask().currentMarker = e_nextgrindmarker.marker
     ml_task_hub:CurrentTask().markerTime = ml_global_information.Now
 	ml_global_information.MarkerTime = ml_global_information.Now
     ml_global_information.MarkerMinLevel = ml_task_hub:CurrentTask().currentMarker:GetMinLevel()
     ml_global_information.MarkerMaxLevel = ml_task_hub:CurrentTask().currentMarker:GetMaxLevel()
     ml_global_information.BlacklistContentID = ml_task_hub:CurrentTask().currentMarker:GetFieldValue(strings[gCurrentLanguage].NOTcontentIDEquals)
-    ml_global_information.WhitelistContentID = ml_task_hub:CurrentTask().currentMarker:GetFieldValue(strings[gCurrentLanguage].contentIDEquals)
-	gStatusMarkerName = ml_task_hub:CurrentTask().currentMarker:GetName()
+    ml_global_information.WhitelistContentID = ml_task_hub:CurrentTask().currentMarker:GetFieldValue(strings[gCurrentLanguage].contentIDEquals)	
 end
+
 
 c_returntomarker = inheritsFrom( ml_cause )
 e_returntomarker = inheritsFrom( ml_effect )
@@ -167,6 +177,7 @@ function c_returntomarker:evaluate()
     return false
 end
 function e_returntomarker:execute()
+	ml_log(" e_returntomarker ")
 	local pos = ml_task_hub:CurrentTask().currentMarker:GetPosition()
 	local navResult = tostring(Player:MoveTo(pos.x,pos.y,pos.z,0.5,false,true,false))
 	if (tonumber(navResult) < 0) then

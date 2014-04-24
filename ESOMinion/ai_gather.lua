@@ -31,6 +31,9 @@ function ai_gathermode:Init()
 	-- Resting
 	self:add(ml_element:create( "Resting", c_resting, e_resting, 225 ), self.process_elements)	
 
+	--Vendoring
+	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
+	
 	-- Looting
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 	
@@ -52,7 +55,9 @@ end
 function ai_gathermode:task_complete_execute()
     
 end
-
+if ( ml_global_information.BotModes) then
+	ml_global_information.BotModes[GetString("gatherMode")] = ai_gathermode
+end
 
 
 -- Gather Task
@@ -88,7 +93,7 @@ function ai_gatherTask:Init()
     self:AddTaskCheckCEs()
 end
 function ai_gatherTask:task_complete_eval()	
-	if ( c_dead:evaluate() or c_Aggro:evaluate() ) then 
+	if ( c_dead:evaluate() or c_Aggro:evaluate() or ml_global_information.Player_InventoryFull) then 
 		Player:Stop()
 		return true
 	end
@@ -103,11 +108,11 @@ c_gatherTask = inheritsFrom( ml_cause )
 e_gatherTask = inheritsFrom( ml_effect )
 c_gatherTask.throttle = 2500
 function c_gatherTask:evaluate()
-	if ( gGather == "1") then
+	if ( gGather == "1" and not ml_global_information.Player_InventoryFull) then
 		if ( gBotMode == GetString("gatherMode") ) then
 			return (TableSize(EntityList("onmesh,nearest,gatherable")) > 0)
 		else
-			return (TableSize(EntityList("onmesh,nearest,gatherable,25")) > 0)
+			return ( not ml_global_information.Player_InCombat and TableSize(EntityList("onmesh,nearest,gatherable,20")) > 0 and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 )
 		end
 	end
    return false
@@ -194,9 +199,9 @@ function e_Gathering:execute()
 						return ml_log(true)
 					end
 					
-					if ( not e("IsInteractionPending()") ) then --or try IsPlayerInteractingWithObject()
+					if ( not e("IsPlayerInteractingWithObject()") ) then
 						Player:Interact( gatherable.id )
-						ml_log("Gathering..")
+						ml_log("Gathering Node..")
 						ml_global_information.Wait(500)					
 					end
 					
@@ -224,7 +229,7 @@ end
 c_Loot = inheritsFrom( ml_cause )
 e_Loot = inheritsFrom( ml_effect )
 function c_Loot:evaluate()
-    return TableSize(EntityList("nearest,lootable,onmesh,maxdistance=50")) > 0
+    return not ml_global_information.Player_InventoryFull and TableSize(EntityList("nearest,lootable,onmesh,maxdistance=50")) > 0
 end
 function e_Loot:execute()
 	ml_log("e_Loot")
@@ -263,7 +268,7 @@ end
 c_LootAll = inheritsFrom( ml_cause )
 e_LootAll = inheritsFrom( ml_effect )
 function c_LootAll:evaluate()
-    return tonumber(e("GetNumLootItems()")) > 0 or tonumber(e("GetLootMoney()")) > 0
+    return not ml_global_information.Player_InventoryFull and (tonumber(e("GetNumLootItems()")) > 0 or tonumber(e("GetLootMoney()")) > 0)
 end
 function e_LootAll:execute()
 	ml_log("e_LootAll")

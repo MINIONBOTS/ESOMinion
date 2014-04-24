@@ -55,8 +55,6 @@ function ml_global_information.moduleinit()
 	GUI_NewComboBox(ml_global_information.window.name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
 	GUI_NewField(ml_global_information.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))	
 	
-	GUI_NewField(ml_global_information.window.name,GetString("markerName"),"gStatusMarkerName",GetString("botStatus") );
-	GUI_NewField(ml_global_information.window.name,GetString("markerTime"),"gStatusMarkerTime",GetString("botStatus") );
 	GUI_NewNumeric(ml_global_information.window.name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
 	GUI_NewComboBox(ml_global_information.window.name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("gatherMode"),"gGather",GetString("settings"))	
@@ -150,19 +148,6 @@ function ml_global_information.onupdate( event, tickcount )
 		ml_log("GAMESTATE_UNKNOWN")
 	end
 	
-	--update marker status
-	if (	gBotMode == GetString("grindMode") and 
-			(ValidTable(GetCurrentMarker())) and
-			ml_task_hub.shouldRun )
-	then
-		local timesince = TimeSince(ml_global_information.MarkerTime)
-		local timeleft = ((GetCurrentMarker():GetTime() * 1000) - timesince) / 1000
-		gStatusMarkerTime = tostring(round(timeleft, 1))
-	else
-		gStatusMarkerName = ""
-		gStatusMarkerTime = ""
-	end
-		
 end
 
 function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
@@ -178,7 +163,6 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 		ml_global_information.lasttick = tickcount
 		
 		ml_log("InTitleScreen: ")
-
 			
 		if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "AccountLogin") then
 			d("Trying to login....")			
@@ -245,6 +229,16 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			-- Update global variables
 			ml_globals.UpdateGlobals()
 			
+			-- Update Marker status
+			if ( gBotMode == GetString("grindMode") and ValidTable(GetCurrentMarker()) and ml_task_hub.shouldRun )then
+				ml_log("Current Marker:"..ml_task_hub:CurrentTask().currentMarker:GetName())
+				
+				local timesince = TimeSince(ml_global_information.MarkerTime)
+				local timeleft = ((GetCurrentMarker():GetTime() * 1000) - timesince) / 1000
+				ml_log("("..tostring(round(timeleft, 1)).."sec) | ")
+			else
+				ml_log("Random Position | ")
+			end
 			
 			-- Let the bot tick ;)
 			if ( ml_global_information.BotModes[gBotMode] ) then
@@ -310,6 +304,27 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		if (k == "gEnableLog" or
 			k == "gGather" or
 			k == "gMount" or
+			k == "gArmorT" or	
+			k == "gArmorN" or
+			k == "gArmorM" or
+			k == "gArmorA" or
+			k == "gArmorL" or
+			k == "gWeapT" or	
+			k == "gWeapN" or
+			k == "gWeapM" or
+			k == "gWeapA" or
+			k == "gWeapL" or
+			k == "gConsT" or	
+			k == "gConsN" or
+			k == "gConsM" or
+			k == "gConsA" or
+			k == "gConsL" or
+			k == "gCraftT" or	
+			k == "gCraftN" or
+			k == "gCraftM" or
+			k == "gCraftA" or
+			k == "gCraftL" or
+			k == "gVendor" or
 			k == "aLogin" or
 			k == "aPassword"
 		)						

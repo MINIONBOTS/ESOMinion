@@ -656,8 +656,7 @@ function eso_skillmanager.AttackTarget( TargetID )
 		target = EntityList:Get(TargetID)
 		
 	end
-	
-		
+			
 	if ( target and TargetID > 0 and target.attackable ) then	
 		local mybuffs = nil --Player.buffs		
 		local targetbuffs = nil

@@ -96,8 +96,11 @@ function ai_unstuck.HandleStuck()
 		table.insert(ai_unstuck.AvoidanceAreas, { x=pPos.x, y=pPos.y, z=pPos.z, r=2 })
 		d("adding AvoidanceArea with size "..tostring(2))
 		NavigationManager:SetAvoidanceAreas(ai_unstuck.AvoidanceAreas)
+		table.insert(Dev.Obstacles, { x=pPos.x, y=pPos.y, z=pPos.z, r=2 })
+		d("Adding new Obstacle with size "..tostring(2))
+		NavigationManager:AddNavObstacles(Dev.Obstacles)
 	end
-	Player.Stop() -- force recreation of path
+	Player:Stop() -- force recreation of path
 	
 	ai_unstuck.stuckcounter = 0	
 end
@@ -108,10 +111,9 @@ function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 		ai_unstuck.Reset()
 		return
 	end
-	
-	d("STUCK! Distance Moved: "..tostring(distmoved) .. " Count: "..tostring(stuckcount) )
-		
-	if ( tonumber(stuckcount) < 10 ) then
+			
+	if ( tonumber(stuckcount) < 10 and tonumber(stuckcount) > 0) then
+		d("Stuck? Distance Moved: "..tostring(distmoved) .. " StuckCount: "..tostring(stuckcount) )
 		Player:Jump()
 				
 		local i = math.random(0,1)
