@@ -1,5 +1,3 @@
-ESOMinion
-=========
 The most awesome LUA Framework and Bot for ESO™
 
 ## [ESOMinion LUA API Documentation] (https://github.com/MINIONBOTS/ESOMinion/wiki)
