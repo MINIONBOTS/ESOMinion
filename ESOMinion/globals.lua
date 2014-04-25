@@ -46,17 +46,7 @@ function LuaEventHandler(...)
 		d("INVENTORY FULL!") --(integer numSlotsRequested, integer numSlotsFree) 
 	
 	elseif(args[1] == "GAME_EVENT_OPEN_STORE" ) then
-		if(tonumber(gVendor) ==1) then
-			ml_log("Selling Junk")
-			markItemsJunk()
-			if(e("HasAnyJunk(1)"))then
-				e("SellAllJunk()")
-			end
-		end
-		ml_log("Repairing items")
-		e("RepairAll()")
-		ml_log("Closing Vendor window")
-		e("EndInteraction(15)")	
+		ai_vendor.HandleVendoring()
 	end
 end
 
@@ -70,20 +60,21 @@ function ml_globals.UpdateGlobals()
 	ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
 	ml_global_information.Player_InventorySlots = e("GetBagInfo(1)")
 	ml_global_information.Player_InventoryNearlyFull = (e("CheckInventorySpaceSilently(5)") == false)
-	ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)
-	
+	ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)	
+	ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
+		
 	ml_global_information.Player_Magicka = {} 
 		local magickaID = g("POWERTYPE_MAGICKA")
 		ml_global_information.Player_Magicka.current,ml_global_information.Player_Magicka.max,ml_global_information.Player_Magicka.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-	
+		ml_global_information.Player_Magicka.percent = ml_global_information.Player_Magicka.current*100/ml_global_information.Player_Magicka.effectiveMax
 	ml_global_information.Player_Stamina = {} 
 		local magickaID = g("POWERTYPE_STAMINA")
 		ml_global_information.Player_Stamina.current,ml_global_information.Player_Stamina.max,ml_global_information.Player_Stamina.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-	
+		ml_global_information.Player_Stamina.percent = ml_global_information.Player_Stamina.current*100/ml_global_information.Player_Stamina.effectiveMax
 	ml_global_information.Player_Ultimate = {} 
 		local magickaID = g("POWERTYPE_ULTIMATE")
 		ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-	
+		ml_global_information.Player_Ultimate.percent = ml_global_information.Player_Ultimate.current*100/ml_global_information.Player_Ultimate.effectiveMax
 	
 	
 	-- Update Debug fields	

@@ -325,6 +325,7 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "gCraftA" or
 			k == "gCraftL" or
 			k == "gVendor" or
+			k == "gRepair" or
 			k == "aLogin" or
 			k == "aPassword"
 		)						

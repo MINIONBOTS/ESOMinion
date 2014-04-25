@@ -159,7 +159,7 @@ function e_resting:execute()
 		Player:Stop()
 	end
 	
-	eso_skillmanager.HealMe()
+	eso_skillmanager.Heal( Player.id )
 	return
 end
 

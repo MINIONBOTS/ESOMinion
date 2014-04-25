@@ -178,7 +178,7 @@ function e_Gathering:execute()
 				if ( ml_global_information.Now - e_Gathering.tmr > e_Gathering.threshold ) then
 					e_Gathering.tmr = ml_global_information.Now
 					e_Gathering.threshold = math.random(1000,3000)
-					eso_skillmanager.HealMe()
+					eso_skillmanager.Heal( Player.id )
 				end
 				ml_log("MoveToGatherable..")
 				return true

@@ -53,10 +53,14 @@ function ai_vendor.moduleinit()
 	end
 	if ( Settings.ESOMinion.gVendor == nil ) then
 		Settings.ESOMinion.gVendor = "1"
-	end	
-
+	end
+	if ( Settings.ESOMinion.gRepair == nil ) then
+		Settings.ESOMinion.gRepair = "1"
+	end		
+	
 	--GUI_NewCheckbox(ml_global_information.window.name,GetString("armor"),"gArmor",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("enabled"),"gVendor",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.window.name,GetString("enableRepair"),"gRepair",GetString("vendorSettings"))	
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("armorTrash"),"gArmorT",GetString("vendorSettings"))
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("armorNormal"),"gArmorN",GetString("vendorSettings"))
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("armorMagic"),"gArmorM",GetString("vendorSettings"))
@@ -94,10 +98,29 @@ function ai_vendor.moduleinit()
 	gCraftM = Settings.ESOMinion.gCraftM
 	gCraftA = Settings.ESOMinion.gCraftA
 	gVendor = Settings.ESOMinion.gVendor
-	
+	gRepair = Settings.ESOMinion.gRepair
 end
 
 RegisterEventHandler("Module.Initalize",ai_vendor.moduleinit)
+
+
+function ai_vendor.HandleVendoring()
+	if ( ml_global_information.running ) then
+		if(tonumber(gVendor) ==1) then
+			ml_log("Selling Junk")
+			markItemsJunk()
+			if(e("HasAnyJunk(1)"))then
+				e("SellAllJunk()")
+			end
+		end
+		if ( gRepair == "1" ) then
+			ml_log("Repairing items")
+			e("RepairAll()")
+		end
+		ml_log("Closing Vendor window")
+		e("EndInteraction(15)")
+	end
+end
 
 --------
 c_movetovendor = inheritsFrom( ml_cause )
@@ -105,9 +128,9 @@ e_movetovendor = inheritsFrom( ml_effect )
 function c_movetovendor:evaluate()
 	if(ml_global_information.Player_InventoryNearlyFull)then
 		local VList = EntityList("nearest,isvendor")
-			if ( VList ) then		
-				return true
-			end
+		if ( TableSize( VList ) > 0 ) then		
+			return true
+		end
 	end
 	return false
 end
@@ -153,7 +176,7 @@ function markItemsJunk()
 	local InventoryMax = args[2]
 	local i = 1
 
-	while(i < tonumber(InventoryMax)) do
+	while(i <= tonumber(InventoryMax)) do
 
 		if( (e("IsItemJunk(1,"..tostring(i)..")")) == false) then
 			local argsItemQ = {e("GetItemInfo( 1,"..tostring(i)..")") } 
