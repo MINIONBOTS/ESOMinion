@@ -231,7 +231,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			
 			-- Update Marker status
 			if ( gBotMode == GetString("grindMode") and ValidTable(GetCurrentMarker()) and ml_task_hub.shouldRun )then
-				ml_log("Current Marker:"..ml_task_hub:CurrentTask().currentMarker:GetName())
+				ml_log("Current Marker:"..GetCurrentMarker():GetName())
 				
 				local timesince = TimeSince(ml_global_information.MarkerTime)
 				local timeleft = ((GetCurrentMarker():GetTime() * 1000) - timesince) / 1000

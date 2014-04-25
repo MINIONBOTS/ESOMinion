@@ -19,8 +19,6 @@ function eso_ai_assist:Init()
 
 end
 
-eso_ai_assist.tmr = 0
-eso_ai_assist.threshold = 2000
 function eso_ai_assist:Process()
 	--ml_log("AssistMode_Process->")
 		
@@ -29,17 +27,12 @@ function eso_ai_assist:Process()
 		
 		-- LootAll
 		if ( c_LootAll:evaluate() ) then e_LootAll:execute() end
-
 		
-		if ( ml_global_information.Now - eso_ai_assist.tmr > eso_ai_assist.threshold and Player:IsMoving()) then
-			eso_ai_assist.tmr = ml_global_information.Now
-			eso_ai_assist.threshold = math.random(500,1000)
-			eso_skillmanager.HealMe()
-		end
-		
-		if ( sMtargetmode == "None" ) then 
-			eso_skillmanager.AttackTarget( nil ) 
-			
+		if ( sMtargetmode == "None" ) then
+			local target = Player:GetTarget()
+			if ( target ) then 
+				eso_skillmanager.AttackTarget( target )
+			end		
 		else
 			eso_ai_assist.SetTargetAssist()
 		end

@@ -81,6 +81,7 @@ function eso_skillmanager.ModuleInit()
 
 	
 	GUI_UnFoldGroup(eso_skillmanager.editwindow.name,"SkillDetails")
+	GUI_UnFoldGroup(eso_skillmanager.editwindow.name,GetString("targetType"))
 	GUI_SizeWindow(eso_skillmanager.editwindow.name,eso_skillmanager.editwindow.w,eso_skillmanager.editwindow.h)
 	GUI_WindowVisible(eso_skillmanager.editwindow.name,false)
 	
@@ -543,7 +544,6 @@ function eso_skillmanager.EditSkill(event)
 	-- Update EditorData
 	local skill = eso_skillmanager.SkillProfile[tonumber(event)]	
 	
-	d("THFUCK :" ..tostring(skill.stype).." OR "..tostring(GetString("smsktypedmg")))
 	
 	if ( skill ) then	
 		SKM_NAME = skill.name or ""
@@ -580,8 +580,6 @@ function eso_skillmanager.EditSkill(event)
 		SKM_PrevID = skill.previd or ""
 		SKM_THROTTLE = tonumber(skill.throttle) or 0
 	end
-	
-	d("WAA "..tostring(SMK_STYPE))
 end
 
 
@@ -621,57 +619,37 @@ function eso_skillmanager.GetAttackRange()
 	
 	if ( gAttackRange == GetString("aRange")) then
 		maxrange = 28
-	elseif ( gAttackRange == GetString("aAutomatic")) then
 		
-		-- check if we have a target to check our skills against
+	elseif ( gAttackRange == GetString("aAutomatic")) then		
+		-- Check if we have a target to check our skills against
 		target = Player:GetTarget()
-				
-		-- go through all current skills and grab the one which is in our skillmanagerprofile + set to "Set Attackrange"
-		local ABList = AbilityList("")
-		if (ABList) then
-			local id,skill = next(ABList)
-			while (id and skill ) do			
-				
-				if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
-					local sID = skill.id
-					for k,v in pairs(eso_skillmanager.SkillProfile) do					
-						--d("skill "..tostring(sID) .." vs "..tostring(v.skillID) .." "..v.name)						
-						if ( v.skillID == sID) then					
-							
-							-- Get Max Attack Range for global use
-							if (v.atkrng == "1" ) then
-								--d(skill.name.." "..tostring(skill.maxRange).." "..tostring(v.name).." "..tostring(v.maxRange))
-								--TODO ADD CD CHECK if ( skill.cooldown == 0 and v.maxRange > maxrange) then
-								if ( target ) then
-									if ( AbilityList:CanCast(sID,target.id) == 10) then
-										if ( v.maxRange > maxrange) then
-											maxrange = v.maxRange
-										end
-									end
-								else
-								
-									if ( v.maxRange > maxrange) then
-										maxrange = v.maxRange
-									end
-								end
-							end						
-							break
-						end
+		if ( not target ) then
+			target = Player
+		end
+					
+		if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
+			
+			for k,v in pairs(eso_skillmanager.SkillProfile) do					
+				-- Get Max Attack Range for global use
+				if (v.atkrng == "1") then
+					--d(v.name.." "..tostring(v.maxRange).." "..tostring(v.name).." "..tostring(eso_skillmanager.CanCast( target, v )))
+					if ( target and eso_skillmanager.CanCast( target, v ) ) then						
+						if ( v.maxRange > maxrange) then
+							maxrange = v.maxRange
+						end						
 					end
-				end	
-				id,skill = next(ABList,id)
-			end	
-		end	
-		
+				end				
+			end
+		end
 	end
 	return maxrange
 end
 
 -- Checks if the passed skillmanager-skill can be cast at the passed target
-function eso_skillmanager.CanCast( target, SM_Skill )
+function eso_skillmanager.CanCast( target, skill )
 	
 	-- Get "live" data
-	local ability = AbilityList:Get(SM_Skill.skillID)
+	local ability = AbilityList:Get(skill.skillID)
 	local targetID = target.id
 		
 	if ( ability and AbilityList:IsTargetInRange(ability.id,targetID) and AbilityList:CanCast(ability.id,targetID) == 10 ) then
@@ -693,8 +671,7 @@ function eso_skillmanager.CanCast( target, SM_Skill )
 		if ( skill.ppowlt > 0 and skill.ppowlt < ml_global_information.Player_Ultimate.percent) then return false end	
 	end
 		--TODO: PLAYER BUFFS
-		
-		
+				
 		if ( skill.minRange > 0 and target.distance < skill.minRange)	 then return false end
 		if ( skill.maxRange > 0 and target.distance > skill.maxRange)	 then return false end
 		if ( skill.phpgt	> 0 and skill.phpgt > target.hp.percent)	 then return false end
@@ -703,12 +680,12 @@ function eso_skillmanager.CanCast( target, SM_Skill )
 		
 		--ALLIE AE CHECK
 		if ( skill.tacount > 0 and skill.tarange > 0) then
-			d("ALLIE AE CHECK "..tostring(TableSize(EntityList("friendly,maxdistance="..skill.tarange..",distanceto="..targetID))))
+			--d("ALLIE AE CHECK "..tostring(TableSize(EntityList("friendly,maxdistance="..skill.tarange..",distanceto="..targetID))))
 			if ( TableSize(EntityList("friendly,maxdistance="..skill.tarange..",distanceto="..targetID)) < skill.tacount) then return false end
 		end	
 		-- TARGET AE CHECK
 		if ( skill.tecount > 0 and skill.terange > 0) then
-			d("TARGET AE CHECK "..tostring(TableSize(EntityList("alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..targetID))))
+			--d("TARGET AE CHECK "..tostring(TableSize(EntityList("alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..targetID))))
 			if ( TableSize(EntityList("alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..targetID)) < skill.tecount) then return false end
 		end
 		
@@ -769,16 +746,17 @@ function eso_skillmanager.AttackTarget( TargetID )
 	local target = EntityList:Get(TargetID)
 	
 	if ( target and TargetID > 0 and target.attackable ) then	
-		
+			
 		if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
 			for prio,skill in pairs(eso_skillmanager.SkillProfile) do
 				
-				if ( skill.stype == GetString("smsktypedmg") and eso_skillmanager.CanCast( target, skill ) ) then
+				if ( skill.skilltype == GetString("smsktypedmg") and eso_skillmanager.CanCast( target, skill ) ) then
 						
-					if ( AbilityList:Cast(ab.id,TargetID) ) then
+					if ( AbilityList:Cast(skill.skillID,TargetID) ) then
 						
-						d("Casting.."..ab.name.." at "..target.name)						
-						eso_skillmanager.prevSkillID = ab.id
+						d("Casting.."..skill.name.." at "..target.name)						
+						eso_skillmanager.prevSkillID = skill.skillID
+						skill.timelastused = ml_global_information.Now
 						
 						-- Add a tiny delay so "iscasting" gets true for this spell, not interrupting it on the next pulse
 						if ( skill.casttime > 0 ) then							
@@ -808,7 +786,7 @@ function eso_skillmanager.Heal( TargetID )
 		if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
 			for prio,skill in pairs(eso_skillmanager.SkillProfile) do
 				
-				if ( skill.stype == GetString("smsktypeheal") and eso_skillmanager.CanCast( target, skill ) ) then
+				if ( skill.skilltype == GetString("smsktypeheal") and eso_skillmanager.CanCast( target, skill ) ) then
 						
 					if ( AbilityList:Cast(ab.id,TargetID) ) then
 						
