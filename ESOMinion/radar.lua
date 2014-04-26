@@ -1,7 +1,7 @@
 -- Main config file of ESOMinion
 
 eso_radar = {}
-eso_radar.MainWindow = { Name = "Radar", x=250, y=200 , width=200, height=200 }
+eso_radar.MainWindow = { Name = "Radar", x=250, y=200 , width=200, height=300 }
 eso_radar.visible = false
 
 function eso_radar.OnUpdate( event, tickcount )
@@ -91,8 +91,9 @@ function eso_radar.HandleInit()
     if ( tonumber(gRadarX) ~= nil) then GameHacks:SetRadarSettings("gRadarX",tonumber(gRadarX)) end
     if ( tonumber(gRadarY) ~= nil) then GameHacks:SetRadarSettings("gRadarY",tonumber(gRadarY)) end
     
-	GUI_NewButton(eso_radar.MainWindow.Name,"Cant See Radar? Press Me","Dev.ChangeMDepth")
-	GUI_UnFoldGroup(eso_radar.MainWindow.Name,"Radar");	
+	--GUI_NewButton(eso_radar.MainWindow.Name,"Cant See Radar? Press Me","Dev.ChangeMDepth")
+	GUI_UnFoldGroup(eso_radar.MainWindow.Name,"Radar");
+	GUI_UnFoldGroup(eso_radar.MainWindow.Name,"RadarSettings");
     GUI_WindowVisible(eso_radar.MainWindow.Name,false)
 end
 

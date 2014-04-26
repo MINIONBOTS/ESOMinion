@@ -63,7 +63,7 @@ function mm.ModuleInit()
 	RegisterEventHandler("newMeshEvent",mm.ClearNavMesh)
 	GUI_NewCheckbox(mm.mainwindow.name,GetString("recmesh"),"gMeshrec",GetString("editor"))
 	GUI_NewComboBox(mm.mainwindow.name,GetString("recAreaType"),"gRecAreaType",GetString("editor"),"Road,Lowdanger,Highdanger")-- enum 1,2,3
-	GUI_NewNumeric(mm.mainwindow.name,GetString("recAreaSize"),"gRecAreaSize",GetString("editor"),"1","35")
+	GUI_NewNumeric(mm.mainwindow.name,GetString("recAreaSize"),"gRecAreaSize",GetString("editor"),"1","25")
 	GUI_NewCheckbox(mm.mainwindow.name,GetString("changeMesh"),"gMeshChange",GetString("editor"))
 	GUI_NewComboBox(mm.mainwindow.name,GetString("changeAreaType"),"gChangeAreaType",GetString("editor"),"Delete,Road,Lowdanger,Highdanger")
 	GUI_NewNumeric(mm.mainwindow.name,GetString("changeAreaSize"),"gChangeAreaSize",GetString("editor"),"1","10")
@@ -327,12 +327,19 @@ function mm.OnUpdate( tickcount )
 				MeshManager:RecForce(true)
 			else
 				MeshManager:RecForce(false)
-			end
+			end			
 			
 			-- 162 = Left CTRL 
 			if ( MeshManager:IsKeyPressed(162) ) then --162 is the integervalue of the virtualkeycode (hex)
+				-- show the mesh if it issnt shown
+				if ( gShowMesh == "0" ) then
+					MeshManager:ShowTriMesh(true)
+				end
 				MeshManager:RecSteeper(true)
 			else
+				if ( gShowMesh == "0" ) then
+					MeshManager:ShowTriMesh(false)
+				end
 				MeshManager:RecSteeper(false)
 			end
 			
@@ -465,13 +472,13 @@ function mm.DrawMarker(marker)
     local s = 1 -- size
     local h = 5 -- height
 	
-    if ( markertype == "Grind Marker" ) then
+    if ( markertype == GetString("grindMarker") ) then
         color = 1 -- red
     elseif ( markertype == "Fishing Marker" ) then
         color = 4 --blue
     elseif ( markertype == "Mining Marker" ) then
         color = 7 -- yellow	
-    elseif ( markertype == "Botany marker" ) then
+    elseif ( markertype == GetString("vendorMarker") ) then
         color = 8 -- orange
     end
     --Building the vertices for the object

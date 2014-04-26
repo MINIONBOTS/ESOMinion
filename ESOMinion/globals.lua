@@ -54,7 +54,7 @@ end
 function ml_globals.UpdateGlobals()
 	
 	if (eso_skillmanager) then 	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() end
-	ml_global_information.CurrentMapID = e("GetCurrentMapIndex()")
+	ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
 	
 	ml_global_information.Player_Position = Player.pos
 	ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
@@ -78,7 +78,11 @@ function ml_globals.UpdateGlobals()
 	
 	
 	-- Update Debug fields	
-	dAttackRange = ml_global_information.AttackRange	
+	dAttackRange = ml_global_information.AttackRange
+	dMapName = e("GetMapName()")
+	dMapZoneIndex = e("GetCurrentMapZoneIndex()")
+	dLocationName = e("GetPlayerLocationName()")
+	
 end
 
 -- Init all variables before the rest of the bot loads

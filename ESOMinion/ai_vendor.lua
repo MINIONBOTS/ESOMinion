@@ -125,13 +125,40 @@ end
 --------
 c_movetovendor = inheritsFrom( ml_cause )
 e_movetovendor = inheritsFrom( ml_effect )
+e_movetovendor.vendorMarker = nil
 function c_movetovendor:evaluate()
-	if(ml_global_information.Player_InventoryNearlyFull)then
+	if( gVendor == "1" and ml_global_information.Player_InventoryNearlyFull)then
 		local VList = EntityList("nearest,isvendor")
-		if ( TableSize( VList ) > 0 ) then		
+		if ( TableSize( VList ) > 0 ) then			
+			return true
+		end
+		
+		-- check if there is a vendormarker setup , if so, go there
+		if ( e_movetovendor.vendorMarker == nil ) then
+			-- get closest vendormarker
+			local VMList = ml_marker_mgr.GetList(GetString("vendorMarker"), false, false)
+			if ( TableSize(VMList) > 0 ) then				
+				local bestmarker = nil
+				local bestdist = 9999999
+				local name,marker = next ( VMList )
+				while (name and marker) do
+					local mPos = marker:GetPosition()
+					if ( Distance3D( mPos.x,mPos.y,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.y,ml_global_information.Player_Position.z) < bestdist) then
+						bestdist = Distance3D( mPos.x,mPos.y,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.y,ml_global_information.Player_Position.z)
+						bestmarker = marker
+					end
+					name,maker = next ( VMList,name )
+				end
+				-- Set this closest vendor to our local variable
+				if ( marker ) then
+					e_movetovendor.vendorMarker = marker
+				end				
+			end
+		else
 			return true
 		end
 	end
+	e_movetovendor.vendorMarker = nil
 	return false
 end
 function e_movetovendor:execute()
@@ -147,7 +174,7 @@ ml_log("e_gotovendor")
 					local dist = Distance3D( tPos.x,tPos.y,tPos.z,pPos.x,pPos.y,pPos.z)
 						ml_log("("..tostring(math.floor(dist))..")")
 						if ( dist > 4 ) then
-							local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,false,true))
+							local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
 							if (tonumber(navResult) < 0) then		
 								ml_error("e_movetovendor result: "..tonumber(navResult))
 								return ml_log(false)							
@@ -164,6 +191,20 @@ ml_log("e_gotovendor")
 					end				
 				end
 			end
+		
+		-- goto vendormarker
+		else
+			if ( e_movetovendor.vendorMarker ~= nil ) then
+				local mPos = e_movetovendor.vendorMarker:GetPosition()
+				ml_log( "Moving to vendorMarker ")
+				local navResult = tostring(Player:MoveTo( mPos.x,mPos.y,mPos.z,10,false,true,true))
+				if (tonumber(navResult) < 0) then		
+					ml_error("e_movetovendorMarker result: "..tonumber(navResult))
+					return ml_log(false)							
+				end	
+				return ml_log(true)	
+				
+			end		
 		end
 	return ml_log(false)
 end

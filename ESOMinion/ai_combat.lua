@@ -146,7 +146,7 @@ c_resting = inheritsFrom( ml_cause )
 e_resting = inheritsFrom( ml_effect )
 c_resting.hpPercent = math.random(55,95)
 function c_resting:evaluate()
-	if ( Player.isswimming == false and Player.hp.percent < c_resting.hpPercent ) then		
+	if ( Player.isswimming == false and (Player.hp.percent < c_resting.hpPercent or ml_global_information.Player_Magicka.percent < c_resting.hpPercent)) then		
 		return true
 	end	
 	return false

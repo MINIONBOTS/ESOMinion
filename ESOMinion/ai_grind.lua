@@ -192,7 +192,7 @@ end
 function ai_grind.SetupMarkers()
     -- add marker templates for grinding
     local grindMarker = ml_marker:Create("grindTemplate")
-	grindMarker:SetType(strings[gCurrentLanguage].grindMarker)
+	grindMarker:SetType(GetString("grindMarker"))
 	grindMarker:AddField("string", strings[gCurrentLanguage].contentIDEquals, "")
 	grindMarker:AddField("string", strings[gCurrentLanguage].NOTcontentIDEquals, "")
     grindMarker:SetTime(300)
@@ -200,6 +200,11 @@ function ai_grind.SetupMarkers()
     grindMarker:SetMaxLevel(50)
     ml_marker_mgr.AddMarkerTemplate(grindMarker)
     
+	-- add vendor templates for finding vendor locations
+	local vendorMarker = ml_marker:Create("vendorTemplate")
+	vendorMarker:SetType(GetString("vendorMarker"))
+    ml_marker_mgr.AddMarkerTemplate(vendorMarker)
+	
     -- refresh the manager with the new templates
     ml_marker_mgr.RefreshMarkerTypes()
 	ml_marker_mgr.RefreshMarkerNames()

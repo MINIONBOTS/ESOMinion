@@ -1,5 +1,5 @@
 ml_global_information = { }
-ml_global_information.window = { name="MinionBot", x=50, y=50, width=200, height=300 }
+ml_global_information.window = { name="MinionBot", x=50, y=50, width=220, height=300 }
 ml_global_information.advwindow = { name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
 ml_global_information.login = { name="AutoLogin", x=100, y=100 , width=230, height=140 }
 ml_global_information.characterselect = { name="CharacterSelect", x=100, y=100 , width=250, height=150 }
@@ -53,21 +53,30 @@ function ml_global_information.moduleinit()
 	RegisterEventHandler("ml_global_information.startStop", ml_global_information.eventhandler)
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
 	GUI_NewComboBox(ml_global_information.window.name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
-	GUI_NewField(ml_global_information.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))	
+	GUI_NewField(ml_global_information.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
+	
+	GUI_NewField(ml_global_information.window.name,"MapName","dMapName",GetString("botStatus"))
+	GUI_NewField(ml_global_information.window.name,"MapZoneIndex","dMapZoneIndex",GetString("botStatus"))
+	GUI_NewField(ml_global_information.window.name,"LocationName","dLocationName",GetString("botStatus"))
+	
+	
 	
 	GUI_NewNumeric(ml_global_information.window.name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
 	GUI_NewComboBox(ml_global_information.window.name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("gatherMode"),"gGather",GetString("settings"))	
 	GUI_NewCheckbox(ml_global_information.window.name,GetString("useMount"),"gMount",GetString("settings"))
 	
-	GUI_NewButton(ml_global_information.window.name, GetString("advancedSettings"), "AdvancedSettings.toggle")
-	RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
+	--GUI_NewButton(ml_global_information.window.name, GetString("advancedSettings"), "AdvancedSettings.toggle")
+	--RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
 	
 	-- ADVANCED SETTINGS WINDOW
-	GUI_NewWindow(ml_global_information.advwindow.name,ml_global_information.advwindow.x,ml_global_information.advwindow.y,ml_global_information.advwindow.width,ml_global_information.advwindow.height,"",false)
-	GUI_NewButton(ml_global_information.advwindow.name, GetString("skillManager"), "SkillManager.toggle")
-	GUI_NewButton(ml_global_information.advwindow.name, GetString("meshManager"), "ToggleMeshmgr")	
-	GUI_WindowVisible(ml_global_information.advwindow.name,false)
+	--GUI_NewWindow(ml_global_information.advwindow.name,ml_global_information.advwindow.x,ml_global_information.advwindow.y,ml_global_information.advwindow.width,ml_global_information.advwindow.height,"",false)
+	GUI_NewButton(ml_global_information.window.name, GetString("skillManager"), "SkillManager.toggle", "Managers")
+	GUI_NewButton(ml_global_information.window.name, GetString("meshManager"), "ToggleMeshmgr", "Managers")
+	GUI_NewButton(ml_global_information.window.name, GetString("markerManager"), "ToggleMarkerMgr", "Managers")
+	GUI_NewButton(ml_global_information.window.name, GetString("blacklistManager"), "ToggleBlacklistMgr", "Managers")	
+	GUI_UnFoldGroup(ml_global_information.window.name,"Managers" )
+	--GUI_WindowVisible(ml_global_information.advwindow.name,false)
 	
 	-- LOGIN WINDOW
 	GUI_NewWindow(ml_global_information.login.name,ml_global_information.login.x,ml_global_information.login.y,ml_global_information.login.width,ml_global_information.login.height,"",true)
@@ -112,10 +121,19 @@ function ml_global_information.moduleinit()
 	ml_marker_mgr.GetPosition = 	function () return Player.pos end
 	ml_marker_mgr.GetLevel = 		function () return e("GetUnitLevel(player)") end
 	ml_marker_mgr.DrawMarker =		mm.DrawMarker
-	
+	ml_blacklist_mgr.parentWindow = { Name="MinionBot" }
+	ml_marker_mgr.parentWindow = { Name="MinionBot" }
 	ml_globals.RegisterLuaEventCallbackHandlers()	
 end
 
+function test()
+	mycode = [[
+	function getmapid()
+		return GetCurrentMapZoneIndex()
+	end
+	]]
+	eDoString(mycode)
+end
 
 function ml_global_information.onupdate( event, tickcount )
 	ml_global_information.Now = tickcount
