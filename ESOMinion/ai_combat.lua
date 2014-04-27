@@ -171,7 +171,7 @@ e_UseMount = inheritsFrom( ml_effect )
 function c_UseMount:evaluate()
 	if(gMount == "1") then
 		if ( (Player.isswimming == false) and (e("IsMounted()") == false) and (Player.iscasting == false) and e("GetNumStableSlots()") > 0 ) then
-			local pPos = ml_global_information.Player_Position
+			local ppos = ml_global_information.Player_Position
 			if ( Distance3D(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,ppos.x,ppos.y,ppos.z) > 35 ) then
 				return true
 			end
@@ -269,7 +269,10 @@ function e_GotoAndKill:execute()
 			Player:SetFacing(tpos.x,tpos.y,tpos.z,false)
 			Player:SetTarget(target.id)
 			--Player:SetFacing(tpos.x,tpos.y+(tpos.height/2),tpos.z)
-			eso_skillmanager.AttackTarget( target.id )
+			
+			if ( not eso_skillmanager.AttackTarget( Player.id ) then
+				eso_skillmanager.AttackTarget( target.id )
+			end
 			return ml_log(true)
 			--DoCombatMovement()
 				

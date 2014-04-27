@@ -631,7 +631,7 @@ function eso_skillmanager.GetAttackRange()
 			
 			for k,v in pairs(eso_skillmanager.SkillProfile) do					
 				-- Get Max Attack Range for global use
-				if (v.atkrng == "1") then
+				if (v.atkrng == "1" and v.skilltype == GetString("smsktypedmg")) then
 					--d(v.name.." "..tostring(v.maxRange).." "..tostring(v.name).." "..tostring(eso_skillmanager.CanCast( target, v )))
 					if ( target and eso_skillmanager.CanCast( target, v ) ) then						
 						if ( v.maxRange > maxrange) then
