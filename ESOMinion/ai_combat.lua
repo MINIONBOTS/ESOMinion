@@ -62,23 +62,23 @@ end
 c_CombatTask = inheritsFrom( ml_cause )
 e_CombatTask = inheritsFrom( ml_effect )
 function c_CombatTask:evaluate()
-	local target = EntityList("attackable,targetable,alive,nocritter,nearest,maxdistance=60,onmesh")		
-	return Player.isswimming == false and target ~= nil and TableSize(target) > 0
+	c_CombatTask.target = EntityList("attackable,targetable,alive,nocritter,shortestpath,maxdistance=60")		
+	return Player.isswimming == false and c_CombatTask.target ~= nil and TableSize(c_CombatTask.target) > 0
 end
 function e_CombatTask:execute()
 	ml_log("e_CombatTask ")
-	local target = nil
+	
 	-- Weakest Aggro in CombatRange first	
 	local TList = ( EntityList("lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance="..ml_global_information.AttackRange) )
 	if ( TableSize( TList ) > 0 ) then
 		local id, E  = next( TList )
 		if ( id ~= nil and id ~= 0 and E ~= nil ) then
-			target = E
+			c_CombatTask.target = E
 			d("Found new Aggro Target: "..(E.name).." ID:"..tostring(E.id))			
 		end		
 	end
 		
-	if ( not target ) then
+	--[[if ( c_CombatTask.target == nil ) then
 		TList = EntityList("attackable,targetable,alive,nocritter,nearest,maxdistance=60,onmesh")
 		if ( TableSize( TList ) > 0 ) then
 			local id, E  = next( TList )
@@ -101,14 +101,15 @@ function e_CombatTask:execute()
 				target = E
 			end		
 		end
-	end
+	end]]
 	
-	if (target) then
+	if (c_CombatTask.target ~= nil) then
 		Player:Stop()
 		local newTask = ai_combatAttack.Create()
-		newTask.targetID = target.id
-		newTask.targetPos = target.pos		
+		newTask.targetID = c_CombatTask.target.id
+		newTask.targetPos = c_CombatTask.target.pos		
 		ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
+		c_CombatTask.target = nil
 	else
 		ml_log("e_CombatTask found no target")
 	end
@@ -152,7 +153,7 @@ function c_resting:evaluate()
 	return false
 end
 function e_resting:execute()
-	ml_log("e_resting.. ")
+	ml_log(" Resting.. ")
 	c_resting.hpPercent = math.random(45,85)
 		
 	if ( Player:IsMoving() ) then
@@ -167,7 +168,6 @@ end
 ---------
 c_UseMount = inheritsFrom( ml_cause )
 e_UseMount = inheritsFrom( ml_effect )
-
 function c_UseMount:evaluate()
 	if(gMount == "1") then
 		if ( (Player.isswimming == false) and (e("IsMounted()") == false) and (Player.iscasting == false) and e("GetNumStableSlots()") > 0 ) then
@@ -191,7 +191,7 @@ function e_UseMount:execute()
 end
 
 
----------
+--------- Goes to and kills our current hub.targetid
 c_GotoAndKill = inheritsFrom( ml_cause )
 e_GotoAndKill = inheritsFrom( ml_effect )
 e_GotoAndKill.ismoving = false
@@ -230,6 +230,19 @@ function e_GotoAndKill:execute()
 	end
 	
 	
+	-- Check for better target while we walk towards out primary target
+			local EList = EntityList("nearest,alive,aggro,attackable,targetable,los,maxdistance=15,onmesh,exclude="..ml_task_hub:CurrentTask().targetID)
+			if ( EList ) then
+				local id,entity = next (EList)
+				if (id and entity) then
+					-- switch to better target
+					d("Switching to better target : "..entity.name.." "..tostring(entity.id))
+					ml_task_hub:CurrentTask().targetID = entity.id					
+					ml_task_hub:CurrentTask().targetPos = entity.pos
+				end
+			end
+	
+	
 	-- Goto n Attack our main target
 	local target = EntityList:Get(ml_task_hub:CurrentTask().targetID)
 	if ( TableSize( target ) > 0 ) then	
@@ -238,21 +251,7 @@ function e_GotoAndKill:execute()
 		ml_task_hub:CurrentTask().targetPos = tpos
 		
 		if ( target.distance > ml_global_information.AttackRange or not target.los ) then		
-			
-			-- Check for better target while we walk towards out primary target
-			local EList = EntityList("nearest,alive,aggro,attackable,targetable,los,maxdistance=12,onmesh,exclude="..ml_task_hub:CurrentTask().targetID)
-			if ( EList ) then
-				local id,entity = next (EList)
-				if (id and entity) then
-					-- switch to better target
-					d("Switching to better target : "..entity.name.." "..tostring(entity.id))
-					ml_task_hub:CurrentTask().targetID = entity.id
-					target = entity
-					tpos = target.pos
-					ml_task_hub:CurrentTask().targetPos = tpos
-				end
-			end
-			
+								
 			-- Player:MoveTo(x,y,z,stoppingdistance,navsystem(normal/follow),navpath(straight/random),smoothturns)
 			local navResult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,0.5+(target.radius),false,true,false))
 			if (tonumber(navResult) < 0) then
@@ -270,7 +269,7 @@ function e_GotoAndKill:execute()
 			Player:SetTarget(target.id)
 			--Player:SetFacing(tpos.x,tpos.y+(tpos.height/2),tpos.z)
 			
-			if ( not eso_skillmanager.AttackTarget( Player.id ) then
+			if ( not eso_skillmanager.Heal( Player.id ) ) then
 				eso_skillmanager.AttackTarget( target.id )
 			end
 			return ml_log(true)

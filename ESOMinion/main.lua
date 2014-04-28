@@ -123,7 +123,10 @@ function ml_global_information.moduleinit()
 	ml_marker_mgr.DrawMarker =		mm.DrawMarker
 	ml_blacklist_mgr.parentWindow = { Name="MinionBot" }
 	ml_marker_mgr.parentWindow = { Name="MinionBot" }
-	ml_globals.RegisterLuaEventCallbackHandlers()	
+	ml_globals.RegisterLuaEventCallbackHandlers()
+	
+	-- Init our global variables
+	ml_globals.UpdateGlobals()
 end
 
 function test()
@@ -240,13 +243,14 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_global_information.gamestatechanged = false
 	end
 
-	if ( ml_global_information.running ) then		
-		if ( tickcount - ml_global_information.lasttick > tonumber(gPulseTime) ) then
-			ml_global_information.lasttick = tickcount
+	if ( tickcount - ml_global_information.lasttick > tonumber(gPulseTime) ) then
+		ml_global_information.lasttick = tickcount
 		
-			-- Update global variables
-			ml_globals.UpdateGlobals()
+		-- Update global variables
+		ml_globals.UpdateGlobals()
 			
+		if ( ml_global_information.running ) then		
+					
 			-- Update Marker status
 			if ( gBotMode == GetString("grindMode") and ValidTable(GetCurrentMarker()) and ml_task_hub.shouldRun )then
 				ml_log("Current Marker:"..GetCurrentMarker():GetName())
@@ -278,12 +282,12 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				-- Update the Statusbar on the left/bottom screen
 				GUI_SetStatusBar(ml_GetTraceString())					
 			end
+				
+		elseif ( ml_global_information.running == false and gAutostartbot == "1" ) then
+			ml_global_information.togglebot(1)
+		else
+			GUI_SetStatusBar("BOT: Not Running")
 		end
-	
-	elseif ( ml_global_information.running == false and gAutostartbot == "1" ) then
-		ml_global_information.togglebot(1)
-	else
-		GUI_SetStatusBar("BOT: Not Running")
 	end
 	
 	-- Mesher OnUpdate

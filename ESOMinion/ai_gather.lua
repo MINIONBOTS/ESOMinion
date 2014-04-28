@@ -107,33 +107,38 @@ end
 c_gatherTask = inheritsFrom( ml_cause )
 e_gatherTask = inheritsFrom( ml_effect )
 c_gatherTask.throttle = 2500
+c_gatherTask.target = nil
 function c_gatherTask:evaluate()
 	if ( gGather == "1" and not ml_global_information.Player_InventoryFull) then
 		if ( gBotMode == GetString("gatherMode") ) then
-			return (TableSize(EntityList("onmesh,nearest,gatherable")) > 0)
+			c_gatherTask.target = EntityList("shortestpath,gatherable")
+			return  c_gatherTask.target ~= nil and TableSize(c_gatherTask.target) > 0
+							
 		else
-			return ( not ml_global_information.Player_InCombat and TableSize(EntityList("onmesh,nearest,gatherable,20")) > 0 and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 )
+			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
+				c_gatherTask.target = EntityList("shortestpath,gatherable,maxdistance=20")
+				if ( c_gatherTask.target ~= nil and TableSize(c_gatherTask.target) > 0 ) then
+					return true
+				end
+			end	
 		end
 	end
-   return false
+	c_gatherTask.target = nil
+	return false
 end
 function e_gatherTask:execute()
 	ml_log("e_gatherTask ")
 	Player:Stop()
 	local newTask = ai_gatherTask.Create()
-	local GList = EntityList("onmesh,nearest,gatherable")
-	if ( TableSize(GList)>0) then
-		local id,gatherable = next(GList)
-		if ( gatherable ) then
-			newTask.tPos = gatherable.pos
-		else
-			ml_error("gatherable not in list..")
-		end
+	
+	if ( TableSize(c_gatherTask.target)>0) then
+		local id,gatherable = next(GList)		
+		newTask.tPos = c_gatherTask.target.pos		
 	else
 		ml_error("Bug: GList in e_gatherTask is empty!?")
 	end
 	ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
-	return ml_log(true)	
+	return ml_log(true)
 end
 
 
@@ -143,7 +148,7 @@ e_Gathering = inheritsFrom( ml_effect )
 function c_Gathering:evaluate()
 		
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) == 0 ) then
-		local _,gatherable = next(EntityList("onmesh,nearest,gatherable,maxdistance=50"))
+		local _,gatherable = next(EntityList("shortestpath,gatherable,maxdistance=50"))
 		if (gatherable) then
 			local gPos = gatherable.pos
 			if ( TableSize(gPos) > 0 ) then
@@ -229,7 +234,7 @@ end
 c_Loot = inheritsFrom( ml_cause )
 e_Loot = inheritsFrom( ml_effect )
 function c_Loot:evaluate()
-    return not ml_global_information.Player_InventoryFull and TableSize(EntityList("nearest,lootable,onmesh,maxdistance=50")) > 0
+    return not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull and TableSize(EntityList("nearest,lootable,onmesh,maxdistance=50")) > 0
 end
 function e_Loot:execute()
 	ml_log("e_Loot")
