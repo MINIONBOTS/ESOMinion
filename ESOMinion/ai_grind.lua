@@ -73,7 +73,7 @@ e_FightToGrindMarker = inheritsFrom( ml_effect )
 c_FightToGrindMarker.target = nil
 function c_FightToGrindMarker:evaluate()
 	if ( c_MoveToMarker.markerreached == false and c_MoveToMarker.allowedToFight == true) then
-		local EList = EntityList("attackable,targetable,alive,nocritter,shortestpath,onmesh,maxdistance=40")
+		local EList = EntityList("attackable,targetable,alive,nocritter,shortestpath,onmesh,maxdistance=30") -- add los ?
 		if ( EList and TableSize(EList) > 0 ) then
 			local id,entry = next(EList)
 			if ( id and entry ) then
@@ -120,7 +120,7 @@ c_MoveToMarker = inheritsFrom( ml_cause )
 e_MoveToMarker = inheritsFrom( ml_effect )
 c_MoveToMarker.markerreachedfirsttime = false
 c_MoveToMarker.markerreached = false
-c_MoveToMarker.allowedToFight = false -- this sh*t is needed else he will go back n forth on the outer side of the marker's 500 radius if an enemy sits at 520 behind that radius -.-
+c_MoveToMarker.allowedToFight = false -- this sh*t is needed else he will go back n forth on the outer side of the marker's 350 radius if an enemy sits at 520 behind that radius -.-
 function c_MoveToMarker:evaluate()
 	-- Get a new/next Marker if we need one ( no marker , out of level, time up )
 	if (ml_task_hub:CurrentTask().currentMarker == nil or ml_task_hub:CurrentTask().currentMarker == false 
@@ -167,8 +167,9 @@ function c_MoveToMarker:evaluate()
 			local pos = ml_task_hub:CurrentTask().currentMarker:GetPosition()
 			local distance = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, pos.x, pos.z)
 			d("We need to move back to our current Marker!")
-			if  (gBotMode == GetString("grindMode") and distance > 500) then
+			if  (gBotMode == GetString("grindMode") and distance > 350) then
 				c_MoveToMarker.markerreached = false
+				c_MoveToMarker.allowedToFight = false
 				return true
 			end
 		end		
@@ -187,7 +188,7 @@ function e_MoveToMarker:execute()
 		local dist = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, pos.x, pos.z)
 		
 		-- Allow fighting when we are far away from the "outside radius of the marker" , else the bot goes back n forth spinning trying to reach the target outside n going back inside right after
-		if ( dist < 450) then
+		if ( dist < 300) then
 			c_MoveToMarker.allowedToFight = true
 		else
 			c_MoveToMarker.allowedToFight = false

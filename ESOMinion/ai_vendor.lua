@@ -152,6 +152,7 @@ function c_movetovendor:evaluate()
 				-- Set this closest vendor to our local variable
 				if ( marker ) then
 					e_movetovendor.vendorMarker = marker
+					return true
 				end				
 			end
 		else
@@ -164,31 +165,30 @@ end
 function e_movetovendor:execute()
 ml_log("e_gotovendor")
 	local VList = EntityList("nearest,isvendor,maxdistance=85")
-		if ( VList ) then	
-			if ( TableSize( VList ) > 0)then	
+		if ( VList and TableSize( VList ) > 0 ) then	
+			
 			id,vendor = next (VList)
 			if ( id and vendor ) then
 				local pPos = Player.pos
 				local tPos = vendor.pos
 				if (pPos) then
 					local dist = Distance3D( tPos.x,tPos.y,tPos.z,pPos.x,pPos.y,pPos.z)
-						ml_log("("..tostring(math.floor(dist))..")")
-						if ( dist > 4 ) then
-							local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
-							if (tonumber(navResult) < 0) then		
-								ml_error("e_movetovendor result: "..tonumber(navResult))
-								return ml_log(false)							
-							end	
-							return ml_log(true)
-						end
-						if(vendor.distance < 3) then
-						
-							Player:Stop()
-							Player:Interact(vendor.id)
-							e("SelectChatterOption(1)")
-							return ml_log(true)
-						end
-					end				
+					ml_log("("..tostring(math.floor(dist))..")")
+					if ( dist > 4 ) then
+						local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
+						if (tonumber(navResult) < 0) then		
+							ml_error("e_movetovendor result: "..tonumber(navResult))
+							return ml_log(false)							
+						end	
+						return ml_log(true)
+					end
+					if(vendor.distance < 3) then
+					
+						Player:Stop()
+						Player:Interact(vendor.id)
+						e("SelectChatterOption(1)")
+						return ml_log(true)
+					end									
 				end
 			end
 		
