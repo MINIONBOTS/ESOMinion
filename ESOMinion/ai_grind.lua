@@ -165,9 +165,9 @@ function c_MoveToMarker:evaluate()
 		else
 			-- check if we ran outside the currentMarker radius and if so, we need to walk back to the currentMarker
 			local pos = ml_task_hub:CurrentTask().currentMarker:GetPosition()
-			local distance = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, pos.x, pos.z)
-			d("We need to move back to our current Marker!")
+			local distance = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, pos.x, pos.z)			
 			if  (gBotMode == GetString("grindMode") and distance > 350) then
+				d("We need to move back to our current Marker!")
 				c_MoveToMarker.markerreached = false
 				c_MoveToMarker.allowedToFight = false
 				return true
