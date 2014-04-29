@@ -742,6 +742,9 @@ function eso_skillmanager.AttackTarget( TargetID )
 	-- Throttle to not cast too fast & interrupt channeling spells
 	if ( ml_global_information.Now - eso_skillmanager.lastcastTmr < 500 ) then return false end
 	
+	-- Check if we have a channeled / charging skill that has to be released in order to make it cast (like heavy shot from Bow)
+	eso_skillmanager.ReleaseCheck()
+	
 	--Valid Target Check
 	local target = EntityList:Get(TargetID)
 	
@@ -807,6 +810,31 @@ function eso_skillmanager.Heal( TargetID )
 		end
 	end
 	return false
+end
+
+-- Some skills have to be "released" in order to be cast
+eso_skillmanager.releasecheckTmr = 0
+eso_skillmanager.releasechecklastID = 0
+function eso_skillmanager.ReleaseCheck()
+	if ( Player.iscasting ) then
+		local cinfo = Player.castinfo
+		if ( cinfo ) then		
+		
+			local CAbiliID = cinfo.abilityid
+			if ( eso_skillmanager.releasechecklastID == 0 or eso_skillmanager.releasechecklastID ~= CAbiliID) then
+				eso_skillmanager.releasechecklastID = CAbiliID
+				eso_skillmanager.releasecheckTmr = ml_global_information.Now + cinfo.endtime - cinfo.starttime - 250
+			else
+				if ( ml_global_information.Now - eso_skillmanager.releasecheckTmr > 0 ) then
+					if ( CAbiliID == 16691 ) then
+						e("OnSlotUp(2)")  -- Heavy Attack Bow
+					end
+					eso_skillmanager.releasecheckTmr = 0
+					eso_skillmanager.releasechecklastID = 0
+				end
+			end		
+		end
+	end
 end
 
 RegisterEventHandler("SkillManager.toggle", eso_skillmanager.ToggleMenu)

@@ -31,7 +31,7 @@ function eso_ai_assist:Process()
 		if ( sMtargetmode == "None" ) then
 			local target = Player:GetTarget()
 			if ( target ) then 
-				eso_skillmanager.AttackTarget( target )
+				eso_skillmanager.AttackTarget( target.id )
 			end		
 		else
 			eso_ai_assist.SetTargetAssist()

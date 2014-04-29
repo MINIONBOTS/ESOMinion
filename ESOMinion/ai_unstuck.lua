@@ -45,14 +45,17 @@ function ai_unstuck:OnUpdate( tick )
 							Player:Jump()
 						--end
 					end
-					if ( ai_unstuck.stuckcounter > 8 ) then
+					if ( ai_unstuck.stuckcounter > 6 ) then
 						ai_unstuck.HandleStuck()
 					end
 					ai_unstuck.stuckcounter = ai_unstuck.stuckcounter + 1
 				else
 					ai_unstuck.stuckcounter = 0
 					if ( ai_unstuck.ismoving == true ) then
-						Player:Stop()						
+						Player:Stop()
+						Player:SetMovement(0,2)
+						Player:SetMovement(0,3)
+						Player:SetMovement(0,4)
 						ai_unstuck.ismoving = false
 					end
 				end
@@ -89,10 +92,11 @@ function ai_unstuck:OnUpdate( tick )
 end
 
 function ai_unstuck.HandleStuck()	
-	d("TODO: Handle stuck")
+	
 	-- Setting an avoidancearea at this point to hopefully find a way around it
 	local pPos = Player.pos
 	if ( pPos ) then
+		--TODO: add proper checks for this , like is ther already a obstacle etcetc
 		table.insert(ai_unstuck.AvoidanceAreas, { x=pPos.x, y=pPos.y, z=pPos.z, r=2 })
 		d("adding AvoidanceArea with size "..tostring(2))
 		NavigationManager:SetAvoidanceAreas(ai_unstuck.AvoidanceAreas)
@@ -102,6 +106,8 @@ function ai_unstuck.HandleStuck()
 	end
 	Player:Stop() -- force recreation of path
 	
+	Player:SetMovement(1,2) -- try walking backwards a bit
+	ml_global_information.Wait( 1500 )
 	ai_unstuck.stuckcounter = 0	
 end
 
@@ -112,21 +118,21 @@ function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 		return
 	end
 			
-	if ( tonumber(stuckcount) < 10 and tonumber(stuckcount) > 0) then
+	if ( tonumber(stuckcount) < 8 and tonumber(stuckcount) > 0) then
 		d("Stuck? Distance Moved: "..tostring(distmoved) .. " StuckCount: "..tostring(stuckcount) )
 		Player:Jump()
 				
 		local i = math.random(0,1)
 		if ( i == 0 ) then
-			--Player:SetMovement(2)
+			Player:SetMovement(1,3)
 			ai_unstuck.ismoving = true
 		elseif ( i == 1 ) then
-			--Player:SetMovement(3)
+			Player:SetMovement(1,4)
 			ai_unstuck.ismoving = true
 		end
 	end
 	
-	if ( tonumber(stuckcount) > 20 ) then
+	if ( tonumber(stuckcount) > 15 ) then
 		ml_error("We are STUCK!")
 		ai_unstuck.HandleStuck()
 	end
@@ -141,6 +147,9 @@ function ai_unstuck.Reset()
 	ai_unstuck.ismoving = false
 	ai_unstuck.lastpos = nil
 	ai_unstuck.logoutTmr = 0
+	Player:SetMovement(0,2)
+	Player:SetMovement(0,3)
+	Player:SetMovement(0,4)
 end
 
 RegisterEventHandler("Gameloop.Stuck",ai_unstuck.stuckhandler) -- gets called by c++ when using the navigationsystem

@@ -19,6 +19,8 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterForEvent("EVENT_INVENTORY_IS_FULL", true)
 	RegisterForEvent("EVENT_OPEN_STORE", true)
 	RegisterForEvent("EVENT_LOOT_ITEM_FAILED", true)
+	RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
+	
 	
 	-- Register a handler on our side:
 	RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE",LuaEventHandler)
@@ -26,7 +28,8 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterEventHandler("GAME_EVENT_INVENTORY_IS_FULL",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_OPEN_STORE",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_LOOT_ITEM_FAILED",LuaEventHandler)
-	  
+	RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP",LuaEventHandler)
+	
 	d("Done registering Event..")
 end
 
@@ -52,18 +55,26 @@ function LuaEventHandler(...)
 	elseif (args[1] == "GAME_EVENT_LOOT_ITEM_FAILED" ) then
 		d("LOOT FAILED: Reason "..tostring(args[3]).." ItemName "..args[4])
 		-- Blacklisting the closest entity which we were trying to loot
-		local EList = EntityList("nearest,lootable,onmesh,maxdistance=5,exclude="..ml_blacklist.GetExcludeString(GetString("monsters")))
+		local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
+		local EList = EntityList("nearest,lootable,onmesh,maxdistance=3,exclude="..blackliststring)
 		
-		if ( not ml_global_information.Player_InCombat and 
-			 not ml_global_information.Player_InventoryFull and
-			 TableSize(EList) > 0 ) then
+		if ( not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull ) then
 			
-			local id, entry = next ( EList )
-			if ( id and entry ) then
-				d("Cannot loot "..entry.name..", blacklisting it")
-				ml_blacklist.AddBlacklistEntry(GetString("monsters"), entry.id, entry.name, ml_global_information.Now+180000)
-			end			
+			if ( TableSize(EList) > 0 ) then			
+				local id, entry = next ( EList )
+				if ( id and entry ) then
+					d("Cannot loot "..entry.name..", blacklisting it")
+					ml_blacklist.AddBlacklistEntry(GetString("monsters"), entry.id, entry.name, ml_global_information.Now+180000)
+				end
+			end
+			c_LootAll.ignoreLootTmr = ml_global_information.Now
+			c_LootAll.ignoreLoot = true
 		end
+	
+	elseif ( args[1] == "GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP" ) then
+		d("Combat Tip ID : "..tostring(args[3]))
+		-- ID 1 - Block
+		
 	end
 end
 

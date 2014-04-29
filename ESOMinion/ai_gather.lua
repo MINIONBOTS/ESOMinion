@@ -283,8 +283,17 @@ end
 --------- Loots the items into our bags if "autoloot" issnt activated
 c_LootAll = inheritsFrom( ml_cause )
 e_LootAll = inheritsFrom( ml_effect )
+c_LootAll.ignoreLoot = false
+c_LootAll.ignoreLootTmr = 0
 function c_LootAll:evaluate()
-    return not ml_global_information.Player_InventoryFull and (tonumber(e("GetNumLootItems()")) > 0 or tonumber(e("GetLootMoney()")) > 0)
+	-- this is needed in order to make the loot window close when we cannot loot something, this is set in globals.lua event
+    if ( c_LootAll.ignoreLootTmr ~= 0 ) then
+		if ( ml_global_information.Now - c_LootAll.ignoreLootTmr > 1500 ) then
+			c_LootAll.ignoreLootTmr = 0
+			c_LootAll.ignoreLoot = false
+		end
+	end
+	return c_LootAll.ignoreLoot == false and not ml_global_information.Player_InventoryFull and (tonumber(e("GetNumLootItems()")) > 0 or tonumber(e("GetLootMoney()")) > 0)
 end
 function e_LootAll:execute()
 	ml_log("e_LootAll")
