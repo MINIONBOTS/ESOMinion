@@ -18,14 +18,15 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	--RegisterForEvent("EVENT_CHARACTER_LIST_RECEIVED", true)
 	RegisterForEvent("EVENT_INVENTORY_IS_FULL", true)
 	RegisterForEvent("EVENT_OPEN_STORE", true)
+	RegisterForEvent("EVENT_LOOT_ITEM_FAILED", true)
 	
 	-- Register a handler on our side:
 	RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE",LuaEventHandler)
 	--RegisterEventHandler("GAME_EVENT_CHARACTER_LIST_RECEIVED",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_INVENTORY_IS_FULL",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_OPEN_STORE",LuaEventHandler)
-	
-	
+	RegisterEventHandler("GAME_EVENT_LOOT_ITEM_FAILED",LuaEventHandler)
+	  
 	d("Done registering Event..")
 end
 
@@ -47,6 +48,22 @@ function LuaEventHandler(...)
 	
 	elseif(args[1] == "GAME_EVENT_OPEN_STORE" ) then
 		ai_vendor.HandleVendoring()
+	
+	elseif (args[1] == "GAME_EVENT_LOOT_ITEM_FAILED" ) then
+		d("LOOT FAILED: Reason "..tostring(args[3]).." ItemName "..args[4])
+		-- Blacklisting the closest entity which we were trying to loot
+		local EList = EntityList("nearest,lootable,onmesh,maxdistance=5,exclude="..ml_blacklist.GetExcludeString(GetString("monsters")))
+		
+		if ( not ml_global_information.Player_InCombat and 
+			 not ml_global_information.Player_InventoryFull and
+			 TableSize(EList) > 0 ) then
+			
+			local id, entry = next ( EList )
+			if ( id and entry ) then
+				d("Cannot loot "..entry.name..", blacklisting it")
+				ml_blacklist.AddBlacklistEntry(GetString("monsters"), entry.id, entry.name, ml_global_information.Now+180000)
+			end			
+		end
 	end
 end
 
@@ -54,15 +71,14 @@ end
 function ml_globals.UpdateGlobals()
 	
 	if (eso_skillmanager) then 	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() end
-	ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
-	
-	ml_global_information.Player_Position = Player.pos
+			
+	ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
 	ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
 	ml_global_information.Player_InventorySlots = e("GetBagInfo(1)")
 	ml_global_information.Player_InventoryNearlyFull = (e("CheckInventorySpaceSilently(5)") == false)
-	ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)	
-	ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
-		
+	ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)			
+	ml_global_information.Player_Level = e("GetUnitLevel(player)")
+	
 	ml_global_information.Player_Magicka = {} 
 		local magickaID = g("POWERTYPE_MAGICKA")
 		ml_global_information.Player_Magicka.current,ml_global_information.Player_Magicka.max,ml_global_information.Player_Magicka.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
@@ -75,6 +91,10 @@ function ml_globals.UpdateGlobals()
 		local magickaID = g("POWERTYPE_ULTIMATE")
 		ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
 		ml_global_information.Player_Ultimate.percent = ml_global_information.Player_Ultimate.current*100/ml_global_information.Player_Ultimate.effectiveMax
+	
+	ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
+	ml_global_information.CurrentMapName = e("GetMapName()")
+	ml_global_information.Player_Position = Player.pos
 	
 	
 	-- Update Debug fields	

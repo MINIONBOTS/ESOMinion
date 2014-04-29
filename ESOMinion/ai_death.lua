@@ -6,7 +6,7 @@ e_dead.lastseenalive = 0
 e_dead.wait = 5000
 
 function c_dead:evaluate()
-	if ( Player.dead ) then
+	if ( Player.dead == true) then
 		return true
 	end
 	e_dead.lastseenalive = ml_global_information.Now
@@ -16,6 +16,7 @@ end
 function e_dead:execute()
 	ml_log("e_dead")
 	if ml_global_information.Now - e_dead.lastseenalive > e_dead.wait then
-		e("Release()")
+		ml_global_information.ResetBot()
+		e("Release()")		
 	end
 end

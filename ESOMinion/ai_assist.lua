@@ -83,8 +83,8 @@ function eso_ai_assist.moduleinit()
 	if (Settings.ESOMinion.sMmode == nil) then
 		Settings.ESOMinion.sMmode = "Everything"
 	end
-	GUI_NewComboBox(ml_global_information.window.name,GetString("sMtargetmode"),"sMtargetmode",GetString("assistMode"),"None,LowestHealth,Closest,Biggest Crowd");
-	GUI_NewComboBox(ml_global_information.window.name,GetString("sMmode"),"sMmode",GetString("assistMode"),"Everything,Players Only")
+	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMtargetmode"),"sMtargetmode",GetString("assistMode"),"None,LowestHealth,Closest,Biggest Crowd");
+	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMmode"),"sMmode",GetString("assistMode"),"Everything,Players Only")
 	
 	sMtargetmode = Settings.ESOMinion.sMtargetmode
 	sMmode = Settings.ESOMinion.sMmode

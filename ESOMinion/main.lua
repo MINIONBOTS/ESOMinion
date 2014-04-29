@@ -1,8 +1,8 @@
 ml_global_information = { }
-ml_global_information.window = { name="MinionBot", x=50, y=50, width=220, height=300 }
-ml_global_information.advwindow = { name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
-ml_global_information.login = { name="AutoLogin", x=100, y=100 , width=230, height=140 }
-ml_global_information.characterselect = { name="CharacterSelect", x=100, y=100 , width=250, height=150 }
+ml_global_information.MainWindow = { Name="MinionBot", x=50, y=50, width=220, height=300 }
+ml_global_information.advwindow = { Name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
+ml_global_information.login = { Name="AutoLogin", x=100, y=100 , width=230, height=140 }
+ml_global_information.characterselect = { Name="CharacterSelect", x=100, y=100 , width=250, height=150 }
 ml_global_information.advwindowvisible = false
 ml_global_information.path = GetStartupPath()
 ml_global_information.Now = 0
@@ -46,53 +46,53 @@ function ml_global_information.moduleinit()
 	end
 	
 	-- MAIN WINDOW
-	GUI_NewWindow(ml_global_information.window.name,ml_global_information.window.x,ml_global_information.window.y,ml_global_information.window.width,ml_global_information.window.height)
-	GUI_NewButton(ml_global_information.window.name,GetString("startStop"),"ml_global_information.startStop")
+	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
+	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("startStop"),"ml_global_information.startStop")
 			
-	GUI_NewButton(ml_global_information.window.name,GetString("showradar"),"Radar.toggle")
+	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("showradar"),"Radar.toggle")
 	RegisterEventHandler("ml_global_information.startStop", ml_global_information.eventhandler)
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
-	GUI_NewComboBox(ml_global_information.window.name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
-	GUI_NewField(ml_global_information.window.name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
+	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
+	GUI_NewField(ml_global_information.MainWindow.Name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
 	
-	GUI_NewField(ml_global_information.window.name,"MapName","dMapName",GetString("botStatus"))
-	GUI_NewField(ml_global_information.window.name,"MapZoneIndex","dMapZoneIndex",GetString("botStatus"))
-	GUI_NewField(ml_global_information.window.name,"LocationName","dLocationName",GetString("botStatus"))
+	GUI_NewField(ml_global_information.MainWindow.Name,"MapName","dMapName",GetString("botStatus"))
+	GUI_NewField(ml_global_information.MainWindow.Name,"MapZoneIndex","dMapZoneIndex",GetString("botStatus"))
+	GUI_NewField(ml_global_information.MainWindow.Name,"LocationName","dLocationName",GetString("botStatus"))
 	
 	
 	
-	GUI_NewNumeric(ml_global_information.window.name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
-	GUI_NewComboBox(ml_global_information.window.name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("gatherMode"),"gGather",GetString("settings"))	
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("useMount"),"gMount",GetString("settings"))
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
+	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("gatherMode"),"gGather",GetString("settings"))	
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useMount"),"gMount",GetString("settings"))
 	
-	--GUI_NewButton(ml_global_information.window.name, GetString("advancedSettings"), "AdvancedSettings.toggle")
+	--GUI_NewButton(ml_global_information.MainWindow.Name, GetString("advancedSettings"), "AdvancedSettings.toggle")
 	--RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
 	
 	-- ADVANCED SETTINGS WINDOW
-	--GUI_NewWindow(ml_global_information.advwindow.name,ml_global_information.advwindow.x,ml_global_information.advwindow.y,ml_global_information.advwindow.width,ml_global_information.advwindow.height,"",false)
-	GUI_NewButton(ml_global_information.window.name, GetString("skillManager"), "SkillManager.toggle", "Managers")
-	GUI_NewButton(ml_global_information.window.name, GetString("meshManager"), "ToggleMeshmgr", "Managers")
-	GUI_NewButton(ml_global_information.window.name, GetString("markerManager"), "ToggleMarkerMgr", "Managers")
-	GUI_NewButton(ml_global_information.window.name, GetString("blacklistManager"), "ToggleBlacklistMgr", "Managers")	
-	GUI_UnFoldGroup(ml_global_information.window.name,"Managers" )
-	--GUI_WindowVisible(ml_global_information.advwindow.name,false)
+	--GUI_NewWindow(ml_global_information.advwindow.Name,ml_global_information.advwindow.x,ml_global_information.advwindow.y,ml_global_information.advwindow.width,ml_global_information.advwindow.height,"",false)
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("skillManager"), "SkillManager.toggle", "Managers")
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("meshManager"), "ToggleMeshmgr", "Managers")
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("markerManager"), "ToggleMarkerMgr", "Managers")
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("blacklistManager"), "ToggleBlacklistMgr", "Managers")	
+	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
+	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
 	
 	-- LOGIN WINDOW
-	GUI_NewWindow(ml_global_information.login.name,ml_global_information.login.x,ml_global_information.login.y,ml_global_information.login.width,ml_global_information.login.height,"",true)
-	GUI_NewField(ml_global_information.login.name,GetString("aLogin"),"aLogin",GetString("settings"))
-	GUI_NewField(ml_global_information.login.name,GetString("aPassword"),"aPassword",GetString("settings"))
-	GUI_NewCheckbox(ml_global_information.login.name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
-	GUI_UnFoldGroup(ml_global_information.login.name,GetString("settings") )	
+	GUI_NewWindow(ml_global_information.login.Name,ml_global_information.login.x,ml_global_information.login.y,ml_global_information.login.width,ml_global_information.login.height,"",true)
+	GUI_NewField(ml_global_information.login.Name,GetString("aLogin"),"aLogin",GetString("settings"))
+	GUI_NewField(ml_global_information.login.Name,GetString("aPassword"),"aPassword",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.login.Name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
+	GUI_UnFoldGroup(ml_global_information.login.Name,GetString("settings") )	
 	aLogin = Settings.ESOMinion.aLogin	
 	aPassword = Settings.ESOMinion.aPassword	
 	
 
 	-- CHARACTERSELECT WINDOW
-	GUI_NewWindow(ml_global_information.characterselect.name,ml_global_information.characterselect.x,ml_global_information.characterselect.y,ml_global_information.characterselect.width,ml_global_information.characterselect.height,"",true)
-	--GUI_NewComboBox(ml_global_information.characterselect.name,GetString("aCharacter"),"gAutoCharacterSelect",GetString("settings"),"None")	
-	GUI_NewCheckbox(ml_global_information.characterselect.name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
-	GUI_UnFoldGroup(ml_global_information.characterselect.name,GetString("settings") )
+	GUI_NewWindow(ml_global_information.characterselect.Name,ml_global_information.characterselect.x,ml_global_information.characterselect.y,ml_global_information.characterselect.width,ml_global_information.characterselect.height,"",true)
+	--GUI_NewComboBox(ml_global_information.characterselect.Name,GetString("aCharacter"),"gAutoCharacterSelect",GetString("settings"),"None")	
+	GUI_NewCheckbox(ml_global_information.characterselect.Name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
+	GUI_UnFoldGroup(ml_global_information.characterselect.Name,GetString("settings") )
 	gAutoLogin = Settings.ESOMinion.gAutoLogin
 	
 	-- setup bot mode
@@ -115,7 +115,7 @@ function ml_global_information.moduleinit()
 	gGather = Settings.ESOMinion.gGather
 	gMount = Settings.ESOMinion.gMount
 	
-	GUI_UnFoldGroup(ml_global_information.window.name,GetString("botStatus") )
+	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
 	-- setup marker manager callbacks and vars
 	ml_marker_mgr.GetPosition = 	function () return Player.pos end
@@ -127,6 +127,15 @@ function ml_global_information.moduleinit()
 	
 	-- Init our global variables
 	ml_globals.UpdateGlobals()
+	
+	-- setup/load blacklist tables
+	ml_blacklist_mgr.parentWindow = ml_global_information.MainWindow	
+    ml_blacklist_mgr.path = GetStartupPath() .. [[\LuaMods\ESOMinion\blacklist.info]]
+    ml_blacklist_mgr.ReadBlacklistFile(ml_blacklist_mgr.path)
+     
+    if not ml_blacklist.BlacklistExists(GetString("monsters")) then
+        ml_blacklist.CreateBlacklist(GetString("monsters"))
+    end
 end
 
 function test()
@@ -147,13 +156,13 @@ function ml_global_information.onupdate( event, tickcount )
 		d("GameState changed to "..tostring(gamestate))
 		ml_global_information.lastgamestate = gamestate
 		ml_global_information.gamestatechanged = true
-		GUI_WindowVisible(ml_global_information.advwindow.name,false)
-		GUI_WindowVisible(ml_global_information.window.name,false)
+		GUI_WindowVisible(ml_global_information.advwindow.Name,false)
+		GUI_WindowVisible(ml_global_information.MainWindow.Name,false)
 		GUI_WindowVisible(mm.mainwindow.name,false)
 		GUI_WindowVisible("Dev",false)
 		GUI_ToggleConsole(false)
-		GUI_WindowVisible(ml_global_information.login.name,false)
-		GUI_WindowVisible(ml_global_information.characterselect.name,false)
+		GUI_WindowVisible(ml_global_information.login.Name,false)
+		GUI_WindowVisible(ml_global_information.characterselect.Name,false)
 	end
 	
 	-- Switch according to the gamestate
@@ -176,7 +185,7 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 	
 	-- show/hide correct windows for gamestate
 	if ( ml_global_information.gamestatechanged == true ) then
-		GUI_WindowVisible(ml_global_information.login.name,true)		
+		GUI_WindowVisible(ml_global_information.login.Name,true)		
 		ml_global_information.gamestatechanged = false			
 	end	
 				
@@ -205,7 +214,7 @@ function ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount
 	
 	-- show/hide correct windows for gamestate
 	if ( ml_global_information.gamestatechanged == true ) then
-		GUI_WindowVisible(ml_global_information.characterselect.name,true)		
+		GUI_WindowVisible(ml_global_information.characterselect.Name,true)		
 		ml_global_information.gamestatechanged = false
 		
 		--TODO: get #chars and set the wanted accordingly
@@ -239,7 +248,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	
 	-- show/hide correct windows for gamestate
 	if ( ml_global_information.gamestatechanged == true ) then
-		GUI_WindowVisible(ml_global_information.window.name,true)
+		GUI_WindowVisible(ml_global_information.MainWindow.Name,true)
 		ml_global_information.gamestatechanged = false
 	end
 
@@ -299,11 +308,12 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	-- PartyManager OnUpdate
 	--mc_multibotmanager.OnUpdate( tickcount )
 	
-	-- BlackList OnUpdate
-	--mc_blacklist.OnUpdate( tickcount )
-	
-	-- FollowBot OnUpdate
-	--mc_followbot.OnUpdate( tickcount )
+    -- ml_blacklist.lua
+    ml_blacklist.ClearBlacklists()
+    
+    -- ml_blacklist_mgr.lua
+    ml_blacklist_mgr.UpdateEntryTime()
+    ml_blacklist_mgr.UpdateEntries(tickcount)
 end
 
 
@@ -365,7 +375,7 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		
 		end
 	end
-	GUI_RefreshWindow(ml_global_information.window.name)
+	GUI_RefreshWindow(ml_global_information.MainWindow.Name)
 end
 
 function ml_global_information.UpdateMode()
@@ -402,7 +412,11 @@ end
 function ml_global_information.ResetBot()
 
 	Player:Stop()
-	--Player:ClearTarget()
+	c_MoveToMarker.markerreachedfirsttime = false
+	c_MoveToMarker.markerreached = false
+	c_MoveToMarker.allowedToFight = false
+	c_MoveToRandomPoint.randomPoint = nil
+	c_MoveToRandomPoint.randomPointreached = false
 end
 
 function ml_global_information.Wait( seconds ) 
@@ -411,12 +425,12 @@ end
 
 function ml_global_information.ToggleAdvMenu()
     if (ml_global_information.advwindowvisible) then
-        GUI_WindowVisible(ml_global_information.advwindow.name,false)	
+        GUI_WindowVisible(ml_global_information.advwindow.Name,false)	
         ml_global_information.advwindowvisible = false
     else
 		local wnd = GUI_GetWindowInfo("MinionBot")	
-        GUI_MoveWindow( ml_global_information.advwindow.name, wnd.x,wnd.y+wnd.height)
-		GUI_WindowVisible(ml_global_information.advwindow.name,true)	
+        GUI_MoveWindow( ml_global_information.advwindow.Name, wnd.x,wnd.y+wnd.height)
+		GUI_WindowVisible(ml_global_information.advwindow.Name,true)	
         ml_global_information.advwindowvisible = true
     end
 end

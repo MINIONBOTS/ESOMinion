@@ -107,18 +107,19 @@ function mm.ModuleInit()
 			meshname = string.gsub(meshname, ".obj", "")
 			table.insert(mm.meshfiles, meshname)
 			meshlist = meshlist..","..meshname
+			--d("Adding mesh to list : "..meshname)
 			i,meshname = next ( meshfilelist,i)
 		end
 	end	
-		
-	pName = e("GetMapName()")	
+	gmeshname_listitems = meshlist
+
+	pName = ml_global_information.CurrentMapName	
 	if ( pName ~= nil and pName ~= "") then
 		pName = pName:gsub('%W','') -- only alphanumeric
 		gnewmeshname = pName
 	else
 		gnewmeshname = ""	
 	end
-	gmeshname_listitems = meshlist
 	
 	
 	

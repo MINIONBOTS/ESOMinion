@@ -781,17 +781,17 @@ function eso_skillmanager.Heal( TargetID )
 	--Valid Target Check
 	local target = EntityList:Get(TargetID)
 	
-	if ( target and TargetID > 0 and target.attackable ) then	
-		
+	if ( target and TargetID > 0 and target.targetable ) then	
+	
 		if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
 			for prio,skill in pairs(eso_skillmanager.SkillProfile) do
-				
+				--d("CHECK :" ..skill.name.." "..skill.skilltype.." " ..tostring(eso_skillmanager.CanCast( target, skill )))
 				if ( skill.skilltype == GetString("smsktypeheal") and eso_skillmanager.CanCast( target, skill ) ) then
 						
-					if ( AbilityList:Cast(ab.id,TargetID) ) then
+					if ( AbilityList:Cast(skill.skillID,TargetID) ) then
 						
-						d("Casting.."..ab.name.." at "..target.name)						
-						eso_skillmanager.prevSkillID = ab.id
+						d("Casting.."..skill.name.." at "..target.name)						
+						eso_skillmanager.prevSkillID = skill.skillID
 						
 						-- Add a tiny delay so "iscasting" gets true for this spell, not interrupting it on the next pulse
 						if ( skill.casttime > 0 ) then							

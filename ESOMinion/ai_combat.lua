@@ -61,9 +61,18 @@ end
 --------- Creates a new REACTIVE_GOAL subtask to kill an enemy
 c_CombatTask = inheritsFrom( ml_cause )
 e_CombatTask = inheritsFrom( ml_effect )
+c_CombatTask.target = nil
 function c_CombatTask:evaluate()
-	c_CombatTask.target = EntityList("attackable,targetable,alive,nocritter,shortestpath,maxdistance=60")		
-	return Player.isswimming == false and c_CombatTask.target ~= nil and TableSize(c_CombatTask.target) > 0
+	local EList = EntityList("attackable,targetable,alive,nocritter,shortestpath,maxdistance=60,onmesh")
+	if ( EList and TableSize(EList) > 0 ) then
+		local id,entry = next(EList)
+		if ( id and entry ) then
+			c_CombatTask.target = entry
+			return Player.isswimming == false and c_CombatTask.target ~= nil
+		end
+	end
+	c_CombatTask.target = nil
+	return false
 end
 function e_CombatTask:execute()
 	ml_log("e_CombatTask ")
@@ -77,36 +86,12 @@ function e_CombatTask:execute()
 			d("Found new Aggro Target: "..(E.name).." ID:"..tostring(E.id))			
 		end		
 	end
-		
-	--[[if ( c_CombatTask.target == nil ) then
-		TList = EntityList("attackable,targetable,alive,nocritter,nearest,maxdistance=60,onmesh")
-		if ( TableSize( TList ) > 0 ) then
-			local id, E  = next( TList )
-			if ( id ~= nil and id ~= 0 and E ~= nil ) then
-				d("New Target: "..(E.name).." ID:"..tostring(E.id).." Distance: "..tostring(E.distance))
-				
-				--[[ Blacklist if we cant select it..happens sometimes when it is outside our select range
-				if (e_SearchTarget.lastID == id ) then
-					e_SearchTarget.count = e_SearchTarget.count+1
-					if ( e_SearchTarget.count > 30 ) then
-						e_SearchTarget.count = 0
-						e_SearchTarget.lastID = 0
-						mc_blacklist.AddBlacklistEntry(GetString("monsters"), E.contentID, E.name, ml_global_information.now + 60000)
-						d("Seems we cant select/target/reach our target, blacklisting it for 60seconds..")
-					end
-				else
-					e_SearchTarget.lastID = id
-					e_SearchTarget.count = 0
-				end]]
-				target = E
-			end		
-		end
-	end]]
+
 	
 	if (c_CombatTask.target ~= nil) then
 		Player:Stop()
 		local newTask = ai_combatAttack.Create()
-		newTask.targetID = c_CombatTask.target.id
+		newTask.targetID = c_CombatTask.target.id		
 		newTask.targetPos = c_CombatTask.target.pos		
 		ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
 		c_CombatTask.target = nil
@@ -145,7 +130,7 @@ end
 ---------
 c_resting = inheritsFrom( ml_cause )
 e_resting = inheritsFrom( ml_effect )
-c_resting.hpPercent = math.random(55,95)
+c_resting.hpPercent = math.random(65,95)
 function c_resting:evaluate()
 	if ( Player.isswimming == false and (Player.hp.percent < c_resting.hpPercent or ml_global_information.Player_Magicka.percent < c_resting.hpPercent)) then		
 		return true
@@ -272,15 +257,31 @@ function e_GotoAndKill:execute()
 			if ( not eso_skillmanager.Heal( Player.id ) ) then
 				eso_skillmanager.AttackTarget( target.id )
 			end
-			return ml_log(true)
-			--DoCombatMovement()
-				
+			
+			DoCombatMovement(target)
+			
+			return ml_log(true)				
 		end
 	end
 	ml_log(false)
 end
 
+-- we'll see what we can do with this
+function DoCombatMovement(target)
+	-- Move a tiny step back if we are too close
+	if ( target.distance < 0.85 ) then
+		Player:SetMovement(1,2)
+	else
+		Player:Stop()
+	
+	end
+	
+	-- Interrupt/Block
+	   -- GetUnitCastingInfo(string unitTag)
+        --Returns: string actionName, number timeStarted, number timeEnding, bool isChannel, integer barType, bool canBlock, bool canInterrupt, bool isChargeUp, bool hideBar 
 
+
+end
 
 ---------
 c_GetNextTarget = inheritsFrom( ml_cause )

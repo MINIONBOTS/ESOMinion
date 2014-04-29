@@ -58,28 +58,28 @@ function ai_vendor.moduleinit()
 		Settings.ESOMinion.gRepair = "1"
 	end		
 	
-	--GUI_NewCheckbox(ml_global_information.window.name,GetString("armor"),"gArmor",GetString("settings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("enabled"),"gVendor",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("enableRepair"),"gRepair",GetString("vendorSettings"))	
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("armorTrash"),"gArmorT",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("armorNormal"),"gArmorN",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("armorMagic"),"gArmorM",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("armorArtefact"),"gArmorA",GetString("vendorSettings"))
+	--GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armor"),"gArmor",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enabled"),"gVendor",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair",GetString("vendorSettings"))	
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armorTrash"),"gArmorT",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armorNormal"),"gArmorN",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armorMagic"),"gArmorM",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armorArtefact"),"gArmorA",GetString("vendorSettings"))
 	
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("weaponTrash"),"gWeapT",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("weaponNormal"),"gWeapN",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("weaponMagic"),"gWeapM",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("weaponArtefact"),"gWeapA",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("weaponTrash"),"gWeapT",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("weaponNormal"),"gWeapN",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("weaponMagic"),"gWeapM",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("weaponArtefact"),"gWeapA",GetString("vendorSettings"))
 	
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("consumTrash"),"gConsT",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("consumNormal"),"gConsN",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("consumMagic"),"gConsM",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("consumArtefact"),"gConsA",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("consumTrash"),"gConsT",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("consumNormal"),"gConsN",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("consumMagic"),"gConsM",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("consumArtefact"),"gConsA",GetString("vendorSettings"))
 	
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("craftTrash"),"gCraftT",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("craftNormal"),"gCraftN",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("craftMagic"),"gCraftM",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.window.name,GetString("craftArtefact"),"gCraftA",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("craftTrash"),"gCraftT",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("craftNormal"),"gCraftN",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("craftMagic"),"gCraftM",GetString("vendorSettings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("craftArtefact"),"gCraftA",GetString("vendorSettings"))
 	
 	gArmorT = Settings.ESOMinion.gArmorT
 	gArmorN = Settings.ESOMinion.gArmorN

@@ -40,12 +40,11 @@ function ai_gathermode:Init()
 	-- Gathering
 	self:add(ml_element:create( "Gathering", c_gatherTask, e_gatherTask, 125 ), self.process_elements)
 	
-	-- Check for Targets
-	-- self:add(ml_element:create( "GetNextTarget", c_CombatTask, e_CombatTask, 75 ), self.process_elements)
-	
-	-- Goto random point on mesh (for now, use markers later)
-	self:add(ml_element:create( "GotoRandomPoint", c_randomPt, e_randomPt, 50 ), self.process_elements)
-	
+	-- TODO: Add gathering Markers here if demanded
+
+	-- Move to a Randompoint if there is nothing to gather around us
+	self:add( ml_element:create( "MoveToRandomPoint", c_MoveToRandomPoint, e_MoveToRandomPoint, 50 ), self.process_elements)
+		
     self:AddTaskCheckCEs()
 end
 
@@ -110,15 +109,27 @@ c_gatherTask.throttle = 2500
 c_gatherTask.target = nil
 function c_gatherTask:evaluate()
 	if ( gGather == "1" and not ml_global_information.Player_InventoryFull) then
+		-- If gatherMarkers are added, you need to add logic to not try to reach a gatherable outside of the marker radius!!!
 		if ( gBotMode == GetString("gatherMode") ) then
-			c_gatherTask.target = EntityList("shortestpath,gatherable")
-			return  c_gatherTask.target ~= nil and TableSize(c_gatherTask.target) > 0
-							
+			local GList = EntityList("shortestpath,gatherable,onmesh")
+			if ( GList and TableSize(GList)>0) then
+				local id,entry = next(GList)
+				if ( id and entry ) then
+					c_gatherTask.target = entry
+					return  c_gatherTask.target ~= nil and TableSize(c_gatherTask.target) > 0
+				end
+			end							
 		else
-			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
-				c_gatherTask.target = EntityList("shortestpath,gatherable,maxdistance=20")
-				if ( c_gatherTask.target ~= nil and TableSize(c_gatherTask.target) > 0 ) then
-					return true
+			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 and
+				c_MoveToMarker.allowedToFight == true -- Gets set in ai_grind to avoid a back_n_forth spinning when trying to reach something outside the marker max radius
+				) then
+				local GList = EntityList("shortestpath,gatherable,maxdistance=20")
+				if ( GList and TableSize(GList)>0) then
+					local id,entry = next(GList)
+					if ( id and entry ) then
+						c_gatherTask.target = entry
+						return true
+					end
 				end
 			end	
 		end
@@ -131,8 +142,7 @@ function e_gatherTask:execute()
 	Player:Stop()
 	local newTask = ai_gatherTask.Create()
 	
-	if ( TableSize(c_gatherTask.target)>0) then
-		local id,gatherable = next(GList)		
+	if ( c_gatherTask.target ~= nil ) then		
 		newTask.tPos = c_gatherTask.target.pos		
 	else
 		ml_error("Bug: GList in e_gatherTask is empty!?")
@@ -148,7 +158,7 @@ e_Gathering = inheritsFrom( ml_effect )
 function c_Gathering:evaluate()
 		
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) == 0 ) then
-		local _,gatherable = next(EntityList("shortestpath,gatherable,maxdistance=50"))
+		local _,gatherable = next(EntityList("shortestpath,gatherable,maxdistance=50,onmesh"))
 		if (gatherable) then
 			local gPos = gatherable.pos
 			if ( TableSize(gPos) > 0 ) then
@@ -234,7 +244,8 @@ end
 c_Loot = inheritsFrom( ml_cause )
 e_Loot = inheritsFrom( ml_effect )
 function c_Loot:evaluate()
-    return not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull and TableSize(EntityList("nearest,lootable,onmesh,maxdistance=50")) > 0
+	local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
+    return not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull and TableSize(EntityList("nearest,lootable,onmesh,maxdistance=50,exclude="..blackliststring)) > 0
 end
 function e_Loot:execute()
 	ml_log("e_Loot")
