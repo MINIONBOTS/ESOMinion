@@ -120,9 +120,7 @@ function c_gatherTask:evaluate()
 				end
 			end							
 		else
-			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 and
-				c_MoveToMarker.allowedToFight == true -- Gets set in ai_grind to avoid a back_n_forth spinning when trying to reach something outside the marker max radius
-				) then
+			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
 				local GList = EntityList("shortestpath,gatherable,maxdistance=20")
 				if ( GList and TableSize(GList)>0) then
 					local id,entry = next(GList)

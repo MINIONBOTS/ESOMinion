@@ -674,8 +674,8 @@ function eso_skillmanager.CanCast( target, skill )
 				
 		if ( skill.minRange > 0 and target.distance < skill.minRange)	 then return false end
 		if ( skill.maxRange > 0 and target.distance > skill.maxRange)	 then return false end
-		if ( skill.phpgt	> 0 and skill.phpgt > target.hp.percent)	 then return false end
-		if ( skill.phplt 	> 0 and skill.phplt < target.hp.percent)	 then return false end
+		if ( skill.thpgt	> 0 and skill.thpgt > target.hp.percent)	 then return false end
+		if ( skill.thplt 	> 0 and skill.thplt < target.hp.percent)	 then return false end
 		--if ( skill.los == "Yes" and not target.los ) 					then return false
 		
 		--ALLIE AE CHECK

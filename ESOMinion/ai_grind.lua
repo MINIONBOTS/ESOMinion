@@ -41,7 +41,7 @@ function ai_grind:Init()
 	self:add(ml_element:create( "Resting", c_resting, e_resting, 175 ), self.process_elements)	
 			
 	-- Gathering - Gathers only in a smaller radius in grindingmode 
-	self:add(ml_element:create( "Gathering", c_gatherTask, e_gatherTask, 150 ), self.process_elements)
+	self:add(ml_element:create( "Gathering", c_gringgatherTask, e_gringgatherTask, 150 ), self.process_elements)
 	
 	-- Fight in a smaller radius towards the current marker ( this takes care of reaching it and also when running outside the markerradius and we need to move back to marker)
 	-- Only for GrindMarkers!	
@@ -64,6 +64,44 @@ function ai_grind:task_complete_eval()
 end
 function ai_grind:task_complete_execute()
     
+end
+
+------------
+c_gringgatherTask = inheritsFrom( ml_cause )
+e_gringgatherTask = inheritsFrom( ml_effect )
+c_gringgatherTask.throttle = 2500
+c_gringgatherTask.target = nil
+function c_gringgatherTask:evaluate()
+	if ( gGather == "1" and not ml_global_information.Player_InventoryFull and not ml_global_information.Player_InCombat) then
+		
+		-- If we are doing the Markerdance, then gather just in a smaller radius while we move to the markers, else a bigger radius, never gather outside markerradius
+		
+		if ( TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
+			local GList = EntityList("shortestpath,gatherable,maxdistance=20")
+			if ( GList and TableSize(GList)>0) then
+				local id,entry = next(GList)
+				if ( id and entry ) then
+					c_gringgatherTask.target = entry
+					return true
+				end
+			end
+		end		
+	end
+	c_gringgatherTask.target = nil
+	return false
+end
+function e_gringgatherTask:execute()
+	ml_log("e_gringgatherTask ")
+	Player:Stop()
+	local newTask = ai_gatherTask.Create()
+	
+	if ( c_gringgatherTask.target ~= nil ) then		
+		newTask.tPos = c_gringgatherTask.target.pos		
+	else
+		ml_error("Bug: GList in e_gringgatherTask is empty!?")
+	end
+	ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
+	return ml_log(true)
 end
 
 
@@ -175,8 +213,6 @@ function c_MoveToMarker:evaluate()
 		end		
 	end
 	
-	-- We dont have any Markers, allow free gathering and fighting
-	c_MoveToMarker.allowedToFight = true
     return false
 end
 function e_MoveToMarker:execute()

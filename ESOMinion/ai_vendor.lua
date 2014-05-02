@@ -128,7 +128,7 @@ e_movetovendor = inheritsFrom( ml_effect )
 e_movetovendor.vendorMarker = nil
 function c_movetovendor:evaluate()
 	if( gVendor == "1" and ml_global_information.Player_InventoryNearlyFull)then
-		local VList = EntityList("nearest,isvendor")
+		local VList = EntityList("nearest,isvendor,onmesh")
 		if ( TableSize( VList ) > 0 ) then			
 			return true
 		end

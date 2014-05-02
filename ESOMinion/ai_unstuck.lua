@@ -45,7 +45,7 @@ function ai_unstuck:OnUpdate( tick )
 							Player:Jump()
 						--end
 					end
-					if ( ai_unstuck.stuckcounter > 6 ) then
+					if ( ai_unstuck.stuckcounter > 10 ) then
 						ai_unstuck.HandleStuck()
 					end
 					ai_unstuck.stuckcounter = ai_unstuck.stuckcounter + 1
@@ -75,7 +75,7 @@ function ai_unstuck:OnUpdate( tick )
 				if ( pPos ) then				
 					if ( Distance2D ( pPos.x, pPos.y, ai_unstuck.lastpos.x,  ai_unstuck.lastpos.y) < 0.85 ) then
 						ai_unstuck.idlecounter = ai_unstuck.idlecounter + 1
-						if ( ai_unstuck.idlecounter > 10 ) then -- 60 seconds of doing nothing
+						if ( ai_unstuck.idlecounter > 12 ) then -- 60 seconds of doing nothing
 							d("Our bot seems to be doing nothing anymore...")
 							ai_unstuck.idlecounter = 0
 							ai_unstuck.HandleStuck()							
@@ -132,7 +132,7 @@ function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 		end
 	end
 	
-	if ( tonumber(stuckcount) > 15 ) then
+	if ( tonumber(stuckcount) > 20 ) then
 		ml_error("We are STUCK!")
 		ai_unstuck.HandleStuck()
 	end
