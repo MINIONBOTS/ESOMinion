@@ -17,7 +17,6 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterForEvent("EVENT_PLAYER_COMBAT_STATE", true)
 	--RegisterForEvent("EVENT_CHARACTER_LIST_RECEIVED", true)
 	RegisterForEvent("EVENT_INVENTORY_IS_FULL", true)
-	RegisterForEvent("EVENT_OPEN_STORE", true)
 	RegisterForEvent("EVENT_LOOT_ITEM_FAILED", true)
 	RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
 	
@@ -26,7 +25,6 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE",LuaEventHandler)
 	--RegisterEventHandler("GAME_EVENT_CHARACTER_LIST_RECEIVED",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_INVENTORY_IS_FULL",LuaEventHandler)
-	RegisterEventHandler("GAME_EVENT_OPEN_STORE",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_LOOT_ITEM_FAILED",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP",LuaEventHandler)
 	
@@ -48,9 +46,6 @@ function LuaEventHandler(...)
 	
 	elseif( args[1] == "GAME_EVENT_INVENTORY_IS_FULL" ) then
 		d("INVENTORY FULL!") --(integer numSlotsRequested, integer numSlotsFree) 
-	
-	elseif(args[1] == "GAME_EVENT_OPEN_STORE" ) then
-		ai_vendor.HandleVendoring()
 	
 	elseif (args[1] == "GAME_EVENT_LOOT_ITEM_FAILED" ) then
 		d("LOOT FAILED: Reason "..tostring(args[3]).." ItemName "..args[4])
