@@ -3,54 +3,6 @@
 ai_vendor = {}
 
 function ai_vendor.moduleinit()
-	if ( Settings.ESOMinion.gArmorT == nil ) then
-		Settings.ESOMinion.gArmorT = "1"
-	end	
-	if ( Settings.ESOMinion.gArmorN == nil ) then
-		Settings.ESOMinion.gArmorN = "1"
-	end	
-	if ( Settings.ESOMinion.gArmorM == nil ) then
-		Settings.ESOMinion.gArmorM = "0"
-	end	
-	if ( Settings.ESOMinion.gArmorA == nil ) then
-		Settings.ESOMinion.gArmorA = "0"
-	end	
-	if ( Settings.ESOMinion.gWeapT == nil ) then
-		Settings.ESOMinion.gWeapT = "1"
-	end	
-	if ( Settings.ESOMinion.gWeapN == nil ) then
-		Settings.ESOMinion.gWeapN = "1"
-	end	
-	if ( Settings.ESOMinion.gWeapM == nil ) then
-		Settings.ESOMinion.gWeapM = "0"
-	end	
-	if ( Settings.ESOMinion.gWeapA == nil ) then
-		Settings.ESOMinion.gWeapA = "0"
-	end	
-	if ( Settings.ESOMinion.gConsT == nil ) then
-		Settings.ESOMinion.gConsT = "1"
-	end	
-	if ( Settings.ESOMinion.gConsN == nil ) then
-		Settings.ESOMinion.gConsN = "1"
-	end	
-	if ( Settings.ESOMinion.gConsM == nil ) then
-		Settings.ESOMinion.gConsM = "0"
-	end	
-	if ( Settings.ESOMinion.gConsA == nil ) then
-		Settings.ESOMinion.gConsA = "0"
-	end	
-	if ( Settings.ESOMinion.gCraftT == nil ) then
-		Settings.ESOMinion.gCraftT = "1"
-	end	
-	if ( Settings.ESOMinion.gCraftN == nil ) then
-		Settings.ESOMinion.gCraftN = "1"
-	end	
-	if ( Settings.ESOMinion.gCraftM == nil ) then
-		Settings.ESOMinion.gCraftM = "0"
-	end	
-	if ( Settings.ESOMinion.gCraftA == nil ) then
-		Settings.ESOMinion.gCraftA = "0"
-	end
 	if ( Settings.ESOMinion.gVendor == nil ) then
 		Settings.ESOMinion.gVendor = "1"
 	end
@@ -58,45 +10,8 @@ function ai_vendor.moduleinit()
 		Settings.ESOMinion.gRepair = "1"
 	end		
 	
-	--GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armor"),"gArmor",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enabled"),"gVendor",GetString("vendorSettings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair",GetString("vendorSettings"))	
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armorTrash"),"gArmorT",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armorNormal"),"gArmorN",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armorMagic"),"gArmorM",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("armorArtefact"),"gArmorA",GetString("vendorSettings"))
-	
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("weaponTrash"),"gWeapT",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("weaponNormal"),"gWeapN",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("weaponMagic"),"gWeapM",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("weaponArtefact"),"gWeapA",GetString("vendorSettings"))
-	
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("consumTrash"),"gConsT",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("consumNormal"),"gConsN",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("consumMagic"),"gConsM",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("consumArtefact"),"gConsA",GetString("vendorSettings"))
-	
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("craftTrash"),"gCraftT",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("craftNormal"),"gCraftN",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("craftMagic"),"gCraftM",GetString("vendorSettings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("craftArtefact"),"gCraftA",GetString("vendorSettings"))
-	
-	gArmorT = Settings.ESOMinion.gArmorT
-	gArmorN = Settings.ESOMinion.gArmorN
-	gArmorM = Settings.ESOMinion.gArmorM
-	gArmorA = Settings.ESOMinion.gArmorA
-	gWeapT = Settings.ESOMinion.gWeapT
-	gWeapN = Settings.ESOMinion.gWeapN
-	gWeapM = Settings.ESOMinion.gWeapM
-	gWeapA = Settings.ESOMinion.gWeapA
-	gConsT = Settings.ESOMinion.gConsT
-	gConsN = Settings.ESOMinion.gConsN
-	gConsM = Settings.ESOMinion.gConsM
-	gConsA = Settings.ESOMinion.gConsA
-	gCraftT = Settings.ESOMinion.gCraftT
-	gCraftN = Settings.ESOMinion.gCraftN
-	gCraftM = Settings.ESOMinion.gCraftM
-	gCraftA = Settings.ESOMinion.gCraftA
 	gVendor = Settings.ESOMinion.gVendor
 	gRepair = Settings.ESOMinion.gRepair
 end
@@ -209,170 +124,288 @@ ml_log("e_gotovendor")
 	return ml_log(false)
 end
 
+-- Check if the item in our inventory is whitelisted
+function isWhiteListed(inventoryitem)
+
+	local itemtest = tostring(inventoryitem)
+	if ( TableSize(eso_vendormanager.WhiteL) > 0) then			
+		local i,item = next ( eso_vendormanager.WhiteL)
+		while i and item do	
+			if( item == inventoryitem) then
+				return true
+			end
+			i,item = next (eso_vendormanager.WhiteL,i)
+		end
+	end
+	return false
+end
+
+
+
 -- Sets the Items in our inventory as junk 
 function markItemsJunk()
 	local junk = "true"
 	local args = { e("GetBagInfo(1)")}    
 	local numArgs = #args
 	local InventoryMax = args[2]
-	local i = 1
-
+	local i = 0
+	
 	while(i <= tonumber(InventoryMax)) do
-
+		
 		if( (e("IsItemJunk(1,"..tostring(i)..")")) == false) then
 			local argsItemQ = {e("GetItemInfo( 1,"..tostring(i)..")") } 
 			local numArgsItemQ = #argsItemQ
 			local quality = argsItemQ[8]  
 			local itemType = e("GetItemFilterTypeInfo(1,"..tostring(i)..")")
-		
+			local itemToCheck = e("GetItemName(1,"..tostring(i)..")")
+			local itemKind = e("GetItemType(1,"..tostring(i)..")")
+			local link = e("GetItemLink(1,"..tostring(i)..",0)")
+			local argsEquipType = { e("GetItemLinkInfo("..tostring(link)..")")}    
+			local numArgsEquipType = #argsEquipType
+			local value = argsEquipType[2]
+			local EquipType = argsEquipType[4]
+
+			--Check if the item is in whitelist first
+			if(isWhiteListed(itemToCheck) == false) then
+	
+				
+				
+				if(tonumber(itemType) == 2) then  --it is Armor
+					if((VM_ATRASH ~= "0") or ( VM_ANORMAL ~= "0") or ( VM_AMAGIC ~= "0") or ( VM_AARTEFACT ~= "0")) then
 -- Armor Trash
-			if(tonumber(itemType) == 2) then
-				if(tonumber(quality) == 1) then
-					if(tonumber(gArmorT) ==1) then
-					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
+
+						if(tonumber(quality) == 1) then
+							
+							if((VM_ATRASH == "1") or (tonumber(VM_ATRASH) == 1)) then					
+								if( (EquipType == g("EQUIP_TYPE_CHEST")) and((VM_CHEST == "1") or (tonumber(VM_CHEST) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_FEET")) and((VM_FEET == "1") or (tonumber(VM_FEET) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_HAND")) and((VM_HAND == "1") or (tonumber(VM_HAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_HEAD")) and((VM_HEAD == "1") or (tonumber(VM_HEAD) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_LEGS")) and((VM_LEGS == "1") or (tonumber(VM_LEGS) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_NECK")) and((VM_NECK == "1") or (tonumber(VM_NECK) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_RING")) and((VM_RING == "1") or (tonumber(VM_RING) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_SHOULDERS")) and((VM_SHOULDERS == "1") or (tonumber(VM_SHOULDERS) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_WAIST")) and((VM_WAIST == "1") or (tonumber(VM_WAIST) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								end	
+								
+							end
+						end
 -- Armor Normal	
-			if(tonumber(itemType) == 2) then
-				if(tonumber(quality) == 2) then
-					if(tonumber(gArmorN) == 1) then
-					d("test")
-					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
+						if(tonumber(quality) == 2) then
+							if((VM_ANORMAL == "1") or (tonumber(VM_ANORMAL) == 1)) then
+								if( (EquipType == g("EQUIP_TYPE_CHEST")) and((VM_CHEST == "1") or (tonumber(VM_CHEST) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_FEET")) and((VM_FEET == "1") or (tonumber(VM_FEET) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_HAND")) and((VM_HAND == "1") or (tonumber(VM_HAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_HEAD")) and((VM_HEAD == "1") or (tonumber(VM_HEAD) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_LEGS")) and((VM_LEGS == "1") or (tonumber(VM_LEGS) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_NECK")) and((VM_NECK == "1") or (tonumber(VM_NECK) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_RING")) and((VM_RING == "1") or (tonumber(VM_RING) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_SHOULDERS")) and((VM_SHOULDERS == "1") or (tonumber(VM_SHOULDERS) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_WAIST")) and((VM_WAIST == "1") or (tonumber(VM_WAIST) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								end
+
+							end
+						end
 -- Armor Magic	
-			if(tonumber(itemType) == 2) then
-				if(tonumber(quality) == 3) then
-					if(tonumber(gArmorM) ==1) then
-					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
+						if(tonumber(quality) == 3) then
+							if((VM_AMAGIC == "1") or (tonumber(VM_AMAGIC) == 1)) then
+								if( (EquipType == g("EQUIP_TYPE_CHEST")) and((VM_CHEST == "1") or (tonumber(VM_CHEST) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_FEET")) and((VM_FEET == "1") or (tonumber(VM_FEET) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_HAND")) and((VM_HAND == "1") or (tonumber(VM_HAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_HEAD")) and((VM_HEAD == "1") or (tonumber(VM_HEAD) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_LEGS")) and((VM_LEGS == "1") or (tonumber(VM_LEGS) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_NECK")) and((VM_NECK == "1") or (tonumber(VM_NECK) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_RING")) and((VM_RING == "1") or (tonumber(VM_RING) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_SHOULDERS")) and((VM_SHOULDERS == "1") or (tonumber(VM_SHOULDERS) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_WAIST")) and((VM_WAIST == "1") or (tonumber(VM_WAIST) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								end
+							end
+						end
 -- Armor Artefact
-			if(tonumber(itemType) == 2) then
-				if(tonumber(quality) == 4) then
-					if(tonumber(gArmorA) ==1) then
-					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+						if(tonumber(quality) == 4) then
+							if((VM_AARTEFACT == "1") or (tonumber(VM_AARTEFACT) == 1)) then
+								if( (EquipType == g("EQUIP_TYPE_CHEST")) and((VM_CHEST == "1") or (tonumber(VM_CHEST) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_FEET")) and((VM_FEET == "1") or (tonumber(VM_FEET) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_HAND")) and((VM_HAND == "1") or (tonumber(VM_HAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_HEAD")) and((VM_HEAD == "1") or (tonumber(VM_HEAD) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_LEGS")) and((VM_LEGS == "1") or (tonumber(VM_LEGS) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_NECK")) and((VM_NECK == "1") or (tonumber(VM_NECK) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_RING")) and((VM_RING == "1") or (tonumber(VM_RING) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_SHOULDERS")) and((VM_SHOULDERS == "1") or (tonumber(VM_SHOULDERS) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_WAIST")) and((VM_WAIST == "1") or (tonumber(VM_WAIST) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								end
+							end
+						end
 					end
 				end
-			end
--- Weapon Trash
-			if(tonumber(itemType) == 1) then
-				if(tonumber(quality) == 1) then
-					if(tonumber(gWeapT) ==1) then
-					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
+
+				
+				if(tonumber(itemType) == 1) then -- it is Weapon
+					if((VM_WTRASH ~= "0") or ( VM_WNORMAL ~= "0") or ( VM_WMAGIC ~= "0") or ( VM_WARTEFACT ~= "0")) then
+--Weapon Trash			
+						if(tonumber(quality) == 1) then
+							if((VM_WTRASH == "1") or  (tonumber(VM_WTRASH) == 1)) then
+								if( (EquipType == g("EQUIP_TYPE_TWO_HAND")) and((VM_TWOHAND == "1") or (tonumber(VM_TWOHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_OFF_HAND")) and((VM_OFFHAND == "1") or (tonumber(VM_OFFHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_ONE_HAND")) and((VM_ONEHAND == "1") or (tonumber(VM_ONEHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								end
+							end
+						end
+
 -- Weapon Normal
-			if(tonumber(itemType) == 1) then
-				if(tonumber(quality) == 2) then
-					if(tonumber(gWeapN) ==1) then
-					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
+						if(tonumber(quality) == 2) then
+							if((VM_WNORMAL == "1") or  (tonumber(VM_WNORMAL) == 1)) then
+								if( (EquipType == g("EQUIP_TYPE_TWO_HAND")) and((VM_TWOHAND == "1") or (tonumber(VM_TWOHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_OFF_HAND")) and((VM_OFFHAND == "1") or (tonumber(VM_OFFHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_ONE_HAND")) and((VM_ONEHAND == "1") or (tonumber(VM_ONEHAND) ==1)))then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_ONE_HAND")) and((VM_ONEHAND == "1") or (tonumber(VM_ONEHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								end
+							end
+						end
 -- Weapon Magic
-			if(tonumber(itemType) == 1) then
-				if(tonumber(quality) == 3) then
-					if(tonumber(gWeapM) ==1) then
-					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
+						if(tonumber(quality) == 3) then
+							if((VM_WMAGIC == "1") or (tonumber(VM_WMAGIC) == 1)) then
+								if( (EquipType == g("EQUIP_TYPE_TWO_HAND")) and((VM_TWOHAND == "1") or (tonumber(VM_TWOHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")") 
+								elseif( (EquipType == g("EQUIP_TYPE_OFF_HAND")) and((VM_OFFHAND == "1") or (tonumber(VM_OFFHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_ONE_HAND")) and((VM_ONEHAND == "1") or (tonumber(VM_ONEHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_ONE_HAND")) and((VM_ONEHAND == "1") or (tonumber(VM_ONEHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								end
+							end
+						end
 -- Weapon Artefact
-			if(tonumber(itemType) == 1) then
-				if(tonumber(quality) == 4) then
-					if(tonumber(gWeapA) ==1) then
-					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+						if(tonumber(quality) == 4) then
+							if((VM_WARTEFACT == "1") or(tonumber(VM_WARTEFACT) == 1)) then
+								if( (EquipType == g("EQUIP_TYPE_TWO_HAND")) and((VM_TWOHAND == "1") or (tonumber(VM_TWOHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_OFF_HAND")) and((VM_OFFHAND == "1") or (tonumber(VM_OFFHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_ONE_HAND")) and((VM_ONEHAND == "1") or (tonumber(VM_ONEHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								elseif( (EquipType == g("EQUIP_TYPE_ONE_HAND")) and((VM_ONEHAND == "1") or (tonumber(VM_ONEHAND) ==1))) then
+									e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+								end
+							end
+						end
 					end
-				end
-			end
--- Consumable Trash
-			if(tonumber(itemType) == 4) then
-				if(tonumber(quality) == 1) then
-					if(tonumber(gConsT) ==1) then
+				end	
+				
+				 if((itemKind == g("ITEMTYPE_INGREDIENT")) and ((VM_INGREDIENT == "1") or (tonumber(VM_INGREDIENT) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Consumable Normal
-			if(tonumber(itemType) == 4) then
-				if(tonumber(quality) == 2) then
-					if(tonumber(gConsN) ==1) then
+				 elseif((itemKind == g("ITEMTYPE_ADDITIVE")) and ((VM_ADDITIVE== "1") or (tonumber(VM_ADDITIVE) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")	 
+				elseif((itemKind == g("ITEMTYPE_ALCHEMY_BASE")) and ((VM_ALCHEMYBASE == "1") or (tonumber(VM_ALCHEMYBASE) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Consumable Magic
-			if(tonumber(itemType) == 4) then
-				if(tonumber(quality) == 3) then
-					if(tonumber(gConsM) ==1) then
+				elseif((itemKind == g("ITEMTYPE_ENCHANTING_RUNE")) and ((VM_ENCHANTRUNE == "1") or (tonumber(VM_ENCHANTRUNE) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Consumable Artefact
-			if(tonumber(itemType) == 4) then
-				if(tonumber(quality) == 4) then
-					if(tonumber(gConsA) ==1) then
+				elseif((itemKind == g("ITEMTYPE_STYLE_MATERIAL")) and ((VM_STYLEMAT == "1") or (tonumber(VM_STYLEMAT) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Consumable Legendary
-			if(tonumber(itemType) == 4) then
-				if(tonumber(quality) == 5) then
-					if(tonumber(gConsL) ==1) then
+				elseif((itemKind == g("ITEMTYPE_REAGENT")) and ((VM_REAGENT == "1") or (tonumber(VM_REAGENT) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Consumable Legendary
-			if(tonumber(itemType) == 4) then
-				if(tonumber(quality) == 5) then
-					if(tonumber(gConsL) ==1) then
+				elseif((itemKind == g("VM_RECIPE")) and ((VM_RECIPE == "1") or (tonumber(VM_RECIPE) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Crafting Trash
-			if(tonumber(itemType) == 5) then
-				if(tonumber(quality) == 1) then
-					if(tonumber(gCraftT) ==1) then
+				elseif((itemKind == g("ITEMTYPE_RAW_MATERIAL")) and ((VM_RAWMATERIAL == "1") or (tonumber(VM_RAWMATERIAL) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Crafting Normal
-			if(tonumber(itemType) == 5) then
-				if(tonumber(quality) == 2) then
-					if(tonumber(gCraftN) ==1) then
+				elseif((itemKind == g("ITEMTYPE_POTION")) and ((VM_PPOTIONS == "1") or (tonumber(VM_PPOTIONS) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Crafting Magic
-			if(tonumber(itemType) == 5) then
-				if(tonumber(quality) == 3) then
-					if(tonumber(gCraftM) ==1) then
+				elseif((itemKind == g("ITEMTYPE_DRINK")) and ((VM_DRINK == "1") or (tonumber(VM_DRINK) == 1))) then
+
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
-				end
-			end
--- Crafting Artefact
-			if(tonumber(itemType) == 5) then
-				if(tonumber(quality) == 4) then
-					if(tonumber(gCraftA) ==1) then
+				elseif((itemKind == g("ITEMTYPE_GLYPH_ARMOR")) and ((VM_GLYPHARMOR == "1") or (tonumber(VM_GLYPHARMOR) == 1))) then
 					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-					end
+				elseif((itemKind == g("ITEMTYPE_GLYPH_WEAPON")) and ((VM_GLYPHWEAPON == "1") or (tonumber(VM_GLYPHWEAPON) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_GLYPH_JEWELRY")) and ((VM_GLYPHJEWELRY == "1") or (tonumber(VM_GLYPHJEWELRY) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_TRASH")) and ((VM_ITEMTRASH == "1") or (tonumber(VM_ITEMTRASH) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_COLLECTIBLE")) and ((VM_COLLECTIBLE == "1") or (tonumber(VM_COLLECTIBLE) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_COSTUME")) and ((VM_COSTUME == "1") or (tonumber(VM_COSTUME) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_LOCKPICK")) and ((VM_LOCKPICK == "1") or (tonumber(VM_LOCKPICK) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_LURE")) and ((VM_LURE == "1") or (tonumber(VM_LURE) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_SOUL_GEM")) and ((VM_SOULGEM == "1") or (tonumber(VM_SOULGEM) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_SPICE")) and ((VM_SPICE == "1") or (tonumber(VM_SPICE) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif((itemKind == g("ITEMTYPE_TROPHY")) and ((VM_TROPHY == "1") or (tonumber(VM_TROPHY) == 1))) then
+					e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+				elseif(itemKind == g("ITEMTYPE_FOOD")) then
+						if(tonumber(quality) == 1) then
+							if((VM_FTRASH == "1") or (tonumber(VM_FTRASH) == 1)) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 2) then
+							if((VM_FNORMAL == "1") or (tonumber(VM_FNORMAL) == 1)) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 3) then
+							if((VM_FMAGIC == "1") or (tonumber(VM_FMAGIC) == 1)) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 4) then
+							if((VM_FARTEFACT== "1") or (tonumber(VM_FARTEFACT) == 1)) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
 				end
 			end
 		end
 		i = i + 1
 	end
+
 end
 
 

@@ -1,5 +1,5 @@
 ml_global_information = { }
-ml_global_information.MainWindow = { Name="MinionBot", x=50, y=50, width=220, height=300 }
+ml_global_information.MainWindow = { Name="MinionBot", x=50, y=50, width=220, height=350 }
 ml_global_information.advwindow = { Name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
 ml_global_information.login = { Name="AutoLogin", x=100, y=100 , width=230, height=140 }
 ml_global_information.characterselect = { Name="CharacterSelect", x=100, y=100 , width=250, height=150 }
@@ -75,6 +75,8 @@ function ml_global_information.moduleinit()
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("meshManager"), "ToggleMeshmgr", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("markerManager"), "ToggleMarkerMgr", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("blacklistManager"), "ToggleBlacklistMgr", "Managers")	
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("vendorManager"), "VendorManager.toggle", "Managers")	
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
 	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
 	
@@ -336,26 +338,6 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		if (k == "gEnableLog" or
 			k == "gGather" or
 			k == "gMount" or
-			k == "gArmorT" or	
-			k == "gArmorN" or
-			k == "gArmorM" or
-			k == "gArmorA" or
-			k == "gArmorL" or
-			k == "gWeapT" or	
-			k == "gWeapN" or
-			k == "gWeapM" or
-			k == "gWeapA" or
-			k == "gWeapL" or
-			k == "gConsT" or	
-			k == "gConsN" or
-			k == "gConsM" or
-			k == "gConsA" or
-			k == "gConsL" or
-			k == "gCraftT" or	
-			k == "gCraftN" or
-			k == "gCraftM" or
-			k == "gCraftA" or
-			k == "gCraftL" or
 			k == "gVendor" or
 			k == "gRepair" or
 			k == "aLogin" or

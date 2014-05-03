@@ -788,7 +788,7 @@ function eso_skillmanager.Heal( TargetID )
 	
 		if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
 			for prio,skill in pairs(eso_skillmanager.SkillProfile) do
-				--d("CHECK :" ..skill.name.." "..skill.skilltype.." " ..tostring(eso_skillmanager.CanCast( target, skill )))
+				d("CHECK :" ..skill.name.." "..skill.skilltype.." " ..tostring(eso_skillmanager.CanCast( target, skill )))
 				if ( skill.skilltype == GetString("smsktypeheal") and eso_skillmanager.CanCast( target, skill ) ) then
 						
 					if ( AbilityList:Cast(skill.skillID,TargetID) ) then

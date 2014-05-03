@@ -23,23 +23,26 @@ function ai_grind:Init()
    -- ml_log("combatAttack_Init->")
 	
 	-- Dead?
-	self:add(ml_element:create( "Dead", c_dead, e_dead, 300 ), self.process_elements)
+	self:add(ml_element:create( "Dead", c_dead, e_dead, 325 ), self.process_elements)
 	
 	-- LootAll
-	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
+	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 300 ), self.process_elements)	
 			
 	-- Aggro
-	self:add(ml_element:create( "Aggro", c_Aggro, e_Aggro, 250 ), self.process_elements) --reactive queue
+	self:add(ml_element:create( "Aggro", c_Aggro, e_Aggro, 275 ), self.process_elements) --reactive queue
 	
+	--Autoequip
+	self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 250 ), self.process_elements)
+
 	--Vendoring
 	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 225 ), self.process_elements)
 				
-	-- Looting
-	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 200 ), self.process_elements)
-				
 	-- Resting
-	self:add(ml_element:create( "Resting", c_resting, e_resting, 175 ), self.process_elements)	
-			
+	self:add(ml_element:create( "Resting", c_resting, e_resting, 200 ), self.process_elements)	
+		
+	-- Looting
+	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
+				
 	-- Gathering - Gathers only in a smaller radius in grindingmode 
 	self:add(ml_element:create( "Gathering", c_gringgatherTask, e_gringgatherTask, 150 ), self.process_elements)
 	

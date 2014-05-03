@@ -29,6 +29,9 @@ function ai_combatAttack:Init()
 	-- LootAll
 	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
 	
+	--Autoequip
+	self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 225 ), self.process_elements)
+	
 	--Vendoring
 	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
 	
