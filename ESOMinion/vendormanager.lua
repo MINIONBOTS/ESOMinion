@@ -255,7 +255,7 @@ function eso_vendormanager.ModuleInit()
 	
 
 		VM_ATRASH = Settings.ESOMinion.VM_ATRASH
-		VM_ANORMAL = Settings.ESOMinion.M_ANORMAL 
+		VM_ANORMAL = Settings.ESOMinion.VM_ANORMAL 
 		VM_AMAGIC = Settings.ESOMinion.VM_AMAGIC
 		VM_AARCANE = Settings.ESOMinion.VM_AARCANE	
 		VM_AARTEFACT = Settings.ESOMinion.VM_AARTEFACT
