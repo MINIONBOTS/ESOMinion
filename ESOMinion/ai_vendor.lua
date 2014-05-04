@@ -10,8 +10,10 @@ ai_vendor.queue = nil
 RegisterForEvent("EVENT_OPEN_STORE", true)
 RegisterEventHandler("GAME_EVENT_OPEN_STORE",
 	function(...)
-		if ai_vendor.queue == nil and e("IsPlayerInteractingWithObject()") then
-			--d("interacting ="..tostring(e("IsPlayerInteractingWithObject()")))
+		if 	ml_global_information.running and
+			ai_vendor.queue == nil and 
+			e("IsPlayerInteractingWithObject()")
+		then
 			d("vendor opened")
 			ai_vendor.queue = ai_vendor:CreateNewQueue()
 		end
@@ -24,8 +26,10 @@ RegisterEventHandler("GAME_EVENT_OPEN_STORE",
 RegisterForEvent("EVENT_CLOSE_STORE", true)	
 RegisterEventHandler("GAME_EVENT_CLOSE_STORE",
 	function(...)
-		d("vendor closed")
-		ai_vendor.queue = nil
+		if 	ml_global_information.running then
+			d("vendor closed")
+			ai_vendor.queue = nil
+		end
 	end
 )
 
@@ -34,7 +38,6 @@ RegisterEventHandler("GAME_EVENT_CLOSE_STORE",
 --****************************************************************************
 function ai_vendor:CreateNewQueue()
 	local queue = {}
-	--d("creating new queue")
 	queue.last = 0
 	queue.throttle = 2500
 	queue.finished = false
@@ -393,6 +396,58 @@ function ai_vendor:markitems()
 	end
 
 end
+--****************************************************************************
+-- Select Conversation Option
+--****************************************************************************
+function ai_vendor:selectvendorconv()
+local convcount = tonumber(e("GetChatterOptionCount()"))
+local args = nil
+local numArgs = nil
+local convstring = nil
+local i = 0
+		while(i < convcount+1) do
+		
+			args = { e("GetChatterOption("..tostring(i)..")")}    
+			numArgs = #args
+			convstring = args[1]
+			convoption = args[3]
+			d(convstring)
+			if(string.match(tostring(convstring),"Store"))then
+				e("SelectChatterOption("..tostring(i)..")")
+				break
+			end
+			i = i+1
+		end
+		
+	
+end
+
+
+--****************************************************************************
+-- Check if equipped gear is broken
+--****************************************************************************
+function ai_vendor:CheckDurability()
+local convcount = tonumber(e("GetChatterOptionCount()"))
+local args = nil
+local numArgs = nil
+local convstring = nil
+local i = 0
+		while(i < convcount+1) do
+		
+			args = { e("GetChatterOption("..tostring(i)..")")}    
+			numArgs = #args
+			convstring = args[1]
+			convoption = args[3]
+			d(convstring)
+			if(string.match(tostring(convstring),"Store"))then
+				e("SelectChatterOption("..tostring(i)..")")
+				break
+			end
+			i = i+1
+		end
+		
+	
+end
 
 --****************************************************************************
 -- White List
@@ -417,7 +472,7 @@ end
 RegisterEventHandler("Module.Initalize",
 	function()
 		if ( Settings.ESOMinion.gVendor == nil ) then
-			Settings.ESOMinion.gVendor = "1"
+			Settings.ESOMinion.gVendor = "0"
 		end
 		if ( Settings.ESOMinion.gRepair == nil ) then
 			Settings.ESOMinion.gRepair = "1"
@@ -493,7 +548,7 @@ ml_log("e_gotovendor")
 					if(vendor.distance < 3) then
 						Player:Stop()
 						Player:Interact(vendor.id)
-						e("SelectChatterOption(1)")
+						ai_vendor:selectvendorconv()
 						return ml_log(true)
 					end									
 				end
@@ -519,7 +574,10 @@ end
 --****************************************************************************
 RegisterEventHandler("Gameloop.Update",
 	function()
-		if ai_vendor.queue and not ai_vendor.queue.finished then
+		if 	ml_global_information.running and
+			ai_vendor.queue and
+			not ai_vendor.queue.finished
+		then
 			ai_vendor.queue:run()
 		end
 	end
