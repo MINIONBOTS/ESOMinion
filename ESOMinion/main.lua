@@ -338,7 +338,7 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		if (k == "gEnableLog" or
 			k == "gGather" or
 			k == "gMount" or
-			k == "gVendor" or
+			--k == "gVendor" or
 			k == "gRepair" or
 			k == "aLogin" or
 			k == "aPassword"

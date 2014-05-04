@@ -513,9 +513,14 @@ RegisterEventHandler("Module.Initalize",
 		
 		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enabled"),"gVendor",GetString("vendorSettings"))
 		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair",GetString("vendorSettings"))	
-		gVendor = Settings.ESOMinion.gVendor
+		gVendor = Settings.ESOMinion.gVendor		
+		-- DISABLE VENDOR FOR NOW SINCE SH*T DOESNT WORK
+		gVendor = "0"
 		gRepair = Settings.ESOMinion.gRepair
 	end
+	
+	
+	
 )
 
 --****************************************************************************
