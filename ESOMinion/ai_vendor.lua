@@ -10,8 +10,10 @@ ai_vendor.queue = nil
 RegisterForEvent("EVENT_OPEN_STORE", true)
 RegisterEventHandler("GAME_EVENT_OPEN_STORE",
 	function(...)
-		if ai_vendor.queue == nil and e("IsPlayerInteractingWithObject()") then
-			--d("interacting ="..tostring(e("IsPlayerInteractingWithObject()")))
+		if 	ml_global_information.running and
+			ai_vendor.queue == nil and 
+			e("IsPlayerInteractingWithObject()")
+		then
 			d("vendor opened")
 			ai_vendor.queue = ai_vendor:CreateNewQueue()
 		end
@@ -24,8 +26,10 @@ RegisterEventHandler("GAME_EVENT_OPEN_STORE",
 RegisterForEvent("EVENT_CLOSE_STORE", true)	
 RegisterEventHandler("GAME_EVENT_CLOSE_STORE",
 	function(...)
-		d("vendor closed")
-		ai_vendor.queue = nil
+		if 	ml_global_information.running then
+			d("vendor closed")
+			ai_vendor.queue = nil
+		end
 	end
 )
 
@@ -34,7 +38,6 @@ RegisterEventHandler("GAME_EVENT_CLOSE_STORE",
 --****************************************************************************
 function ai_vendor:CreateNewQueue()
 	local queue = {}
-	--d("creating new queue")
 	queue.last = 0
 	queue.throttle = 2500
 	queue.finished = false
@@ -393,6 +396,91 @@ function ai_vendor:markitems()
 	end
 
 end
+--****************************************************************************
+-- Select Conversation Option
+--****************************************************************************
+function ai_vendor:selectvendorconv()
+local convcount = tonumber(e("GetChatterOptionCount()"))
+local args = nil
+local numArgs = nil
+local convstring = nil
+local i = 0
+		while(i < convcount+1) do
+		
+			args = { e("GetChatterOption("..tostring(i)..")")}    
+			numArgs = #args
+			convstring = args[1]
+			convoption = args[3]
+			if(string.match(tostring(convstring),"Store"))then
+				e("SelectChatterOption("..tostring(i)..")")
+				break
+			end
+			i = i+1
+		end
+		
+	
+end
+
+
+--****************************************************************************
+-- Check if equipped gear is broken
+--****************************************************************************
+function ai_vendor:CheckDurability()
+local chestdurabilty = e("GetItemCondition(0,2)")  -- return gear condition in %
+local handsdurability = e("GetItemCondition(0,16)")
+local waistdurability = e("GetItemCondition(0,6)")
+local feetdurability = e("GetItemCondition(0,9)")
+local shoulderdurability = e("GetItemCondition(0,3)")
+local headdurability = e("GetItemCondition(0,0)")
+local legsdurability = e("GetItemCondition(0,8)")
+local args = nil
+local numArgs = nil
+
+
+	if(tonumber(chestdurabilty) <= 2)then  -- if the durability is lower or equal to 2%
+		args = { e("GetEquippedItemInfo(2)")}     
+		if(args[2] == true)then --we check if something is equipped in this slot
+			return true
+		end
+	end
+	if(tonumber(handsdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(16)")}    
+		if(args[2] == true)then 
+			return true
+		end
+	end
+	if(tonumber(waistdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(6)")}    
+		if(args[2] == true)then 
+			return true
+		end
+	end
+	if(tonumber(feetdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(9)")}    
+		if(args[2] == true)then 
+			return true
+		end
+	end
+	if(tonumber(shoulderdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(3)")}    
+		if(args[2] == true)then
+			return true
+		end
+	end
+	if(tonumber(headdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(0)")}    
+		if(args[2] == true)then 
+			return true
+		end
+	end
+	if(tonumber(legsdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(8)")}    
+		if(args[2] == true)then
+			return true
+		end
+	end
+	return false
+end
 
 --****************************************************************************
 -- White List
@@ -417,7 +505,7 @@ end
 RegisterEventHandler("Module.Initalize",
 	function()
 		if ( Settings.ESOMinion.gVendor == nil ) then
-			Settings.ESOMinion.gVendor = "1"
+			Settings.ESOMinion.gVendor = "0"
 		end
 		if ( Settings.ESOMinion.gRepair == nil ) then
 			Settings.ESOMinion.gRepair = "1"
@@ -438,7 +526,7 @@ e_movetovendor = inheritsFrom( ml_effect )
 e_movetovendor.vendorMarker = nil
 
 function c_movetovendor:evaluate()
-	if( gVendor == "1" and ml_global_information.Player_InventoryNearlyFull)then
+	if( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or( gRepair == "1" and (ai_vendor:CheckDurability()== true)))then
 		local VList = EntityList("nearest,isvendor,onmesh")
 		if ( TableSize( VList ) > 0 ) then			
 			return true
@@ -493,7 +581,7 @@ ml_log("e_gotovendor")
 					if(vendor.distance < 3) then
 						Player:Stop()
 						Player:Interact(vendor.id)
-						e("SelectChatterOption(1)")
+						ai_vendor:selectvendorconv()
 						return ml_log(true)
 					end									
 				end
@@ -519,7 +607,10 @@ end
 --****************************************************************************
 RegisterEventHandler("Gameloop.Update",
 	function()
-		if ai_vendor.queue and not ai_vendor.queue.finished then
+		if 	ml_global_information.running and
+			ai_vendor.queue and
+			not ai_vendor.queue.finished
+		then
 			ai_vendor.queue:run()
 		end
 	end
