@@ -411,7 +411,6 @@ local i = 0
 			numArgs = #args
 			convstring = args[1]
 			convoption = args[3]
-			d(convstring)
 			if(string.match(tostring(convstring),"Store"))then
 				e("SelectChatterOption("..tostring(i)..")")
 				break
@@ -427,26 +426,60 @@ end
 -- Check if equipped gear is broken
 --****************************************************************************
 function ai_vendor:CheckDurability()
-local convcount = tonumber(e("GetChatterOptionCount()"))
+local chestdurabilty = e("GetItemCondition(0,2)")  -- return gear condition in %
+local handsdurability = e("GetItemCondition(0,16)")
+local waistdurability = e("GetItemCondition(0,6)")
+local feetdurability = e("GetItemCondition(0,9)")
+local shoulderdurability = e("GetItemCondition(0,3)")
+local headdurability = e("GetItemCondition(0,0)")
+local legsdurability = e("GetItemCondition(0,8)")
 local args = nil
 local numArgs = nil
-local convstring = nil
-local i = 0
-		while(i < convcount+1) do
-		
-			args = { e("GetChatterOption("..tostring(i)..")")}    
-			numArgs = #args
-			convstring = args[1]
-			convoption = args[3]
-			d(convstring)
-			if(string.match(tostring(convstring),"Store"))then
-				e("SelectChatterOption("..tostring(i)..")")
-				break
-			end
-			i = i+1
+
+
+	if(tonumber(chestdurabilty) <= 2)then  -- if the durability is lower or equal to 2%
+		args = { e("GetEquippedItemInfo(2)")}     
+		if(args[2] == true)then --we check if something is equipped in this slot
+			return true
 		end
-		
-	
+	end
+	if(tonumber(handsdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(16)")}    
+		if(args[2] == true)then 
+			return true
+		end
+	end
+	if(tonumber(waistdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(6)")}    
+		if(args[2] == true)then 
+			return true
+		end
+	end
+	if(tonumber(feetdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(9)")}    
+		if(args[2] == true)then 
+			return true
+		end
+	end
+	if(tonumber(shoulderdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(3)")}    
+		if(args[2] == true)then
+			return true
+		end
+	end
+	if(tonumber(headdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(0)")}    
+		if(args[2] == true)then 
+			return true
+		end
+	end
+	if(tonumber(legsdurability) <= 2)then
+		args = { e("GetEquippedItemInfo(8)")}    
+		if(args[2] == true)then
+			return true
+		end
+	end
+	return false
 end
 
 --****************************************************************************
@@ -493,7 +526,7 @@ e_movetovendor = inheritsFrom( ml_effect )
 e_movetovendor.vendorMarker = nil
 
 function c_movetovendor:evaluate()
-	if( gVendor == "1" and ml_global_information.Player_InventoryNearlyFull)then
+	if( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or( gRepair == "1" and (ai_vendor:CheckDurability()== true)))then
 		local VList = EntityList("nearest,isvendor,onmesh")
 		if ( TableSize( VList ) > 0 ) then			
 			return true
