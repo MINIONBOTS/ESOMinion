@@ -338,7 +338,7 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		if (k == "gEnableLog" or
 			k == "gGather" or
 			k == "gMount" or
-			--k == "gVendor" or
+			k == "gVendor" or
 			k == "gRepair" or
 			k == "aLogin" or
 			k == "aPassword"
@@ -380,6 +380,7 @@ function ml_global_information.togglebot(arg)
 		ml_global_information.ResetBot()
 		ml_task_hub:ClearQueues()
 		ml_global_information.UpdateMode()
+		ai_vendor.queue = nil
 	else
 		d("Starting Bot..")
 		ml_global_information.running = true
@@ -399,6 +400,7 @@ function ml_global_information.ResetBot()
 	c_MoveToMarker.allowedToFight = false
 	c_MoveToRandomPoint.randomPoint = nil
 	c_MoveToRandomPoint.randomPointreached = false
+	ai_vendor.queue = nil
 end
 
 function ml_global_information.Wait( seconds ) 

@@ -245,7 +245,7 @@ c_autoequip.wait = 20000
  
 function c_autoequip:evaluate()
       if ( (ml_global_information.Now) >= (lastequip + c_autoequip.wait + math.random(0,10000))) then
-			if((Player.iscasting == false) and (isInCombat() == false))then
+			if ( Player.iscasting == false and ml_global_information.Player_InCombat == false ) then
 				lastequip =  ml_global_information.Now
 				return true
 			end
@@ -254,30 +254,20 @@ function c_autoequip:evaluate()
 end
  
 function e_autoequip:execute()
-ml_log("e_autoequip.. ")
+	ml_log("e_autoequip.. ")
 	eso_autoequip.HandleAutoEquip()
 	ml_global_information.Wait(500)
-end
-
-function isInCombat()
-local player = "player"
-	if(e("IsUnitInCombat("..player..")")) then
-		return true
-	else
-	return false
-	end
-
 end
 
 
 function getARMORNype(bagId,slotId)
     local icon = e("GetItemInfo("..bagId..","..slotId..")")
     if (string.find(icon, "heavy")) then
-      return g("ARMORNYPE_HEAVY")
+		return g("ARMORNYPE_HEAVY")
     elseif string.find(icon,"medium") then
         return g("ARMORNYPE_MEDIUM")
     elseif string.find(icon,"light") then
-       return g("ARMORNYPE_LIGHT")
+		return g("ARMORNYPE_LIGHT")
     else
         return g("ARMORNYPE_NONE")
     end
@@ -288,7 +278,7 @@ function getWEAPONNype(bagId,slotId)
     local icon =  e("GetItemInfo("..bagId..","..slotId..")")
     
     if (string.find(icon, "1hsword")) then
-      return g("WEAPONNYPE_SWORD")
+		return g("WEAPONNYPE_SWORD")
     elseif string.find(icon,"2hsword") then
         return g("WEAPONNYPE_TWO_HANDED_SWORD")
     elseif string.find(icon,"1haxe") then
@@ -330,24 +320,24 @@ function getArmorBonusType(bagID,slotID)
 end
 
 function getitemstat(slotID)
-d(e("GetItemStatValue(0,"..tostring(slotID)..")"))
-d(e("GetItemCondition(0,"..tostring(slotID)..")"))
+	d(e("GetItemStatValue(0,"..tostring(slotID)..")"))
+	d(e("GetItemCondition(0,"..tostring(slotID)..")"))
 end
 function eso_autoequip.getAccessoryStat(linkitem)
 
-local color, id ,random1,itemlevel,statbonustype =string.match(tostring(linkitem),"(%w+):item:(%w+):(%w+):(%w+):(%w+):")
+	local color, id ,random1,itemlevel,statbonustype =string.match(tostring(linkitem),"(%w+):item:(%w+):(%w+):(%w+):(%w+):")
 
-return statbonustype
---bonus 45870 = Magicka type
---bonus 45871 = Stamina type
+	return statbonustype
+	--bonus 45870 = Magicka type
+	--bonus 45871 = Stamina type
 
 end
 
 function eso_autoequip.getItemLevel(linkitem)
 
-local color, id ,random1,itemlevel,statbonustype =string.match(tostring(linkitem),"(%w+):item:(%w+):(%w+):(%w+):(%w+):")
+	local color, id ,random1,itemlevel,statbonustype =string.match(tostring(linkitem),"(%w+):item:(%w+):(%w+):(%w+):(%w+):")
 
-return itemlevel
+	return itemlevel
 
 end
 
