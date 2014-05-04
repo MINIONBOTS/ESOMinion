@@ -54,7 +54,8 @@ function ai_combatAttack:Init()
     self:AddTaskCheckCEs()
 end
 function ai_combatAttack:task_complete_eval()
-	if ( Player.isswimming == true or c_dead:evaluate() == true or (c_GotoAndKill:evaluate() == false and c_Aggro:evaluate() == false)) then 
+
+	if ( (Player.isswimming == true or c_dead:evaluate() == true) or (c_GotoAndKill:evaluate() == false and c_Aggro:evaluate() == false)) then 
 		Player:Stop()
 		return true
 	end
