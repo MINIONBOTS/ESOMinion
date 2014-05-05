@@ -44,6 +44,18 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gAutoLogin == nil ) then
 		Settings.ESOMinion.gAutoLogin = ""
 	end
+	if ( Settings.ESOMinion.gPot == nil ) then
+		Settings.ESOMinion.gPot = "0"
+	end
+	if ( Settings.ESOMinion.gPotiontype == nil ) then
+		Settings.ESOMinion.gPotiontype = "Health"
+	end
+	if ( Settings.ESOMinion.gPotlevel == nil ) then
+		Settings.ESOMinion.gPotlevel = "1"
+	end
+	if ( Settings.ESOMinion.gPotvalue == nil ) then
+		Settings.ESOMinion.gPotvalue = "27"
+	end
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
@@ -65,6 +77,11 @@ function ml_global_information.moduleinit()
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("gatherMode"),"gGather",GetString("settings"))	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useMount"),"gMount",GetString("settings"))
+	
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
+	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("potiontype"),"gPotiontype",GetString("potionssettings"),"Health,Stamina,Magicka")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("potlevel"),"gPotlevel",GetString("potionssettings"),"1","50")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("potusebelow"),"gPotvalue",GetString("potionssettings"),"1","100")
 	
 	--GUI_NewButton(ml_global_information.MainWindow.Name, GetString("advancedSettings"), "AdvancedSettings.toggle")
 	--RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
@@ -116,6 +133,10 @@ function ml_global_information.moduleinit()
 	gAttackRange = Settings.ESOMinion.gAttackRange
 	gGather = Settings.ESOMinion.gGather
 	gMount = Settings.ESOMinion.gMount
+	gPot = Settings.ESOMinion.gPot
+	gPotiontype = Settings.ESOMinion.gPotiontype
+	gPotlevel = Settings.ESOMinion.gPotlevel
+	gPotvalue = Settings.ESOMinion.gPotvalue 
 	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
@@ -341,7 +362,11 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "gVendor" or
 			k == "gRepair" or
 			k == "aLogin" or
-			k == "aPassword"
+			k == "aPassword" or
+			k == "gPot" or
+			k == "gPotiontype" or
+			k == "gPotvalue" or
+			k == "gPotlevel"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
