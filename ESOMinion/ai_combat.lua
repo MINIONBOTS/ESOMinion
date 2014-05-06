@@ -35,6 +35,9 @@ function ai_combatAttack:Init()
 	--Vendoring
 	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
 	
+		
+	--Using Potions
+	--self:add(ml_element:create( "UsePotions", c_usePotions, e_usePotions , 190 ), self.process_elements)
 	-- Looting
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 	
@@ -51,7 +54,7 @@ function ai_combatAttack:Init()
     self:AddTaskCheckCEs()
 end
 function ai_combatAttack:task_complete_eval()
-	if ( Player.isswimming == true or (c_GotoAndKill:evaluate() == false and c_Aggro:evaluate() == false)) then 
+	if ( Player.isswimming == true or c_dead:evaluate() == true or (c_GotoAndKill:evaluate() == false and c_Aggro:evaluate() == false)) then 
 		Player:Stop()
 		return true
 	end
@@ -151,6 +154,7 @@ function e_resting:execute()
 	eso_skillmanager.Heal( Player.id )
 	return
 end
+
 
 
 ---------
@@ -370,4 +374,171 @@ function e_GetNextTarget:execute()
 		end		
 	end
 	return ml_log(false)
+end
+
+
+--------------
+c_usePotions = inheritsFrom( ml_cause )
+e_usePotions = inheritsFrom( ml_effect )
+e_lastpotionHPslot = nil
+e_lastpotionMPslot = nil
+e_lastpotionSTAslot = nil
+e_usehealth = false
+e_usemagicka = false
+e_useStamina = false
+
+
+function c_usePotions:evaluate()
+	if((gHPpot == "0") and (gMPpot == "0") and (gSTApot == "0"))then
+		return false
+	end
+	
+    if((ml_global_information.Player_InCombat == true) and (Player.hp.percent < tonumber(gHPpotvalue))) then
+		if(gHPpot == "1")then
+			d(Player.hp.percent)
+
+			if(e_lastpotionHPslot == nil)then
+				e_usehealth = true
+				return true
+			end
+				local args2 = { e("GetItemCooldownInfo(1,"..tostring(e_lastpotionHPslot)..")")}    
+				local numArgs2 = #args2
+				local potioncooldown = args2[1]
+				if(tonumber(potioncooldown) == 0)then
+					e_usehealth = true
+					return true
+				end
+		end
+	end
+	if((ml_global_information.Player_InCombat == true) and (ml_global_information.Player_Magicka.percent< tonumber(gMPpotvalue))) then
+		if(gMPpot == "1")then
+			if(e_lastpotionMPslot == nil)then
+				e_usemagicka = true
+				return true
+			end
+				local args2 = { e("GetItemCooldownInfo(1,"..tostring(e_lastpotionMPslot)..")")}    
+				local numArgs2 = #args2
+				local potioncooldown = args2[1]
+				if(tonumber(potioncooldown) == 0)then
+					e_usemagicka = true
+					return true
+				end
+		end
+	end
+	if((ml_global_information.Player_InCombat == true) and  (ml_global_information.Player_Stamina.percent < tonumber(gSTApotvalue) )) then
+		if(gSTApot == "1")then
+			if(e_lastpotionMPslot == nil)then
+				e_useStamina = true
+				return true
+			end
+				local args2 = { e("GetItemCooldownInfo(1,"..tostring(e_lastpotionSTAslot)..")")}    
+				local numArgs2 = #args2
+				local potioncooldown = args2[1]
+				if(tonumber(potioncooldown) == 0)then
+					e_useStamina = true
+					return true
+				end
+		end
+	end
+	return false
+end
+
+
+function e_usePotions:execute()
+	local InventoryList = {}
+	local args = { e("GetBagInfo(1)")}    
+	local numArgs = #args
+	local InventoryMax = args[2]
+	if(tonumber(Player.hp.percent) <=tonumber(gHPpotvalue))then
+		if(gHPpot == "1")then
+			local i = 0
+				if(e_usehealth == true) then
+					while(i < tonumber(InventoryMax)) do
+						if(getPotionType(i) == "health") then
+						local linkitem = e("GetItemLink(1,"..tostring(i)..",0)")
+							if(tonumber(eso_autoequip.getItemLevel(linkitem)) >= tonumber(gHPpotlevel))then	
+								d("enter1")
+								local args2 = { e("GetItemCooldownInfo(1,"..tostring(i)..")")}    
+								local numArgs2 = #args2
+								local potioncooldown = args2[1]
+								 d(potioncooldown)
+								if(tonumber(potioncooldown) == 0)then
+									 e("UseItem(1,"..tostring(i)..")") -- using the potion
+										e_lastpotionHPslot = i
+										e_usehealth = false
+									 ml_log("Using Health Potion")
+									 break
+								end
+							end
+						end
+						i = i + 1
+					end
+				end
+		end
+	end
+	if(ml_global_information.Player_Magicka.percent< tonumber(gMPpotvalue)) then
+		if(gMPpot == "1")then
+		local i = 0
+			if(e_usemagicka == true)then
+				while(i < tonumber(InventoryMax)) do
+					if(getPotionType(i) == "magicka") then
+						local linkitem = e("GetItemLink(1,"..tostring(i)..",0)")
+						if(tonumber(eso_autoequip.getItemLevel(linkitem)) >= tonumber(gMPpotlevel))then
+							local args2 = { e("GetItemCooldownInfo(1,"..tostring(i)..")")}    
+							local numArgs2 = #args2
+							local potioncooldown = args2[1]
+							if(tonumber(potioncooldown) == 0)then
+								e("UseItem(1,"..tostring(i)..")") -- using the potion
+								e_lastpotionMPslot = i
+								e_usemagicka = false
+								 ml_log("Using Magicka Potion")
+								break
+							end
+						end
+					end
+					i = i + 1
+				end
+			end
+		end
+	end
+	if(ml_global_information.Player_Stamina.percent < tonumber(gSTApotvalue)) then
+		if(gSTApot == "1")then
+		local i = 0
+			if(e_useStamina == true)then
+				while(i < tonumber(InventoryMax)) do
+					if(getPotionType(i) == "stamina") then
+						local linkitem = e("GetItemLink(1,"..tostring(i)..",0)")
+						if(tonumber(eso_autoequip.getItemLevel(linkitem)) >= tonumber(gSTApotlevel))then
+							local args2 = { e("GetItemCooldownInfo(1,"..tostring(i)..")")}    
+							local numArgs2 = #args2
+							local potioncooldown = args2[1]
+							if(tonumber(potioncooldown) == 0)then
+								 e("UseItem(1,"..tostring(i)..")") -- using the potion
+									e_lastpotionSTAslot = i
+									e_useStamina = false
+									ml_log("Using Stamina Potion")
+								 break
+							end
+						end
+					end
+					i = i + 1
+				end
+			end
+		end
+	end
+	return ml_log(false)
+end
+
+function getPotionType(slotID)
+
+local links = e("GetItemLink(1,"..slotID..",1)")
+local color, id = string.match(tostring(links),"(%w+):item:(%w+):")
+	if(tonumber(id) == 27036 )then
+		return "health"
+	elseif(tonumber(id) == 27037 )then
+		return "magicka"
+	elseif(tonumber(id) == 27038)then
+		return "stamina"
+	end
+
 end

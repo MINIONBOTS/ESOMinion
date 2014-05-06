@@ -13,7 +13,7 @@ eso_vendormanager.DefaultProfiles = {
 
 function eso_vendormanager.ModuleInit() 	
 	if (Settings.ESOMinion.gVMprofile == nil) then
-		Settings.ESOMinion.gVMprofile = "None"
+		Settings.ESOMinion.gVMprofile = "Default"
 	end
 	if (Settings.ESOMinion.gWhiteList == nil) then
 		Settings.ESOMinion.gWhiteList = "None"
@@ -22,31 +22,31 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.gInventory = "None"
 	end
 	if (Settings.ESOMinion.VM_ATRASH == nil) then
-		Settings.ESOMinion.VM_ATRASH = 1
+		Settings.ESOMinion.VM_ATRASH = "0"
 	end
 	if (Settings.ESOMinion.VM_ANORMAL == nil) then
-		Settings.ESOMinion.VM_ANORMAL = 0
+		Settings.ESOMinion.VM_ANORMAL = "0"
 	end
 	if (Settings.ESOMinion.VM_AMAGIC == nil) then
-		Settings.ESOMinion.VM_AMAGIC = 0
+		Settings.ESOMinion.VM_AMAGIC = "0"
 	end
-	if (Settings.ESOMinion.VM_AARTEFACT == nil) then
-		Settings.ESOMinion.VM_AARTEFACT = 0
+	if (Settings.ESOMinion.VM_AARCANE == nil) then
+		Settings.ESOMinion.VM_AARCANE = "0"
 	end
 	if (Settings.ESOMinion.VM_WTRASH == nil) then
-		Settings.ESOMinion.VM_WTRASH = 1
+		Settings.ESOMinion.VM_WTRASH = "0"
 	end
 	if (Settings.ESOMinion.VM_WNORMAL == nil) then
-		Settings.ESOMinion.VM_WNORMAL = 0
+		Settings.ESOMinion.VM_WNORMAL = "0"
 	end
 	if (Settings.ESOMinion.VM_WMAGIC == nil) then
-		Settings.ESOMinion.VM_WMAGIC = 0
+		Settings.ESOMinion.VM_WMAGIC = "0"
 	end
-	if (Settings.ESOMinion.VM_WARTEFACT == nil) then
-		Settings.ESOMinion.VM_WARTEFACT = 0
+	if (Settings.ESOMinion.VM_WARCANE == nil) then
+		Settings.ESOMinion.VM_WARCANE = "0"
 	end
 	if (Settings.ESOMinion.VM_FTRASH == nil) then
-		Settings.ESOMinion.VM_FTRASH = "1"
+		Settings.ESOMinion.VM_FTRASH = "0"
 	end
 	if (Settings.ESOMinion.VM_FNORMAL == nil) then
 		Settings.ESOMinion.VM_FNORMAL = "0"
@@ -54,8 +54,8 @@ function eso_vendormanager.ModuleInit()
 	if (Settings.ESOMinion.VM_FMAGIC == nil) then
 		Settings.ESOMinion.VM_FMAGIC = "0"
 	end
-	if (Settings.ESOMinion.VM_FARTEFACT == nil) then
-		Settings.ESOMinion.VM_FARTEFACT = "0"
+	if (Settings.ESOMinion.VM_FARCANE == nil) then
+		Settings.ESOMinion.VM_FARCANE = "0"
 	end
 	if (Settings.ESOMinion.VM_ADDITIVE == nil) then
 		Settings.ESOMinion.VM_ADDITIVE = "0"
@@ -64,43 +64,43 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.VM_ALCHEMYBASE = "0"
 	end
 	if (Settings.ESOMinion.VM_ENCHANTRUNE == nil) then
-		Settings.ESOMinion.VM_ENCHANTRUNE = "1"
+		Settings.ESOMinion.VM_ENCHANTRUNE = "0"
 	end
 	if (Settings.ESOMinion.VM_REAGENT == nil) then
-		Settings.ESOMinion.VM_REAGENT = "1"
+		Settings.ESOMinion.VM_REAGENT = "0"
 	end
 	if (Settings.ESOMinion.VM_RAWMATERIAL == nil) then
-		Settings.ESOMinion.VM_RAWMATERIAL = "1"
+		Settings.ESOMinion.VM_RAWMATERIAL = "0"
 	end
 	if (Settings.ESOMinion.VM_RECIPE == nil) then
-		Settings.ESOMinion.VM_RECIPE = "1"
+		Settings.ESOMinion.VM_RECIPE = "0"
 	end
 	if (Settings.ESOMinion.VM_INGREDIENT == nil) then
-		Settings.ESOMinion.VM_INGREDIENT = "1"
+		Settings.ESOMinion.VM_INGREDIENT = "0"
 	end
 	if (Settings.ESOMinion.VM_PPOTIONS == nil) then
-		Settings.ESOMinion.VM_PPOTIONS= "1"
+		Settings.ESOMinion.VM_PPOTIONS= "0"
 	end
 	if (Settings.ESOMinion.VM_COLLECTIBLE == nil) then
-		Settings.ESOMinion.VM_COLLECTIBLE = "1"
+		Settings.ESOMinion.VM_COLLECTIBLE = "0"
 	end
 	if (Settings.ESOMinion.VM_COSTUME == nil) then
-		Settings.ESOMinion.VM_COSTUME = "1"
+		Settings.ESOMinion.VM_COSTUME = "0"
 	end
 	if (Settings.ESOMinion.VM_DRINK == nil) then
-		Settings.ESOMinion.VM_DRINK = "1"
+		Settings.ESOMinion.VM_DRINK = "0"
 	end
 	if (Settings.ESOMinion.VM_LOCKPICK == nil) then
 		Settings.ESOMinion.VM_LOCKPICK = "0"
 	end
 	if (Settings.ESOMinion.VM_LURE == nil) then
-		Settings.ESOMinion.VM_LURE = "1"
+		Settings.ESOMinion.VM_LURE = "0"
 	end
 	if (Settings.ESOMinion.VM_SOULGEM == nil) then
-		Settings.ESOMinion.VM_SOULGEM = "1"
+		Settings.ESOMinion.VM_SOULGEM = "0"
 	end
 	if (Settings.ESOMinion.VM_SPICE == nil) then
-		Settings.ESOMinion.VM_SPICE = "1"
+		Settings.ESOMinion.VM_SPICE = "0"
 	end
 	if (Settings.ESOMinion.VM_STYLEMAT == nil) then
 		Settings.ESOMinion.VM_STYLEMAT = "0"
@@ -109,69 +109,66 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.VM_ITEMTRASH = "0"
 	end
 	if (Settings.ESOMinion.VM_TROPHY == nil) then
-		Settings.ESOMinion.VM_TROPHY = "1"
+		Settings.ESOMinion.VM_TROPHY = "0"
 	end
 	if (Settings.ESOMinion.VM_GLYPHARMOR == nil) then
-		Settings.ESOMinion.VM_GLYPHARMOR = "1"
+		Settings.ESOMinion.VM_GLYPHARMOR = "0"
 	end
 	if (Settings.ESOMinion.VM_GLYPHWEAPON == nil) then
-		Settings.ESOMinion.VM_GLYPHWEAPON = "1"
+		Settings.ESOMinion.VM_GLYPHWEAPON = "0"
 	end
 	if (Settings.ESOMinion.VM_GLYPHJEWELRY == nil) then
-		Settings.ESOMinion.VM_GLYPHJEWELRY = "1"
+		Settings.ESOMinion.VM_GLYPHJEWELRY = "0"
 	end
 	if (Settings.ESOMinion.VM_CHEST == nil) then
-		Settings.ESOMinion.VM_CHEST = "1"
+		Settings.ESOMinion.VM_CHEST = "0"
 	end
 	if (Settings.ESOMinion.VM_FEET == nil) then
-		Settings.ESOMinion.VM_FEET = "1"
+		Settings.ESOMinion.VM_FEET = "0"
 	end
 	if (Settings.ESOMinion.VM_HAND == nil) then
-		Settings.ESOMinion.VM_HAND = "1"
+		Settings.ESOMinion.VM_HAND = "0"
 	end
 	if (Settings.ESOMinion.VM_CHEST== nil) then
-		Settings.ESOMinion.VM_CHEST = "1"
+		Settings.ESOMinion.VM_CHEST = "0"
 	end
 	if (Settings.ESOMinion.VM_HEAD == nil) then
-		Settings.ESOMinion.VM_HEAD = "1"
+		Settings.ESOMinion.VM_HEAD = "0"
 	end
 	if (Settings.ESOMinion.VM_LEGS == nil) then
-		Settings.ESOMinion.VM_LEGS = "1"
+		Settings.ESOMinion.VM_LEGS = "0"
 	end
 	if (Settings.ESOMinion.VM_SHOULDERS== nil) then
-		Settings.ESOMinion.VM_SHOULDERS = "1"
+		Settings.ESOMinion.VM_SHOULDERS = "0"
 	end
 	if (Settings.ESOMinion.VM_WAIST== nil) then
-		Settings.ESOMinion.VM_WAIST = "1"
+		Settings.ESOMinion.VM_WAIST = "0"
 	end
 	if (Settings.ESOMinion.VM_NECK== nil) then
-		Settings.ESOMinion.VM_NECK = "1"
+		Settings.ESOMinion.VM_NECK = "0"
 	end
 	if (Settings.ESOMinion.VM_RING== nil) then
-		Settings.ESOMinion.VM_RING = "1"
+		Settings.ESOMinion.VM_RING = "0"
 	end
 	if (Settings.ESOMinion.VM_OFFHAND== nil) then
-		Settings.ESOMinion.VM_OFFHAND = "1"
+		Settings.ESOMinion.VM_OFFHAND = "0"
 	end
 	if (Settings.ESOMinion.VM_ONEHAND== nil) then
-		Settings.ESOMinion.VM_ONEHAND = "1"
+		Settings.ESOMinion.VM_ONEHAND = "0"
 	end
 	if (Settings.ESOMinion.VM_TWOHAND== nil) then
-		Settings.ESOMinion.VM_TWOHAND = "1"
+		Settings.ESOMinion.VM_TWOHAND = "0"
 	end
 
-	
-
-	
 		
 	GUI_NewWindow(eso_vendormanager.MainWindow.Name,eso_vendormanager.MainWindow.x,eso_vendormanager.MainWindow.y,eso_vendormanager.MainWindow.w,eso_vendormanager.MainWindow.h,"",true)
-	GUI_NewComboBox(eso_vendormanager.MainWindow.Name,GetString("profile"),"gVMprofile",GetString("generalSettings"),"None")
-	GUI_NewComboBox(eso_vendormanager.MainWindow.Name,GetString("inventoryl"),"gInventory","WhiteList","")
+	GUI_NewComboBox(eso_vendormanager.MainWindow.Name,GetString("profile"),"gVMprofile",GetString("generalSettings"),"")
+	GUI_NewComboBox(eso_vendormanager.MainWindow.Name,strings[gCurrentLanguage].inventoryl,"gInventory","WhiteList","")
 	GUI_NewButton(eso_vendormanager.MainWindow.Name,GetString("addWhite"),"VMAddWhiteList","WhiteList")
 	RegisterEventHandler("VMAddWhiteList",eso_vendormanager.AddWhiteList)
 	GUI_NewButton(eso_vendormanager.MainWindow.Name,GetString("updInv"),"VMupdInventoryList","WhiteList")
 	RegisterEventHandler("VMupdInventoryList",eso_vendormanager.UpdateInventoryList)
-	GUI_NewComboBox(eso_vendormanager.MainWindow.Name,GetString("whitelist"),"gWhiteList","WhiteList","")
+	GUI_NewComboBox(eso_vendormanager.MainWindow.Name,strings[gCurrentLanguage].whitelist,"gWhiteList","WhiteList","")
 	GUI_NewButton(eso_vendormanager.MainWindow.Name,GetString("delWhite"),"VMDelWhiteList","WhiteList")
 	RegisterEventHandler("VMDelWhiteList",eso_vendormanager.DelWhiteList)
 	GUI_NewField(eso_vendormanager.MainWindow.Name,GetString("newProfileName"),"gVMnewname",GetString("generalSettings"))
@@ -184,7 +181,7 @@ function eso_vendormanager.ModuleInit()
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("trash"),"VM_ATRASH","Armor")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("normal"),"VM_ANORMAL","Armor")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("magic"),"VM_AMAGIC","Armor")
-	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("artefact"),"VM_AARTEFACT","Armor")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("arcane"),"VM_AARCANE","Armor")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("chest"),"VM_CHEST","Armor")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("feets"),"VM_FEET","Armor")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("hands"),"VM_HAND","Armor")
@@ -199,19 +196,16 @@ function eso_vendormanager.ModuleInit()
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("trash"),"VM_WTRASH","Weapon")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("normal"),"VM_WNORMAL","Weapon")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("magic"),"VM_WMAGIC","Weapon")
-	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("artefact"),"VM_WARTEFACT","Weapon")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("arcane"),"VM_WARCANE","Weapon")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("offhand"),"VM_OFFHAND","Weapon")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("onehand"),"VM_ONEHAND","Weapon")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("twohand"),"VM_TWOHAND","Weapon")
 	
-
 	
-
-
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("trash"),"VM_FTRASH","Food")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("normal"),"VM_FNORMAL","Food")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("magic"),"VM_FMAGIC","Food")
-	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("artefact"),"VM_FARTEFACT","Food")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("arcane"),"VM_FARCANE","Food")
 	
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("additive"),"VM_ADDITIVE","Crafting")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("alchemybase"),"VM_ALCHEMYBASE","Crafting")
@@ -224,7 +218,6 @@ function eso_vendormanager.ModuleInit()
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("potions"),"VM_PPOTIONS","Potions")
 
 	
-
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("collectible"),"VM_COLLECTIBLE","Misc")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("costume"),"VM_COSTUME","Misc")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("drink"),"VM_DRINK","Misc")
@@ -243,18 +236,18 @@ function eso_vendormanager.ModuleInit()
 	
 
 		VM_ATRASH = Settings.ESOMinion.VM_ATRASH
-		VM_ANORMAL = Settings.ESOMinion.M_ANORMAL 
-		VM_AMAGIC = Settings.ESOMinion.VM_AMAGIC 
-		VM_AARTEFACT = Settings.ESOMinion.VM_AARTEFACT
+		VM_ANORMAL = Settings.ESOMinion.VM_ANORMAL 
+		VM_AMAGIC = Settings.ESOMinion.VM_AMAGIC
+		VM_AARCANE = Settings.ESOMinion.VM_AARCANE	
 		VM_WTRASH = Settings.ESOMinion.VM_WTRASH
 		VM_WNORMAL = Settings.ESOMinion.VM_WNORMAL
 		VM_WTRASH = Settings.ESOMinion.VM_WTRASH
 		VM_WMAGIC = Settings.ESOMinion.VM_WMAGIC
-		VM_WARTEFACT = Settings.ESOMinion.VM_WARTEFACTb
+		VM_WARCANE = Settings.ESOMinion.VM_WARCANE
 		VM_FTRASH = Settings.ESOMinion.VM_FTRASH 
 		VM_FNORMAL = Settings.ESOMinion.VM_FNORMAL
 		VM_FMAGIC = Settings.ESOMinion.VM_FMAGIC
-		VM_FARTEFACT = Settings.ESOMinion.VM_FARTEFACT
+		VM_FARCANE = Settings.ESOMinion.VM_FARCANE
 		VM_ADDITIVE = Settings.ESOMinion.VM_ADDITIVE 
 		VM_ALCHEMYBASE = Settings.ESOMinion.VM_ALCHEMYBASE
 		VM_ENCHANTRUNE = Settings.ESOMinion.VM_ENCHANTRUNE
@@ -297,14 +290,10 @@ function eso_vendormanager.ModuleInit()
 	GUI_SizeWindow(eso_vendormanager.MainWindow.Name,eso_vendormanager.MainWindow.w,eso_vendormanager.MainWindow.h)
 	GUI_UnFoldGroup(eso_vendormanager.MainWindow.Name,GetString("generalSettings"))
 	GUI_WindowVisible(eso_vendormanager.MainWindow.Name,false)
-	
-	
-	
 	eso_vendormanager.UpdateProfiles()
 	eso_vendormanager.UpdateInventoryList()
 	GUI_DeleteGroup(eso_vendormanager.MainWindow.Name,"ProfileItems")
 	eso_vendormanager.UpdateCurrentProfileData()	
-	
 	
 end
 
@@ -314,22 +303,23 @@ function eso_vendormanager.getInventoryList()
 	local InventoryMax = args[2]
 	local i = 0
 	local v = 0
-	 while(i < tonumber(InventoryMax)) do
+	while(i < tonumber(InventoryMax)) do
 		if(e("GetItemName(1,"..tostring(i)..")") ~= "") then
-		eso_vendormanager.InventoryL[v] = e("GetItemName(1,"..tostring(i)..")")
+			eso_vendormanager.InventoryL[v] = e("GetItemName(1,"..tostring(i)..")")
 			v = v + 1
 		end
 		i = i + 1
 	end
-	gInventory_listitems = GetString("inventoryl")..",".."test"..",".."test"
+	 gInventory_listitems = strings[gCurrentLanguage].inventoryl..",".."test"..",".."test"
 end
 
 
 
 function eso_vendormanager.UpdateProfiles()
 	-- Grab all Profiles and enlist them in the dropdown field
-	local profiles = "None"
+	local profiles = ""
 	local found = "None"	
+	
 	local profilelist = dirlist(eso_vendormanager.profilepath,".*lua")
 	if ( TableSize(profilelist) > 0) then			
 		local i,profile = next ( profilelist)
@@ -368,9 +358,9 @@ function eso_vendormanager.RefreshWhiteList()
 	local myitems = gWhiteList_listitems
 	if ( TableSize(eso_vendormanager.WhiteL) > 0) then			
 		local i,item = next ( eso_vendormanager.WhiteL)
-			while i and item do	
-				myitems = myitems..","..item
-				i,item = next ( eso_vendormanager.WhiteL ,i)
+		while i and item do	
+			myitems = myitems..","..item
+			i,item = next ( eso_vendormanager.WhiteL ,i)
 		end
 	end
 	gWhiteList_listitems = myitems
@@ -379,11 +369,12 @@ end
 
 function eso_vendormanager.UpdateInventoryList()
 	--Grab all items in inventory and add them to a dropdown list
-	local myitems = ""	
+	local myitems = ""
+	
 	eso_vendormanager.getInventoryList()
 	if ( TableSize(eso_vendormanager.InventoryL ) > 0) then			
 		local i,myitem = next (eso_vendormanager.InventoryL)
-		while i and myitem do			
+		 while i and myitem do			
 		
 				myitems = myitems..","..myitem
 				
@@ -392,7 +383,8 @@ function eso_vendormanager.UpdateInventoryList()
 	else
 		ml_error("No item found in your inventory")		
 	end
-	gInventory_listitems = myitems	
+	gInventory_listitems = myitems
+	
 end
 
 
@@ -409,15 +401,15 @@ function eso_vendormanager.CreateNewProfile()
 	VM_ATRASH="0"
 	VM_ANORMAL="0"
 	VM_AMAGIC="0"
-	VM_AARTEFACT="0"
+	VM_AARCANE="0"
 	VM_WTRASH="0"
 	VM_WNORMAL="0"
 	VM_WMAGIC="0"
-	VM_WARTEFACT="0"
+	VM_WARCANE="0"
 	VM_FTRASH="0"
 	VM_FNORMAL="0"
 	VM_FMAGIC="0"
-	VM_FARTEFACT="0"
+	VM_FARCANE="0"
 	VM_ADDITIVE="0"
 	VM_ALCHEMYBASE="0"
 	VM_ENCHANTRUNE="0"
@@ -470,10 +462,10 @@ function eso_vendormanager.AddWhiteList()
 		
 	myitems = myitems..","..gInventory
 	gWhiteList_listitems = myitems
+	
 	table.insert(eso_vendormanager.WhiteL,TableSize(gInventory)+1,gInventory)
 
 end
-
 
 
 function eso_vendormanager.DelWhiteList()
@@ -522,15 +514,15 @@ function eso_vendormanager.SaveProfile()
 			string2write = string2write.."VM_ATRASH="..tostring(VM_ATRASH).."\n"
 			string2write = string2write.."VM_ANORMAL="..tostring(VM_ANORMAL).."\n"
 			string2write = string2write.."VM_AMAGIC="..tostring(VM_AMAGIC).."\n"
-			string2write = string2write.."VM_AARTEFACT="..tostring(VM_AARTEFACT).."\n"
+			string2write = string2write.."VM_AARCANE="..tostring(VM_AARCANE).."\n"
 			string2write = string2write.."VM_WTRASH="..tostring(VM_WTRASH).."\n"
 			string2write = string2write.."VM_WNORMAL="..tostring(VM_WNORMAL).."\n"
 			string2write = string2write.."VM_WMAGIC="..tostring(VM_WMAGIC).."\n"
-			string2write = string2write.."VM_WARTEFACT="..tostring(VM_WARTEFACT).."\n"
+			string2write = string2write.."VM_WARCANE="..tostring(VM_WARCANE).."\n"
 			string2write = string2write.."VM_FTRASH="..tostring(VM_FTRASH).."\n"
 			string2write = string2write.."VM_FNORMAL="..tostring(VM_FNORMAL).."\n"
 			string2write = string2write.."VM_FMAGIC="..tostring(VM_FMAGIC).."\n"
-			string2write = string2write.."VM_FARTEFACT="..tostring(VM_FARTEFACT).."\n"
+			string2write = string2write.."VM_FARCANE="..tostring(VM_FARCANE).."\n"
 			string2write = string2write.."VM_ADDITIVE="..tostring(VM_ADDITIVE).."\n"
 			string2write = string2write.."VM_ALCHEMYBASE="..tostring(VM_ALCHEMYBASE).."\n"
 			string2write = string2write.."VM_ENCHANTRUNE="..tostring(VM_ENCHANTRUNE).."\n"
@@ -581,7 +573,7 @@ end
 
 function eso_vendormanager.UpdateCurrentProfileData()
 
-	--Read all datas from the profile in directory
+--Read all datas from the profile in directory
     if ( gVMprofile ~= nil and gVMprofile ~= "" and gVMprofile ~= "None" ) then
 
 
@@ -606,16 +598,15 @@ function eso_vendormanager.UpdateCurrentProfileData()
 								elseif ( key == "ATRASH" )then VM_ATRASH = tonumber(value)
 								elseif ( key == "ANORMAL" )then VM_ANORMAL = tonumber(value)
 								elseif ( key == "AMAGIC" )then VM_AMAGIC = tonumber(value)
-								elseif ( key == "AARTEFACT" )then VM_AARTEFACT = tonumber(value)
-								elseif ( key == "ANORMAL" )then VM_ANORMAL = tonumber(value)
+								elseif ( key == "AARCANE" )then VM_AARCANE = tonumber(value)
 								elseif ( key == "WTRASH" )then VM_WTRASH = tonumber(value)
 								elseif ( key == "WNORMAL" )then VM_WNORMAL = tonumber(value)
 								elseif ( key == "WMAGIC" )then VM_WMAGIC = tonumber(value)
-								elseif ( key == "WARTEFACT" )then VM_WARTEFACT = tonumber(value)
+								elseif ( key == "WARCANE" )then VM_WARCANE = tonumber(value)
 								elseif ( key == "FTRASH" )then VM_FTRASH = tonumber(value)
 								elseif ( key == "FNORMAL" )then VM_FNORMAL = tonumber(value)
 								elseif ( key == "FMAGIC" )then VM_FMAGIC = tonumber(value)
-								elseif ( key == "FARTEFACT" )then VM_FARTEFACT = tonumber(value)
+								elseif ( key == "FARCANE" )then VM_FARCANE = tonumber(value)
 								elseif ( key == "ADDITIVE" )then VM_ADDITIVE = tonumber(value)
 								elseif ( key == "ALCHEMYBASE" )then VM_ALCHEMYBASE = tonumber(value)
 								elseif ( key == "ENCHANTRUNE" )then VM_ENCHANTRUNE = tonumber(value)
@@ -674,6 +665,8 @@ function eso_vendormanager.UpdateCurrentProfileData()
 end
 
 
+
+
 function eso_vendormanager.CreateNewItemEntry(item)	
 	if (item ~= nil ) then
 		if (item ~= "" ) then
@@ -684,6 +677,7 @@ function eso_vendormanager.CreateNewItemEntry(item)
 		table.insert(eso_vendormanager.WhiteL,TableSize(Settings.ESOMinion.gInventory)+1,item)
 		end
 	end
+
 end  
 
 
@@ -701,15 +695,15 @@ function eso_vendormanager.GUIVarUpdate(Event, NewVals, OldVals)
 			k == "VM_ATRASH" or
 			k == "VM_ANORMAL" or	
 			k == "VM_AMAGIC" or
-			k == "VM_AARTEFACT" or
+			k == "VM_AARCANE" or
 			k == "VM_WTRASH" or
 			k == "VM_WNORMAL" or	
 			k == "VM_WMAGIC" or
-			k == "VM_WARTEFACT" or
+			k == "VM_WARCANE" or
 			k == "VM_FTRASH" or
 			k == "VM_FNORMAL" or	
 			k == "VM_FMAGIC" or
-			k == "VM_FARTEFACT" or
+			k == "VM_FARCANE" or
 			k == "VM_ADDITIVE" or
 			k == "VM_PPOTIONS" or	
 			k == "VM_ENCHANTRUNE" or
@@ -751,7 +745,6 @@ end
 function eso_vendormanager.ToggleMenu()
 	if (eso_vendormanager.visible) then
 		GUI_WindowVisible(eso_vendormanager.MainWindow.Name,false)	
-		GUI_WindowVisible(eso_vendormanager.editwindow.Name,false)
 		
 		eso_vendormanager.visible = false
 	else
@@ -761,6 +754,7 @@ function eso_vendormanager.ToggleMenu()
 		eso_vendormanager.visible = true
 	end
 end
+
 
 
 RegisterEventHandler("VendorManager.toggle", eso_vendormanager.ToggleMenu)
