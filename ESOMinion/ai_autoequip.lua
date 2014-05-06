@@ -260,7 +260,7 @@ function e_autoequip:execute()
 end
 
 
-function getARMORNype(bagId,slotId)
+function getArmorType(bagId,slotId)
     local icon = e("GetItemInfo("..bagId..","..slotId..")")
     if (string.find(icon, "heavy")) then
 		return g("ARMORNYPE_HEAVY")
@@ -274,7 +274,7 @@ function getARMORNype(bagId,slotId)
 end
 
 
-function getWEAPONNype(bagId,slotId)
+function getWeaponType(bagId,slotId)
     local icon =  e("GetItemInfo("..bagId..","..slotId..")")
     
     if (string.find(icon, "1hsword")) then
@@ -305,15 +305,15 @@ end
 function getArmorBonusType(bagID,slotID)
 
 	local iname = e("GetItemName("..tostring(bagID)..","..tostring(slotID)..")")
-	if(string.match(iname,"Warlock"))then
+	if(string.match(iname,"Warlock") or string.match(iname,"Hexers") or string.match(iname,"sorcier"))then
 		return "Warlock"
-	elseif(string.match(iname,"Necromancer"))then
+	elseif(string.match(iname,"Necromancer") or string.match(iname,"Nekromanten") or string.match(iname,"n\xc3\xa9cromancien"))then
 		return "Necromancer"
-	elseif(string.match(iname,"of stamina"))then
+	elseif(string.match(iname,"of stamina") or string.match(iname,"der Stamina") )then
 		return "Stamina"
-	elseif(string.match(iname,"of health"))then
+	elseif(string.match(iname,"of health") or string.match(iname,"der Health") or string.match(iname,"vitale") or string.match(iname,"vitales"))then
 		return "Health"
-	elseif(string.match(iname,"of magicka"))then
+	elseif(string.match(iname,"of magicka") or string.match(iname,"der Magicka") or string.match(iname,"magique") or string.match(iname,"magiques"))then
 		return "Magicka"
 	end
 
@@ -357,8 +357,8 @@ function eso_autoequip.AutoEquip()
 				if(e("GetItemName(1,"..tostring(i)..")") ~= "") then
 
 					item.itemtype = e("GetItemType(1,"..tostring(i)..")")
-					item.ArmorKind = getARMORNype(1,i)
-					item.WeaponKind = getWEAPONNype(1,i)
+					item.ArmorKind = getArmorType(1,i)
+					item.WeaponKind = getWeaponType(1,i)
 					local argsItemQ = {e("GetItemInfo( 1,"..tostring(i)..")") } 
 					local numArgsItemQ = #argsItemQ
 					item.EquipType = argsItemQ[6]
