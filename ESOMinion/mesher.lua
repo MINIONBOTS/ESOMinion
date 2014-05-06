@@ -165,7 +165,9 @@ function mm.SaveMesh()
 		gMeshChange = "0"
 		MeshManager:Record(false)
 		MeshManager:SetChangeAreaMode(false)
-				
+		MeshManager:ShowTriMesh(false)
+		NavigationManager:ShowNavMesh(false)
+		
 		local filename = ""
 		-- If a new Meshname is given, create a new file and save it in there
 		if ( gnewmeshname ~= nil and gnewmeshname ~= "" ) then

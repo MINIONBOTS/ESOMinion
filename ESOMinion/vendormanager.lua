@@ -22,7 +22,7 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.gInventory = "None"
 	end
 	if (Settings.ESOMinion.VM_ATRASH == nil) then
-		Settings.ESOMinion.VM_ATRASH = "0"
+		Settings.ESOMinion.VM_ATRASH = "1"
 	end
 	if (Settings.ESOMinion.VM_ANORMAL == nil) then
 		Settings.ESOMinion.VM_ANORMAL = "0"
@@ -34,7 +34,7 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.VM_AARCANE = "0"
 	end
 	if (Settings.ESOMinion.VM_WTRASH == nil) then
-		Settings.ESOMinion.VM_WTRASH = "0"
+		Settings.ESOMinion.VM_WTRASH = "1"
 	end
 	if (Settings.ESOMinion.VM_WNORMAL == nil) then
 		Settings.ESOMinion.VM_WNORMAL = "0"
@@ -121,43 +121,43 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.VM_GLYPHJEWELRY = "0"
 	end
 	if (Settings.ESOMinion.VM_CHEST == nil) then
-		Settings.ESOMinion.VM_CHEST = "0"
+		Settings.ESOMinion.VM_CHEST = "1"
 	end
 	if (Settings.ESOMinion.VM_FEET == nil) then
-		Settings.ESOMinion.VM_FEET = "0"
+		Settings.ESOMinion.VM_FEET = "1"
 	end
 	if (Settings.ESOMinion.VM_HAND == nil) then
-		Settings.ESOMinion.VM_HAND = "0"
+		Settings.ESOMinion.VM_HAND = "1"
 	end
 	if (Settings.ESOMinion.VM_CHEST== nil) then
-		Settings.ESOMinion.VM_CHEST = "0"
+		Settings.ESOMinion.VM_CHEST = "1"
 	end
 	if (Settings.ESOMinion.VM_HEAD == nil) then
-		Settings.ESOMinion.VM_HEAD = "0"
+		Settings.ESOMinion.VM_HEAD = "1"
 	end
 	if (Settings.ESOMinion.VM_LEGS == nil) then
-		Settings.ESOMinion.VM_LEGS = "0"
+		Settings.ESOMinion.VM_LEGS = "1"
 	end
 	if (Settings.ESOMinion.VM_SHOULDERS== nil) then
-		Settings.ESOMinion.VM_SHOULDERS = "0"
+		Settings.ESOMinion.VM_SHOULDERS = "1"
 	end
 	if (Settings.ESOMinion.VM_WAIST== nil) then
-		Settings.ESOMinion.VM_WAIST = "0"
+		Settings.ESOMinion.VM_WAIST = "1"
 	end
 	if (Settings.ESOMinion.VM_NECK== nil) then
-		Settings.ESOMinion.VM_NECK = "0"
+		Settings.ESOMinion.VM_NECK = "1"
 	end
 	if (Settings.ESOMinion.VM_RING== nil) then
-		Settings.ESOMinion.VM_RING = "0"
+		Settings.ESOMinion.VM_RING = "1"
 	end
 	if (Settings.ESOMinion.VM_OFFHAND== nil) then
-		Settings.ESOMinion.VM_OFFHAND = "0"
+		Settings.ESOMinion.VM_OFFHAND = "1"
 	end
 	if (Settings.ESOMinion.VM_ONEHAND== nil) then
-		Settings.ESOMinion.VM_ONEHAND = "0"
+		Settings.ESOMinion.VM_ONEHAND = "1"
 	end
 	if (Settings.ESOMinion.VM_TWOHAND== nil) then
-		Settings.ESOMinion.VM_TWOHAND = "0"
+		Settings.ESOMinion.VM_TWOHAND = "1"
 	end
 
 		
@@ -317,33 +317,28 @@ end
 
 function eso_vendormanager.UpdateProfiles()
 	-- Grab all Profiles and enlist them in the dropdown field
-	local profiles = ""
-	local found = "None"	
+	local profiles = "Default"
+	local found = "Default"	
 	
 	local profilelist = dirlist(eso_vendormanager.profilepath,".*lua")
 	if ( TableSize(profilelist) > 0) then			
 		local i,profile = next ( profilelist)
-		while i and profile do				
+		while i and profile do			
 			profile = string.gsub(profile, ".lua", "")
-			
-			
+						
 			local file = fileread(eso_vendormanager.profilepath..profile..".lua")
-			if ( TableSize(file) > 0) then
-				local i, line = next (file)					
-				local _, key, id, value = string.match(line, "(%w+)_(%w+)_(%d+)=(.*)")
-				
-				
-					profiles = profiles..","..profile
-					if ( Settings.ESOMinion.gVMprofile ~= nil and Settings.ESOMinion.gVMprofile == profile ) then
-						d("Last Profile found : "..profile)
-						found = profile					
-					end					
-				--end
+			if ( TableSize(file) > 0 and profile ~= "Default" ) then
+								
+				profiles = profiles..","..profile
+				if ( Settings.ESOMinion.gVMprofile ~= nil and Settings.ESOMinion.gVMprofile == profile ) then
+					d("Last VendorProfile found : "..profile)
+					found = profile					
+				end	
 			end
 			i,profile = next ( profilelist,i)
 		end		
 	else
-		ml_error("No Sdsfsd profiles for our current Profession found")		
+		ml_error("No Vendor profiles for our current Character found")		
 	end
 	gVMprofile_listitems = profiles
 	
@@ -391,7 +386,7 @@ end
 
 function eso_vendormanager.CreateNewProfile()
 	--reset all fields 
-    gVMprofile = "None"
+    gVMprofile = "Default"
     Settings.ESOMinion.gVMprofile = gVMprofile
 	eso_vendormanager.InventoryL = {}
 	eso_vendormanager.WhiteL = {}
@@ -494,7 +489,7 @@ function eso_vendormanager.SaveProfile()
 			filename = gVMprofile
 		end
 		--prevent from breaking the code
-		if(filename == "None")then
+		if(filename == nil or filename == "Default" or filename == "")then
 			ml_error("Enter a valid profile name")
 			return
 		end
@@ -561,21 +556,19 @@ function eso_vendormanager.SaveProfile()
 	else
 		ml_error("You need to enter a new Filename first!!")
 	end
-		if(isnew ==true)then
-			gVMprofile = gVMnewname
-			Settings.ESOMinion.gVMprofile = gVMnewname
-			 eso_vendormanager.UpdateProfiles()
-			 gVMnewname = ""
-			 Settings.ESOMinion.gVMprofile = ""
-		end
-		
+	
+	if(isnew ==true)then
+		gVMprofile = gVMnewname
+		Settings.ESOMinion.gVMprofile = gVMnewname
+		eso_vendormanager.UpdateProfiles()
+		gVMnewname = ""		
+	end		
 end
 
 function eso_vendormanager.UpdateCurrentProfileData()
 
 --Read all datas from the profile in directory
-    if ( gVMprofile ~= nil and gVMprofile ~= "" and gVMprofile ~= "None" ) then
-
+    if ( gVMprofile ~= nil and gVMprofile ~= "" and gVMprofile ~= "Default" ) then
 
         local profile = fileread(eso_vendormanager.profilepath..gVMprofile..".lua")
         if ( TableSize(profile) > 0) then
@@ -660,7 +653,7 @@ function eso_vendormanager.UpdateCurrentProfileData()
             d("Profile is empty..")			
         end		
     else
-		gVMprofile = "None"
+		gVMprofile = "Default"
     end
 end
 

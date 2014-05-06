@@ -100,9 +100,9 @@ function ai_unstuck.HandleStuck()
 		table.insert(ai_unstuck.AvoidanceAreas, { x=pPos.x, y=pPos.y, z=pPos.z, r=2 })
 		d("adding AvoidanceArea with size "..tostring(2))
 		NavigationManager:SetAvoidanceAreas(ai_unstuck.AvoidanceAreas)
-		table.insert(Dev.Obstacles, { x=pPos.x, y=pPos.y, z=pPos.z, r=2 })
-		d("Adding new Obstacle with size "..tostring(2))
-		NavigationManager:AddNavObstacles(Dev.Obstacles)
+		--table.insert(Dev.Obstacles, { x=pPos.x, y=pPos.y, z=pPos.z, r=2 })
+		--d("Adding new Obstacle with size "..tostring(2))
+		--NavigationManager:AddNavObstacles(Dev.Obstacles)
 	end
 	Player:Stop() -- force recreation of path
 	

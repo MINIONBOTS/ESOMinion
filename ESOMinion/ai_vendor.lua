@@ -10,10 +10,8 @@ ai_vendor.queue = nil
 RegisterForEvent("EVENT_OPEN_STORE", true)
 RegisterEventHandler("GAME_EVENT_OPEN_STORE",
 	function(...)
-		if 	ml_global_information.running and
-			ai_vendor.queue == nil and 
-			e("IsPlayerInteractingWithObject()")
-		then
+		d("Store opened..")
+		if 	(ml_global_information.running and ai_vendor.queue == nil ) then
 			d("vendor opened")
 			ai_vendor.queue = ai_vendor:CreateNewQueue()
 		end
@@ -26,6 +24,7 @@ RegisterEventHandler("GAME_EVENT_OPEN_STORE",
 RegisterForEvent("EVENT_CLOSE_STORE", true)	
 RegisterEventHandler("GAME_EVENT_CLOSE_STORE",
 	function(...)
+		d("Store closed..")
 		if 	ml_global_information.running then
 			d("vendor closed")
 			ai_vendor.queue = nil
@@ -69,7 +68,7 @@ function ai_vendor:CreateNewQueue()
 			end
 			
 			if not queue.vendored and tonumber(gVendor) == 1 and e("HasAnyJunk(1)") then
-				d("Selling items")
+				d("Selling items")				
 				e("SellAllJunk()")
 				queue.vendored = true	
 				return
@@ -192,9 +191,9 @@ function ai_vendor:markitems()
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 									elseif( (EquipType == g("EQUIP_TYPE_NECK")) and(VM_NECK == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-									elseif( (EquipType == g("EQUIP_TYPE_RING")) and(VM_RING == "1")) then
+									elseif( (EquipType == g("EQUIP_TYPE_RING")) and(VM_RING == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-									elseif( (EquipType == g("EQUIP_TYPE_SHOULDERS")) and(VM_SHOULDERS == "1") )) then
+									elseif( (EquipType == g("EQUIP_TYPE_SHOULDERS")) and(VM_SHOULDERS == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 									elseif( (EquipType == g("EQUIP_TYPE_WAIST")) and(VM_WAIST == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
@@ -210,11 +209,11 @@ function ai_vendor:markitems()
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 									elseif( (EquipType == g("EQUIP_TYPE_FEET")) and(VM_FEET == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-									elseif( (EquipType == g("EQUIP_TYPE_HAND")) and(VM_HAND == "1")) then
+									elseif( (EquipType == g("EQUIP_TYPE_HAND")) and(VM_HAND == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-									elseif( (EquipType == g("EQUIP_TYPE_HEAD")) and(VM_HEAD == "1")) then
+									elseif( (EquipType == g("EQUIP_TYPE_HEAD")) and(VM_HEAD == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
-									elseif( (EquipType == g("EQUIP_TYPE_LEGS")) and(VM_LEGS == "1")) then
+									elseif( (EquipType == g("EQUIP_TYPE_LEGS")) and(VM_LEGS == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 									elseif( (EquipType == g("EQUIP_TYPE_NECK")) and(VM_NECK == "1") ) then
 										e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
@@ -361,20 +360,18 @@ local args = nil
 local numArgs = nil
 local convstring = nil
 local i = 0
-		while(i < convcount+1) do
+	while(i < convcount+1) do
 		
-			args = { e("GetChatterOption("..tostring(i)..")")}    
-			numArgs = #args
-			convstring = args[1]
-			convoption = args[3]
-			if(string.match(tostring(convstring),"Store") or string.match(tostring(convstring),"H\xc3\xa4ndler") or string.match(tostring(convstring),"marchand"))then
-				e("SelectChatterOption("..tostring(i)..")")
-				break
-			end
-			i = i+1
+		args = { e("GetChatterOption("..tostring(i)..")")}    		
+		numArgs = #args
+		convstring = args[1]
+		convoption = args[3]
+		if(string.match(tostring(convstring),"Store") or string.match(tostring(convstring),"H\xc3\xa4ndler") or string.match(tostring(convstring),"marchand"))then
+			e("SelectChatterOption("..tostring(i)..")")
+			break
 		end
-		
-	
+		i = i+1
+	end
 end
 
 --****************************************************************************
@@ -466,8 +463,8 @@ RegisterEventHandler("Module.Initalize",
 			Settings.ESOMinion.gRepair = "1"
 		end		
 		
-		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enabled"),"gVendor",GetString("vendorSettings"))
-		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair",GetString("vendorSettings"))	
+		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor",GetString("settings"))
+		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair",GetString("settings"))	
 		gVendor = Settings.ESOMinion.gVendor
 		gRepair = Settings.ESOMinion.gRepair
 	end
@@ -513,6 +510,7 @@ function c_movetovendor:evaluate()
 	return false
 end
 
+
 function e_movetovendor:execute()
 ml_log("e_gotovendor")
 	local VList = EntityList("nearest,isvendor,onmesh,maxdistance=85")
@@ -533,10 +531,13 @@ ml_log("e_gotovendor")
 						end	
 						return ml_log(true)
 					end
-					if(vendor.distance < 3) then
+					if(vendor.distance <= 4) then
 						Player:Stop()
-						Player:Interact(vendor.id)
-						ai_vendor:selectvendorconv()
+						if ( tonumber(e("GetChatterOptionCount()")) == 0) then
+							Player:Interact(vendor.id)
+						else
+							ai_vendor:selectvendorconv()
+						end
 						ml_global_information.Wait(1000)
 						return ml_log(true)
 					end									
