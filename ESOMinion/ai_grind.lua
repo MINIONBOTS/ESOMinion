@@ -39,6 +39,9 @@ function ai_grind:Init()
 				
 	-- Resting
 	self:add(ml_element:create( "Resting", c_resting, e_resting, 200 ), self.process_elements)	
+	
+	--Potions
+	self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)
 		
 	-- Looting
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
