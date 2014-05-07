@@ -16,7 +16,8 @@ ml_global_information.MarkerMaxLevel = 50
 ml_global_information.BlacklistContentID = ""
 ml_global_information.WhitelistContentID = ""
 ml_global_information.MarkerTime = 0
-
+ml_global_information.Player_SprintingRecharging = false
+ml_global_information.Player_Sprinting = false
 
 function ml_global_information.moduleinit()
 	
@@ -45,6 +46,14 @@ function ml_global_information.moduleinit()
 		Settings.ESOMinion.gAutoLogin = ""
 	end
 	
+  if ( Settings.ESOMinion.gSprint == nil ) then
+		Settings.ESOMinion.gSprint = "0"
+	end
+  
+  if ( Settings.ESOMinion.gSprintStopThreshold == nil ) then
+		Settings.ESOMinion.gSprintStopThreshold = "50"
+	end
+
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
 	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("startStop"),"ml_global_information.startStop")
@@ -59,12 +68,12 @@ function ml_global_information.moduleinit()
 	GUI_NewField(ml_global_information.MainWindow.Name,"MapZoneIndex","dMapZoneIndex",GetString("botStatus"))
 	GUI_NewField(ml_global_information.MainWindow.Name,"LocationName","dLocationName",GetString("botStatus"))
 	
-	
-	
 	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("gatherMode"),"gGather",GetString("settings"))	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useMount"),"gMount",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
 	
 	--GUI_NewButton(ml_global_information.MainWindow.Name, GetString("advancedSettings"), "AdvancedSettings.toggle")
 	--RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
@@ -116,7 +125,9 @@ function ml_global_information.moduleinit()
 	gAttackRange = Settings.ESOMinion.gAttackRange
 	gGather = Settings.ESOMinion.gGather
 	gMount = Settings.ESOMinion.gMount
-	
+	gSprint = Settings.ESOMinion.gSprint
+  gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
+  
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
 	-- setup marker manager callbacks and vars
@@ -338,7 +349,9 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		if (k == "gEnableLog" or
 			k == "gGather" or
 			k == "gMount" or
-			k == "gVendor" or
+			k == "gSprint" or
+			k == "gSprintStopThreshold" or
+      k == "gVendor" or
 			k == "gRepair" or
 			k == "aLogin" or
 			k == "aPassword"

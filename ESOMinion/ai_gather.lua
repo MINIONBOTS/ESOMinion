@@ -174,6 +174,8 @@ end
 
 e_Gathering.tmr = 0
 e_Gathering.threshold = 500
+ml_global_information.Player_Sprinting = false
+ml_global_information.Player_SprintingRecharging = false 
 function e_Gathering:execute()
 	ml_log("e_Gathering ")
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) > 0 ) then
@@ -184,6 +186,20 @@ function e_Gathering:execute()
 			-- MoveIntoInteractRange
 			if ( tPos ) then
 				
+        if (gSprint) then
+          if (ml_global_information.Player_Stamina.percent > tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
+            --e("OnSpecialMoveKeyUp(1)")
+            e("OnSpecialMoveKeyDown(1)")
+            ml_global_information.Player_Sprinting = true
+          elseif (ml_global_information.Player_Stamina.percent > 99 and ml_global_information.Player_SprintingRecharging) then
+            ml_global_information.Player_SprintingRecharging = false
+          elseif (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
+            e("OnSpecialMoveKeyUp(1)")
+            ml_global_information.Player_SprintingRecharging = true
+            ml_global_information.Player_Sprinting = false
+          end
+        end
+        
 				local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,true,true))
 				if (tonumber(navResult) < 0) then
 					d("e_Gathering.MoveIntoRange result: "..tonumber(navResult))

@@ -28,7 +28,11 @@ function eso_skillmanager.ModuleInit()
 	GUI_NewComboBox(eso_skillmanager.mainwindow.name,GetString("profile"),"gSMprofile",GetString("generalSettings"),"None")
 	
 	GUI_NewButton(eso_skillmanager.mainwindow.name,GetString("autoetectSkills"),"SMAutodetect",GetString("skillEditor"))
+	GUI_NewButton(eso_skillmanager.mainwindow.name,GetString("addinterrupt"),"SMAddInterrupt",GetString("skillEditor"))
+	GUI_NewButton(eso_skillmanager.mainwindow.name,GetString("addblock"),"SMAddBlock",GetString("skillEditor"))
 	RegisterEventHandler("SMAutodetect",eso_skillmanager.AutoDetectSkills)
+	RegisterEventHandler("SMAddInterrupt",eso_skillmanager.AddInterrupt)
+	RegisterEventHandler("SMAddBlock",eso_skillmanager.AddBlock)
 	GUI_NewButton(eso_skillmanager.mainwindow.name,GetString("saveProfile"),"SMSaveEvent")	
 	RegisterEventHandler("SMSaveEvent",eso_skillmanager.SaveProfile)	
 	GUI_NewField(eso_skillmanager.mainwindow.name,GetString("newProfileName"),"gSMnewname",GetString("skillEditor"))
@@ -93,10 +97,14 @@ function eso_skillmanager.ModuleInit()
 	RegisterEventHandler("SMESkillDOWNEvent",eso_skillmanager.EditorButtonHandler)	
 	GUI_NewButton(eso_skillmanager.editwindow.name,"UP","SMESkillUPEvent")
 	RegisterEventHandler("SMESkillUPEvent",eso_skillmanager.EditorButtonHandler)
+    
 		
+  GUI_NewCheckbox(eso_skillmanager.editwindow.name,GetString("targetIsCasting"),"SKM_ISCASTING","SkillDetails")
+
 	eso_skillmanager.UpdateProfiles() -- Update the profiles dropdownlist
 	GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
 	eso_skillmanager.UpdateCurrentProfileData()	
+  
 end
 
 function eso_skillmanager.UpdateCurrentProfileData()
@@ -159,7 +167,9 @@ function eso_skillmanager.UpdateCurrentProfileData()
 								elseif ( key == "TCondC" )then newskill.tcondc = tonumber(value)								
 								elseif ( key == "TBoonC" )then newskill.tboonc = tonumber(value)
 								elseif ( key == "PrevID" )then newskill.previd = tostring(value)
-								elseif ( key == "THROTTLE" )then newskill.throttle = tonumber(value)			
+								elseif ( key == "THROTTLE" )then newskill.throttle = tonumber(value)
+								elseif ( key == "ISCASTING" )then newskill.iscasting = tostring(value)
+			
 							end
 						else
 							ml_error("Error loading inputline: Key: "..(tostring(key)).." value:"..tostring(value))
@@ -242,6 +252,7 @@ function eso_skillmanager.GUIVarUpdate(Event, NewVals, OldVals)
 		elseif ( k == "SKM_TBoonC" ) then eso_skillmanager.SkillProfile[SKM_Prio].tboonc = tonumber(v)
 		elseif ( k == "SKM_PrevID" ) then eso_skillmanager.SkillProfile[SKM_Prio].previd = v
 		elseif ( k == "SKM_THROTTLE" ) then eso_skillmanager.SkillProfile[SKM_Prio].throttle = tonumber(v)			
+		elseif ( k == "SKM_ISCASTING" ) then eso_skillmanager.SkillProfile[SKM_Prio].iscasting = tostring(v)			
 		end
 	end
 end
@@ -330,42 +341,42 @@ function eso_skillmanager.SaveProfile()
 		local string2write = "SKM_Profession_"..tostring(profession).."="..tostring(profession).."\n"
 		local skID,skill = next (eso_skillmanager.SkillProfile)
 		while skID and skill do
-			string2write = string2write.."SKM_NAME="..skill.name.."\n"
-			string2write = string2write.."SKM_ID="..skill.skillID.."\n"
-			string2write = string2write.."SKM_ATKRNG="..skill.atkrng.."\n"			
-			string2write = string2write.."SKM_Prio="..skill.prio.."\n"
-			string2write = string2write.."SKM_LOS="..skill.los.."\n"			
-			string2write = string2write.."SKM_SKILLTYPE="..skill.skilltype.."\n"			
-			string2write = string2write.."SKM_CASTTIME="..skill.casttime.."\n"			
-			string2write = string2write.."SKM_MinR="..skill.minRange.."\n"
-			string2write = string2write.."SKM_MaxR="..skill.maxRange.."\n" 
-			string2write = string2write.."SKM_TType="..skill.ttype.."\n"
-			string2write = string2write.."SKM_OutOfCombat="..skill.ooc.."\n"
-			string2write = string2write.."SKM_PHPGT="..skill.phpgt.."\n" 
-			string2write = string2write.."SKM_PHPLT="..skill.phplt.."\n"			
-			string2write = string2write.."SKM_POWERTYPE="..skill.powertype.."\n" 
-			string2write = string2write.."SKM_PPowGT="..skill.ppowgt.."\n" 
-			string2write = string2write.."SKM_PPowLT="..skill.ppowlt.."\n" 
-			string2write = string2write.."SKM_PEff1="..skill.peff1.."\n" 
-			string2write = string2write.."SKM_PCondC="..skill.pcondc.."\n" 
-			string2write = string2write.."SKM_PNEff1="..skill.pneff1.."\n" 								
-			string2write = string2write.."SKM_TMove="..skill.tmove.."\n" 
-			string2write = string2write.."SKM_THPGT="..skill.thpgt.."\n" 
-			string2write = string2write.."SKM_THPLT="..skill.thplt.."\n" 
-			string2write = string2write.."SKM_TECount="..skill.tecount.."\n" 
-			string2write = string2write.."SKM_TERange="..skill.terange.."\n" 
-			string2write = string2write.."SKM_TACount="..skill.tacount.."\n" 
-			string2write = string2write.."SKM_TARange="..skill.tarange.."\n" 	
-			string2write = string2write.."SKM_TEff1="..skill.teff1.."\n" 
-			string2write = string2write.."SKM_TNEff1="..skill.tneff1.."\n" 
-			string2write = string2write.."SKM_TCondC="..skill.tcondc.."\n" 
-			string2write = string2write.."SKM_PBoonC="..skill.pboonc.."\n" 
-			string2write = string2write.."SKM_TBoonC="..skill.tboonc.."\n"
-			string2write = string2write.."SKM_PrevID="..skill.previd.."\n"
-			string2write = string2write.."SKM_THROTTLE="..skill.throttle.."\n"
-			string2write = string2write.."SKM_END=0\n"
-		
-			skID,skill = next (eso_skillmanager.SkillProfile,skID)
+      string2write = string2write.."SKM_NAME="..skill.name.."\n"
+      string2write = string2write.."SKM_ID="..skill.skillID.."\n"
+      string2write = string2write.."SKM_ATKRNG="..skill.atkrng.."\n"			
+      string2write = string2write.."SKM_Prio="..skill.prio.."\n"
+      string2write = string2write.."SKM_LOS="..skill.los.."\n"			
+      string2write = string2write.."SKM_SKILLTYPE="..skill.skilltype.."\n"			
+      string2write = string2write.."SKM_CASTTIME="..skill.casttime.."\n"			
+      string2write = string2write.."SKM_MinR="..skill.minRange.."\n"
+      string2write = string2write.."SKM_MaxR="..skill.maxRange.."\n" 
+      string2write = string2write.."SKM_TType="..skill.ttype.."\n"
+      string2write = string2write.."SKM_OutOfCombat="..skill.ooc.."\n"
+      string2write = string2write.."SKM_PHPGT="..skill.phpgt.."\n" 
+      string2write = string2write.."SKM_PHPLT="..skill.phplt.."\n"			
+      string2write = string2write.."SKM_POWERTYPE="..skill.powertype.."\n" 
+      string2write = string2write.."SKM_PPowGT="..skill.ppowgt.."\n" 
+      string2write = string2write.."SKM_PPowLT="..skill.ppowlt.."\n" 
+      string2write = string2write.."SKM_PEff1="..skill.peff1.."\n" 
+      string2write = string2write.."SKM_PCondC="..skill.pcondc.."\n" 
+      string2write = string2write.."SKM_PNEff1="..skill.pneff1.."\n" 								
+      string2write = string2write.."SKM_TMove="..skill.tmove.."\n" 
+      string2write = string2write.."SKM_THPGT="..skill.thpgt.."\n" 
+      string2write = string2write.."SKM_THPLT="..skill.thplt.."\n" 
+      string2write = string2write.."SKM_TECount="..skill.tecount.."\n" 
+      string2write = string2write.."SKM_TERange="..skill.terange.."\n" 
+      string2write = string2write.."SKM_TACount="..skill.tacount.."\n" 
+      string2write = string2write.."SKM_TARange="..skill.tarange.."\n" 	
+      string2write = string2write.."SKM_TEff1="..skill.teff1.."\n" 
+      string2write = string2write.."SKM_TNEff1="..skill.tneff1.."\n" 
+      string2write = string2write.."SKM_TCondC="..skill.tcondc.."\n" 
+      string2write = string2write.."SKM_PBoonC="..skill.pboonc.."\n" 
+      string2write = string2write.."SKM_TBoonC="..skill.tboonc.."\n"
+      string2write = string2write.."SKM_PrevID="..skill.previd.."\n"
+      string2write = string2write.."SKM_THROTTLE="..skill.throttle.."\n"
+      string2write = string2write.."SKM_ISCASTING="..skill.iscasting.."\n"
+      string2write = string2write.."SKM_END=0\n"
+      skID,skill = next (eso_skillmanager.SkillProfile,skID)
 		end	
 		d(filewrite(eso_skillmanager.profilepath ..filename..".lua",string2write))
 		
@@ -391,6 +402,25 @@ end
 function eso_skillmanager.AutoDetectSkills()
 	eso_skillmanager.RecordSkillTmr = ml_global_information.Now
 	eso_skillmanager.SkillRecordingActive = true
+end
+
+function eso_skillmanager.AddInterrupt()
+ 	local interrupt = { }
+  interrupt.skillID = -2
+  interrupt.id = -2
+  interrupt.name = "Interrupt"
+  interrupt.throttle = 100
+  interrupt.iscasting = "1"
+  eso_skillmanager.CreateNewSkillEntry(interrupt)
+end
+
+function eso_skillmanager.AddBlock()
+	local block = { }
+  block.skillID = -1
+  block.id = -1
+  block.name = "Block"
+  block.iscasting = "0"
+  eso_skillmanager.CreateNewSkillEntry(block)
 end
 
 function eso_skillmanager.UpdateProfiles()
@@ -470,12 +500,10 @@ function eso_skillmanager.CheckForNewSkills()
 					skill.skillID = skill.id -- ya I'm lazy
 					eso_skillmanager.CreateNewSkillEntry(skill)
 				end
-			
-			
 			id,skill = next(ABList,id)
 		end	
-	end	
-		
+	end	  
+  
 	GUI_UnFoldGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
 end
 
@@ -531,7 +559,8 @@ function eso_skillmanager.CreateNewSkillEntry(skill)
 				pboonc = skill.pboonc or 0,
 				tboonc = skill.tboonc or 0,
 				previd = skill.previd or "",
-				throttle = skill.throttle or 0
+				throttle = skill.throttle or 0,
+        iscasting = skill.iscasting or "0"
 			}		
 		end		
 	end
@@ -579,6 +608,7 @@ function eso_skillmanager.EditSkill(event)
 		SKM_TBoonC = tonumber(skill.tboonc) or 0
 		SKM_PrevID = skill.previd or ""
 		SKM_THROTTLE = tonumber(skill.throttle) or 0
+    SKM_ISCASTING = skill.iscasting or "0"
 	end
 end
 
@@ -652,7 +682,7 @@ function eso_skillmanager.CanCast( target, skill )
 	local ability = AbilityList:Get(skill.skillID)
 	local targetID = target.id
 		
-	if ( ability and AbilityList:IsTargetInRange(ability.id,targetID) and AbilityList:CanCast(ability.id,targetID) == 10 ) then
+	if ( skill.skillID <0 or (ability and AbilityList:IsTargetInRange(ability.id,targetID) and AbilityList:CanCast(ability.id,targetID) == 10 )) then
 			
 		-- Check custom conditions from Skillmanager profile
 		if ( skill.throttle	> 0 and skill.timelastused and ml_global_information.Now - skill.timelastused < skill.throttle)  then return false end
@@ -676,7 +706,8 @@ function eso_skillmanager.CanCast( target, skill )
 		if ( skill.maxRange > 0 and target.distance > skill.maxRange)	 then return false end
 		if ( skill.thpgt	> 0 and skill.thpgt > target.hp.percent)	 then return false end
 		if ( skill.thplt 	> 0 and skill.thplt < target.hp.percent)	 then return false end
-		--if ( skill.los == "Yes" and not target.los ) 					then return false
+		if ( skill.iscasting == "1" and not (target.iscasting) ) then return false end -- target.ischanneling 
+    --if ( skill.los == "Yes" and not target.los ) 					then return false
 		
 		--ALLIE AE CHECK
 		if ( skill.tacount > 0 and skill.tarange > 0) then
@@ -754,13 +785,25 @@ function eso_skillmanager.AttackTarget( TargetID )
 			for prio,skill in pairs(eso_skillmanager.SkillProfile) do
 				
 				if ( skill.skilltype == GetString("smsktypedmg") and eso_skillmanager.CanCast( target, skill ) ) then
-						
-					if ( AbilityList:Cast(skill.skillID,TargetID) ) then
-						
+					
+          if (skill.skillID <0) then
+              if (skill.skillID == -1) then
+                 d("blocking "..target.name)						
+                 e("OnSpecialMoveKeyDown(0)")
+                 e("OnSpecialMoveKeyUp(0)")
+                 eso_skillmanager.prevSkillID = skill.skillID
+                 skill.timelastused = ml_global_information.Now
+              elseif (skill.skillID == -2) then
+                 d("interrupting "..target.name)						
+                 e("OnSpecialMoveKeyDown(3)")
+                 e("OnSpecialMoveKeyUp(3)")
+                 eso_skillmanager.prevSkillID = skill.skillID
+                 skill.timelastused = ml_global_information.Now
+              end
+          elseif ( AbilityList:Cast(skill.skillID,TargetID) ) then
 						d("Casting.."..skill.name.." at "..target.name)						
 						eso_skillmanager.prevSkillID = skill.skillID
 						skill.timelastused = ml_global_information.Now
-						
 						-- Add a tiny delay so "iscasting" gets true for this spell, not interrupting it on the next pulse
 						if ( skill.casttime > 0 ) then							
 							eso_skillmanager.lastcastTmr = ml_global_information.Now + skill.casttime - 500
