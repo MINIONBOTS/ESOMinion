@@ -35,9 +35,9 @@ function ai_combatAttack:Init()
 	--Vendoring
 	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
 	
-		
-	--Using Potions
-	--self:add(ml_element:create( "UsePotions", c_usePotions, e_usePotions , 190 ), self.process_elements)
+	--Potions
+	self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)
+	
 	-- Looting
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 	
@@ -54,7 +54,8 @@ function ai_combatAttack:Init()
     self:AddTaskCheckCEs()
 end
 function ai_combatAttack:task_complete_eval()
-	if ( Player.isswimming == true or c_dead:evaluate() == true or (c_GotoAndKill:evaluate() == false and c_Aggro:evaluate() == false)) then 
+
+	if ( (Player.isswimming == true or c_dead:evaluate() == true) or (c_GotoAndKill:evaluate() == false and c_Aggro:evaluate() == false)) then 
 		Player:Stop()
 		return true
 	end
@@ -165,7 +166,7 @@ c_UseMount = inheritsFrom( ml_cause )
 e_UseMount = inheritsFrom( ml_effect )
 function c_UseMount:evaluate()
 	if(gMount == "1") then
-		if ( (Player.isswimming == false) and (e("IsMounted()") == false) and (Player.iscasting == false) and e("GetNumStableSlots()") > 0 ) then
+		if ( (Player.isswimming == false) and (e("IsMounted()") == false) and (Player.iscasting == false)) then
 			local ppos = ml_global_information.Player_Position
 			if ( Distance3D(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,ppos.x,ppos.y,ppos.z) > 35 ) then
 				return true
@@ -380,168 +381,102 @@ function e_GetNextTarget:execute()
 end
 
 
+
 --------------
 c_usePotions = inheritsFrom( ml_cause )
 e_usePotions = inheritsFrom( ml_effect )
-e_lastpotionHPslot = nil
-e_lastpotionMPslot = nil
-e_lastpotionSTAslot = nil
-e_usehealth = false
-e_usemagicka = false
-e_useStamina = false
-
-
+c_usePotions.throttle = 1000
 function c_usePotions:evaluate()
-	if((gHPpot == "0") and (gMPpot == "0") and (gSTApot == "0"))then
+	if(gPot == "0")then
 		return false
 	end
+	if(gPotiontype == "Health")then
+		if((ml_global_information.Player_InCombat == true) and (Player.hp.percent <= tonumber(gPotvalue))) then
+			if(haveAndNotCoolDownPotion(16) == true)then
+				d("using potion:"..gPotiontype)
+				ml_log("using potion :"..gPotiontype)
+				return true
+			end
+		end
+	elseif(gPotiontype =="Magicka")then
+		if((ml_global_information.Player_InCombat == true) and (ml_global_information.Player_Magicka.percent <= tonumber(gPotvalue))) then
+			if(haveAndNotCoolDownPotion(16) == true)then
+				d("using potion:"..gPotiontype)
+				ml_log("using potion :"..gPotiontype)
+				return true
+			end
+		end
+	elseif(gPotiontype =="Stamina")then
+		if((ml_global_information.Player_InCombat == true) and (ml_global_information.Player_Stamina.percent <= tonumber(gPotvalue))) then
+			if(haveAndNotCoolDownPotion(16) == true)then
+				d("using potion:"..gPotiontype)
+				ml_log("using potion :"..gPotiontype)
+				return true
+			end
+		end
+	end
 	
-    if((ml_global_information.Player_InCombat == true) and (Player.hp.percent < tonumber(gHPpotvalue))) then
-		if(gHPpot == "1")then
-			d(Player.hp.percent)
-
-			if(e_lastpotionHPslot == nil)then
-				e_usehealth = true
-				return true
-			end
-				local args2 = { e("GetItemCooldownInfo(1,"..tostring(e_lastpotionHPslot)..")")}    
-				local numArgs2 = #args2
-				local potioncooldown = args2[1]
-				if(tonumber(potioncooldown) == 0)then
-					e_usehealth = true
-					return true
-				end
-		end
-	end
-	if((ml_global_information.Player_InCombat == true) and (ml_global_information.Player_Magicka.percent< tonumber(gMPpotvalue))) then
-		if(gMPpot == "1")then
-			if(e_lastpotionMPslot == nil)then
-				e_usemagicka = true
-				return true
-			end
-				local args2 = { e("GetItemCooldownInfo(1,"..tostring(e_lastpotionMPslot)..")")}    
-				local numArgs2 = #args2
-				local potioncooldown = args2[1]
-				if(tonumber(potioncooldown) == 0)then
-					e_usemagicka = true
-					return true
-				end
-		end
-	end
-	if((ml_global_information.Player_InCombat == true) and  (ml_global_information.Player_Stamina.percent < tonumber(gSTApotvalue) )) then
-		if(gSTApot == "1")then
-			if(e_lastpotionMPslot == nil)then
-				e_useStamina = true
-				return true
-			end
-				local args2 = { e("GetItemCooldownInfo(1,"..tostring(e_lastpotionSTAslot)..")")}    
-				local numArgs2 = #args2
-				local potioncooldown = args2[1]
-				if(tonumber(potioncooldown) == 0)then
-					e_useStamina = true
-					return true
-				end
-		end
-	end
 	return false
 end
 
 
+
 function e_usePotions:execute()
-	local InventoryList = {}
-	local args = { e("GetBagInfo(1)")}    
-	local numArgs = #args
-	local InventoryMax = args[2]
-	if(tonumber(Player.hp.percent) <=tonumber(gHPpotvalue))then
-		if(gHPpot == "1")then
-			local i = 0
-				if(e_usehealth == true) then
-					while(i < tonumber(InventoryMax)) do
-						if(getPotionType(i) == "health") then
-						local linkitem = e("GetItemLink(1,"..tostring(i)..",0)")
-							if(tonumber(eso_autoequip.getItemLevel(linkitem)) >= tonumber(gHPpotlevel))then	
-								d("enter1")
-								local args2 = { e("GetItemCooldownInfo(1,"..tostring(i)..")")}    
-								local numArgs2 = #args2
-								local potioncooldown = args2[1]
-								 d(potioncooldown)
-								if(tonumber(potioncooldown) == 0)then
-									 e("UseItem(1,"..tostring(i)..")") -- using the potion
-										e_lastpotionHPslot = i
-										e_usehealth = false
-									 ml_log("Using Health Potion")
-									 break
-								end
-							end
-						end
-						i = i + 1
-					end
-				end
-		end
-	end
-	if(ml_global_information.Player_Magicka.percent< tonumber(gMPpotvalue)) then
-		if(gMPpot == "1")then
-		local i = 0
-			if(e_usemagicka == true)then
-				while(i < tonumber(InventoryMax)) do
-					if(getPotionType(i) == "magicka") then
-						local linkitem = e("GetItemLink(1,"..tostring(i)..",0)")
-						if(tonumber(eso_autoequip.getItemLevel(linkitem)) >= tonumber(gMPpotlevel))then
-							local args2 = { e("GetItemCooldownInfo(1,"..tostring(i)..")")}    
-							local numArgs2 = #args2
-							local potioncooldown = args2[1]
-							if(tonumber(potioncooldown) == 0)then
-								e("UseItem(1,"..tostring(i)..")") -- using the potion
-								e_lastpotionMPslot = i
-								e_usemagicka = false
-								 ml_log("Using Magicka Potion")
-								break
-							end
-						end
-					end
-					i = i + 1
-				end
-			end
-		end
-	end
-	if(ml_global_information.Player_Stamina.percent < tonumber(gSTApotvalue)) then
-		if(gSTApot == "1")then
-		local i = 0
-			if(e_useStamina == true)then
-				while(i < tonumber(InventoryMax)) do
-					if(getPotionType(i) == "stamina") then
-						local linkitem = e("GetItemLink(1,"..tostring(i)..",0)")
-						if(tonumber(eso_autoequip.getItemLevel(linkitem)) >= tonumber(gSTApotlevel))then
-							local args2 = { e("GetItemCooldownInfo(1,"..tostring(i)..")")}    
-							local numArgs2 = #args2
-							local potioncooldown = args2[1]
-							if(tonumber(potioncooldown) == 0)then
-								 e("UseItem(1,"..tostring(i)..")") -- using the potion
-									e_lastpotionSTAslot = i
-									e_useStamina = false
-									ml_log("Using Stamina Potion")
-								 break
-							end
-						end
-					end
-					i = i + 1
-				end
-			end
-		end
-	end
-	return ml_log(false)
+e("OnSlotUp(16)")
+return false
 end
 
+------------------------------------------------------------------------
+--Todo : add multilanguage : Health -> Lebens, lebens, Sant\xc3\xa9 , sant\xc3\xa9
+						--   Stamina -> Ausdauer, ausdauer, Vigueur, vigueur
+						---  Magicka -> Magicka , magicka,  Magie, magie
+------------------------------------------------------------------------
+
+function haveAndNotCoolDownPotion(slotID)  
+local potionCount = e("GetSlotItemCount("..tostring(slotID)..")")
+local args = {e("GetSlotCooldownInfo("..tostring(slotID)..")")}
+local isNotCoolDown = args[3]
+local slotname = e("GetSlotName(16)")
+	if(string.match(slotname,gPotiontype) or string.match(slotname,string.lower(gPotiontype)))then
+		if(tonumber(potionCount)>0)then
+			if(isNotCoolDown == true) then
+				return true
+			end
+			return false
+		end
+		checkForNewPotions(slotID)
+		return false
+	end
+	checkForNewPotions(slotID)
+	return false
+end
+
+
+
+function checkForNewPotions(slotID) -- place the potion in your quickslot based on your UI choice.  If stack is at 0 then it check if you have another kind of those potions.
+local inventory = { e("GetBagInfo(1)")}    
+local InventoryMax = inventory[2]
+local i = 0
+	while(i< tonumber(InventoryMax))do
+		if(getPotionType(i) == gPotiontype)then
+			e("SelectSlotItem(1,"..tostring(i)..","..tostring(slotID)..")")
+			break
+		end
+		i = i+1
+	end
+	
+end
+----------------------------------
 function getPotionType(slotID)
 
 local links = e("GetItemLink(1,"..slotID..",1)")
 local color, id = string.match(tostring(links),"(%w+):item:(%w+):")
 	if(tonumber(id) == 27036 )then
-		return "health"
+		return "Health"
 	elseif(tonumber(id) == 27037 )then
-		return "magicka"
+		return "Magicka"
 	elseif(tonumber(id) == 27038)then
-		return "stamina"
+		return "Stamina"
 	end
 
 end

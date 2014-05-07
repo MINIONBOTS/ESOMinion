@@ -45,6 +45,15 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gAutoLogin == nil ) then
 		Settings.ESOMinion.gAutoLogin = ""
 	end
+	if ( Settings.ESOMinion.gPot == nil ) then
+		Settings.ESOMinion.gPot = "0"
+	end
+	if ( Settings.ESOMinion.gPotiontype == nil ) then
+		Settings.ESOMinion.gPotiontype = "Health"
+	end
+	if ( Settings.ESOMinion.gPotvalue == nil ) then
+		Settings.ESOMinion.gPotvalue = "27"
+	end
 	
   if ( Settings.ESOMinion.gSprint == nil ) then
 		Settings.ESOMinion.gSprint = "0"
@@ -74,6 +83,10 @@ function ml_global_information.moduleinit()
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useMount"),"gMount",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
 	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
+	
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
+	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("potiontype"),"gPotiontype",GetString("potionssettings"),"Health,Stamina,Magicka")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("potusebelow"),"gPotvalue",GetString("potionssettings"),"1","100")
 	
 	--GUI_NewButton(ml_global_information.MainWindow.Name, GetString("advancedSettings"), "AdvancedSettings.toggle")
 	--RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
@@ -128,6 +141,11 @@ function ml_global_information.moduleinit()
 	gSprint = Settings.ESOMinion.gSprint
   gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
   
+	gPot = Settings.ESOMinion.gPot
+	gPotiontype = Settings.ESOMinion.gPotiontype
+	gPotlevel = Settings.ESOMinion.gPotlevel
+	gPotvalue = Settings.ESOMinion.gPotvalue 
+	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
 	-- setup marker manager callbacks and vars
@@ -354,7 +372,10 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
       k == "gVendor" or
 			k == "gRepair" or
 			k == "aLogin" or
-			k == "aPassword"
+			k == "aPassword" or
+			k == "gPot" or
+			k == "gPotiontype" or
+			k == "gPotvalue"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v

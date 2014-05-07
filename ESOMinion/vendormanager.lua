@@ -22,7 +22,7 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.gInventory = "None"
 	end
 	if (Settings.ESOMinion.VM_ATRASH == nil) then
-		Settings.ESOMinion.VM_ATRASH = "0"
+		Settings.ESOMinion.VM_ATRASH = "1"
 	end
 	if (Settings.ESOMinion.VM_ANORMAL == nil) then
 		Settings.ESOMinion.VM_ANORMAL = "0"
@@ -34,7 +34,7 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.VM_AARCANE = "0"
 	end
 	if (Settings.ESOMinion.VM_WTRASH == nil) then
-		Settings.ESOMinion.VM_WTRASH = "0"
+		Settings.ESOMinion.VM_WTRASH = "1"
 	end
 	if (Settings.ESOMinion.VM_WNORMAL == nil) then
 		Settings.ESOMinion.VM_WNORMAL = "0"
@@ -121,43 +121,43 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.VM_GLYPHJEWELRY = "0"
 	end
 	if (Settings.ESOMinion.VM_CHEST == nil) then
-		Settings.ESOMinion.VM_CHEST = "0"
+		Settings.ESOMinion.VM_CHEST = "1"
 	end
 	if (Settings.ESOMinion.VM_FEET == nil) then
-		Settings.ESOMinion.VM_FEET = "0"
+		Settings.ESOMinion.VM_FEET = "1"
 	end
 	if (Settings.ESOMinion.VM_HAND == nil) then
-		Settings.ESOMinion.VM_HAND = "0"
+		Settings.ESOMinion.VM_HAND = "1"
 	end
 	if (Settings.ESOMinion.VM_CHEST== nil) then
-		Settings.ESOMinion.VM_CHEST = "0"
+		Settings.ESOMinion.VM_CHEST = "1"
 	end
 	if (Settings.ESOMinion.VM_HEAD == nil) then
-		Settings.ESOMinion.VM_HEAD = "0"
+		Settings.ESOMinion.VM_HEAD = "1"
 	end
 	if (Settings.ESOMinion.VM_LEGS == nil) then
-		Settings.ESOMinion.VM_LEGS = "0"
+		Settings.ESOMinion.VM_LEGS = "1"
 	end
 	if (Settings.ESOMinion.VM_SHOULDERS== nil) then
-		Settings.ESOMinion.VM_SHOULDERS = "0"
+		Settings.ESOMinion.VM_SHOULDERS = "1"
 	end
 	if (Settings.ESOMinion.VM_WAIST== nil) then
-		Settings.ESOMinion.VM_WAIST = "0"
+		Settings.ESOMinion.VM_WAIST = "1"
 	end
 	if (Settings.ESOMinion.VM_NECK== nil) then
-		Settings.ESOMinion.VM_NECK = "0"
+		Settings.ESOMinion.VM_NECK = "1"
 	end
 	if (Settings.ESOMinion.VM_RING== nil) then
-		Settings.ESOMinion.VM_RING = "0"
+		Settings.ESOMinion.VM_RING = "1"
 	end
 	if (Settings.ESOMinion.VM_OFFHAND== nil) then
-		Settings.ESOMinion.VM_OFFHAND = "0"
+		Settings.ESOMinion.VM_OFFHAND = "1"
 	end
 	if (Settings.ESOMinion.VM_ONEHAND== nil) then
-		Settings.ESOMinion.VM_ONEHAND = "0"
+		Settings.ESOMinion.VM_ONEHAND = "1"
 	end
 	if (Settings.ESOMinion.VM_TWOHAND== nil) then
-		Settings.ESOMinion.VM_TWOHAND = "0"
+		Settings.ESOMinion.VM_TWOHAND = "1"
 	end
 
 		
@@ -317,33 +317,28 @@ end
 
 function eso_vendormanager.UpdateProfiles()
 	-- Grab all Profiles and enlist them in the dropdown field
-	local profiles = ""
-	local found = "None"	
+	local profiles = "Default"
+	local found = "Default"	
 	
 	local profilelist = dirlist(eso_vendormanager.profilepath,".*lua")
 	if ( TableSize(profilelist) > 0) then			
 		local i,profile = next ( profilelist)
-		while i and profile do				
+		while i and profile do			
 			profile = string.gsub(profile, ".lua", "")
-			
-			
+						
 			local file = fileread(eso_vendormanager.profilepath..profile..".lua")
-			if ( TableSize(file) > 0) then
-				local i, line = next (file)					
-				local _, key, id, value = string.match(line, "(%w+)_(%w+)_(%d+)=(.*)")
-				
-				
-					profiles = profiles..","..profile
-					if ( Settings.ESOMinion.gVMprofile ~= nil and Settings.ESOMinion.gVMprofile == profile ) then
-						d("Last Profile found : "..profile)
-						found = profile					
-					end					
-				--end
+			if ( TableSize(file) > 0 and profile ~= "Default" ) then
+								
+				profiles = profiles..","..profile
+				if ( Settings.ESOMinion.gVMprofile ~= nil and Settings.ESOMinion.gVMprofile == profile ) then
+					d("Last VendorProfile found : "..profile)
+					found = profile					
+				end	
 			end
 			i,profile = next ( profilelist,i)
 		end		
 	else
-		ml_error("No Sdsfsd profiles for our current Profession found")		
+		ml_error("No Vendor profiles for our current Character found")		
 	end
 	gVMprofile_listitems = profiles
 	
@@ -391,7 +386,7 @@ end
 
 function eso_vendormanager.CreateNewProfile()
 	--reset all fields 
-    gVMprofile = "None"
+    gVMprofile = "Default"
     Settings.ESOMinion.gVMprofile = gVMprofile
 	eso_vendormanager.InventoryL = {}
 	eso_vendormanager.WhiteL = {}
@@ -494,7 +489,7 @@ function eso_vendormanager.SaveProfile()
 			filename = gVMprofile
 		end
 		--prevent from breaking the code
-		if(filename == "None")then
+		if(filename == nil or filename == "Default" or filename == "")then
 			ml_error("Enter a valid profile name")
 			return
 		end
@@ -561,21 +556,19 @@ function eso_vendormanager.SaveProfile()
 	else
 		ml_error("You need to enter a new Filename first!!")
 	end
-		if(isnew ==true)then
-			gVMprofile = gVMnewname
-			Settings.ESOMinion.gVMprofile = gVMnewname
-			 eso_vendormanager.UpdateProfiles()
-			 gVMnewname = ""
-			 Settings.ESOMinion.gVMprofile = ""
-		end
-		
+	
+	if(isnew ==true)then
+		gVMprofile = gVMnewname
+		Settings.ESOMinion.gVMprofile = gVMnewname
+		eso_vendormanager.UpdateProfiles()
+		gVMnewname = ""		
+	end		
 end
 
 function eso_vendormanager.UpdateCurrentProfileData()
 
 --Read all datas from the profile in directory
-    if ( gVMprofile ~= nil and gVMprofile ~= "" and gVMprofile ~= "None" ) then
-
+    if ( gVMprofile ~= nil and gVMprofile ~= "" and gVMprofile ~= "Default" ) then
 
         local profile = fileread(eso_vendormanager.profilepath..gVMprofile..".lua")
         if ( TableSize(profile) > 0) then
@@ -595,51 +588,51 @@ function eso_vendormanager.UpdateCurrentProfileData()
 							if ( key == "NAME" )then 
 						    newitem = value
 							 table.insert(unsortedItemList,tonumber(i),newitem)
-								elseif ( key == "ATRASH" )then VM_ATRASH = tonumber(value)
-								elseif ( key == "ANORMAL" )then VM_ANORMAL = tonumber(value)
-								elseif ( key == "AMAGIC" )then VM_AMAGIC = tonumber(value)
-								elseif ( key == "AARCANE" )then VM_AARCANE = tonumber(value)
-								elseif ( key == "WTRASH" )then VM_WTRASH = tonumber(value)
-								elseif ( key == "WNORMAL" )then VM_WNORMAL = tonumber(value)
-								elseif ( key == "WMAGIC" )then VM_WMAGIC = tonumber(value)
-								elseif ( key == "WARCANE" )then VM_WARCANE = tonumber(value)
-								elseif ( key == "FTRASH" )then VM_FTRASH = tonumber(value)
-								elseif ( key == "FNORMAL" )then VM_FNORMAL = tonumber(value)
-								elseif ( key == "FMAGIC" )then VM_FMAGIC = tonumber(value)
-								elseif ( key == "FARCANE" )then VM_FARCANE = tonumber(value)
-								elseif ( key == "ADDITIVE" )then VM_ADDITIVE = tonumber(value)
-								elseif ( key == "ALCHEMYBASE" )then VM_ALCHEMYBASE = tonumber(value)
-								elseif ( key == "ENCHANTRUNE" )then VM_ENCHANTRUNE = tonumber(value)
-								elseif ( key == "REAGENT" )then VM_REAGENT = tonumber(value)
-								elseif ( key == "RAWMATERIAL" )then VM_RAWMATERIAL = tonumber(value)
-								elseif ( key == "RECIPE" )then VM_RECIPE = tonumber(value)
-								elseif ( key == "INGREDIENT" )then VM_INGREDIENT = tonumber(value)
-								elseif ( key == "PPOTIONS" )then VM_PPOTIONS = tonumber(value)
-								elseif ( key == "COLLECTIBLE" )then VM_COLLECTIBLE = tonumber(value)
-								elseif ( key == "COSTUME" )then VM_COSTUME = tonumber(value)
-								elseif ( key == "DRINK" )then VM_DRINK = tonumber(value)
-								elseif ( key == "LOCKPICK" )then VM_LOCKPICK = tonumber(value)
-								elseif ( key == "LURE" )then VM_LURE = tonumber(value)
-								elseif ( key == "SOULGEM" )then VM_SOULGEM = tonumber(value)
-								elseif ( key == "SPICE" )then VM_SPICE = tonumber(value)
-								elseif ( key == "STYLEMAT" )then VM_STYLEMAT = tonumber(value)
-								elseif ( key == "ITEMTRASH" )then VM_ITEMTRASH = tonumber(value)
-								elseif ( key == "TROPHY" )then VM_TROPHY = tonumber(value)
-								elseif ( key == "GLYPHARMOR" )then VM_GLYPHARMOR = tonumber(value)
-								elseif ( key == "GLYPHWEAPON" )then VM_GLYPHWEAPON = tonumber(value)
-								elseif ( key == "GLYPHJEWELRY" )then VM_GLYPHJEWELRY = tonumber(value)
-								elseif ( key == "CHEST" )then VM_CHEST = tonumber(value)
-								elseif ( key == "FEET" )then VM_FEET = tonumber(value)
-								elseif ( key == "HAND" )then VM_HAND = tonumber(value)
-								elseif ( key == "HEAD" )then VM_HEAD = tonumber(value)
-								elseif ( key == "LEGS" )then VM_LEGS = tonumber(value)
-								elseif ( key == "NECK" )then VM_NECK = tonumber(value)
-								elseif ( key == "OFFHAND" )then VM_OFFHAND = tonumber(value)
-								elseif ( key == "ONEHAND" )then VM_ONEHAND = tonumber(value)
-								elseif ( key == "RING" )then VM_RING = tonumber(value)
-								elseif ( key == "SHOULDERS" )then VM_SHOULDERS = tonumber(value)
-								elseif ( key == "TWOHAND" )then VM_TWOHAND = tonumber(value)
-								elseif ( key == "WAIST" )then VM_WAIST = tonumber(value)
+								elseif ( key == "ATRASH" )then VM_ATRASH = tostring(value)
+								elseif ( key == "ANORMAL" )then VM_ANORMAL = tostring(value)
+								elseif ( key == "AMAGIC" )then VM_AMAGIC = tostring(value)
+								elseif ( key == "AARCANE" )then VM_AARCANE = tostring(value)
+								elseif ( key == "WTRASH" )then VM_WTRASH = tostring(value)
+								elseif ( key == "WNORMAL" )then VM_WNORMAL = tostring(value)
+								elseif ( key == "WMAGIC" )then VM_WMAGIC = tostring(value)
+								elseif ( key == "WARCANE" )then VM_WARCANE = tostring(value)
+								elseif ( key == "FTRASH" )then VM_FTRASH = tostring(value)
+								elseif ( key == "FNORMAL" )then VM_FNORMAL = tostring(value)
+								elseif ( key == "FMAGIC" )then VM_FMAGIC = tostring(value)
+								elseif ( key == "FARCANE" )then VM_FARCANE = tostring(value)
+								elseif ( key == "ADDITIVE" )then VM_ADDITIVE = tostring(value)
+								elseif ( key == "ALCHEMYBASE" )then VM_ALCHEMYBASE = tostring(value)
+								elseif ( key == "ENCHANTRUNE" )then VM_ENCHANTRUNE = tostring(value)
+								elseif ( key == "REAGENT" )then VM_REAGENT = tostring(value)
+								elseif ( key == "RAWMATERIAL" )then VM_RAWMATERIAL = tostring(value)
+								elseif ( key == "RECIPE" )then VM_RECIPE = tostring(value)
+								elseif ( key == "INGREDIENT" )then VM_INGREDIENT = tostring(value)
+								elseif ( key == "PPOTIONS" )then VM_PPOTIONS = tostring(value)
+								elseif ( key == "COLLECTIBLE" )then VM_COLLECTIBLE = tostring(value)
+								elseif ( key == "COSTUME" )then VM_COSTUME = tostring(value)
+								elseif ( key == "DRINK" )then VM_DRINK = tostring(value)
+								elseif ( key == "LOCKPICK" )then VM_LOCKPICK = tostring(value)
+								elseif ( key == "LURE" )then VM_LURE = tostring(value)
+								elseif ( key == "SOULGEM" )then VM_SOULGEM = tostring(value)
+								elseif ( key == "SPICE" )then VM_SPICE = tostring(value)
+								elseif ( key == "STYLEMAT" )then VM_STYLEMAT = tostring(value)
+								elseif ( key == "ITEMTRASH" )then VM_ITEMTRASH = tostring(value)
+								elseif ( key == "TROPHY" )then VM_TROPHY = tostring(value)
+								elseif ( key == "GLYPHARMOR" )then VM_GLYPHARMOR = tostring(value)
+								elseif ( key == "GLYPHWEAPON" )then VM_GLYPHWEAPON = tostring(value)
+								elseif ( key == "GLYPHJEWELRY" )then VM_GLYPHJEWELRY = tostring(value)
+								elseif ( key == "CHEST" )then VM_CHEST = tostring(value)
+								elseif ( key == "FEET" )then VM_FEET = tostring(value)
+								elseif ( key == "HAND" )then VM_HAND = tostring(value)
+								elseif ( key == "HEAD" )then VM_HEAD = tostring(value)
+								elseif ( key == "LEGS" )then VM_LEGS = tostring(value)
+								elseif ( key == "NECK" )then VM_NECK = tostring(value)
+								elseif ( key == "OFFHAND" )then VM_OFFHAND = tostring(value)
+								elseif ( key == "ONEHAND" )then VM_ONEHAND = tostring(value)
+								elseif ( key == "RING" )then VM_RING = tostring(value)
+								elseif ( key == "SHOULDERS" )then VM_SHOULDERS = tostring(value)
+								elseif ( key == "TWOHAND" )then VM_TWOHAND = tostring(value)
+								elseif ( key == "WAIST" )then VM_WAIST = tostring(value)
 							end
 
 						else
@@ -660,7 +653,7 @@ function eso_vendormanager.UpdateCurrentProfileData()
             d("Profile is empty..")			
         end		
     else
-		gVMprofile = "None"
+		gVMprofile = "Default"
     end
 end
 
