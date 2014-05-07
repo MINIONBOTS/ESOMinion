@@ -395,7 +395,7 @@ function c_usePotions:evaluate()
 			end
 		end
 	elseif(gPotiontype =="Magicka")then
-		if((ml_global_information.Player_InCombat == false) and (ml_global_information.Player_Magicka.percent <= tonumber(gPotvalue))) then
+		if((ml_global_information.Player_InCombat == true) and (ml_global_information.Player_Magicka.percent <= tonumber(gPotvalue))) then
 			if(haveAndNotCoolDownPotion(16) == true)then
 				d("using potion:"..gPotiontype)
 				ml_log("using potion :"..gPotiontype)
@@ -403,7 +403,7 @@ function c_usePotions:evaluate()
 			end
 		end
 	elseif(gPotiontype =="Stamina")then
-		if((ml_global_information.Player_InCombat == false) and (ml_global_information.Player_Stamina.percent <= tonumber(gPotvalue))) then
+		if((ml_global_information.Player_InCombat == true) and (ml_global_information.Player_Stamina.percent <= tonumber(gPotvalue))) then
 			if(haveAndNotCoolDownPotion(16) == true)then
 				d("using potion:"..gPotiontype)
 				ml_log("using potion :"..gPotiontype)
