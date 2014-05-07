@@ -366,7 +366,7 @@ local i = 0
 		numArgs = #args
 		convstring = args[1]
 		convoption = args[3]
-		if(string.match(tostring(convstring),"Store") or string.match(tostring(convstring),"H\xc3\xa4ndler") or string.match(tostring(convstring),"marchand"))then
+		if(string.match(tostring(convstring),"Store") or string.match(tostring(convstring),"H\xc3\xa4ndler") or string.match(tostring(convstring),"Magasin"))then
 			e("SelectChatterOption("..tostring(i)..")")
 			break
 		end
