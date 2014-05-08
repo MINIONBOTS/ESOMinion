@@ -290,7 +290,7 @@ function Dev.UpdateWindow()
 		TID = mytarget.id
 		SID = mytarget.serverid
 		TType = mytarget.type
-		TCID = mytarget.contentID
+		TCID = mytarget.contentid
 		TName = mytarget.name
 		TClass = mytarget.class
 		TTarID = mytarget.targetid
