@@ -257,7 +257,7 @@ function eso_vendormanager.ModuleInit()
 	
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("recipe"),"VM_RECIPE","Recipe")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("magic"),"VM_RMAGIC","Recipe")
-	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("trash"),"VM_RARCANE","Recipe")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("arcane"),"VM_RARCANE","Recipe")
 
 	
 	
