@@ -12,13 +12,13 @@ function eso_autoequip.moduleinit()
 	GUI_NewCheckbox(eso_autoequip.MainWindow.Name,GetString("aearmornormal"),"AE_ARMORN","Armor")
 	GUI_NewCheckbox(eso_autoequip.MainWindow.Name,GetString("aelegendary"),"AE_ARMORL","Armor")
 	GUI_NewCheckbox(eso_autoequip.MainWindow.Name,GetString("aeartefact"),"AE_ARMORA","Armor")
-	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aechest"),"AE_CHEST","Armor","Heavy,Medium,Light,Warlock,Necromancer")
+	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aechest"),"AE_CHEST","Armor","Heavy,Medium,Light,Warlock,Necromancer,Dragon")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aebonus"),"AE_CHESTBONUS","Armor",",None,Of Magicka,Of Stamina,Of Health")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aefeets"),"AE_FEETS","Armor","Heavy,Medium,Light")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aebonus"),"AE_FEETSBONUS","Armor",",None,Of Magicka,Of Stamina,Of Health")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aehands"),"AE_HANDS","Armor","Heavy,Medium,Light")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aebonus"),"AE_HANDSBONUS","Armor",",None,Of Magicka,Of Stamina,Of Health")
-	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aehead"),"AE_HEAD","Armor","Heavy,Medium,Light,Warlock,Necromancer")
+	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aehead"),"AE_HEAD","Armor","Heavy,Medium,Light,Warlock,Necromancer,Dragon")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aebonus"),"AE_HEADBONUS","Armor",",None,Of Magicka,Of Stamina,Of Health")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aelegs"),"AE_LEGS","Armor","Heavy,Medium,Light,Necromancer")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aebonus"),"AE_LEGSBONUS","Armor",",None,Of Magicka,Of Stamina,Of Health")
@@ -33,8 +33,8 @@ function eso_autoequip.moduleinit()
 	GUI_NewCheckbox(eso_autoequip.MainWindow.Name,GetString("aeweaponnormal"),"AE_WEAPONN","Weapon")
 	GUI_NewCheckbox(eso_autoequip.MainWindow.Name,GetString("aelegendary"),"AE_WEAPONL","Weapon")
 	GUI_NewCheckbox(eso_autoequip.MainWindow.Name,GetString("aeartefact"),"AE_WEAPONA","Weapon")
-	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aeoffhand"),"AE_OFFHAND","Weapon","None,Shield")
-	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aeonehand"),"AE_ONEHAND","Weapon","None,1hAxe,1hSword,1hHammer,Dagger,All1HandedMelee")
+	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aeoffhand"),"AE_OFFHAND","Weapon","None,Shield,DragonShield")
+	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aeonehand"),"AE_ONEHAND","Weapon","None,1hAxe,1hSword,1hHammer,Dagger,All1HandedMelee,Dual-Weild,DragonSword")
 	GUI_NewComboBox(eso_autoequip.MainWindow.Name,GetString("aetwohand"),"AE_TWOHAND","Weapon","None,Bow,2hHammer,2hSword,Staff,2hAxe,All2HandedMelee")
 	
 	
@@ -278,27 +278,27 @@ function getWeaponType(bagId,slotId)
     local icon =  e("GetItemInfo("..bagId..","..slotId..")")
     
     if (string.find(icon, "1hsword")) then
-		return g("WEAPONNYPE_SWORD")
+		return g("WEAPONTYPE_SWORD")
     elseif string.find(icon,"2hsword") then
-        return g("WEAPONNYPE_TWO_HANDED_SWORD")
+        return g("WEAPONTYPE_TWO_HANDED_SWORD")
     elseif string.find(icon,"1haxe") then
-        return g("WEAPONNYPE_AXE")
+        return g("WEAPONTYPE_AXE")
     elseif string.find(icon,"2haxe") then
-        return g("WEAPONNYPE_TWO_HANDED_AXE")
+        return g("WEAPONTYPE_TWO_HANDED_AXE")
     elseif string.find(icon,"1hhammer") then
-        return g("WEAPONNYPE_HAMMER")
+        return g("WEAPONTYPE_HAMMER")
     elseif string.find(icon,"2hhammer") then
-        return g("WEAPONNYPE_TWO_HANDED_HAMMER")
+        return g("WEAPONTYPE_TWO_HANDED_HAMMER")
     elseif string.find(icon,"dagger") then
-        return g("WEAPONNYPE_DAGGER")
+        return g("WEAPONTYPE_DAGGER")
     elseif string.find(icon,"shield") then
-        return g("WEAPONNYPE_SHIELD")
+        return g("WEAPONTYPE_SHIELD")
     elseif string.find(icon,"bow") then
-        return g("WEAPONNYPE_BOW")
+        return g("WEAPONTYPE_BOW")
     elseif string.find(icon,"staff") then
-        return g("WEAPONNYPE_FIRE_STAFF")
+        return g("WEAPONTYPE_FIRE_STAFF")
     else
-        return g("WEAPONNYPE_NONE")
+        return g("WEAPONTYPE_NONE")
     end
 end
 
@@ -309,7 +309,9 @@ function getArmorBonusType(bagID,slotID)
 		return "Warlock"
 	elseif(string.match(iname,"Necromancer") or string.match(iname,"Nekromanten") or string.match(iname,"n\xc3\xa9cromancien"))then
 		return "Necromancer"
-	elseif(string.match(iname,"of stamina") or string.match(iname,"der Stamina") )then
+	elseif(string.match(iname,"dragon") or string.match(iname,"Drachen"))then
+		return "Dragon"
+	elseif(string.match(iname,"of stamina") or string.match(iname,"der Stamina") or string.match(iname,"Vigoureux") or string.match(iname,"Vigoureuse") )then
 		return "Stamina"
 	elseif(string.match(iname,"of health") or string.match(iname,"der Health") or string.match(iname,"vitale") or string.match(iname,"vitales"))then
 		return "Health"
@@ -613,99 +615,99 @@ function eso_autoequip.AutoEquip()
 					local c,inventoryWA = next (InventoryList)
 					while c and inventoryWA do
 						if(e("IsEquipable(1,"..tostring(inventoryWA.bagslot)..")")) then
-							if((inventoryWA.itemtype == g("ITEMTYPE_WEAPON") and ( (AE_WEAPON == 1) or (AE_WEAPON == "1")))) then
+							if((inventoryWA.itemtype == g("ITEMTYPE_WEAPON") and ( (AE_WEAPON == 1)))) then
 									if(AE_TWOHAND ~= "None") then
 										if(AE_TWOHAND == "Staff") then
-											if(inventoryWA.WeaponKind == g("WEAPONNYPE_FIRE_STAFF"))then
+											if(inventoryWA.WeaponKind == g("WEAPONTYPE_FIRE_STAFF"))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and  ( AE_WEAPONN == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and  ( AE_WEAPONL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
 												end
 											end
 										elseif(AE_TWOHAND == "2hHammer") then
-											if(inventoryWA.WeaponKind == g("WEAPONNYPE_TWO_HANDED_HAMMER"))then
+											if(inventoryWA.WeaponKind == g("WEAPONTYPE_TWO_HANDED_HAMMER"))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1")) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
 												end
 											end
 										elseif(AE_TWOHAND == "2hAxe") then
-											if(inventoryWA.WeaponKind == g("WEAPONNYPE_TWO_HANDED_AXE"))then
+											if(inventoryWA.WeaponKind == g("WEAPONTYPE_TWO_HANDED_AXE"))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
 												end
 											end
 										elseif(AE_TWOHAND == "Bow") then
-											if(inventoryWA.WeaponKind == g("WEAPONNYPE_BOW"))then
+											if(inventoryWA.WeaponKind == g("WEAPONTYPE_BOW"))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and  ( AE_WEAPONN == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
 												end
 											end
 										elseif(AE_TWOHAND == "2hSword") then
-											if(inventoryWA.WeaponKind == g("WEAPONNYPE_TWO_HANDED_SWORD"))then
+											if(inventoryWA.WeaponKind == g("WEAPONTYPE_TWO_HANDED_SWORD"))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and  ( AE_WEAPONA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and  ( AE_WEAPONL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
 												end
 											end
 										elseif(AE_TWOHAND == "All2HandedMelee") then
-											if((inventoryWA.WeaponKind == g("WEAPONNYPE_TWO_HANDED_SWORD")) or( inventoryWA.WeaponKind == g("WEAPONNYPE_TWO_HANDED_AXE")) or (inventoryWA.WeaponKind == g("WEAPONNYPE_TWO_HANDED_HAMMER")))then
+											if((inventoryWA.WeaponKind == g("WEAPONTYPE_TWO_HANDED_SWORD")) or( inventoryWA.WeaponKind == g("WEAPONTYPE_TWO_HANDED_AXE")) or (inventoryWA.WeaponKind == g("WEAPONTYPE_TWO_HANDED_HAMMER")))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and  ( AE_WEAPONN == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
@@ -715,89 +717,124 @@ function eso_autoequip.AutoEquip()
 									end
 									if(AE_ONEHAND ~= "None") then
 										if(AE_ONEHAND == "1hSword") then
-											if(inventoryWA.WeaponKind == g("WEAPONNYPE_SWORD"))then
+											if(inventoryWA.WeaponKind == g("WEAPONTYPE_SWORD"))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and  ( AE_WEAPONA == "1")) then 
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
 														end
 													end
 												end
 											end
 										elseif(AE_ONEHAND == "1hAxe") then
-											if(inventoryWA.WeaponKind == g("WEAPONNYPE_AXE"))then
+											if(inventoryWA.WeaponKind == g("WEAPONTYPE_AXE"))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
 														end
 													end
 												end
 											end
 												
 										elseif(AE_ONEHAND == "1hHammer") then
-												if(inventoryWA.WeaponKind == g("WEAPONNYPE_HAMMER"))then
+												if(inventoryWA.WeaponKind == g("WEAPONTYPE_HAMMER"))then
 													if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 														if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 															if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
-																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-															elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
-																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-															elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
-																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-															elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
-																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
+																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+															elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
+																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+															elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
+																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+															elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
+																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
 															end
 														end
 													end
 												end
 										elseif(AE_ONEHAND == "Dagger") then
-												if(inventoryWA.WeaponKind == g("WEAPONNYPE_DAGGER"))then
+												if(inventoryWA.WeaponKind == g("WEAPONTYPE_DAGGER"))then
 													if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 														if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 															if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
-																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-															elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
-																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-															elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
-																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-															elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
-																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
+																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+															elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
+																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+															elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
+																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+															elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
+																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
 															end
 														end
 													end
 												end
 										elseif(AE_ONEHAND == "All1HandedMelee") then
-											if((inventoryWA.WeaponKind == g("WEAPONNYPE_DAGGER")) or( inventoryWA.WeaponKind == g("WEAPONNYPE_HAMMER")) or (inventoryWA.WeaponKind == g("WEAPONNYPE_AXE")) or(inventoryWA.WeaponKind == g("WEAPONNYPE_SWORD")))then
+											if((inventoryWA.WeaponKind == g("WEAPONTYPE_DAGGER")) or( inventoryWA.WeaponKind == g("WEAPONTYPE_HAMMER")) or (inventoryWA.WeaponKind == g("WEAPONTYPE_AXE")) or(inventoryWA.WeaponKind == g("WEAPONTYPE_SWORD")))then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
-															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1")) then 
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and( AE_WEAPONL == "1")) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
 														end
 													end
 												end
-											end			
+											end
+										elseif(AE_ONEHAND == "DragonSword") then	
+											if(inventoryWA.WeaponKind == g("WEAPONTYPE_SWORD"))then			
+												if(getArmorBonusType(1,inventoryWA.bagslot) == "Dragon")then
+													if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[15].itemlevel) )then
+														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+													end
+												end
+											end
+										elseif(AE_ONEHAND == "Dual-Weild") then
+											if((inventoryWA.WeaponKind == g("WEAPONTYPE_DAGGER")) or( inventoryWA.WeaponKind == g("WEAPONTYPE_HAMMER")) or (inventoryWA.WeaponKind == g("WEAPONTYPE_AXE")) or(inventoryWA.WeaponKind == g("WEAPONTYPE_SWORD")))then
+												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[15].itemlevel)) then
+													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[15].statvalue) )then
+														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotmainhand)..")")
+														end
+													end
+												elseif(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[7].itemlevel)) then
+													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[7].statvalue) )then
+														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotoffhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotoffhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotoffhand)..")")
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and( AE_WEAPONL == "1") ) then
+															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..","..tostring(slotoffhand)..")")
+														end
+													end
+												end
+											end
 										end
 									end
-									
 							end
 							if(inventoryWA.EquipType == g("EQUIP_TYPE_OFF_HAND"))then
 								if(AE_OFFHAND == "Shield")then
@@ -805,18 +842,26 @@ function eso_autoequip.AutoEquip()
 										if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[7].statvalue) )then
 											if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
 												e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-											elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_WEAPONN == 1) or ( AE_WEAPONN == "1") )) then
+											elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_WEAPONN == "1") ) then
 												e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-											elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_WEAPONA == 1) or ( AE_WEAPONA == "1") )) then 
+											elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_WEAPONA == "1") ) then 
 												e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-											elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_WEAPONL == 1) or ( AE_WEAPONL == "1") )) then
+											elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_WEAPONL == "1") ) then
+												e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
+											end
+										end
+									end
+								elseif(AE_OFFHAND =="DragonShield")then
+									if(inventoryWA.ArmorKind == g("EQUIP_TYPE_OFF_HAND"))then			
+										if(getArmorBonusType(1,inventoryWA.bagslot) == "Dragon")then
+											if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[7].itemlevel) )then
 												e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 											end
 										end
 									end
 								end
 							end
-							if((inventoryWA.itemtype == g("ITEMTYPE_ARMOR") and ((AE_ARMOR == 1) or (AE_ARMOR == "1")))) then	
+							if((inventoryWA.itemtype == g("ITEMTYPE_ARMOR") and ((AE_ARMOR == 1) ))) then	
 								if(inventoryWA.EquipType == g("EQUIP_TYPE_CHEST"))then
 									if(AE_CHEST == "Light")then
 										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT")) then
@@ -832,11 +877,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_CHESTBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and  ( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and( AE_ARMORL == "1")) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -856,11 +901,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_CHESTBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -880,11 +925,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_CHESTBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")													
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -901,6 +946,14 @@ function eso_autoequip.AutoEquip()
 									elseif(AE_CHEST == "Necromancer") then	
 										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT"))then			
 											if(getArmorBonusType(1,inventoryWA.bagslot) == "Necromancer")then
+												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[1].itemlevel) )then
+													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
+												end
+											end
+										end
+									elseif(AE_CHEST == "Dragon") then	
+										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY"))then			
+											if(getArmorBonusType(1,inventoryWA.bagslot) == "Dragon")then
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[1].itemlevel) )then
 													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 												end
@@ -923,11 +976,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_FEETSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -947,11 +1000,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_FEETSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1")) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -971,11 +1024,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_FEETSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1")) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -997,12 +1050,12 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_HANDSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 														d("wtf")
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1")) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1022,11 +1075,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_HANDSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1036,7 +1089,6 @@ function eso_autoequip.AutoEquip()
 										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[3].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[3].statvalue) )then
-													--d(inventoryWA.quality)
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and (inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and (inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL"))) then
 														if((AE_HANDSBONUS == "Of Magicka") and (getArmorBonusType(1,inventoryWA.bagslot) == "Magicka") )then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -1047,12 +1099,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_HANDSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
-														d("wtf")
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1074,11 +1125,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_HEADBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1098,11 +1149,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_HEADBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and  ( AE_ARMORN == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1122,11 +1173,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_HEADBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and  ( AE_ARMORN == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1148,6 +1199,14 @@ function eso_autoequip.AutoEquip()
 												end
 											end
 										end
+									elseif(AE_HEAD == "Dragon") then	
+										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY"))then			
+											if(getArmorBonusType(1,inventoryWA.bagslot) == "Dragon")then
+												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[4].itemlevel) )then
+													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
+												end
+											end
+										end
 									end
 								elseif(inventoryWA.EquipType == g("EQUIP_TYPE_LEGS"))then
 									if(AE_LEGS == "Light")then
@@ -1164,11 +1223,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_LEGSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and( AE_ARMORN == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")	
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and( AE_ARMORA == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1188,11 +1247,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_LEGSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")	
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1")) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1212,11 +1271,11 @@ function eso_autoequip.AutoEquip()
 														elseif(AE_LEGSBONUS == "None")then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")	
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1239,9 +1298,9 @@ function eso_autoequip.AutoEquip()
 												if(Inecklevel > Enecklevel) then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")))) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1253,9 +1312,9 @@ function eso_autoequip.AutoEquip()
 												if(Inecklevel > Enecklevel) then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")))) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1276,9 +1335,9 @@ function eso_autoequip.AutoEquip()
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[8].itemlevel)) then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")))) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1")) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1288,9 +1347,9 @@ function eso_autoequip.AutoEquip()
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[8].itemlevel)) then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")))) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1")) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1309,9 +1368,9 @@ function eso_autoequip.AutoEquip()
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[9].itemlevel)) then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")))) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1")) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1321,9 +1380,9 @@ function eso_autoequip.AutoEquip()
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[9].itemlevel)) then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")))) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+													elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1")) then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 													end
 												end
@@ -1352,11 +1411,11 @@ function eso_autoequip.AutoEquip()
 															elseif(AE_SHOULDERSBONUS == "None")then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 															end
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and( AE_ARMORN == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
@@ -1376,11 +1435,11 @@ function eso_autoequip.AutoEquip()
 															elseif(AE_SHOULDERSBONUS == "None")then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 															end
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
@@ -1400,11 +1459,11 @@ function eso_autoequip.AutoEquip()
 															elseif(AE_SHOULDERSBONUS == "None")then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 															end
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
@@ -1434,11 +1493,11 @@ function eso_autoequip.AutoEquip()
 															elseif(AE_WAISTBONUS == "None")then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 															end
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1")) then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
@@ -1458,11 +1517,11 @@ function eso_autoequip.AutoEquip()
 															elseif(AE_WAISTBONUS == "None")then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 															end
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and ( AE_ARMORA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and( AE_ARMORL == "1") ) then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end
@@ -1482,11 +1541,11 @@ function eso_autoequip.AutoEquip()
 															elseif(AE_WAISTBONUS == "None")then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 															end
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and (( AE_ARMORN == 1) or ( AE_ARMORN == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_NORMAL")) and ( AE_ARMORN == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and (( AE_ARMORA == 1) or ( AE_ARMORA == "1") )) then 
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_ARTIFACT")) and  ( AE_ARMORA == "1") ) then 
 															e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
-														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and (( AE_ARMORL == 1) or ( AE_ARMORL == "1") )) then
+														elseif((inventoryWA.quality == g("ITEM_QUALITY_LEGENDARY")) and ( AE_ARMORL == "1") ) then
 																e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
 														end
 													end

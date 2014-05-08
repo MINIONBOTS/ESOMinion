@@ -385,7 +385,6 @@ end
 --------------
 c_usePotions = inheritsFrom( ml_cause )
 e_usePotions = inheritsFrom( ml_effect )
-c_usePotions.throttle = 1000
 function c_usePotions:evaluate()
 	if(gPot == "0")then
 		return false
@@ -427,17 +426,14 @@ return false
 end
 
 ------------------------------------------------------------------------
---Todo : add multilanguage : Health -> Lebens, lebens, Sant\xc3\xa9 , sant\xc3\xa9
-						--   Stamina -> Ausdauer, ausdauer, Vigueur, vigueur
-						---  Magicka -> Magicka , magicka,  Magie, magie
 ------------------------------------------------------------------------
-
 function haveAndNotCoolDownPotion(slotID)  
 local potionCount = e("GetSlotItemCount("..tostring(slotID)..")")
 local args = {e("GetSlotCooldownInfo("..tostring(slotID)..")")}
 local isNotCoolDown = args[3]
-local slotname = e("GetSlotName(16)")
-	if(string.match(slotname,gPotiontype) or string.match(slotname,string.lower(gPotiontype)))then
+local slotname = tostring(e("GetSlotName(16)"))
+if(gPotiontype == "Stamina")then
+	if(string.match(slotname,"Stamina") or string.match(slotname,"stamina") or string.match(slotname,"Ausdauer") or string.match(slotname,"ausdauer") or string.match(slotname,"Vigueur^m") or string.match(slotname,"vigueur")) then
 		if(tonumber(potionCount)>0)then
 			if(isNotCoolDown == true) then
 				return true
@@ -447,6 +443,29 @@ local slotname = e("GetSlotName(16)")
 		checkForNewPotions(slotID)
 		return false
 	end
+elseif(gPotiontype =="Magicka")then
+	if(string.match(slotname,"Magicka") or string.match(slotname,"magicka") or string.match(slotname,"Magie") or string.match(slotname,"magie")) then
+		if(tonumber(potionCount)>0)then
+			if(isNotCoolDown == true) then
+				return true
+			end
+			return false
+		end
+		checkForNewPotions(slotID)
+		return false
+	end
+elseif(gPotiontype =="Health")then
+	if(string.match(slotname,"Health") or string.match(slotname,"health") or string.match(slotname,"Lebens") or string.match(slotname,"lebens") or string.match(slotname,"Sant\xc3\xa9") or string.match(slotname,"sant\xc3\xa9")) then
+		if(tonumber(potionCount)>0)then
+			if(isNotCoolDown == true) then
+				return true
+			end
+			return false
+		end
+		checkForNewPotions(slotID)
+		return false
+	end
+end
 	checkForNewPotions(slotID)
 	return false
 end
