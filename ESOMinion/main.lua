@@ -16,6 +16,8 @@ ml_global_information.MarkerMaxLevel = 50
 ml_global_information.BlacklistContentID = ""
 ml_global_information.WhitelistContentID = ""
 ml_global_information.MarkerTime = 0
+ml_global_information.Player_SprintingRecharging = false
+ml_global_information.Player_Sprinting = false
 
 
 function ml_global_information.moduleinit()
@@ -54,6 +56,15 @@ function ml_global_information.moduleinit()
 		Settings.ESOMinion.gPotvalue = "27"
 	end
 	
+	if ( Settings.ESOMinion.gSprint == nil ) then
+	Settings.ESOMinion.gSprint = "0"
+ 	end
+  
+    if ( Settings.ESOMinion.gSprintStopThreshold == nil ) then
+ 		Settings.ESOMinion.gSprintStopThreshold = "50"
+	end
+ 
+	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
 	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("startStop"),"ml_global_information.startStop")
@@ -74,6 +85,10 @@ function ml_global_information.moduleinit()
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("gatherMode"),"gGather",GetString("settings"))	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useMount"),"gMount",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
+ 	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
+	
+  	
 	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("potiontype"),"gPotiontype",GetString("potionssettings"),"Health,Stamina,Magicka")
@@ -134,6 +149,8 @@ function ml_global_information.moduleinit()
 	gPotiontype = Settings.ESOMinion.gPotiontype
 	gPotlevel = Settings.ESOMinion.gPotlevel
 	gPotvalue = Settings.ESOMinion.gPotvalue 
+	gSprint = Settings.ESOMinion.gSprint
+	gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
 	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
@@ -362,6 +379,8 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "aPassword" or
 			k == "gPot" or
 			k == "gPotiontype" or
+			k == "gSprint" or
+ 			k == "gSprintStopThreshold" or
 			k == "gPotvalue"
 		)						
 		then
