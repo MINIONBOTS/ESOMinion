@@ -159,6 +159,25 @@ function eso_vendormanager.ModuleInit()
 	if (Settings.ESOMinion.VM_TWOHAND== nil) then
 		Settings.ESOMinion.VM_TWOHAND = "1"
 	end
+	if (Settings.ESOMinion.VM_GTRASH== nil) then
+		Settings.ESOMinion.VM_GTRASH = "0"
+	end
+	if (Settings.ESOMinion.VM_GNORMAL== nil) then
+		Settings.ESOMinion.VM_GNORMAL = "0"
+	end
+	if (Settings.ESOMinion.VM_GMAGIC== nil) then
+		Settings.ESOMinion.VM_GARCANE = "0"
+	end
+	if (Settings.ESOMinion.VM_GARCANE== nil) then
+		Settings.ESOMinion.VM_GARCANE = "0"
+	end
+	if (Settings.ESOMinion.VM_RMAGIC== nil) then
+		Settings.ESOMinion.VM_RMAGIC = "0"
+	end
+	if (Settings.ESOMinion.VM_RARCANE== nil) then
+		Settings.ESOMinion.VM_RARCANE = "0"
+	end
+	
 
 		
 	GUI_NewWindow(eso_vendormanager.MainWindow.Name,eso_vendormanager.MainWindow.x,eso_vendormanager.MainWindow.y,eso_vendormanager.MainWindow.w,eso_vendormanager.MainWindow.h,"",true)
@@ -211,12 +230,10 @@ function eso_vendormanager.ModuleInit()
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("alchemybase"),"VM_ALCHEMYBASE","Crafting")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("enchantingrune"),"VM_ENCHANTRUNE","Crafting")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("reagent"),"VM_REAGENT","Crafting")
-	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("recipe"),"VM_RECIPE","Crafting")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("rawmaterial"),"VM_RAWMATERIAL","Crafting")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("ingredient"),"VM_INGREDIENT","Crafting")
 
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("potions"),"VM_PPOTIONS","Potions")
-
 	
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("collectible"),"VM_COLLECTIBLE","Misc")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("costume"),"VM_COSTUME","Misc")
@@ -233,6 +250,16 @@ function eso_vendormanager.ModuleInit()
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("glypharmor"),"VM_GLYPHARMOR","Glyph")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("glyphweapon"),"VM_GLYPHWEAPON","Glyph")
 	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("glyphjewelry"),"VM_GLYPHJEWELRY","Glyph")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("trash"),"VM_GTRASH","Glyph")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("normal"),"VM_GNORMAL","Glyph")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("magic"),"VM_GMAGIC","Glyph")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("arcane"),"VM_GARCANE","Glyph")
+	
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("recipe"),"VM_RECIPE","Recipe")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("magic"),"VM_RMAGIC","Recipe")
+	GUI_NewCheckbox(eso_vendormanager.MainWindow.Name,GetString("trash"),"VM_RARCANE","Recipe")
+
+	
 	
 
 		VM_ATRASH = Settings.ESOMinion.VM_ATRASH
@@ -281,8 +308,12 @@ function eso_vendormanager.ModuleInit()
 		VM_SHOULDERS = Settings.ESOMinion.VM_SHOULDERS
 		VM_TWOHAND = Settings.ESOMinion.VM_TWOHAND
 		VM_WAIST = Settings.ESOMinion.VM_WAIST
-		
-		
+		VM_GTRASH = Settings.ESOMinion.VM_GTRASH
+		VM_GNORMAL = Settings.ESOMinion.VM_GNORMAL
+		VM_GMAGIC = Settings.ESOMinion.VM_GMAGIC
+		VM_GARCANE = Settings.ESOMinion.VM_GARCANE
+		VM_RMAGIC = Settings.ESOMinion.VM_RMAGIC
+		VM_RARCANE = Settings.ESOMinion.VM_RARCANE
 		
 	gVMprofile = Settings.ESOMinion.gVMprofile
 	gVMnewname = ""
@@ -438,6 +469,13 @@ function eso_vendormanager.CreateNewProfile()
 	VM_SHOULDERS = "0"
 	VM_TWOHAND = "0"
 	VM_WAIST = "0"
+	VM_GTRASH= "0"
+	VM_GNORMAL = "0"
+	VM_GARCANE = "0"
+	VM_GMAGIC = "0"
+	VM_RMAGIC = "0"
+	VM_RARCANE = "0"
+	
 		
 end
 
@@ -524,6 +562,8 @@ function eso_vendormanager.SaveProfile()
 			string2write = string2write.."VM_REAGENT="..tostring(VM_REAGENT).."\n"
 			string2write = string2write.."VM_RAWMATERIAL="..tostring(VM_RAWMATERIAL).."\n"
 			string2write = string2write.."VM_RECIPE="..tostring(VM_RECIPE).."\n"
+			string2write = string2write.."VM_RMAGIC="..tostring(VM_RMAGIC).."\n"
+			string2write = string2write.."VM_RARCANE="..tostring(VM_RARCANE).."\n"
 			string2write = string2write.."VM_INGREDIENT="..tostring(VM_INGREDIENT).."\n"
 			string2write = string2write.."VM_PPOTIONS="..tostring(VM_PPOTIONS).."\n"
 			string2write = string2write.."VM_COLLECTIBLE="..tostring(VM_COLLECTIBLE).."\n"
@@ -539,6 +579,10 @@ function eso_vendormanager.SaveProfile()
 			string2write = string2write.."VM_GLYPHARMOR="..tostring(VM_GLYPHARMOR).."\n"
 			string2write = string2write.."VM_GLYPHWEAPON="..tostring(VM_GLYPHWEAPON).."\n"
 			string2write = string2write.."VM_GLYPHJEWELRY="..tostring(VM_GLYPHJEWELRY).."\n"
+			string2write = string2write.."VM_GTRASH="..tostring(VM_GTRASH).."\n"
+			string2write = string2write.."VM_GNORMAL="..tostring(VM_GNORMAL).."\n"
+			string2write = string2write.."VM_GMAGIC="..tostring(VM_GMAGIC).."\n"
+			string2write = string2write.."VM_GARCANE="..tostring(VM_GARCANE).."\n"
 			string2write = string2write.."VM_CHEST="..tostring(VM_CHEST).."\n"
 			string2write = string2write.."VM_FEET="..tostring(VM_FEET).."\n"
 			string2write = string2write.."VM_HAND="..tostring(VM_HAND).."\n"
@@ -551,6 +595,8 @@ function eso_vendormanager.SaveProfile()
 			string2write = string2write.."VM_SHOULDERS="..tostring(VM_SHOULDERS).."\n"
 			string2write = string2write.."VM_TWOHAND="..tostring(VM_TWOHAND).."\n"
 			string2write = string2write.."VM_WAIST="..tostring(VM_WAIST).."\n"
+			
+		
 			d(filewrite(eso_vendormanager.profilepath ..filename..".lua",string2write))
 
 	else
@@ -633,6 +679,13 @@ function eso_vendormanager.UpdateCurrentProfileData()
 								elseif ( key == "SHOULDERS" )then VM_SHOULDERS = tostring(value)
 								elseif ( key == "TWOHAND" )then VM_TWOHAND = tostring(value)
 								elseif ( key == "WAIST" )then VM_WAIST = tostring(value)
+								elseif ( key == "GTRASH" )then VM_GTRASH= tostring(value)
+								elseif ( key == "GNORMAL" )then VM_GNORMAL= tostring(value)
+								elseif ( key == "GMAGIC" )then VM_GMAGIC = tostring(value)
+								elseif ( key == "GARCANE" )then VM_GARCANE = tostring(value)
+								elseif ( key == "RMAGIC" )then VM_RMAGIC = tostring(value)
+								elseif ( key == "RARCANE" )then VM_RARCANE = tostring(value)
+								
 							end
 
 						else
@@ -727,7 +780,14 @@ function eso_vendormanager.GUIVarUpdate(Event, NewVals, OldVals)
 			k == "VM_RING" or
 			k == "VM_SHOULDERS" or
 			k == "VM_TWOHAND" or
+			k == "VM_GTRASH" or
+			k == "VM_GNORMAL" or
+			k == "VM_GMAGIC" or
+			k == "VM_GARCANE" or
+			k == "VM_RMAGIC" or
+			k == "VM_RARCANE" or		
 			k == "VM_WAIST"
+			
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v

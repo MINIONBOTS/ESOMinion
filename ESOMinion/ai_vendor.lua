@@ -3,6 +3,7 @@
 --****************************************************************************
 ai_vendor={}
 ai_vendor.queue = nil
+ai_vendor.vendored = false
 
 --****************************************************************************
 -- Vendor Open Event
@@ -77,6 +78,9 @@ function ai_vendor:CreateNewQueue()
 			if ml_global_information.running then
 				d("Closing vendor window")
 				e("EndInteraction(15)")
+				if(gMail == "1")then
+					ai_vendor.vendored = true
+				end
 				return
 			end
 			
@@ -288,7 +292,16 @@ function ai_vendor:markitems()
 					elseif((itemKind == g("ITEMTYPE_REAGENT")) and (VM_REAGENT == "1") ) then
 						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 					elseif((itemKind == g("ITEMTYPE_RECIPE")) and (VM_RECIPE == "1") ) then
-						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+						if(tonumber(quality) == 2) then
+							if((VM_GMAGIC == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 3) then
+							if((VM_GARCANE == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
 					elseif((itemKind == g("ITEMTYPE_RAW_MATERIAL") and (VM_RAWMATERIAL == "1") )) then
 						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 					elseif((itemKind == g("ITEMTYPE_BLACKSMITHING_RAW_MATERIAL")) and (VM_RAWMATERIAL == "1")) then
@@ -302,11 +315,68 @@ function ai_vendor:markitems()
 					elseif((itemKind == g("ITEMTYPE_DRINK")) and (VM_DRINK == "1") ) then
 						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 					elseif((itemKind == g("ITEMTYPE_GLYPH_ARMOR")) and (VM_GLYPHARMOR == "1") ) then
-						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+						if(tonumber(quality) == 0) then
+							if((VM_GTRASH == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 1) then
+							if((VM_GNORMAL == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 2) then
+							if((VM_GMAGIC == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 3) then
+							if((VM_GARCANE == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
 					elseif((itemKind == g("ITEMTYPE_GLYPH_WEAPON")) and (VM_GLYPHWEAPON == "1")) then
-						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+						if(tonumber(quality) == 0) then
+							if((VM_GTRASH == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 1) then
+							if((VM_GNORMAL == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 2) then
+							if((VM_GMAGIC == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 3) then
+							if((VM_GARCANE == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
 					elseif((itemKind == g("ITEMTYPE_GLYPH_JEWELRY")) and (VM_GLYPHJEWELRY == "1") ) then
-						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+						if(tonumber(quality) == 0) then
+							if((VM_GTRASH == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 1) then
+							if((VM_GNORMAL == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 2) then
+							if((VM_GMAGIC == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
+						if(tonumber(quality) == 3) then
+							if((VM_GARCANE == "1") ) then	
+								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
+							end
+						end
 					elseif((itemKind == g("ITEMTYPE_TRASH")) and (VM_ITEMTRASH == "1") ) then
 						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 					elseif((itemKind == g("ITEMTYPE_COLLECTIBLE")) and (VM_COLLECTIBLE == "1") ) then
