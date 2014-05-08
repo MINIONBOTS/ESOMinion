@@ -293,12 +293,12 @@ function ai_vendor:markitems()
 						e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 					elseif((itemKind == g("ITEMTYPE_RECIPE")) and (VM_RECIPE == "1") ) then
 						if(tonumber(quality) == 2) then
-							if((VM_GMAGIC == "1") ) then	
+							if((VM_RMAGIC == "1") ) then	
 								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 							end
 						end
 						if(tonumber(quality) == 3) then
-							if((VM_GARCANE == "1") ) then	
+							if((VM_RARCANE == "1") ) then	
 								e("SetItemIsJunk(1,"..tostring(i)..","..junk..")")
 							end
 						end
