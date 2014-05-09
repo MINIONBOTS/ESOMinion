@@ -440,7 +440,7 @@ function ml_global_information.ResetBot()
 	c_MoveToMarker.allowedToFight = false
 	c_MoveToRandomPoint.randomPoint = nil
 	c_MoveToRandomPoint.randomPointreached = false
-	ai_vendor.queue = nil
+	e_movetovendor.isvendoring = false
 end
 
 function ml_global_information.Wait( seconds ) 

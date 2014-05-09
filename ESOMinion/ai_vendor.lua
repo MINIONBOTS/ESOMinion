@@ -144,17 +144,15 @@ ml_log("e_gotovendor")
 							
 							--Close Store
 							if (e_movetovendor.merchantstep == 4) then
+								e_movetovendor.merchantstep = 0
+								e_movetovendor.isvendoring = false
 								d("Closing vendor window")
-								if ( gVendor == "1" and e("HasAnyJunk(1)") ) then
-									d("Closing vendor window")
-									e("EndInteraction(15)")
-									e_movetovendor.isvendoring = false
-									if(gMail == "1")then
-										ai_vendor.vendored = true
-									end
-									ml_global_information.Wait(1000)
-									return ml_log(true)
-								end								
+								d("Closing vendor window")
+								e("EndInteraction(15)")								
+								ml_global_information.Wait(1000)
+								if(gMail == "1")then
+									ai_vendor.vendored = true
+								end
 							end
 							
 							d("Bug ? Didnt handle merchant correctly..")
