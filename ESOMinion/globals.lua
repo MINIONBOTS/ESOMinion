@@ -1,7 +1,6 @@
 ml_globals = {}
 
 
-
 -- our version of EVENT_MANAGER:RegisterForEvent("Globals_Common", EVENT_GLOBAL_MOUSE_DOWN, OnGlobalMouseDown)
 function ml_globals.RegisterLuaEventCallbackHandlers()
 	d("Registering Events..")	

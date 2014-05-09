@@ -392,6 +392,20 @@ function eso_vendormanager.RefreshWhiteList()
 	gWhiteList_listitems = myitems
 end
 
+function eso_vendormanager.isWhiteListed(inventoryitem)
+	local itemtest = tostring(inventoryitem)
+	if ( TableSize(eso_vendormanager.WhiteL) > 0) then			
+		local i,item = next ( eso_vendormanager.WhiteL)
+		while i and item do	
+			if( item == inventoryitem) then
+			return true
+			end
+			i,item = next (eso_vendormanager.WhiteL,i)
+		end
+	end
+	return false
+end
+
 
 function eso_vendormanager.UpdateInventoryList()
 	--Grab all items in inventory and add them to a dropdown list

@@ -6,98 +6,207 @@ ai_vendor.queue = nil
 ai_vendor.vendored = false
 
 --****************************************************************************
--- Vendor Open Event
+-- Initialize
 --****************************************************************************
-RegisterForEvent("EVENT_OPEN_STORE", true)
-RegisterEventHandler("GAME_EVENT_OPEN_STORE",
-	function(...)
-		d("Store opened..")
-		if 	(ml_global_information.running and ai_vendor.queue == nil ) then
-			d("vendor opened")
-			ai_vendor.queue = ai_vendor:CreateNewQueue()
+RegisterEventHandler("Module.Initalize",
+	function()
+		if ( Settings.ESOMinion.gVendor == nil ) then
+			Settings.ESOMinion.gVendor = "0"
 		end
+		if ( Settings.ESOMinion.gRepair == nil ) then
+			Settings.ESOMinion.gRepair = "1"
+		end		
+		
+		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor",GetString("settings"))
+		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair",GetString("settings"))	
+		gVendor = Settings.ESOMinion.gVendor
+		gRepair = Settings.ESOMinion.gRepair
 	end
 )
 
 --****************************************************************************
--- Vendor Close Event
+-- Cause/Effect
 --****************************************************************************
-RegisterForEvent("EVENT_CLOSE_STORE", true)	
-RegisterEventHandler("GAME_EVENT_CLOSE_STORE",
-	function(...)
-		d("Store closed..")
-		if 	ml_global_information.running then
-			d("vendor closed")
-			ai_vendor.queue = nil
-		end
+c_movetovendor = inheritsFrom( ml_cause )
+e_movetovendor = inheritsFrom( ml_effect )
+e_movetovendor.vendorMarker = nil
+e_movetovendor.isvendoring = false
+function c_movetovendor:evaluate()
+	if (e_movetovendor.isvendoring) then
+		return true
 	end
-)
 
---****************************************************************************
--- Vendor Queue
---****************************************************************************
-function ai_vendor:CreateNewQueue()
-	local queue = {}
-	queue.last = 0
-	queue.throttle = 2500
-	queue.finished = false
-				
-	function queue:run()
-	
-		if ( ml_global_information.Now - queue.last > queue.throttle) then
-			queue.last = ml_global_information.Now
-			
-			if not queue.repaired then
-				d("Repairing items")
-				e("RepairAll()")
-				queue.repaired = true
-				return
-			end
-
-			if not queue.autoequip and tonumber(gAutoEquip) == 1 then
-				d("Auto equipping superior items")
-				eso_autoequip.AutoEquip()
-				queue.autoequip = true	
-				return
-			end
-			
-			if not queue.marked and tonumber(gVendor) == 1 then
-				d("Marking items")
-				ai_vendor.markitems()
-				queue.marked = true	
-				return
-			end
-			
-			if not queue.vendored and tonumber(gVendor) == 1 and e("HasAnyJunk(1)") then
-				d("Selling items")				
-				e("SellAllJunk()")
-				queue.vendored = true	
-				return
-			end
-
-			if ml_global_information.running then
-				d("Closing vendor window")
-				e("EndInteraction(15)")
-				if(gMail == "1")then
-					ai_vendor.vendored = true
+	if( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or( gRepair == "1" and ai_vendor:CheckDurability()== true))then
+		
+		local VList = EntityList("nearest,isvendor,onmesh")
+		if ( TableSize( VList ) > 0 ) then			
+			return true
+		end
+		if ( e_movetovendor.vendorMarker == nil ) then
+			local VMList = ml_marker_mgr.GetList(GetString("vendorMarker"), false, false)
+			if ( TableSize(VMList) > 0 ) then				
+				local bestmarker = nil
+				local bestdist = 9999999
+				local name,marker = next ( VMList )
+				while (name and marker) do
+					local mPos = marker:GetPosition()
+					if ( Distance3D( mPos.x,mPos.y,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.y,ml_global_information.Player_Position.z) < bestdist) then
+						bestdist = Distance3D( mPos.x,mPos.y,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.y,ml_global_information.Player_Position.z)
+						bestmarker = marker
+					end
+					name,maker = next ( VMList,name )
 				end
-				return
+				if ( marker ) then
+					e_movetovendor.vendorMarker = marker
+					return true
+				end				
 			end
-			
-			d("Vendor queue completed")
-			queue.finished = true
-			ai_vendor.queue = nil
-			
+		else
+			return true
 		end
 	end
-	
-	return queue
+	e_movetovendor.vendorMarker = nil
+	return false
 end
+e_movetovendor.merchantstep = 0
+function e_movetovendor:execute()
+ml_log("e_gotovendor")
+	local VList = EntityList("nearest,isvendor,onmesh,maxdistance=85")
+		if ( VList and TableSize( VList ) > 0 ) then	
+			
+			id,vendor = next (VList)
+			if ( id and vendor ) then
+				local pPos = Player.pos
+				local tPos = vendor.pos
+				if (pPos) then
+					local dist = Distance3D( tPos.x,tPos.y,tPos.z,pPos.x,pPos.y,pPos.z)
+					ml_log("("..tostring(math.floor(dist))..")")
+					if ( dist > 4 ) then
+						local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
+						if (tonumber(navResult) < 0) then		
+							ml_error("e_movetovendor result: "..tonumber(navResult))
+							return ml_log(false)							
+						end	
+						return ml_log(true)
+					end
+					if(vendor.distance <= 4) then
+						Player:Stop()
+						
+						-- I KNOW this should go in seperate cause & effects, but then a whole new task would also have to be written for vendoring, I'm waaay to lazy now
+						
+						-- If sell window is already open, sell & repair
+						if ( e("GetNumStoreItems()") > 0 ) then
+							
+							e_movetovendor.isvendoring = true
+							-- Repair
+							if (e_movetovendor.merchantstep == 0) then
+								e_movetovendor.merchantstep = 1
+								if ( gRepair == "1" and ai_vendor.CheckDurability()== true ) then
+									d("Repairing items")
+									e("RepairAll()")
+									ml_global_information.Wait(1000)
+									return ml_log(true)
+								end								
+							end
+							
+							--Autoequip
+							if (e_movetovendor.merchantstep == 1) then
+								e_movetovendor.merchantstep = 2
+								if ( gAutoEquip == "1" ) then
+									d("Auto equipping superior items")
+									eso_autoequip.AutoEquip()
+									ml_global_information.Wait(1000)
+									return ml_log(true)
+								end								
+							end
+							
+							-- Mark Junk items
+							if (e_movetovendor.merchantstep == 2) then
+								e_movetovendor.merchantstep = 3
+								if ( gVendor == "1" ) then
+									d("Marking items as junk")
+									ai_vendor.markitems()
+									ml_global_information.Wait(1000)
+									return ml_log(true)
+								end								
+							end
+							
+							--Sell Items
+							if (e_movetovendor.merchantstep == 3) then
+								e_movetovendor.merchantstep = 4
+								if ( gVendor == "1" and e("HasAnyJunk(1)") ) then
+									d("Selling items")				
+									e("SellAllJunk()")
+									ml_global_information.Wait(1000)
+									return ml_log(true)
+								end								
+							end
+							
+							--Close Store
+							if (e_movetovendor.merchantstep == 4) then
+								d("Closing vendor window")
+								if ( gVendor == "1" and e("HasAnyJunk(1)") ) then
+									d("Closing vendor window")
+									e("EndInteraction(15)")
+									e_movetovendor.isvendoring = false
+									if(gMail == "1")then
+										ai_vendor.vendored = true
+									end
+									ml_global_information.Wait(1000)
+									return ml_log(true)
+								end								
+							end
+							
+							d("Bug ? Didnt handle merchant correctly..")
+							return ml_log(false)
+						end
+						
+						-- Open store when it is not yet opened
+						local chatoptionscount = tonumber(e("GetChatterOptionCount()"))						
+						if ( chatoptionscount == 0) then
+							d("Interacting with Merchant..")
+							Player:Interact(vendor.id)
+							e_movetovendor.merchantstep = 0
+						else
+							-- switch to vendoring
+							for i=0,chatoptionscount, 1 do									
+								local args = { e("GetChatterOption("..tostring(i)..")")}
+								local convstring = args[1]
+								if ( convstring ~= nil and convstring ~= "" ) then
+									if(string.match(tostring(convstring),"Store") or string.match(tostring(convstring),"H\xc3\xa4ndler") or string.match(tostring(convstring),"Magasin"))then
+										d("Selecting Merchant conversation option..")
+										e("SelectChatterOption("..tostring(i)..")")
+										break
+									end
+								end
+							end
+						end
+						ml_global_information.Wait(1000)
+						return ml_log(true)
+					end									
+				end
+			end
+		else
+			if ( e_movetovendor.vendorMarker ~= nil ) then
+				local mPos = e_movetovendor.vendorMarker:GetPosition()
+				ml_log( "Moving to vendorMarker ")
+				local navResult = tostring(Player:MoveTo( mPos.x,mPos.y,mPos.z,10,false,true,true))
+				if (tonumber(navResult) < 0) then		
+					ml_error("e_movetovendorMarker result: "..tonumber(navResult))
+					return ml_log(false)							
+				end	
+				return ml_log(true)	
+				
+			end		
+		end
+	return ml_log(false)
+end
+
 
 --****************************************************************************
 -- Mark Items
 --****************************************************************************
-function ai_vendor:markitems()
+function ai_vendor.markitems()
 	local junk = "true"
 	local args = { e("GetBagInfo(1)")}    
 	local numArgs = #args
@@ -110,6 +219,7 @@ function ai_vendor:markitems()
 		while(i <= tonumber(InventoryMax)) do
 			
 			if( (e("IsItemJunk(1,"..tostring(i)..")")) == false) then
+							
 				local argsItemQ = {e("GetItemInfo( 1,"..tostring(i)..")") } 
 				local numArgsItemQ = #argsItemQ
 				local quality = argsItemQ[8]  
@@ -123,9 +233,9 @@ function ai_vendor:markitems()
 				local EquipType = argsEquipType[4]
 				--d(EquipType)
 				--Check if the item is in whitelist first
-				if(ai_vendor:isWhiteListed(itemToCheck) == false) then
+				if(eso_vendormanager.isWhiteListed(itemToCheck) == false) then
 					if(tonumber(itemType) == 2) then  --it is Armor
-						if((VM_ATRASH ~= "0") or ( VM_ANORMAL ~= "0") or ( VM_AMAGIC ~= "0") or ( VM_AARCANE ~= "0")) then			
+						if((VM_ATRASH == "1") or ( VM_ANORMAL == "1") or ( VM_AMAGIC == "1") or ( VM_AARCANE == "1")) then			
 							-- Armor Trash
 							if(tonumber(quality) == 0) then		
 								if((VM_ATRASH == "1") ) then					
@@ -235,7 +345,7 @@ function ai_vendor:markitems()
 						end
 					end		
 					if(tonumber(itemType) == 1) then -- it is Weapon
-						if((VM_WTRASH ~= "0") or ( VM_WNORMAL ~= "0") or ( VM_WMAGIC ~= "0") or ( VM_WARCANE ~= "0")) then
+						if((VM_WTRASH == "1") or ( VM_WNORMAL == "1") or ( VM_WMAGIC == "1") or ( VM_WARCANE == "1")) then
 							--Weapon Trash			
 							if(tonumber(quality) == 0) then
 								if((VM_WTRASH == "1") ) then
@@ -421,33 +531,12 @@ function ai_vendor:markitems()
 		end
 	end
 end
---****************************************************************************
--- Select Conversation Option
---****************************************************************************
-function ai_vendor:selectvendorconv()
-local convcount = tonumber(e("GetChatterOptionCount()"))
-local args = nil
-local numArgs = nil
-local convstring = nil
-local i = 0
-	while(i < convcount+1) do
-		
-		args = { e("GetChatterOption("..tostring(i)..")")}    		
-		numArgs = #args
-		convstring = args[1]
-		convoption = args[3]
-		if(string.match(tostring(convstring),"Store") or string.match(tostring(convstring),"H\xc3\xa4ndler") or string.match(tostring(convstring),"Magasin"))then
-			e("SelectChatterOption("..tostring(i)..")")
-			break
-		end
-		i = i+1
-	end
-end
+
 
 --****************************************************************************
 -- Check if equipped gear is broken
 --****************************************************************************
-function ai_vendor:CheckDurability()
+function ai_vendor.CheckDurability()
 	local chestdurabilty = e("GetItemCondition(0,2)")  -- return gear condition in %
 	local handsdurability = e("GetItemCondition(0,16)")
 	local waistdurability = e("GetItemCondition(0,6)")
@@ -504,141 +593,4 @@ function ai_vendor:CheckDurability()
 	return false
 end
 
---****************************************************************************
--- White List
---****************************************************************************
-function ai_vendor:isWhiteListed(inventoryitem)
-	local itemtest = tostring(inventoryitem)
-	if ( TableSize(eso_vendormanager.WhiteL) > 0) then			
-		local i,item = next ( eso_vendormanager.WhiteL)
-		while i and item do	
-			if( item == inventoryitem) then
-			return true
-			end
-			i,item = next (eso_vendormanager.WhiteL,i)
-		end
-	end
-	return false
-end
 
---****************************************************************************
--- Initialize
---****************************************************************************
-RegisterEventHandler("Module.Initalize",
-	function()
-		if ( Settings.ESOMinion.gVendor == nil ) then
-			Settings.ESOMinion.gVendor = "0"
-		end
-		if ( Settings.ESOMinion.gRepair == nil ) then
-			Settings.ESOMinion.gRepair = "1"
-		end		
-		
-		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor",GetString("settings"))
-		GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair",GetString("settings"))	
-		gVendor = Settings.ESOMinion.gVendor
-		gRepair = Settings.ESOMinion.gRepair
-	end
-)
-
---****************************************************************************
--- Cause/Effect
---****************************************************************************
-c_movetovendor = inheritsFrom( ml_cause )
-e_movetovendor = inheritsFrom( ml_effect )
-e_movetovendor.vendorMarker = nil
-
-function c_movetovendor:evaluate()
-	if( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or( gRepair == "1" and (ai_vendor:CheckDurability()== true)))then
-		local VList = EntityList("nearest,isvendor,onmesh")
-		if ( TableSize( VList ) > 0 ) then			
-			return true
-		end
-		if ( e_movetovendor.vendorMarker == nil ) then
-			local VMList = ml_marker_mgr.GetList(GetString("vendorMarker"), false, false)
-			if ( TableSize(VMList) > 0 ) then				
-				local bestmarker = nil
-				local bestdist = 9999999
-				local name,marker = next ( VMList )
-				while (name and marker) do
-					local mPos = marker:GetPosition()
-					if ( Distance3D( mPos.x,mPos.y,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.y,ml_global_information.Player_Position.z) < bestdist) then
-						bestdist = Distance3D( mPos.x,mPos.y,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.y,ml_global_information.Player_Position.z)
-						bestmarker = marker
-					end
-					name,maker = next ( VMList,name )
-				end
-				if ( marker ) then
-					e_movetovendor.vendorMarker = marker
-					return true
-				end				
-			end
-		else
-			return true
-		end
-	end
-	e_movetovendor.vendorMarker = nil
-	return false
-end
-
-
-function e_movetovendor:execute()
-ml_log("e_gotovendor")
-	local VList = EntityList("nearest,isvendor,onmesh,maxdistance=85")
-		if ( VList and TableSize( VList ) > 0 ) then	
-			
-			id,vendor = next (VList)
-			if ( id and vendor ) then
-				local pPos = Player.pos
-				local tPos = vendor.pos
-				if (pPos) then
-					local dist = Distance3D( tPos.x,tPos.y,tPos.z,pPos.x,pPos.y,pPos.z)
-					ml_log("("..tostring(math.floor(dist))..")")
-					if ( dist > 4 ) then
-						local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
-						if (tonumber(navResult) < 0) then		
-							ml_error("e_movetovendor result: "..tonumber(navResult))
-							return ml_log(false)							
-						end	
-						return ml_log(true)
-					end
-					if(vendor.distance <= 4) then
-						Player:Stop()
-						if ( tonumber(e("GetChatterOptionCount()")) == 0) then
-							Player:Interact(vendor.id)
-						else
-							ai_vendor:selectvendorconv()
-						end
-						ml_global_information.Wait(1000)
-						return ml_log(true)
-					end									
-				end
-			end
-		else
-			if ( e_movetovendor.vendorMarker ~= nil ) then
-				local mPos = e_movetovendor.vendorMarker:GetPosition()
-				ml_log( "Moving to vendorMarker ")
-				local navResult = tostring(Player:MoveTo( mPos.x,mPos.y,mPos.z,10,false,true,true))
-				if (tonumber(navResult) < 0) then		
-					ml_error("e_movetovendorMarker result: "..tonumber(navResult))
-					return ml_log(false)							
-				end	
-				return ml_log(true)	
-				
-			end		
-		end
-	return ml_log(false)
-end
-
---****************************************************************************
--- Game Loop
---****************************************************************************
-RegisterEventHandler("Gameloop.Update",
-	function()
-		if 	ml_global_information.running and
-			ai_vendor.queue and
-			not ai_vendor.queue.finished
-		then
-			ai_vendor.queue:run()
-		end
-	end
-)
