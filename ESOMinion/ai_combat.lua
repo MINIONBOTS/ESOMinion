@@ -166,7 +166,7 @@ c_UseMount = inheritsFrom( ml_cause )
 e_UseMount = inheritsFrom( ml_effect )
 function c_UseMount:evaluate()
 	if(gMount == "1") then
-		if ( (Player.isswimming == false) and (e("IsMounted()") == false) and (Player.iscasting == false)) then
+		if ( Player.isswimming == false and e("IsMounted()") == false and Player.iscasting == false and ml_global_information.Player_InCombat == false) then
 			local ppos = ml_global_information.Player_Position
 			if ( Distance3D(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,ppos.x,ppos.y,ppos.z) > 35 ) then
 				return true
