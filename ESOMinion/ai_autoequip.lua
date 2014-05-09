@@ -263,13 +263,13 @@ end
 function getArmorType(bagId,slotId)
     local icon = e("GetItemInfo("..bagId..","..slotId..")")
     if (string.find(icon, "heavy")) then
-		return g("ARMORNYPE_HEAVY")
+		return g("ARMORTYPE_HEAVY")
     elseif string.find(icon,"medium") then
-        return g("ARMORNYPE_MEDIUM")
+        return g("ARMORTYPE_MEDIUM")
     elseif string.find(icon,"light") then
-		return g("ARMORNYPE_LIGHT")
+		return g("ARMORTYPE_LIGHT")
     else
-        return g("ARMORNYPE_NONE")
+        return g("ARMORTYPE_NONE")
     end
 end
 
@@ -368,7 +368,6 @@ function eso_autoequip.AutoEquip()
 					item.statvalue = e("GetItemStatValue(1,"..tostring(i)..")")
 					item.bagslot = i
 					itemlink = e("GetItemLink(1,"..tostring(i)..",1)")
-
 					item.statbonustype =  eso_autoequip.getAccessoryStat(itemlink)
 					item.itemlevel = eso_autoequip.getItemLevel(itemlink)
 					if((item.ArmorKind ~= 0) or (item.WeaponKind ~= 0 ) or(item.EquipType ==g("EQUIP_TYPE_NECK")) or (item.EquipType == g("EQUIP_TYPE_RING")) or (item.EquipType == g("EQUIP_TYPE_OFF_HAND"))) then 
@@ -615,7 +614,7 @@ function eso_autoequip.AutoEquip()
 					local c,inventoryWA = next (InventoryList)
 					while c and inventoryWA do
 						if(e("IsEquipable(1,"..tostring(inventoryWA.bagslot)..")")) then
-							if((inventoryWA.itemtype == g("ITEMTYPE_WEAPON") and ( (AE_WEAPON == 1)))) then
+							if((inventoryWA.itemtype == g("ITEMTYPE_WEAPON") and ( (AE_WEAPON == "1")))) then
 									if(AE_TWOHAND ~= "None") then
 										if(AE_TWOHAND == "Staff") then
 											if(inventoryWA.WeaponKind == g("WEAPONTYPE_FIRE_STAFF"))then
@@ -861,10 +860,10 @@ function eso_autoequip.AutoEquip()
 									end
 								end
 							end
-							if((inventoryWA.itemtype == g("ITEMTYPE_ARMOR") and ((AE_ARMOR == 1) ))) then	
+							if((inventoryWA.itemtype == g("ITEMTYPE_ARMOR") and ((AE_ARMOR == "1") ))) then	
 								if(inventoryWA.EquipType == g("EQUIP_TYPE_CHEST"))then
 									if(AE_CHEST == "Light")then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[1].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[1].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -888,7 +887,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_CHEST == "Medium") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_MEDIUM")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_MEDIUM")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[1].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[1].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -912,7 +911,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_CHEST == "Heavy") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[1].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[1].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -936,7 +935,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_CHEST == "Warlock") then	
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT"))then			
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT"))then			
 											if(getArmorBonusType(1,inventoryWA.bagslot) == "Warlock")then
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[1].itemlevel) )then
 													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -944,7 +943,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_CHEST == "Necromancer") then	
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT"))then			
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT"))then			
 											if(getArmorBonusType(1,inventoryWA.bagslot) == "Necromancer")then
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[1].itemlevel) )then
 													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -952,7 +951,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_CHEST == "Dragon") then	
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY"))then			
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY"))then			
 											if(getArmorBonusType(1,inventoryWA.bagslot) == "Dragon")then
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[1].itemlevel) )then
 													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -963,7 +962,8 @@ function eso_autoequip.AutoEquip()
 									end
 								elseif(inventoryWA.EquipType == g("EQUIP_TYPE_FEET"))then
 									if(AE_FEETS == "Light")then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT")) then
+						
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[2].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[2].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -987,7 +987,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_FEETS == "Medium") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_MEDIUM")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_MEDIUM")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[2].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[2].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1011,7 +1011,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_FEETS == "Heavy") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[2].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[2].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1037,7 +1037,7 @@ function eso_autoequip.AutoEquip()
 									end
 								elseif(inventoryWA.EquipType == g("EQUIP_TYPE_HAND"))then
 									if(AE_HANDS == "Light")then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[3].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[3].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and(inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and (inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL"))) then
@@ -1062,7 +1062,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_HANDS == "Medium") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_MEDIUM")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_MEDIUM")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[3].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[3].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and(inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and (inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL"))) then
@@ -1086,7 +1086,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_HANDS == "Heavy") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[3].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[3].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and (inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and (inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL"))) then
@@ -1112,7 +1112,7 @@ function eso_autoequip.AutoEquip()
 									end
 								elseif(inventoryWA.EquipType == g("EQUIP_TYPE_HEAD"))then
 									if(AE_HEAD == "Light")then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[4].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[4].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1136,7 +1136,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_HEAD == "Medium") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_MEDIUM")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_MEDIUM")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[4].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[4].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1160,7 +1160,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_HEAD == "Heavy") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[4].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[4].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1184,7 +1184,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_HEAD == "Warlock") then	
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT"))then			
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT"))then			
 											if(getArmorBonusType(1,inventoryWA.bagslot) == "Warlock")then
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[4].itemlevel) )then
 													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -1192,7 +1192,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_HEAD == "Necromancer") then	
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT"))then			
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT"))then			
 											if(getArmorBonusType(1,inventoryWA.bagslot) == "Necromancer")then
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[4].itemlevel) )then
 													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -1200,7 +1200,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_HEAD == "Dragon") then	
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY"))then			
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY"))then			
 											if(getArmorBonusType(1,inventoryWA.bagslot) == "Dragon")then
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[4].itemlevel) )then
 													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -1210,7 +1210,7 @@ function eso_autoequip.AutoEquip()
 									end
 								elseif(inventoryWA.EquipType == g("EQUIP_TYPE_LEGS"))then
 									if(AE_LEGS == "Light")then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[5].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[5].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1234,7 +1234,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_LEGS == "Medium") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_MEDIUM")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_MEDIUM")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[5].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[5].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1258,7 +1258,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_LEGS == "Heavy") then
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY")) then
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY")) then
 											if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[5].itemlevel)) then
 												if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[5].statvalue) )then
 													if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1282,7 +1282,7 @@ function eso_autoequip.AutoEquip()
 											end
 										end
 									elseif(AE_LEGS == "Necromancer") then	
-										if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT"))then			
+										if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT"))then			
 											if(getArmorBonusType(1,inventoryWA.bagslot) == "Necromancer")then
 												if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[5].itemlevel) )then
 													e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -1398,7 +1398,7 @@ function eso_autoequip.AutoEquip()
 										end
 								elseif(inventoryWA.EquipType == g("EQUIP_TYPE_SHOULDERS"))then
 										if(AE_SHOULDERS == "Light")then
-											if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT")) then
+											if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT")) then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[10].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[10].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1422,7 +1422,7 @@ function eso_autoequip.AutoEquip()
 												end
 											end
 										elseif(AE_SHOULDERS == "Medium") then
-											if(inventoryWA.ArmorKind == g("ARMORNYPE_MEDIUM")) then
+											if(inventoryWA.ArmorKind == g("ARMORTYPE_MEDIUM")) then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[10].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[10].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1446,7 +1446,7 @@ function eso_autoequip.AutoEquip()
 												end
 											end
 										elseif(AE_SHOULDERS == "Heavy") then
-											if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY")) then
+											if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY")) then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[10].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[10].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1470,7 +1470,7 @@ function eso_autoequip.AutoEquip()
 												end
 											end
 										elseif(AE_SHOULDERS == "Necromancer") then	
-											if(inventoryWA.ArmorKind == g("ARMORNYPE_LIGHT"))then			
+											if(inventoryWA.ArmorKind == g("ARMORTYPE_LIGHT"))then			
 												if(getArmorBonusType(1,inventoryWA.bagslot) == "Necromancer")then
 													if(tonumber(inventoryWA.itemlevel) > tonumber(EquippedList[10].itemlevel) )then
 														e("EquipItem(1,"..tostring(inventoryWA.bagslot)..")")
@@ -1480,7 +1480,7 @@ function eso_autoequip.AutoEquip()
 										end
 								elseif(inventoryWA.EquipType == g("EQUIP_TYPE_WAIST"))then
 										if(AE_WAIST == "Light")then
-											if(inventoryWA.WA == g("ARMORNYPE_LIGHT")) then
+											if(inventoryWA.WA == g("ARMORTYPE_LIGHT")) then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[13].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[13].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1504,7 +1504,7 @@ function eso_autoequip.AutoEquip()
 												end
 											end
 										elseif(AE_WAIST == "Medium") then
-											if(inventoryWA.ArmorKind == g("ARMORNYPE_MEDIUM")) then
+											if(inventoryWA.ArmorKind == g("ARMORTYPE_MEDIUM")) then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[13].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[13].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
@@ -1528,7 +1528,7 @@ function eso_autoequip.AutoEquip()
 												end
 											end
 										elseif(AE_WAIST == "Heavy") then
-											if(inventoryWA.ArmorKind == g("ARMORNYPE_HEAVY")) then
+											if(inventoryWA.ArmorKind == g("ARMORTYPE_HEAVY")) then
 												if(tonumber(inventoryWA.itemlevel) >= tonumber(EquippedList[13].itemlevel)) then
 													if(tonumber(inventoryWA.statvalue) > tonumber(EquippedList[13].statvalue) )then
 														if((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT")) and((inventoryWA.quality ~= g("ITEM_QUALITY_ARTIFACT"))) and ((inventoryWA.quality ~= g("ITEM_QUALITY_NORMAL")))) then
