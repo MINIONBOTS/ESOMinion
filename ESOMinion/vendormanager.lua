@@ -166,10 +166,10 @@ function eso_vendormanager.ModuleInit()
 		Settings.ESOMinion.VM_GNORMAL = "0"
 	end
 	if (Settings.ESOMinion.VM_GMAGIC== nil) then
-		Settings.ESOMinion.VM_GARCANE = "0"
+		Settings.ESOMinion.VM_GMAGIC = "0"
 	end
 	if (Settings.ESOMinion.VM_GARCANE== nil) then
-		Settings.ESOMinion.VM_GARCANE = "0"
+		Settings.ESOMinion.VM_GARCANE= "0"
 	end
 	if (Settings.ESOMinion.VM_RMAGIC== nil) then
 		Settings.ESOMinion.VM_RMAGIC = "0"
