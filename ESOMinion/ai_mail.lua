@@ -176,6 +176,7 @@ RegisterEventHandler("Module.Initalize",
 		gMailTo = Settings.ESOMinion.gMailTo
 		gSubject = Settings.ESOMinion.gSubject
 		gMailStack = Settings.ESOMinion.gMailStack
+		GUI_WindowVisible(ai_mail.MainWindow.Name,false)
 	end
 )
 
