@@ -6,7 +6,7 @@ e_dead.lastseenalive = 0
 e_dead.wait = 5000
 
 function c_dead:evaluate()
-	if ( Player.dead == true) then
+	if ( ml_global_information.Player_Dead == true) then
 		return true
 	end
 	e_dead.lastseenalive = ml_global_information.Now

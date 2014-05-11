@@ -83,6 +83,7 @@ function ml_globals.UpdateGlobals()
 	ml_global_information.Player_InventoryNearlyFull = (e("CheckInventorySpaceSilently(5)") == false)
 	ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)			
 	ml_global_information.Player_Level = e("GetUnitLevel(player)")
+	ml_global_information.Player_Dead = e("IsUnitDead(player)")
 	
 	ml_global_information.Player_Magicka = {} 
 		local magickaID = g("POWERTYPE_MAGICKA")

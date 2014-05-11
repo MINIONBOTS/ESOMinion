@@ -147,12 +147,12 @@ ml_log("e_gotovendor")
 								e_movetovendor.merchantstep = 0
 								e_movetovendor.isvendoring = false
 								d("Closing vendor window")
-								d("Closing vendor window")
 								e("EndInteraction(15)")								
 								ml_global_information.Wait(1000)
 								if(gMail == "1")then
 									ai_vendor.vendored = true
 								end
+								return ml_log(true)
 							end
 							
 							d("Bug ? Didnt handle merchant correctly..")
