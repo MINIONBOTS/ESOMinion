@@ -11,7 +11,7 @@ ai_unstuck.AvoidanceAreas = {}
 
 function ai_unstuck:OnUpdate( tick )
 	
-	if ( Player.alive == false) then 
+	if ( ml_global_information.Player_Dead == true) then 
 		ai_unstuck.Reset()
 		return
 	end
@@ -113,7 +113,7 @@ end
 
 function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 	
-	if ( Player.alive == false) then 
+	if ( ml_global_information.Player_Dead == true) then 
 		ai_unstuck.Reset()
 		return
 	end

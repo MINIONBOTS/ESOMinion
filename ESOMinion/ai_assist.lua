@@ -30,7 +30,7 @@ function eso_ai_assist:Process()
 		
 		if ( sMtargetmode == "None" ) then
 			local target = Player:GetTarget()
-			if ( target ) then 
+			if ( target and target.attackable and target.alive and target.iscritter == false) then 
 				eso_skillmanager.AttackTarget( target.id )
 			end		
 		else

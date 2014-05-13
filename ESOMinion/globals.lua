@@ -75,40 +75,41 @@ end
 -- Global vars which are used very often and we can just reduce the hammering by getting them once per frame
 function ml_globals.UpdateGlobals()
 	
-	if (eso_skillmanager) then 	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() end
-			
-	ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
-	ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
-	ml_global_information.Player_InventorySlots = e("GetBagInfo(1)")
-	ml_global_information.Player_InventoryNearlyFull = (e("CheckInventorySpaceSilently(5)") == false)
-	ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)			
-	ml_global_information.Player_Level = e("GetUnitLevel(player)")
-	ml_global_information.Player_Dead = e("IsUnitDead(player)")
-	
-	ml_global_information.Player_Magicka = {} 
-		local magickaID = g("POWERTYPE_MAGICKA")
-		ml_global_information.Player_Magicka.current,ml_global_information.Player_Magicka.max,ml_global_information.Player_Magicka.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-		ml_global_information.Player_Magicka.percent = ml_global_information.Player_Magicka.current*100/ml_global_information.Player_Magicka.effectiveMax
-	ml_global_information.Player_Stamina = {} 
-		local magickaID = g("POWERTYPE_STAMINA")
-		ml_global_information.Player_Stamina.current,ml_global_information.Player_Stamina.max,ml_global_information.Player_Stamina.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-		ml_global_information.Player_Stamina.percent = ml_global_information.Player_Stamina.current*100/ml_global_information.Player_Stamina.effectiveMax
-	ml_global_information.Player_Ultimate = {} 
-		local magickaID = g("POWERTYPE_ULTIMATE")
-		ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-		ml_global_information.Player_Ultimate.percent = ml_global_information.Player_Ultimate.current*100/ml_global_information.Player_Ultimate.effectiveMax
-	
-	ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
-	ml_global_information.CurrentMapName = e("GetMapName()")
-	ml_global_information.Player_Position = Player.pos
-	
-	
-	-- Update Debug fields	
-	dAttackRange = ml_global_information.AttackRange
-	dMapName = e("GetMapName()")
-	dMapZoneIndex = e("GetCurrentMapZoneIndex()")
-	dLocationName = e("GetPlayerLocationName()")
-	
+	if ( Player ~= nil ) then
+		if (eso_skillmanager) then 	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() end
+				
+		ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
+		ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
+		ml_global_information.Player_InventorySlots = e("GetBagInfo(1)")
+		ml_global_information.Player_InventoryNearlyFull = (e("CheckInventorySpaceSilently(5)") == false)
+		ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)			
+		ml_global_information.Player_Level = e("GetUnitLevel(player)")
+		ml_global_information.Player_Dead = e("IsUnitDead(player)")
+		
+		ml_global_information.Player_Magicka = {} 
+			local magickaID = g("POWERTYPE_MAGICKA")
+			ml_global_information.Player_Magicka.current,ml_global_information.Player_Magicka.max,ml_global_information.Player_Magicka.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
+			ml_global_information.Player_Magicka.percent = ml_global_information.Player_Magicka.current*100/ml_global_information.Player_Magicka.effectiveMax
+		ml_global_information.Player_Stamina = {} 
+			local magickaID = g("POWERTYPE_STAMINA")
+			ml_global_information.Player_Stamina.current,ml_global_information.Player_Stamina.max,ml_global_information.Player_Stamina.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
+			ml_global_information.Player_Stamina.percent = ml_global_information.Player_Stamina.current*100/ml_global_information.Player_Stamina.effectiveMax
+		ml_global_information.Player_Ultimate = {} 
+			local magickaID = g("POWERTYPE_ULTIMATE")
+			ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
+			ml_global_information.Player_Ultimate.percent = ml_global_information.Player_Ultimate.current*100/ml_global_information.Player_Ultimate.effectiveMax
+		
+		ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
+		ml_global_information.CurrentMapName = e("GetMapName()")
+		ml_global_information.Player_Position = Player.pos
+		
+		
+		-- Update Debug fields	
+		dAttackRange = ml_global_information.AttackRange
+		dMapName = e("GetMapName()")
+		dMapZoneIndex = e("GetCurrentMapZoneIndex()")
+		dLocationName = e("GetPlayerLocationName()")
+	end
 end
 
 -- Init all variables before the rest of the bot loads

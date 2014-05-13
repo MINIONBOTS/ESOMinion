@@ -644,31 +644,32 @@ end
 
 -- Updates the MaxAttackRange and our cskills List
 function eso_skillmanager.GetAttackRange()
-	
-	local maxrange = 5 -- 5 is the melee sword attack range
-	
-	if ( gAttackRange == GetString("aRange")) then
-		maxrange = 28
 		
-	elseif ( gAttackRange == GetString("aAutomatic")) then		
-		-- Check if we have a target to check our skills against
-		target = Player:GetTarget()
-		if ( not target ) then
-			target = Player
-		end
-					
-		if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
+	local maxrange = 5 -- 5 is the melee sword attack range
+	if ( Player ~= nil) then	
+		if ( gAttackRange == GetString("aRange")) then
+			maxrange = 28
 			
-			for k,v in pairs(eso_skillmanager.SkillProfile) do					
-				-- Get Max Attack Range for global use
-				if (v.atkrng == "1" and v.skilltype == GetString("smsktypedmg")) then
-					--d(v.name.." "..tostring(v.maxRange).." "..tostring(v.name).." "..tostring(eso_skillmanager.CanCast( target, v )))
-					if ( target and eso_skillmanager.CanCast( target, v ) ) then						
-						if ( v.maxRange > maxrange) then
-							maxrange = v.maxRange
-						end						
-					end
-				end				
+		elseif ( gAttackRange == GetString("aAutomatic")) then		
+			-- Check if we have a target to check our skills against
+			target = Player:GetTarget()
+			if ( not target ) then
+				target = Player
+			end
+						
+			if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
+				
+				for k,v in pairs(eso_skillmanager.SkillProfile) do					
+					-- Get Max Attack Range for global use
+					if (v.atkrng == "1" and v.skilltype == GetString("smsktypedmg")) then
+						--d(v.name.." "..tostring(v.maxRange).." "..tostring(v.name).." "..tostring(eso_skillmanager.CanCast( target, v )))
+						if ( target and eso_skillmanager.CanCast( target, v ) ) then						
+							if ( v.maxRange > maxrange) then
+								maxrange = v.maxRange
+							end						
+						end
+					end				
+				end
 			end
 		end
 	end
