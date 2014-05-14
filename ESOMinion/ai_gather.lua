@@ -193,12 +193,17 @@ function e_Gathering:execute()
             ml_global_information.Player_Sprinting = true
           elseif (ml_global_information.Player_Stamina.percent > 99 and ml_global_information.Player_SprintingRecharging) then
             ml_global_information.Player_SprintingRecharging = false
-          elseif (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging)       then
+          elseif (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
             e("OnSpecialMoveKeyUp(1)")
             ml_global_information.Player_SprintingRecharging = true
             ml_global_information.Player_Sprinting = false
           end
+        elseif (ml_global_information.Player_Sprinting == true) then
+            e("OnSpecialMoveKeyUp(1)")
+            ml_global_information.Player_SprintingRecharging = false
+            ml_global_information.Player_Sprinting = false 
         end
+        
         
 				local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,true,true))
 				if (tonumber(navResult) < 0) then
