@@ -204,8 +204,10 @@ function e_Gathering:execute()
             ml_global_information.Player_Sprinting = false 
         end
         
+        local rndPath = false
+        if (dist>20) then rndPath = true else rndPath = false end
         
-				local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,true,true))
+				local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,rndPath,false))
 				if (tonumber(navResult) < 0) then
 					d("e_Gathering.MoveIntoRange result: "..tonumber(navResult))
 				end
@@ -277,7 +279,7 @@ function e_Loot:execute()
 			if ( entity.distance > 2) then
 				-- MoveIntoInteractRange				
 				if ( tPos ) then					
-					local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,true,true))		
+					local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,false,false))		
 					if (tonumber(navResult) < 0) then
 						d("e_Loot.MoveIntoCombatRange result: "..tonumber(navResult))					
 					end

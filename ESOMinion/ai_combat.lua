@@ -229,10 +229,13 @@ function e_GotoAndKill:execute()
 
 	-- Walk within a certain distance first before checking the enemy data in our Elist
 	local ppos = ml_global_information.Player_Position
-	if ( Distance3D(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,ppos.x,ppos.y,ppos.z) > 40 ) then
+  local dist = Distance3D(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,ppos.x,ppos.y,ppos.z) 
+	if ( dist > 40 ) then
 		ml_log(" Walking to Target ")
-		-- Player:MoveTo(x,y,z,stoppingdistance,navsystem(normal/follow),navpath(straight/random),smoothturns)
-		local navResult = tostring(Player:MoveTo(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,0.5,false,true,false))
+		local rndPath = false
+    if (dist>20) then rndPath = true else rndPath = false end
+    -- Player:MoveTo(x,y,z,stoppingdistance,navsystem(normal/follow),navpath(straight/random),smoothturns)
+		local navResult = tostring(Player:MoveTo(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,0.5,false,rndPath,false))
 		if (tonumber(navResult) < 0) then
 			ml_log("Movement result: "..tostring(navResult))
 			return ml_log(false)
@@ -248,9 +251,10 @@ function e_GotoAndKill:execute()
 		ml_task_hub:CurrentTask().targetPos = tpos
 		
 		if ( target.distance > ml_global_information.AttackRange or not target.los ) then		
-								
+			local rndPath = false
+      if (target.distance>20) then rndPath = true else rndPath = false end					
 			-- Player:MoveTo(x,y,z,stoppingdistance,navsystem(normal/follow),navpath(straight/random),smoothturns)
-			local navResult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,0.5+(target.radius),false,true,false))
+			local navResult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,0.5+(target.radius),false,rndPath,false))
 			if (tonumber(navResult) < 0) then
 				ml_log("CombatMovement result: "..tostring(navResult))
 				return ml_log(false)
