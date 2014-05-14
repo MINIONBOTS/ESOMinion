@@ -103,8 +103,9 @@ function ai_unstuck.HandleStuck()
 		--table.insert(Dev.Obstacles, { x=pPos.x, y=pPos.y, z=pPos.z, r=2 })
 		--d("Adding new Obstacle with size "..tostring(2))
 		--NavigationManager:AddNavObstacles(Dev.Obstacles)
+		
 	end
-	Player:Stop() -- force recreation of path
+	Player:Stop() -- force the recreation of a new path
 	
 	Player:SetMovement(1,2) -- try walking backwards a bit
 	ml_global_information.Wait( 1500 )
