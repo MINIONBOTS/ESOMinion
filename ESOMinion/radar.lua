@@ -30,8 +30,8 @@ function eso_radar.HandleInit()
     if ( Settings.ESOMinion.gRadarShowPlayers == nil ) then
         Settings.ESOMinion.gRadarShowPlayers = "0"
     end	
-    if ( Settings.ESOMinion.gRadarShowAnchors == nil ) then
-        Settings.ESOMinion.gRadarShowAnchors = "0"
+    if ( Settings.ESOMinion.gRadarShowOnlyGatherables == nil ) then
+        Settings.ESOMinion.gRadarShowOnlyGatherables = "0"
     end	
     if ( Settings.ESOMinion.gRadarShowSieges == nil ) then
         Settings.ESOMinion.gRadarShowSieges = "0"
@@ -58,7 +58,7 @@ function eso_radar.HandleInit()
     GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showPlayers"),"gRadarShowPlayers","RadarSettings" );
 	GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showNPCs"),"gRadarShowMonsters","RadarSettings" );
     GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showObjects"),"gRadarShowObjects","RadarSettings" );
-	GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showAnchors"),"gRadarShowAnchors","RadarSettings" );
+	GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showOnlyGatherables"),"gRadarShowOnlyGatherables","RadarSettings" );
 	GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showSieges"),"gRadarShowSieges","RadarSettings" );	
         
     GUI_NewNumeric(eso_radar.MainWindow.Name,GetString("xPos"),"gRadarX","RadarSettings","0","2000" );
@@ -72,7 +72,7 @@ function eso_radar.HandleInit()
     gRadarShowMonsters = Settings.ESOMinion.gRadarShowMonsters
     gRadarShowPlayers = Settings.ESOMinion.gRadarShowPlayers
     gRadarShowObjects = Settings.ESOMinion.gRadarShowObjects
-	gRadarShowAnchors = Settings.ESOMinion.gRadarShowAnchors
+	gRadarShowOnlyGatherables = Settings.ESOMinion.gRadarShowOnlyGatherables
 	gRadarShowSieges = Settings.ESOMinion.gRadarShowSieges
     gRadarX = tonumber(Settings.ESOMinion.gRadarX/10)
     gRadarY = tonumber(Settings.ESOMinion.gRadarY/10)
@@ -85,7 +85,7 @@ function eso_radar.HandleInit()
     if ( gRadarShowMonsters == "0") then GameHacks:SetRadarSettings("gRadarShowMonsters",false) else GameHacks:SetRadarSettings("gRadarShowMonsters",true) end
     if ( gRadarShowPlayers == "0") then GameHacks:SetRadarSettings("gRadarShowPlayers",false) else GameHacks:SetRadarSettings("gRadarShowPlayers",true) end
     if ( gRadarShowObjects == "0") then GameHacks:SetRadarSettings("gRadarShowObjects",false) else GameHacks:SetRadarSettings("gRadarShowObjects",true) end
-	if ( gRadarShowAnchors == "0") then GameHacks:SetRadarSettings("gRadarShowAnchors",false) else GameHacks:SetRadarSettings("gRadarShowAnchors",true) end
+	if ( gRadarShowOnlyGatherables == "0") then GameHacks:SetRadarSettings("gRadarShowOnlyGatherables",false) else GameHacks:SetRadarSettings("gRadarShowOnlyGatherables",true) end
 	if ( gRadarShowSieges == "0") then GameHacks:SetRadarSettings("gRadarShowSieges",false) else GameHacks:SetRadarSettings("gRadarShowSieges",true) end
 	
     if ( tonumber(gRadarX) ~= nil) then GameHacks:SetRadarSettings("gRadarX",tonumber(gRadarX)) end
@@ -106,7 +106,7 @@ function eso_radar.GUIVarUpdate(Event, NewVals, OldVals)
             k == "gRadarShowMonsters" or
             k == "gRadarShowPlayers" or
             k == "gRadarShowObjects" or	
-			k == "gRadarShowAnchors" or
+			k == "gRadarShowOnlyGatherables" or
 			k == "gRadarShowSieges")
         then
             Settings.ESOMinion[tostring(k)] = v
