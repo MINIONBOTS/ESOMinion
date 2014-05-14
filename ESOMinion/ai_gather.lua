@@ -156,7 +156,7 @@ e_Gathering = inheritsFrom( ml_effect )
 function c_Gathering:evaluate()
 		
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) == 0 ) then
-		local _,gatherable = next(EntityList("shortestpath,gatherable,maxdistance=50,onmesh"))
+		local _,gatherable = next(EntityList("shortestpath,gatherable,onmesh"))
 		if (gatherable) then
 			local gPos = gatherable.pos
 			if ( TableSize(gPos) > 0 ) then
@@ -186,14 +186,14 @@ function e_Gathering:execute()
 			-- MoveIntoInteractRange
 			if ( tPos ) then
 				
-        if (gSprint) then
-          if (ml_global_information.Player_Stamina.percent > tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
+        if (gSprint == "1") then
+          if (ml_global_information.Player_Sprinting == false and ml_global_information.Player_Stamina.percent > tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
             --e("OnSpecialMoveKeyUp(1)")
             e("OnSpecialMoveKeyDown(1)")
             ml_global_information.Player_Sprinting = true
           elseif (ml_global_information.Player_Stamina.percent > 99 and ml_global_information.Player_SprintingRecharging) then
             ml_global_information.Player_SprintingRecharging = false
-          elseif (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
+          elseif (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging)       then
             e("OnSpecialMoveKeyUp(1)")
             ml_global_information.Player_SprintingRecharging = true
             ml_global_information.Player_Sprinting = false

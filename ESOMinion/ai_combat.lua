@@ -70,7 +70,7 @@ c_CombatTask = inheritsFrom( ml_cause )
 e_CombatTask = inheritsFrom( ml_effect )
 c_CombatTask.target = nil
 function c_CombatTask:evaluate()
-	local EList = EntityList("attackable,targetable,alive,nocritter,shortestpath,maxdistance=60,onmesh")
+	local EList = EntityList("attackable,targetable,alive,nocritter,shortestpath,maxdistance=120,onmesh")
 	if ( EList and TableSize(EList) > 0 ) then
 		local id,entry = next(EList)
 		if ( id and entry ) then
@@ -81,9 +81,9 @@ function c_CombatTask:evaluate()
 	c_CombatTask.target = nil
 	return false
 end
+
 function e_CombatTask:execute()
 	ml_log("e_CombatTask ")
-	
 	-- Weakest Aggro in CombatRange first	
 	local TList = ( EntityList("lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance="..ml_global_information.AttackRange) )
 	if ( TableSize( TList ) > 0 ) then
@@ -114,7 +114,8 @@ end
 c_Aggro = inheritsFrom( ml_cause )
 e_Aggro = inheritsFrom( ml_effect )
 function c_Aggro:evaluate()
-    return Player.isswimming == false and TableSize(EntityList("nearest,alive,aggro,attackable,targetable,maxdistance=28,onmesh")) > 0 and ml_global_information.Player_InCombat
+    return Player.isswimming == false and TableSize(EntityList("nearest,alive,aggro,attackable,targetable,maxdistance=28,onmesh")) > 0
+    --and ml_global_information.Player_InCombat
 end
 function e_Aggro:execute()
 	ml_log("e_Aggro ")
@@ -209,8 +210,22 @@ function c_GotoAndKill:evaluate()
 	end	
 	return false
 end
+
+
 function e_GotoAndKill:execute()
 	ml_log("e_GotoAndKill ")
+
+	-- Check for better target while we walk towards out primary target
+  local EList = EntityList("nearest,alive,aggro,attackable,targetable,los,maxdistance=25,onmesh,exclude="..ml_task_hub:CurrentTask().targetID)
+  if ( EList ) then
+    local id,entity = next(EList)
+    if (id and entity) then
+      -- switch to better target
+      d("Switching to better target : "..entity.name.." "..tostring(entity.id))
+      ml_task_hub:CurrentTask().targetID = entity.id					
+      ml_task_hub:CurrentTask().targetPos = entity.pos
+    end
+  end
 
 	-- Walk within a certain distance first before checking the enemy data in our Elist
 	local ppos = ml_global_information.Player_Position
@@ -224,20 +239,6 @@ function e_GotoAndKill:execute()
 		end
 		return ml_log(true)
 	end
-	
-	
-	-- Check for better target while we walk towards out primary target
-			local EList = EntityList("nearest,alive,aggro,attackable,targetable,los,maxdistance=15,onmesh,exclude="..ml_task_hub:CurrentTask().targetID)
-			if ( EList ) then
-				local id,entity = next (EList)
-				if (id and entity) then
-					-- switch to better target
-					d("Switching to better target : "..entity.name.." "..tostring(entity.id))
-					ml_task_hub:CurrentTask().targetID = entity.id					
-					ml_task_hub:CurrentTask().targetPos = entity.pos
-				end
-			end
-	
 	
 	-- Goto n Attack our main target
 	local target = EntityList:Get(ml_task_hub:CurrentTask().targetID)
