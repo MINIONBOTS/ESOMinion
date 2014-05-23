@@ -14,8 +14,7 @@ ai_mail.visible = false
 RegisterForEvent("EVENT_MAIL_OPEN_MAILBOX", true)
 RegisterEventHandler("GAME_EVENT_MAIL_OPEN_MAILBOX",
 	function(...)
-		d("mailbox test")
-		if 	(ml_global_information.running and ai_mail.queue == nil ) then
+		if 	(gMail == "1" and ml_global_information.running and ai_mail.queue == nil ) then
 			d("MailBox opened")
 			ai_mail.taskdone= false
 			ai_mail.queue = ai_mail:CreateNewQueue()
@@ -231,7 +230,6 @@ c_sendmail.throttle = 1500
 
 function c_sendmail:evaluate()
 	if( (gMail == "1") and (ai_vendor.vendored == true))then
-		d("test")
 		return true
 	end
 	return false	
@@ -250,7 +248,8 @@ end
 --****************************************************************************
 RegisterEventHandler("Gameloop.Update",
 	function()
-		if 	ml_global_information.running and
+		if 	gMail == "1" and
+			ml_global_information.running and
 			ai_mail.queue and
 			not ai_mail.queue.finished
 		then
