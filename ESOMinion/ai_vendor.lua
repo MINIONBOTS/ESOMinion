@@ -81,7 +81,7 @@ ml_log("e_gotovendor")
 				if (pPos) then
 					local dist = Distance3D( tPos.x,tPos.y,tPos.z,pPos.x,pPos.y,pPos.z)
 					ml_log("("..tostring(math.floor(dist))..")")
-					if ( dist > 4 ) then
+					if ( dist > 4 and tonumber(e("GetChatterOptionCount()"))==0) then
 						local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
 						if (tonumber(navResult) < 0) then		
 							ml_error("e_movetovendor result: "..tonumber(navResult))
@@ -89,7 +89,7 @@ ml_log("e_gotovendor")
 						end	
 						return ml_log(true)
 					end
-					if(vendor.distance <= 4) then
+					if(vendor.distance <= 4 or tonumber(e("GetChatterOptionCount()")) > 0 or e("GetNumStoreItems()") > 0) then
 						Player:Stop()
 						
 						-- I KNOW this should go in seperate cause & effects, but then a whole new task would also have to be written for vendoring, I'm waaay to lazy now
@@ -176,6 +176,9 @@ ml_log("e_gotovendor")
 										e("SelectChatterOption("..tostring(i)..")")
 										break
 									end
+								else
+									d("Unknown Merchant conversation options..trying to make him chat lol")
+									e("SelectChatterOption("..tostring(1)..")")
 								end
 							end
 						end
