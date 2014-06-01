@@ -39,10 +39,7 @@ function ai_grind:Init()
 				
 	-- Resting
 	self:add(ml_element:create( "Resting", c_resting, e_resting, 210 ), self.process_elements)	
-	
-	--SendMail
-	self:add(ml_element:create( "SendMail", c_sendmail, e_sendmail, 200 ), self.process_elements)
-	
+
 	--Potions
 	self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)
 		
