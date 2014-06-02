@@ -18,7 +18,7 @@ ml_global_information.WhitelistContentID = ""
 ml_global_information.MarkerTime = 0
 ml_global_information.Player_SprintingRecharging = false
 ml_global_information.Player_Sprinting = false
-ml_global_information.VendorChar = ""
+
 
 function ml_global_information.moduleinit()
 	
@@ -44,10 +44,7 @@ function ml_global_information.moduleinit()
 		Settings.ESOMinion.aPassword = ""
 	end
 	if ( Settings.ESOMinion.gAutoLogin == nil ) then
-		Settings.ESOMinion.gAutoLogin = "0"
-	end
-	if ( Settings.ESOMinion.gAutoCharacterSelect == nil ) then
-		Settings.ESOMinion.gAutoCharacterSelect = ""
+		Settings.ESOMinion.gAutoLogin = ""
 	end
 	if ( Settings.ESOMinion.gPot == nil ) then
 		Settings.ESOMinion.gPot = "0"
@@ -58,15 +55,15 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gPotvalue == nil ) then
 		Settings.ESOMinion.gPotvalue = "27"
 	end
-	
 	if ( Settings.ESOMinion.gSprint == nil ) then
-	Settings.ESOMinion.gSprint = "0"
+		Settings.ESOMinion.gSprint = "0"
  	end
-  
     if ( Settings.ESOMinion.gSprintStopThreshold == nil ) then
  		Settings.ESOMinion.gSprintStopThreshold = "50"
 	end
- 
+	if ( Settings.ESOMinion.gAutoStart == nil ) then
+		Settings.ESOMinion.gAutoStart = "0"
+	end
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
@@ -75,6 +72,7 @@ function ml_global_information.moduleinit()
 	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("showradar"),"Radar.toggle")
 	RegisterEventHandler("ml_global_information.startStop", ml_global_information.eventhandler)
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("autoStartBot"),"gAutoStart",GetString("botStatus"))
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
 	GUI_NewField(ml_global_information.MainWindow.Name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
 	
@@ -107,7 +105,7 @@ function ml_global_information.moduleinit()
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("markerManager"), "ToggleMarkerMgr", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("blacklistManager"), "ToggleBlacklistMgr", "Managers")	
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("vendorManager"), "VendorManager.toggle", "Managers")	
-	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")		
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
 	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
 	
@@ -123,7 +121,7 @@ function ml_global_information.moduleinit()
 
 	-- CHARACTERSELECT WINDOW
 	GUI_NewWindow(ml_global_information.characterselect.Name,ml_global_information.characterselect.x,ml_global_information.characterselect.y,ml_global_information.characterselect.width,ml_global_information.characterselect.height,"",true)
-	GUI_NewComboBox(ml_global_information.characterselect.Name,GetString("aCharacter"),"gAutoCharacterSelect",GetString("settings"),"None")	
+	--GUI_NewComboBox(ml_global_information.characterselect.Name,GetString("aCharacter"),"gAutoCharacterSelect",GetString("settings"),"None")	
 	GUI_NewCheckbox(ml_global_information.characterselect.Name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
 	GUI_UnFoldGroup(ml_global_information.characterselect.Name,GetString("settings") )
 	gAutoLogin = Settings.ESOMinion.gAutoLogin
@@ -143,6 +141,7 @@ function ml_global_information.moduleinit()
 	ml_global_information.UpdateMode()
 	
 	gBotRunning = "0"
+	gAutoStart = Settings.ESOMinion.gAutoStart
 	gPulseTime = Settings.ESOMinion.gPulseTime	
 	gAttackRange = Settings.ESOMinion.gAttackRange
 	gGather = Settings.ESOMinion.gGather
@@ -175,6 +174,10 @@ function ml_global_information.moduleinit()
     if not ml_blacklist.BlacklistExists(GetString("monsters")) then
         ml_blacklist.CreateBlacklist(GetString("monsters"))
     end
+
+	if gAutoStart == "1" and not ml_global_information.running then
+		ml_global_information.togglebot(1)
+	end	
 end
 
 function test()
@@ -256,34 +259,12 @@ function ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount
 		GUI_WindowVisible(ml_global_information.characterselect.Name,true)		
 		ml_global_information.gamestatechanged = false
 		
-		local charcount = e("GetNumCharacters()")
+		--TODO: get #chars and set the wanted accordingly
+		--local charcount = e("GetNumCharacters()")
 		
 		-- populate char-dropdown-list				
-		local charList = ""
-		local LoginCharFound = false
-		local SettingsCharFound = false
-		for i = 1, e("GetNumCharacters()") do
-			local charName = TrimString(e("GetCharacterInfo("..tostring(i)..")"),3)
-			if(charList == "") then
-				charList = charName
-			else
-				charList = charList..","..charName
-			end
-			
-			if ml_global_information.VendorChar == charName then 
-				LoginCharFound = true
-			elseif Settings.ESOMinion.gAutoCharacterSelect == charName then 
-				SettingsCharFound = true 
-			end
-		end
-	
-		gAutoCharacterSelect_listitems = charList
-		if LoginCharFound then 
-			gAutoCharacterSelect = ml_global_information.VendorChar
-		elseif SettingsCharFound then
-			gAutoCharacterSelect = Settings.ESOMinion.gAutoCharacterSelect
-		end
-	end
+		--gAutoCharacterSelect_listitems = 
+	end	
 				
 	if ( tickcount - ml_global_information.lasttick > 10000 ) then
 		ml_global_information.lasttick = tickcount
@@ -292,18 +273,12 @@ function ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount
 		if ( gAutoLogin == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "CharacterSelect") then
 			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
 				ml_log("Select character and login! ")
-				for i = 1, e("GetNumCharacters()") do
-					local charName = TrimString(e("GetCharacterInfo("..tostring(i)..")"),3)
-					if (charName == gAutoCharacterSelect) then
-						e("SelectCharacterToView("..tostring(i)..")")
-					end
-				end
 				e("ZO_CharacterSelect_Login(false)")
 			else
 				ml_log("Login Error detected....trying again in 10 seconds..")
 				e("RequestCharacterList()")
 			end
-		end
+		end		
 		
 		-- Update the Statusbar on the left/bottom screen
 		GUI_SetStatusBar(ml_GetTraceString())		
@@ -359,7 +334,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				GUI_SetStatusBar(ml_GetTraceString())					
 			end
 				
-		elseif ( ml_global_information.running == false and gAutostartbot == "1" ) then
+		elseif ( ml_global_information.running == false and gAutoStart == "1" ) then
 			ml_global_information.togglebot(1)
 		else
 			GUI_SetStatusBar("BOT: Not Running")
@@ -383,13 +358,16 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
     ml_blacklist_mgr.UpdateEntries(tickcount)
 end
 
+
+
+
 function ml_global_information.eventhandler(arg)
 	if ( arg == "ml_global_information.startStop" or arg == "MINION.toggle") then
 		if ( gBotRunning == "1" ) then
-			gAutostartbot = "0"
+			gAutoStart = "0"
 			ml_global_information.togglebot("0")			
 		else
-			gAutostartbot = "1"
+			gAutoStart = "1"
 			ml_global_information.togglebot("1")
 		end
 	end
@@ -408,8 +386,8 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "gPotiontype" or
 			k == "gSprint" or
  			k == "gSprintStopThreshold" or
-			k == "gPotvalue" or 
-			k == "gAutoCharacterSelect"
+			k == "gPotvalue" or
+			k == "gAutoStart"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
