@@ -127,7 +127,6 @@ RegisterEventHandler("GAME_EVENT_MOUNT_FAILURE",
 			d("[Mount Error] Waiting to try again [Reason] InCombat")
 		end
 		if tonumber(reason) == 1 then
-
 			d("[Mount Error] Waiting to try again [Reason] No Horse Zone")
 		end
 		ai_mount.lastmount = ml_global_information.Now + math.random(10000,30000)
