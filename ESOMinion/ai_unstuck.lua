@@ -8,6 +8,7 @@ ai_unstuck.ismoving = false
 ai_unstuck.lastpos = nil
 ai_unstuck.Obstacles = {}
 ai_unstuck.AvoidanceAreas = {}
+ai_unstuck.lastmount = 0
 
 function ai_unstuck:OnUpdate( tick )
 	
@@ -16,7 +17,6 @@ function ai_unstuck:OnUpdate( tick )
 		return
 	end
 	
-	
 	if 	(ai_unstuck.lastpos == nil) or (ai_unstuck.lastpos and type(ai_unstuck.lastpos) ~= "table") then
 		ai_unstuck.lastpos = Player.pos
 		return	
@@ -24,6 +24,10 @@ function ai_unstuck:OnUpdate( tick )
 	
 	if ( gBotMode == GetString("assistMode") ) then return end
 	
+	if ai_mount.lastmount == 0 or (ml_global_information.Now - ai_mount.lastmount < 5000) then
+		ai_unstuck.Reset()
+		return
+	end
 	
 	-- Stuck check for movement stucks
 	if ( Player:IsMoving()) then
@@ -115,6 +119,11 @@ end
 function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 	
 	if ( ml_global_information.Player_Dead == true) then 
+		ai_unstuck.Reset()
+		return
+	end
+	
+	if ai_mount.lastmount == 0 or (ml_global_information.Now - ai_mount.lastmount < 5000) then
 		ai_unstuck.Reset()
 		return
 	end
