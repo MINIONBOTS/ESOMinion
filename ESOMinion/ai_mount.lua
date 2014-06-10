@@ -95,7 +95,7 @@ function ai_mount.Initialize()
 	
 	local window = ml_global_information.MainWindow
 	GUI_NewCheckbox(window.Name,"UseMount","gUseMount",GetString("settings"))
-	GUI_NewNumeric(window.Name,"Distance","gUseMountRange",GetString("settings"),"30","10000")
+	GUI_NewNumeric(window.Name,"MountDistance","gUseMountRange",GetString("settings"),"30","10000")
 	
 	gUseMount = Settings.ESOMinion.gUseMount
 	gUseMountRange = Settings.ESOMinion.gUseMountRange
