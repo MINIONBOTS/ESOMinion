@@ -36,32 +36,15 @@ end
 
 function e_dead:execute()
 	ml_log("e_dead")
+	
 	_,_,_,_,_,_,_, releaseOnly, soulGemAvailable,_ = e("GetDeathInfo()")
 	
 	if ml_global_information.Now - e_dead.lastseenalive > e_dead.wait then
-	
 		ml_global_information.ResetBot()
 		
 		if gUseSoulGems and gUseSoulGems == "1" and soulGemAvailable then
 			e("Revive()")
-			return
-			
-			--[[ No Longer Needed
-			
-			local bag,slots =	e("GetBagInfo(1)")
-			local soulgemtype =	g("ITEMTYPE_SOUL_GEM")
-			
-			if slots and tonumber(slots) > 0 then
-				for i = slots, 1, -1 do
-					local itemtype = e("GetItemType(1,"..tostring(i)..")")
-					
-					if itemtype == soulgemtype then
-						e("Revive()")
-						return
-					end
-				end
-			end
-			]]			
+			return		
 		end	
 		
 		e("Release()")
