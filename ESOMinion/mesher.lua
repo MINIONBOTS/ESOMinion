@@ -136,6 +136,20 @@ function mm.ModuleInit()
 			mm.ChangeNavMesh(Settings.ESOMinion.DefaultMaps[tonumber(mapid)])
 		end
 	end
+	
+	mm.SetupNavNodes()
+	mm.SetupMarkers()
+end
+
+function mm.GetMapMarker(mapid)
+	local list = ml_marker_mgr.GetList(GetString("mapMarker"),false,false)
+	if(TableSize(list) > 0) then
+		for name, marker in pairs(list) do
+			if(tonumber(marker.GetFieldValue(GetString("toMapID"))) == tonumber(mapid)) then
+				return marker
+			end
+		end
+	end
 end
 
 ---------
@@ -505,6 +519,33 @@ function mm.DrawMarker(marker)
     
     local id = RenderManager:AddObject(t)
     return id
+end
+
+function mm.SetupNavNodes()
+    for id, neighbors in pairs(eso_navdata) do
+		local node = ml_node:Create()
+		if (ValidTable(node)) then
+			node.id = id
+			for index, id in ipairs(neighbors) do
+				node:AddNeighbor(nid, {x = 0.0, y = 0.0, z = 0.0})
+			end
+			ml_nav_manager.AddNode(node)
+		end
+	end
+end
+
+function mm.SetupMarkers()
+    local mapMarker = ml_marker:Create("mapTemplate")
+	mapMarker:SetType(strings[gCurrentLanguage].mapMarker)
+	mapMarker:AddField("string", strings[gCurrentLanguage].toMapID, "")
+    mapMarker:SetTime(300)
+    mapMarker:SetMinLevel(1)
+    mapMarker:SetMaxLevel(50)
+    ml_marker_mgr.AddMarkerTemplate(mapMarker)
+    
+    -- refresh the manager with the new templates
+    ml_marker_mgr.RefreshMarkerTypes()
+	ml_marker_mgr.RefreshMarkerNames()
 end
 
 RegisterEventHandler("ToggleMeshmgr", mm.ToggleMenu)
