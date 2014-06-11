@@ -1,7 +1,7 @@
 -- Grind
 ai_grind = inheritsFrom(ml_task)
 ai_grind.name = "GrindMode"
-
+--
 function ai_grind.Create()
 	local newinst = inheritsFrom(ai_grind)
     
@@ -228,6 +228,12 @@ function e_MoveToMarker:execute()
 		
 		local pos = ml_task_hub:CurrentTask().currentMarker:GetPosition()
 		local dist = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, pos.x, pos.z)
+
+		if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
+			ai_mount:Mount()
+		elseif gUseMount == "1" and tonumber(gUseMountRange) > dist then
+			ai_mount:Dismount()
+		end
 		
 		-- Allow fighting when we are far away from the "outside radius of the marker" , else the bot goes back n forth spinning trying to reach the target outside n going back inside right after
 		if ( dist < 300) then
@@ -289,8 +295,13 @@ function e_MoveToRandomPoint:execute()
 		
 	-- Move to our random Point
 	if ( c_MoveToRandomPoint.randomPoint ~= nil ) then
-		local dis = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, c_MoveToRandomPoint.randomPoint.x, c_MoveToRandomPoint.randomPoint.z)
-		if  ( dis < 10) then
+		local dist = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, c_MoveToRandomPoint.randomPoint.x, c_MoveToRandomPoint.randomPoint.z)
+
+		if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
+			ai_mount:Mount()
+		end
+		
+		if  ( dist < 10) then
 			-- We reached our random Point
 			c_MoveToRandomPoint.randomPointreached = true
 			c_MoveToRandomPoint.randomPoint = nil

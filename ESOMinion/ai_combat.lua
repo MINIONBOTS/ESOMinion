@@ -42,7 +42,7 @@ function ai_combatAttack:Init()
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 	
 	-- use Mount
-	self:add(ml_element:create( "UseMount", c_UseMount, e_UseMount,120 ), self.process_elements)
+	--self:add(ml_element:create( "UseMount", c_UseMount, e_UseMount,120 ), self.process_elements)
 	
 	-- Kill Target
 	self:add(ml_element:create( "KillTarget", c_GotoAndKill, e_GotoAndKill, 100 ), self.process_elements)
@@ -229,7 +229,14 @@ function e_GotoAndKill:execute()
 
 	-- Walk within a certain distance first before checking the enemy data in our Elist
 	local ppos = ml_global_information.Player_Position
-  local dist = Distance3D(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,ppos.x,ppos.y,ppos.z) 
+    local dist = Distance3D(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,ppos.x,ppos.y,ppos.z) 
+	
+	if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
+		ai_mount:Mount()
+	elseif gUseMount == "1" and tonumber(gUseMountRange) > dist then
+		ai_mount:Dismount()
+	end
+	
 	if ( dist > 40 ) then
 		ml_log(" Walking to Target ")
 		local rndPath = false
