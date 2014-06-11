@@ -17,9 +17,9 @@ function c_resting:evaluate()
 		return false
 	end
 	
-	local hp = tonumber(gRestHP) or 100
-	local mp = tonumber(gRestMP) or 100
-	local sp = tonumber(gRestSP) or 100
+	local hp = tonumber(gRestHP) or 75
+	local mp = tonumber(gRestMP) or 75
+	local sp = tonumber(gRestSP) or 10
 	
 	if 	ml_global_information.Player_Health.percent < hp or
 		ml_global_information.Player_Magicka.percent < mp or
@@ -54,7 +54,7 @@ function ai_resting.Initialize()
 	if Settings.ESOMinion.gRest == nil then Settings.ESOMinion.gRest = "1" end
 	if Settings.ESOMinion.gRestHP == nil then Settings.ESOMinion.gRestHP = "75" end
 	if Settings.ESOMinion.gRestMP == nil then Settings.ESOMinion.gRestMP = "75" end
-	if Settings.ESOMinion.gRestSP == nil then Settings.ESOMinion.gRestSP = "75" end
+	if Settings.ESOMinion.gRestSP == nil then Settings.ESOMinion.gRestSP = "10" end
 	
 	local window  =	ml_global_information.MainWindow
 	local section =	GetString("settings")
