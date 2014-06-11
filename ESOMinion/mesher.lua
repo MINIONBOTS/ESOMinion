@@ -137,8 +137,8 @@ function mm.ModuleInit()
 		end
 	end
 	
-	mm.SetupNavNodes()
-	mm.SetupMarkers()
+	--mm.SetupNavNodes()
+	--mm.SetupMarkers()
 end
 
 function mm.GetMapMarker(mapid)
