@@ -24,7 +24,7 @@ function ai_unstuck:OnUpdate( tick )
 	
 	if ( gBotMode == GetString("assistMode") ) then return end
 	
-	if ai_mount.lastmount == 0 or (ml_global_information.Now - ai_mount.lastmount < 5000) then
+	if (ml_global_information.Now - ai_mount.lastmount < 5000) then
 		ai_unstuck.Reset()
 		return
 	end
@@ -123,7 +123,7 @@ function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 		return
 	end
 	
-	if ai_mount.lastmount == 0 or (ml_global_information.Now - ai_mount.lastmount < 5000) then
+	if (ml_global_information.Now - ai_mount.lastmount < 5000) then
 		ai_unstuck.Reset()
 		return
 	end
