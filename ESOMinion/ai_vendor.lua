@@ -81,6 +81,13 @@ ml_log("e_gotovendor")
 				if (pPos) then
 					local dist = Distance3D( tPos.x,tPos.y,tPos.z,pPos.x,pPos.y,pPos.z)
 					ml_log("("..tostring(math.floor(dist))..")")
+					
+					if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
+						ai_mount:Mount()
+					elseif gUseMount == "1" and tonumber(gUseMountRange) > dist then
+						ai_mount:Dismount()
+					end
+		
 					if ( dist > 4 and tonumber(e("GetChatterOptionCount()"))==0) then
 						local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
 						if (tonumber(navResult) < 0) then		
@@ -187,6 +194,15 @@ ml_log("e_gotovendor")
 		else
 			if ( e_movetovendor.vendorMarker ~= nil ) then
 				local mPos = e_movetovendor.vendorMarker:GetPosition()
+				local pPos = Player.pos
+				local dist = Distance3D( mPos.x,mPos.y,mPos.z,pPos.x,pPos.y,pPos.z)
+				
+				if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
+					ai_mount:Mount()
+				elseif gUseMount == "1" and dist < 5 then
+					ai_mount:Dismount()
+				end
+				
 				ml_log( "Moving to vendorMarker ")
 				local navResult = tostring(Player:MoveTo( mPos.x,mPos.y,mPos.z,10,false,true,true))
 				if (tonumber(navResult) < 0) then		

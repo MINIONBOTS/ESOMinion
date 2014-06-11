@@ -839,6 +839,7 @@ function eso_skillmanager.Heal( TargetID )
 						
 						d("Casting.."..skill.name.." at "..target.name)						
 						eso_skillmanager.prevSkillID = skill.skillID
+						skill.timelastused = ml_global_information.Now
 						
 						-- Add a tiny delay so "iscasting" gets true for this spell, not interrupting it on the next pulse
 						if ( skill.casttime > 0 ) then							
