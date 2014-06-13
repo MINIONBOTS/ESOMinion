@@ -27,19 +27,19 @@ function ai_combatAttack:Init()
 	self:add(ml_element:create( "Dead", c_dead, e_dead, 300 ), self.process_elements)
 	
 	-- LootAll
-	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
+	--self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
 	
 	--Autoequip
-	self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 225 ), self.process_elements)
+	--self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 225 ), self.process_elements)
 	
 	--Vendoring
-	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
+	--self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
 	
 	--Potions
 	self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)
 	
 	-- Looting
-	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
+	--self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 	
 	-- use Mount
 	--self:add(ml_element:create( "UseMount", c_UseMount, e_UseMount,120 ), self.process_elements)

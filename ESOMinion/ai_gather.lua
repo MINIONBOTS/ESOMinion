@@ -105,36 +105,36 @@ end
 ------------
 c_gatherTask = inheritsFrom( ml_cause )
 e_gatherTask = inheritsFrom( ml_effect )
-c_gatherTask.throttle = 2500
 c_gatherTask.target = nil
 function c_gatherTask:evaluate()
-	if ( gGather == "1" and not ml_global_information.Player_InventoryFull) then
-		-- If gatherMarkers are added, you need to add logic to not try to reach a gatherable outside of the marker radius!!!
-		if ( gBotMode == GetString("gatherMode") ) then
-			local GList = EntityList("shortestpath,gatherable,onmesh")
-			if ( GList and TableSize(GList)>0) then
-				local id,entry = next(GList)
-				if ( id and entry ) then
-					c_gatherTask.target = entry
-					return  c_gatherTask.target ~= nil and TableSize(c_gatherTask.target) > 0
-				end
-			end							
-		else
-			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
-				local GList = EntityList("shortestpath,gatherable,maxdistance=20")
-				if ( GList and TableSize(GList)>0) then
-					local id,entry = next(GList)
-					if ( id and entry ) then
-						c_gatherTask.target = entry
-						return true
-					end
-				end
-			end	
-		end
+  
+  if (ml_global_information.Player_InventoryFull) then return false end
+  if ( gBotMode == GetString("gatherMode") ) then
+    local GList = EntityList("shortestpath,gatherable,onmesh,noplayersaround=10")
+    if ( GList and TableSize(GList)>0) then
+      local id,entry = next(GList)
+      if ( id and entry and TableSize(entry)>0 ) then
+        c_gatherTask.target = entry
+        c_gatherTask.lastcheck = ml_global_information.Now
+        return true
+      end
+    end							
+  else
+		if ( gGather == "1" and not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
+      local GList = EntityList("shortestpath,gatherable,maxdistance=20,noplayersaround=5")
+      if ( GList and TableSize(GList)>0) then
+        local id,entry = next(GList)
+        if ( id and entry ) then
+          c_gatherTask.target = entry
+          return true
+        end
+      end
+		end	
 	end
 	c_gatherTask.target = nil
 	return false
 end
+
 function e_gatherTask:execute()
 	ml_log("e_gatherTask ")
 	Player:Stop()
@@ -156,7 +156,7 @@ e_Gathering = inheritsFrom( ml_effect )
 function c_Gathering:evaluate()
 		
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) == 0 ) then
-		local _,gatherable = next(EntityList("shortestpath,gatherable,onmesh"))
+		local _,gatherable = next(EntityList("shortestpath,gatherable,onmesh,noplayersaround=5"))
 		if (gatherable) then
 			local gPos = gatherable.pos
 			if ( TableSize(gPos) > 0 ) then
@@ -228,7 +228,7 @@ function e_Gathering:execute()
 			end
 		else
 			-- Grab that thing			
-			local GList = EntityList("onmesh,nearest,gatherable,maxdistance=5")
+			local GList = EntityList("onmesh,nearest,gatherable,maxdistance=5,noplayersaround=5")
 			if ( TableSize(GList)>0) then
 				local _,gatherable = next(GList)				
 				if (gatherable) then
