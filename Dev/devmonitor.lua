@@ -419,8 +419,11 @@ function Dev.UpdateWindow()
 	
 end
 
-function Dev.OnUpdateHandler( Event, ticks ) 	
-	if ( ticks - Dev.lastticks > 500 ) then
+function Dev.OnUpdateHandler( Event, ticks )
+	
+	local gamestate = GetGameState()
+	
+	if ( gamestate == 2 ) and ( ticks - Dev.lastticks > 500 ) then
 		Dev.lastticks = ticks		
 		if ( Dev.running ) then
 			Dev.UpdateWindow()
