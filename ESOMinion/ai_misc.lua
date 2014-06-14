@@ -65,7 +65,7 @@ end
 function ai_vendorswap:Init()
 	self:add(ml_element:create( "MailToVendor", c_MailToVendor, e_MailToVendor, 300 ), self.process_elements)
 	self:add(ml_element:create( "MainLogout", c_MainLogout, e_MainLogout, 250 ), self.process_elements)
-	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 225 ), self.process_elements)
+	self:add(ml_element:create( "GetVendor", c_vendor, e_vendor, 225 ), self.process_elements)
 end
 
 ai_movetomap = inheritsFrom(ml_task)

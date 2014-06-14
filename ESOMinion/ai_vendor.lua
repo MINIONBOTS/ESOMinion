@@ -24,195 +24,345 @@ RegisterEventHandler("Module.Initalize",
 	end
 )
 
+ai_vendortask = inheritsFrom(ml_task)
+ai_vendortask.name = "Vendoring"
+function ai_vendortask.Create()
+	local newinst = inheritsFrom(ai_vendortask)
+    
+    newinst.valid = true
+    newinst.completed = false
+    newinst.subtask = nil
+    newinst.process_elements = {}
+    newinst.overwatch_elements = {} 
+    return newinst
+end
+
+function ai_vendortask:Init()		
+
+
+	-- LootAll
+	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)		
+
+	-- Resting
+	self:add(ml_element:create( "Resting", c_resting, e_resting, 250 ), self.process_elements)
+
+	--Vendoring
+	self:add(ml_element:create( "GetVendor", c_sellandrepair, e_sellandrepair, 225 ), self.process_elements)
+
+	--Vendoring
+	self:add(ml_element:create( "GoVendor", c_movetovend, e_movetovend, 200 ), self.process_elements)
+
+		
+    self:AddTaskCheckCEs()
+end
+
+function ai_vendortask:task_complete_eval()	
+	if ( c_dead:evaluate() or c_Aggro:evaluate() or 
+		(not ( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or
+			   ( gRepair == "1" and ai_vendor:CheckDurability()== true)
+			 ) and e_sellandrepair.isvendoring == false)		) then 
+		Player:Stop()
+		return true
+	end
+	return false
+end
+function ai_vendortask:task_complete_execute()
+   self.completed = true
+end
+
+
 --****************************************************************************
--- Cause/Effect
+-- Create New Vendor Task Cause/Effect
 --****************************************************************************
-c_movetovendor = inheritsFrom( ml_cause )
-e_movetovendor = inheritsFrom( ml_effect )
-e_movetovendor.vendorMarker = nil
-e_movetovendor.isvendoring = false
-function c_movetovendor:evaluate()
-	if (e_movetovendor.isvendoring) then
+c_vendor = inheritsFrom( ml_cause )
+e_vendor = inheritsFrom( ml_effect )
+c_vendor.throttle = 2500
+function c_vendor:evaluate()
+	if( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or( gRepair == "1" and ai_vendor:CheckDurability()== true))then
 		return true
 	end
 
-	if( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or( gRepair == "1" and ai_vendor:CheckDurability()== true))then
-		
-		local VList = EntityList("nearest,isvendor,onmesh")
-		if ( TableSize( VList ) > 0 ) then			
-			return true
-		end
-		if ( e_movetovendor.vendorMarker == nil ) then
-			local VMList = ml_marker_mgr.GetList(GetString("vendorMarker"), false, false)
-			if ( TableSize(VMList) > 0 ) then				
-				local bestmarker = nil
-				local bestdist = 9999999
-				local name,marker = next ( VMList )
-				while (name and marker) do
-					local mPos = marker:GetPosition()
-					if ( Distance3D( mPos.x,mPos.y,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.y,ml_global_information.Player_Position.z) < bestdist) then
-						bestdist = Distance3D( mPos.x,mPos.y,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.y,ml_global_information.Player_Position.z)
-						bestmarker = marker
-					end
-					name,maker = next ( VMList,name )
-				end
-				if ( marker ) then
-					e_movetovendor.vendorMarker = marker
-					return true
-				end				
-			end
-		else
-			return true
-		end
-	end
-	e_movetovendor.vendorMarker = nil
 	return false
 end
-e_movetovendor.merchantstep = 0
-function e_movetovendor:execute()
-ml_log("e_gotovendor")
-	local VList = EntityList("nearest,isvendor,onmesh,maxdistance=85")
-		if ( VList and TableSize( VList ) > 0 ) then	
-			
+
+function e_vendor:execute()
+	ml_log("e_vendor ")
+	Player:Stop()
+	local newTask = ai_vendortask.Create()
+	
+	ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
+	return ml_log(true)
+end
+
+
+--****************************************************************************
+-- Cause/Effect
+--****************************************************************************
+
+
+c_movetovend = inheritsFrom( ml_cause )
+e_movetovend = inheritsFrom( ml_effect )
+c_movetovend.markerreachedfirsttime = false
+c_movetovend.markerreached = false
+function c_movetovend:evaluate()
+	if( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or ( gRepair == "1" and ai_vendor:CheckDurability()== true))then
+		local dist = -1
+		local VList = EntityList("nearest,isvendor,onmesh,maxdistance=85")
+		if ( TableSize( VList ) > 0 ) then		
+
 			id,vendor = next (VList)
 			if ( id and vendor ) then
 				local pPos = Player.pos
 				local tPos = vendor.pos
 				if (pPos) then
-					local dist = Distance3D( tPos.x,tPos.y,tPos.z,pPos.x,pPos.y,pPos.z)
-					ml_log("("..tostring(math.floor(dist))..")")
-					
-					if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
-						ai_mount:Mount()
-					elseif gUseMount == "1" and tonumber(gUseMountRange) > dist then
-						ai_mount:Dismount()
-					end
-		
-					if ( dist > 4 and tonumber(e("GetChatterOptionCount()"))==0) then
-						local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
-						if (tonumber(navResult) < 0) then		
-							ml_error("e_movetovendor result: "..tonumber(navResult))
-							return ml_log(false)							
-						end	
-						return ml_log(true)
-					end
-					if(vendor.distance <= 4 or tonumber(e("GetChatterOptionCount()")) > 0 or e("GetNumStoreItems()") > 0) then
-						Player:Stop()
-						
-						-- I KNOW this should go in seperate cause & effects, but then a whole new task would also have to be written for vendoring, I'm waaay to lazy now
-						
-						-- If sell window is already open, sell & repair
-						if ( e("GetNumStoreItems()") > 0 ) then
-							
-							e_movetovendor.isvendoring = true
-							-- Repair
-							if (e_movetovendor.merchantstep == 0) then
-								e_movetovendor.merchantstep = 1
-								if ( gRepair == "1" and ai_vendor.CheckDurability()== true ) then
-									d("Repairing items")
-									e("RepairAll()")
-									ml_global_information.Wait(1000)
-									return ml_log(true)
-								end								
-							end
-							
-							--Autoequip
-							if (e_movetovendor.merchantstep == 1) then
-								e_movetovendor.merchantstep = 2
-								if ( gAutoEquip == "1" ) then
-									d("Auto equipping superior items")
-									eso_autoequip.AutoEquip()
-									ml_global_information.Wait(1000)
-									return ml_log(true)
-								end								
-							end
-							
-							-- Mark Junk items
-							if (e_movetovendor.merchantstep == 2) then
-								e_movetovendor.merchantstep = 3
-								if ( gVendor == "1" ) then
-									d("Marking items as junk")
-									ai_vendor.markitems()
-									ml_global_information.Wait(1000)
-									return ml_log(true)
-								end								
-							end
-							
-							--Sell Items
-							if (e_movetovendor.merchantstep == 3) then
-								e_movetovendor.merchantstep = 4
-								if ( gVendor == "1" and e("HasAnyJunk(1)") ) then
-									d("Selling items")				
-									e("SellAllJunk()")
-									ml_global_information.Wait(1000)
-									return ml_log(true)
-								end								
-							end
-							
-							--Close Store
-							if (e_movetovendor.merchantstep == 4) then
-								e_movetovendor.merchantstep = 0
-								e_movetovendor.isvendoring = false
-								d("Closing vendor window")
-								e("EndInteraction(15)")								
-								ml_global_information.Wait(1000)
-								return ml_log(true)
-							end
-							
-							d("Bug ? Didnt handle merchant correctly..")
-							return ml_log(false)
-						end
-						
-						-- Open store when it is not yet opened
-						local chatoptionscount = tonumber(e("GetChatterOptionCount()"))						
-						if ( chatoptionscount == 0) then
-							d("Interacting with Merchant..")
-							Player:Interact(vendor.id)
-							e_movetovendor.merchantstep = 0
-						else
-							-- switch to vendoring
-							for i=0,chatoptionscount, 1 do									
-								local args = { e("GetChatterOption("..tostring(i)..")")}
-								local convstring = args[1]
-								if ( convstring ~= nil and convstring ~= "" ) then
-									if(string.match(tostring(convstring),"Store") or string.match(tostring(convstring),"H\xc3\xa4ndler") or string.match(tostring(convstring),"Magasin"))then
-										d("Selecting Merchant conversation option..")
-										e("SelectChatterOption("..tostring(i)..")")
-										break
-									end
-								else
-									d("Unknown Merchant conversation options..trying to make him chat lol")
-									e("SelectChatterOption("..tostring(1)..")")
-								end
-							end
-						end
-						ml_global_information.Wait(1000)
-						return ml_log(true)
-					end									
+					dist = Distance2D( tPos.x,tPos.z,pPos.x,pPos.z)
 				end
 			end
+
 		else
-			if ( e_movetovendor.vendorMarker ~= nil ) then
-				local mPos = e_movetovendor.vendorMarker:GetPosition()
-				local pPos = Player.pos
-				local dist = Distance3D( mPos.x,mPos.y,mPos.z,pPos.x,pPos.y,pPos.z)
-				
-				if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
-					ai_mount:Mount()
-				elseif gUseMount == "1" and dist < 5 then
-					ai_mount:Dismount()
+			if ( e_movetovend.vendorMarker == nil ) then
+				local VMList = ml_marker_mgr.GetList(GetString("vendorMarker"), false, false)
+				if ( TableSize(VMList) > 0 ) then				
+					local bestmarker = nil
+					local bestdist = 9999999
+					local name,marker = next ( VMList )
+					while (name and marker) do
+						local mPos = marker:GetPosition()
+						if ( Distance2D( mPos.x,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.z) < bestdist) then
+							bestdist = Distance2D( mPos.x,mPos.z,ml_global_information.Player_Position.x,ml_global_information.Player_Position.z)
+							bestmarker = marker
+						end
+						name,maker = next ( VMList,name )
+					end
+					if ( marker ) then
+						e_movetovend.vendorMarker = marker
+						return true
+					end				
 				end
-				
-				ml_log( "Moving to vendorMarker ")
-				local navResult = tostring(Player:MoveTo( mPos.x,mPos.y,mPos.z,10,false,true,true))
-				if (tonumber(navResult) < 0) then		
-					ml_error("e_movetovendorMarker result: "..tonumber(navResult))
-					return ml_log(false)							
-				end	
-				return ml_log(true)	
-				
-			end		
+			end
+			if ( e_movetovend.vendorMarker ~= nil ) then
+				local mPos = e_movetovend.vendorMarker:GetPosition()
+				local pPos = Player.pos
+				dist = Distance2D( mPos.x,mPos.z,pPos.x,pPos.z)		
+			end
 		end
+
+		if ( c_movetovend.markerreached == false) then			
+			return true
+		
+		else
+			
+			
+			if  (dist > 5) then
+				d("We need to move to vendor!")
+				c_movetovend.markerreached = false
+				return true
+			end
+		end		
+
+	end
+	
+    return false
+end
+
+function e_movetovend:execute()
+	ml_log(" e_movetovend ")
+	local dist =-1
+	local tPos =-1
+	local pPos = Player.pos
+
+		-- Check for coordinate of nearest vendor, otherwise check coord for vendor marker
+		local VList = EntityList("nearest,isvendor,onmesh,maxdistance=85")
+		if ( VList and TableSize( VList ) > 0 ) then	
+			
+			id,vendor = next (VList)
+			if ( id and vendor ) then
+				tPos = vendor.pos	
+			end
+		elseif (e_movetovend.vendorMarker ~= nil) then
+				tPos = e_movetovend.vendorMarker:GetPosition()
+		end
+
+		-- Ride the sunset!
+		if(pPos and tPos) then
+			if (pPos) then
+				dist = Distance2D( tPos.x,tPos.z,pPos.x,pPos.z)
+			end	
+
+
+			if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
+				ai_mount:Mount()
+			elseif gUseMount == "1" and tonumber(gUseMountRange) > dist then
+				ai_mount:Dismount()
+			end
+			
+			
+			if  ( dist < 5) then
+				-- We reached our Vending Machine
+				c_movetovend.markerreached = true
+				d("Reached current Vendor...")
+				return ml_log(true)		
+			else
+				-- We need to reach our Vending Machine			
+				local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,10,false,true,false))
+				if (tonumber(navResult) < 0) then
+					ml_log("e_movetovend result: "..tostring(navResult))
+					return ml_log(false)
+				end
+				return ml_log(true)
+			end
+		end
+
+	return ml_log(false)
+end
+
+
+
+
+
+c_sellandrepair = inheritsFrom( ml_cause )
+e_sellandrepair = inheritsFrom( ml_effect )
+e_sellandrepair.vendorMarker = nil
+e_sellandrepair.isvendoring = false
+function c_sellandrepair:evaluate()
+	if (e_sellandrepair.isvendoring) then
+		return true
+	end
+
+	if( (gVendor == "1" and ml_global_information.Player_InventoryNearlyFull) or( gRepair == "1" and ai_vendor:CheckDurability()== true))then
+		
+		--if no vendors within 10 steps then fuck all! we ain't bending! protects our back!
+		local VList = EntityList("nearest,isvendor,onmesh,maxdistance=10")
+		if ( TableSize( VList ) > 0 ) then			
+			return true
+		else
+			return false
+		end
+	end
+
+	e_sellandrepair.vendorMarker = nil
+	return false
+end
+
+e_sellandrepair.merchantstep = 0
+function e_sellandrepair:execute()
+	ml_log("e_gotovendor")
+	local VList = EntityList("nearest,isvendor,onmesh,maxdistance=85")
+	if ( VList and TableSize( VList ) > 0 ) then	
+		
+		id,vendor = next (VList)
+		if ( id and vendor ) then
+			local pPos = Player.pos
+			local tPos = vendor.pos
+			if (pPos) then
+				local dist = Distance3D( tPos.x,tPos.y,tPos.z,pPos.x,pPos.y,pPos.z)
+				ml_log("("..tostring(math.floor(dist))..")")
+	
+				if ( dist > 4 and tonumber(e("GetChatterOptionCount()"))==0) then
+					local navResult = tostring(Player:MoveTo( tPos.x,tPos.y,tPos.z,2,false,true,true))
+					if (tonumber(navResult) < 0) then		
+						ml_error("e_sellandrepair result: "..tonumber(navResult))
+						return ml_log(false)							
+					end	
+					return ml_log(true)
+				end
+				if(vendor.distance <= 4 or tonumber(e("GetChatterOptionCount()")) > 0 or e("GetNumStoreItems()") > 0) then
+					Player:Stop()
+					
+					-- I KNOW this should go in seperate cause & effects, but then a whole new task would also have to be written for vendoring, I'm waaay to lazy now
+					
+					-- If sell window is already open, sell & repair
+					if ( e("GetNumStoreItems()") > 0 ) then
+						
+						e_sellandrepair.isvendoring = true
+						-- Repair
+						if (e_sellandrepair.merchantstep == 0) then
+							e_sellandrepair.merchantstep = 1
+							if ( gRepair == "1" and ai_vendor.CheckDurability()== true ) then
+								d("Repairing items")
+								e("RepairAll()")
+								ml_global_information.Wait(1000)
+								return ml_log(true)
+							end								
+						end
+						
+						--Autoequip
+						if (e_sellandrepair.merchantstep == 1) then
+							e_sellandrepair.merchantstep = 2
+							if ( gAutoEquip == "1" ) then
+								d("Auto equipping superior items")
+								eso_autoequip.AutoEquip()
+								ml_global_information.Wait(1000)
+								return ml_log(true)
+							end								
+						end
+						
+						-- Mark Junk items
+						if (e_sellandrepair.merchantstep == 2) then
+							e_sellandrepair.merchantstep = 3
+							if ( gVendor == "1" ) then
+								d("Marking items as junk")
+								ai_vendor.markitems()
+								ml_global_information.Wait(1000)
+								return ml_log(true)
+							end								
+						end
+						
+						--Sell Items
+						if (e_sellandrepair.merchantstep == 3) then
+							e_sellandrepair.merchantstep = 4
+							if ( gVendor == "1" and e("HasAnyJunk(1)") ) then
+								d("Selling items")				
+								e("SellAllJunk()")
+								ml_global_information.Wait(4000)
+								return ml_log(true)
+							end								
+						end
+						
+						--Close Store
+						if (e_sellandrepair.merchantstep == 4) then
+							e_sellandrepair.merchantstep = 0
+							e_sellandrepair.isvendoring = false
+							d("Closing vendor window")
+							e("EndInteraction(15)")								
+							ml_global_information.Wait(1000)
+							return ml_log(true)
+						end
+						
+						d("Bug ? Didnt handle merchant correctly..")
+						return ml_log(false)
+					end
+					
+					-- Open store when it is not yet opened
+					local chatoptionscount = tonumber(e("GetChatterOptionCount()"))						
+					if ( chatoptionscount == 0) then
+						d("Interacting with Merchant..")
+						Player:Interact(vendor.id)
+						e_sellandrepair.merchantstep = 0
+					else
+						-- switch to vendoring
+						for i=0,chatoptionscount, 1 do									
+							local args = { e("GetChatterOption("..tostring(i)..")")}
+							local convstring = args[1]
+							if ( convstring ~= nil and convstring ~= "" ) then
+								if(string.match(tostring(convstring),"Store") or string.match(tostring(convstring),"H\xc3\xa4ndler") or string.match(tostring(convstring),"Magasin"))then
+									d("Selecting Merchant conversation option..")
+									e("SelectChatterOption("..tostring(i)..")")
+									break
+								end
+							else
+								d("Unknown Merchant conversation options..trying to make him chat lol")
+								e("SelectChatterOption("..tostring(1)..")")
+							end
+						end
+					end
+					ml_global_information.Wait(1000)
+					return ml_log(true)
+				end									
+			end
+		end
+	
+	end
 	return ml_log(false)
 end
 
