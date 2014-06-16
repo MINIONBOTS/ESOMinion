@@ -60,11 +60,10 @@ function LuaEventHandler(...)
 					d("Cannot loot "..entry.name..", blacklisting it")
 					ml_blacklist.AddBlacklistEntry(GetString("monsters"), entry.id, entry.name, ml_global_information.Now+180000)
 				end
-			end
-			c_LootAll.ignoreLootTmr = ml_global_information.Now
-			c_LootAll.ignoreLoot = true
+			end	
 		end
-	
+		c_LootAll.ignoreLootTmr = ml_global_information.Now
+		c_LootAll.ignoreLoot = true
 	elseif ( args[1] == "GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP" ) then
 		d("Combat Tip ID : "..tostring(args[3]))
 		-- ID 1 - Block
