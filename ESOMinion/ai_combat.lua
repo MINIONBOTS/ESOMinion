@@ -33,7 +33,7 @@ function ai_combatAttack:Init()
 	--self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 225 ), self.process_elements)
 	
 	--Vendoring
-	--self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
+	--self:add(ml_element:create( "GetVendor", c_vendor, e_vendor, 200 ), self.process_elements)
 	
 	--Potions
 	self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)
