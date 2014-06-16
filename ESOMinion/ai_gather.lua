@@ -278,7 +278,8 @@ function c_Loot:evaluate()
 end
 function e_Loot:execute()
 	ml_log("e_Loot")
-	local CharList = EntityList("lootable,shortestpath,onmesh")
+	local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
+	local CharList = EntityList("lootable,shortestpath,onmesh,exclude="..blackliststring)
 	if ( TableSize(CharList) > 0 ) then
 		local id,entity = next (CharList)
 		if ( id and entity ) then
