@@ -182,13 +182,6 @@ function e_Gathering:execute()
 		local pPos = Player.pos
 		local tPos = ml_task_hub:CurrentTask().tPos
 		local dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
-		
-		if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
-			ai_mount:Mount()
-		elseif gUseMount == "1" and dist <= 5 then
-			ai_mount:Dismount()
-		end
-		
 		if (dist > 2) then
 			-- MoveIntoInteractRange
 			if ( tPos ) then
@@ -235,7 +228,6 @@ function e_Gathering:execute()
 					-- another check if we may picked up a different gatherable/old one is gone meanwhile
 					local tPos = gatherable.pos
 					local dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
-				
 					if (dist > 2) then
 						-- set new gatherable position
 						d("Different gatherable found, setting new position..")
