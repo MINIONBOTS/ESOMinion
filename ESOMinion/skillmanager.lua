@@ -12,6 +12,17 @@ eso_skillmanager.cskills = {} -- Current List of Skills, gets constantly updated
 eso_skillmanager.prevSkillID = 0
 eso_skillmanager.lastcastTmr = 0
 
+eso_skillmanager.slots = {
+	[1] = {},
+	[2] = {},
+	[3] = {},
+	[4] = {},
+	[5] = {},
+	[6] = {},
+	[7] = {},
+	[8] = {},
+}
+
 eso_skillmanager.DefaultProfiles = {
 	[1] = "DragonKnight",
 	[2] = "Sorcerer",
@@ -52,7 +63,9 @@ function eso_skillmanager.ModuleInit()
 	GUI_NewWindow(eso_skillmanager.editwindow.name,eso_skillmanager.mainwindow.x+eso_skillmanager.mainwindow.w,eso_skillmanager.mainwindow.y,eso_skillmanager.editwindow.w,eso_skillmanager.editwindow.h,"",true)		
 	GUI_NewField(eso_skillmanager.editwindow.name,GetString("maMarkerName"),"SKM_NAME","SkillDetails")
 	GUI_NewField(eso_skillmanager.editwindow.name,GetString("maMarkerID"),"SKM_ID","SkillDetails")
+	GUI_NewCheckbox(eso_skillmanager.editwindow.name,GetString("enabled"),"SKM_ENABLED","SkillDetails")
 	GUI_NewCheckbox(eso_skillmanager.editwindow.name,GetString("setsAttackRange"),"SKM_ATKRNG","SkillDetails")
+	GUI_NewCheckbox(eso_skillmanager.editwindow.name,GetString("targetIsCasting"),"SKM_ISCASTING","SkillDetails")
 	GUI_NewField(eso_skillmanager.editwindow.name,GetString("prevSkillID"),"SKM_PrevID","SkillDetails");
 	GUI_NewComboBox(eso_skillmanager.editwindow.name,GetString("smsktype"),"SKM_SKILLTYPE","SkillDetails",GetString("smsktypedmg")..","..GetString("smsktypeheal"));		
 	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("casttime"),"SKM_CASTTIME","SkillDetails")
@@ -97,9 +110,6 @@ function eso_skillmanager.ModuleInit()
 	RegisterEventHandler("SMESkillDOWNEvent",eso_skillmanager.EditorButtonHandler)	
 	GUI_NewButton(eso_skillmanager.editwindow.name,"UP","SMESkillUPEvent")
 	RegisterEventHandler("SMESkillUPEvent",eso_skillmanager.EditorButtonHandler)
-    
-		
-  GUI_NewCheckbox(eso_skillmanager.editwindow.name,GetString("targetIsCasting"),"SKM_ISCASTING","SkillDetails")
 
 	eso_skillmanager.UpdateProfiles() -- Update the profiles dropdownlist
 	GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
@@ -131,6 +141,7 @@ function eso_skillmanager.UpdateCurrentProfileData()
 								--d("Adding Skill :"..newskill.name.."Prio:"..tostring(newskill.prio))
 								table.insert(unsortedSkillList,tonumber(newskill.prio),newskill)						
 								newskill = {}
+								elseif ( key == "ENABLED" )then newskill.enabled = tostring(value)
 								elseif ( key == "ID" )then newskill.skillID = tonumber(value)
 								elseif ( key == "NAME" )then newskill.name = value
 								elseif ( key == "ATKRNG" )then newskill.atkrng = tostring(value)								
@@ -221,6 +232,7 @@ function eso_skillmanager.GUIVarUpdate(Event, NewVals, OldVals)
 			Settings.ESOMinion.gSMprofile = tostring(v)
 		elseif ( k == "SKM_NAME" ) then eso_skillmanager.SkillProfile[SKM_Prio].name = v
 		elseif ( k == "SKM_ID" ) then eso_skillmanager.SkillProfile[SKM_Prio].skillID = tonumber(v)
+		elseif ( k == "SKM_ENABLED" ) then eso_skillmanager.SkillProfile[SKM_Prio].enabled = tostring(v)
 		elseif ( k == "SKM_ATKRNG" ) then eso_skillmanager.SkillProfile[SKM_Prio].atkrng = tonumber(v)
 		elseif ( k == "SKM_LOS" ) then eso_skillmanager.SkillProfile[SKM_Prio].los = v
 		elseif ( k == "SKM_INSTA" ) then eso_skillmanager.SkillProfile[SKM_Prio].insta = v		
@@ -343,6 +355,7 @@ function eso_skillmanager.SaveProfile()
 		while skID and skill do
       string2write = string2write.."SKM_NAME="..skill.name.."\n"
       string2write = string2write.."SKM_ID="..skill.skillID.."\n"
+      string2write = string2write.."SKM_ENABLED="..skill.enabled.."\n"
       string2write = string2write.."SKM_ATKRNG="..skill.atkrng.."\n"			
       string2write = string2write.."SKM_Prio="..skill.prio.."\n"
       string2write = string2write.."SKM_LOS="..skill.los.."\n"			
@@ -530,6 +543,7 @@ function eso_skillmanager.CreateNewSkillEntry(skill)
 				skillID = skID,
 				prio = newskillprio,
 				name = skname,
+				enabled = skill.enabled or "1",
 				atkrng = skill.atkrng or "1",		
 				los = skill.los or "1",				
 				skilltype = skill.skilltype or GetString("smsktypedmg"),
@@ -560,8 +574,8 @@ function eso_skillmanager.CreateNewSkillEntry(skill)
 				tboonc = skill.tboonc or 0,
 				previd = skill.previd or "",
 				throttle = skill.throttle or 0,
-        iscasting = skill.iscasting or "0"
-			}		
+				iscasting = skill.iscasting or "0"
+			}
 		end		
 	end
 end
@@ -577,6 +591,7 @@ function eso_skillmanager.EditSkill(event)
 	if ( skill ) then	
 		SKM_NAME = skill.name or ""
 		SKM_ID = skill.skillID or 0
+		SKM_ENABLED = skill.enabled or "1"
 		SKM_ATKRNG = skill.atkrng or "1"
 		SKM_Prio = tonumber(event)
 		SKM_LOS = skill.los or "1"		
@@ -721,7 +736,6 @@ function eso_skillmanager.CanCast( target, skill )
 			if ( TableSize(EntityList("alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..targetID)) < skill.tecount) then return false end
 		end
 		
-		
 		--TODO:: BUFFS N CONDIS
 		--[[ PLAYER BUFF AND CONDITION CHECKS
 					if ( skill.peff1 ~= "" and mybuffs )then 	
@@ -785,23 +799,23 @@ function eso_skillmanager.AttackTarget( TargetID )
 		if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
 			for prio,skill in pairs(eso_skillmanager.SkillProfile) do
 				
-				if ( skill.skilltype == GetString("smsktypedmg") and eso_skillmanager.CanCast( target, skill ) ) then
-					
-          if (skill.skillID <0) then
-              if (skill.skillID == -1) then
-                 d("blocking "..target.name)						
-                 e("OnSpecialMoveKeyDown(0)")
-                 e("OnSpecialMoveKeyUp(0)")
-                 eso_skillmanager.prevSkillID = skill.skillID
-                 skill.timelastused = ml_global_information.Now
-              elseif (skill.skillID == -2) then
-                 d("interrupting "..target.name)						
-                 e("OnSpecialMoveKeyDown(3)")
-                 e("OnSpecialMoveKeyUp(3)")
-                 eso_skillmanager.prevSkillID = skill.skillID
-                 skill.timelastused = ml_global_information.Now
-              end
-          elseif ( AbilityList:Cast(skill.skillID,TargetID) ) then
+				if ( skill.enabled == "1" and skill.skilltype == GetString("smsktypedmg") and eso_skillmanager.CanCast( target, skill ) ) then
+						
+					if (skill.skillID <0) then
+						if (skill.skillID == -1) then
+							 d("blocking "..target.name)						
+							 e("OnSpecialMoveKeyDown(0)")
+							 e("OnSpecialMoveKeyUp(0)")
+							 eso_skillmanager.prevSkillID = skill.skillID
+							 skill.timelastused = ml_global_information.Now
+						elseif (skill.skillID == -2) then
+							 d("interrupting "..target.name)						
+							 e("OnSpecialMoveKeyDown(3)")
+							 e("OnSpecialMoveKeyUp(3)")
+							 eso_skillmanager.prevSkillID = skill.skillID
+							 skill.timelastused = ml_global_information.Now
+						end
+					elseif ( AbilityList:Cast(skill.skillID,TargetID) ) then
 						d("Casting.."..skill.name.." at "..target.name)						
 						eso_skillmanager.prevSkillID = skill.skillID
 						skill.timelastused = ml_global_information.Now
@@ -811,7 +825,7 @@ function eso_skillmanager.AttackTarget( TargetID )
 						else
 							eso_skillmanager.lastcastTmr = ml_global_information.Now
 						end
-						
+							
 						return true
 					end
 				end
@@ -833,7 +847,7 @@ function eso_skillmanager.Heal( TargetID )
 		if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
 			for prio,skill in pairs(eso_skillmanager.SkillProfile) do
 				--d("CHECK :" ..skill.name.." "..skill.skilltype.." " ..tostring(eso_skillmanager.CanCast( target, skill )))
-				if ( skill.skilltype == GetString("smsktypeheal") and eso_skillmanager.CanCast( target, skill ) ) then
+				if ( skill.enabled == "1" and skill.skilltype == GetString("smsktypeheal") and eso_skillmanager.CanCast( target, skill ) ) then
 						
 					if ( AbilityList:Cast(skill.skillID,TargetID) ) then
 						
@@ -885,3 +899,127 @@ end
 RegisterEventHandler("SkillManager.toggle", eso_skillmanager.ToggleMenu)
 RegisterEventHandler("GUI.Update",eso_skillmanager.GUIVarUpdate)
 RegisterEventHandler("Module.Initalize",eso_skillmanager.ModuleInit)
+RegisterEventHandler("Gameloop.Update", eso_skillmanager.OnUpdate)
+
+--:===============================================================================================================
+--: on update
+--:===============================================================================================================  
+
+function eso_skillmanager.OnUpdate()
+	--Future Use
+	--eso_skillmanager.CheckActionSlots()
+end
+
+--:===============================================================================================================
+--: helper functions
+--:===============================================================================================================
+
+function eso_skillmanager.IsProfileValid(profile)
+	return (ValidTable(profile) and TableSize(profile) > 0)
+end
+
+function eso_skillmanager.IsSkillValid(skill)
+	return (ValidTable(skill) and TableSize(skill) > 0)
+end
+
+function eso_skillmanager.IsSkillRegistered(skillid)
+	for key,skill in pairs(eso_skillmanager.SkillProfile) do
+		if skill.skillID == skillid then
+			return true
+		end
+	end
+	return false
+end
+
+function eso_skillmanager.CheckActionSlots()
+
+	for index = 1, #eso_skillmanager.slots do
+	
+		local slot = {
+			id		= e("GetSlotBoundId("..tostring(index)..")"),
+			name	= e("GetSlotName("..tostring(index)..")"),
+			used 	= e("IsSlotUsed("..tostring(index)..")"),
+			useable	= e("IsSlotUsable("..tostring(index)..")"),
+		}
+
+		if slot 
+			and slot.id
+			and slot.name
+			and slot.used
+			and slot.useable
+		then
+			local profile = eso_skillmanager.SkillProfile
+			
+			if  not eso_skillmanager.IsSkillRegistered(slot.id)
+				and eso_skillmanager.IsSkillValid(slot)
+				and eso_skillmanager.IsProfileValid(profile)
+			then
+				--determine if this new skill is actually
+				--an upgraded (ranked) or (morphed) skill
+				--or user dragged a skill to the bar
+				--clone parent skill properties
+			end
+		end	
+	end
+end
+
+--[[
+Thought we could find skill's parent id here, it's not here, saving this for later use, auto leveling skill lines
+
+local NumSkillTypes = e("GetNumSkillTypes()")
+
+for i = 1, NumSkillTypes do
+	local GetNumSkillLines = e("GetNumSkillLines("..tostring(i)..")")
+	for j = 1, GetNumSkillLines do
+		local name,rank = e("GetSkillLineInfo("..tostring(i)..","..tostring(j)..")")
+		d(name..rank)
+		
+		local NumSkillAbilities = e("GetNumSkillAbilities("..tostring(i)..","..tostring(j)..")")
+		for k = 1, NumSkillAbilities do
+			local name,texture,rank,ispassive,isultimate,ispurchased,progression = e("GetSkillAbilityInfo("..tostring(i)..","..tostring(j)..","..tostring(k)..")")
+			d(name..rank..tostring(ispurchased)..tostring(progression))
+		end
+	end
+end
+
+local NumAbilities = e("GetNumAbilities()")
+
+for i = 1, NumAbilities do
+	local name,texture,rank,type,ispassive,spellbook = e("GetAbilityInfoByIndex("..tostring(i)..")")
+	d(name..rank..type..tostring(spellbook))
+end
+]]
+
+--[[
+GetNumSkillTypes()
+Returns: integer numSkillTypes
+
+GetNumSkillLines(SkillType skillType)
+Returns: integer numSkillLines
+
+GetSkillLineInfo(SkillType skillType, luaindex skillIndex)
+Returns: string name, luaindex rank
+
+GetSkillLineXPInfo(SkillType skillType, luaindex skillIndex)
+Returns: integer lastRankXp, integer nextRankXP, integer currentXP
+
+GetNumSkillAbilities(SkillType skillType, luaindex skillIndex)
+Returns: integer numAbilities
+
+GetSkillAbilityInfo(SkillType skillType, luaindex skillIndex, luaindex abilityIndex)
+Returns: string name, textureName texture, luaindex earnedRank, bool passive, bool ultimate, bool purchased, luaindex:nilable progressionIndex
+
+GetSkillAbilityUpgradeInfo(SkillType skillType, luaindex skillIndex, luaindex abilityIndex)
+Returns: integer:nilable currentUpgradeLevel, integer:nilable maxUpgradeLevel
+
+
+NumBuffs = e("GetNumBuffs(player)")
+d(NumBuffs.." Buffs")
+
+for i = 1, NumBuffs do
+	buffName,timeStarted,timeEnding,buffSlot,stackCount,textureName,buffType,effectType,abilityType,statusEffectType = e("GetUnitBuffInfo(player,"..tostring(i)..")")
+	d(buffName)
+end
+
+
+]]
