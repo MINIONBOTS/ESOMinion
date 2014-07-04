@@ -340,7 +340,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				local timesince = TimeSince(ml_global_information.MarkerTime)
 				local timeleft = ((GetCurrentMarker():GetTime() * 1000) - timesince) / 1000
 				ml_log("("..tostring(round(timeleft, 1)).."sec) | ")
-			else
+			elseif gBotMode == GetString("grindMode") then
 				ml_log("Random Position | ")
 			end
 			
