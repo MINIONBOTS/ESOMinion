@@ -105,36 +105,36 @@ end
 ------------
 c_gatherTask = inheritsFrom( ml_cause )
 e_gatherTask = inheritsFrom( ml_effect )
+c_gatherTask.throttle = 2500
 c_gatherTask.target = nil
 function c_gatherTask:evaluate()
-  
-  if (ml_global_information.Player_InventoryFull) then return false end
-  if ( gBotMode == GetString("gatherMode") ) then
-    local GList = EntityList("shortestpath,gatherable,onmesh,noplayersaround=10")
-    if ( GList and TableSize(GList)>0) then
-      local id,entry = next(GList)
-      if ( id and entry and TableSize(entry)>0 ) then
-        c_gatherTask.target = entry
-        c_gatherTask.lastcheck = ml_global_information.Now
-        return true
-      end
-    end							
-  else
-		if ( gGather == "1" and not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
-      local GList = EntityList("shortestpath,gatherable,maxdistance=20,noplayersaround=5")
-      if ( GList and TableSize(GList)>0) then
-        local id,entry = next(GList)
-        if ( id and entry ) then
-          c_gatherTask.target = entry
-          return true
-        end
-      end
-		end	
+	if ( gGather == "1" and not ml_global_information.Player_InventoryFull) then
+		-- If gatherMarkers are added, you need to add logic to not try to reach a gatherable outside of the marker radius!!!
+		if ( gBotMode == GetString("gatherMode") ) then
+			local GList = EntityList("shortestpath,gatherable,onmesh")
+			if ( GList and TableSize(GList)>0) then
+				local id,entry = next(GList)
+				if ( id and entry ) then
+					c_gatherTask.target = entry
+					return  c_gatherTask.target ~= nil and TableSize(c_gatherTask.target) > 0
+				end
+			end							
+		else
+			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
+				local GList = EntityList("shortestpath,gatherable,maxdistance=20")
+				if ( GList and TableSize(GList)>0) then
+					local id,entry = next(GList)
+					if ( id and entry ) then
+						c_gatherTask.target = entry
+						return true
+					end
+				end
+			end	
+		end
 	end
 	c_gatherTask.target = nil
 	return false
 end
-
 function e_gatherTask:execute()
 	ml_log("e_gatherTask ")
 	Player:Stop()
@@ -156,7 +156,7 @@ e_Gathering = inheritsFrom( ml_effect )
 function c_Gathering:evaluate()
 		
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) == 0 ) then
-		local _,gatherable = next(EntityList("shortestpath,gatherable,onmesh,noplayersaround=5"))
+		local _,gatherable = next(EntityList("shortestpath,gatherable,onmesh"))
 		if (gatherable) then
 			local gPos = gatherable.pos
 			if ( TableSize(gPos) > 0 ) then
@@ -191,28 +191,27 @@ function e_Gathering:execute()
 		
 		if (dist > 2) then
 			-- MoveIntoInteractRange
-			if ( tPos ) then
-				
-        if (gSprint == "1") then
-          if (ml_global_information.Player_Sprinting == false and ml_global_information.Player_Stamina.percent > tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
-            --e("OnSpecialMoveKeyUp(1)")
-            e("OnSpecialMoveKeyDown(1)")
-            ml_global_information.Player_Sprinting = true
-          elseif (ml_global_information.Player_Stamina.percent > 99 and ml_global_information.Player_SprintingRecharging) then
-            ml_global_information.Player_SprintingRecharging = false
-          elseif (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
-            e("OnSpecialMoveKeyUp(1)")
-            ml_global_information.Player_SprintingRecharging = true
-            ml_global_information.Player_Sprinting = false
-          end
-        elseif (ml_global_information.Player_Sprinting == true) then
-            e("OnSpecialMoveKeyUp(1)")
-            ml_global_information.Player_SprintingRecharging = false
-            ml_global_information.Player_Sprinting = false 
-        end
+			if ( tPos ) then			
+				if (gSprint == "1") then
+					if (ml_global_information.Player_Sprinting == false and ml_global_information.Player_Stamina.percent > tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
+						--e("OnSpecialMoveKeyUp(1)")
+						e("OnSpecialMoveKeyDown(1)")
+						ml_global_information.Player_Sprinting = true
+					elseif (ml_global_information.Player_Stamina.percent > 99 and ml_global_information.Player_SprintingRecharging) then
+						ml_global_information.Player_SprintingRecharging = false
+					elseif (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
+						e("OnSpecialMoveKeyUp(1)")
+						ml_global_information.Player_SprintingRecharging = true
+						ml_global_information.Player_Sprinting = false
+					end
+				elseif (ml_global_information.Player_Sprinting == true) then
+					e("OnSpecialMoveKeyUp(1)")
+					ml_global_information.Player_SprintingRecharging = false
+					ml_global_information.Player_Sprinting = false 
+				end
         
-        local rndPath = false
-        if (dist>20) then rndPath = true else rndPath = false end
+			local rndPath = false
+			if (dist>20) then rndPath = true else rndPath = false end
         
 				local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,rndPath,false))
 				if (tonumber(navResult) < 0) then
@@ -228,7 +227,7 @@ function e_Gathering:execute()
 			end
 		else
 			-- Grab that thing			
-			local GList = EntityList("onmesh,nearest,gatherable,maxdistance=5,noplayersaround=5")
+			local GList = EntityList("onmesh,nearest,gatherable,maxdistance=5")
 			if ( TableSize(GList)>0) then
 				local _,gatherable = next(GList)				
 				if (gatherable) then
@@ -242,6 +241,35 @@ function e_Gathering:execute()
 						ml_task_hub:CurrentTask().tPos = tPos
 						return ml_log(true)
 					end
+					
+					if not ml_task_hub:CurrentTask().timestarted then
+						ml_task_hub:CurrentTask().timestarted = ml_global_information.Now
+					end
+				
+					local timediff = ml_global_information.Now - ml_task_hub:CurrentTask().timestarted
+					local playerfound = nil
+					local timeexpired = nil
+					
+					local players = EntityList("nearest,alive,friendly,maxdistance=5")
+					if players then
+						local index,player = next(players)
+						if index and player then
+							if player.type == g("UNIT_REACTION_PLAYER_ALLY") then
+								playerfound = true
+							end
+						end
+					end
+					
+					if timediff > 10000 then	
+						timeexpired = true
+					end
+					
+					if playerfound or timeexpired then
+						d("Blacklisting Gatherable " .. gatherable.id)
+						EntityList:AddToBlacklist(gatherable.id, 300000)
+						ml_task_hub:CurrentTask().completed = true
+						return ml_log(false)
+					end		
 					
 					if ( not e("IsPlayerInteractingWithObject()") ) then
 						Player:Interact( gatherable.id )
