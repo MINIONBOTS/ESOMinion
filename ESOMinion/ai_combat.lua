@@ -20,26 +20,29 @@ function ai_combatAttack.Create()
 	newinst.targetPos = {}
 	
     return newinst
-end
+end 
 function ai_combatAttack:Init()
-		
+	
+	-- Update
+	self:add(ml_element:create( "TargetUpdate", c_targetupdate, e_targetupdate, 100 ), self.overwatch_elements)
+
 	-- Dead?
 	self:add(ml_element:create( "Dead", c_dead, e_dead, 300 ), self.process_elements)
 	
 	-- LootAll
-	--self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
+	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
 	
 	--Autoequip
-	--self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 225 ), self.process_elements)
+	self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 225 ), self.process_elements)
 	
 	--Vendoring
-	--self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
+	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 200 ), self.process_elements)
 	
 	--Potions
 	self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)
 	
 	-- Looting
-	--self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
+	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 	
 	-- use Mount
 	--self:add(ml_element:create( "UseMount", c_UseMount, e_UseMount,120 ), self.process_elements)
@@ -49,7 +52,6 @@ function ai_combatAttack:Init()
 		
 	-- Check for other Targets
 	self:add(ml_element:create( "GetNextTarget", c_GetNextTarget, e_GetNextTarget, 75 ), self.process_elements)
-	
 	
     self:AddTaskCheckCEs()
 end
@@ -63,6 +65,46 @@ function ai_combatAttack:task_complete_eval()
 end
 function ai_combatAttack:task_complete_execute()
    self.completed = true
+end
+
+
+c_targetpdate = inheritsFrom( ml_cause )
+e_targetupdate = inheritsFrom( ml_effect )
+
+function c_targetpdate:evaluate()
+
+	local task = ml_task_hub:CurrentTask()
+	
+	if task
+		and task.targetID
+		and task.targetPos
+	then
+		local target	= EntityList:Get(task.targetID)
+		local timenow	= ml_global_information.Now
+		
+		if target then
+			if not ml_task_hub:CurrentTask().starttime then
+				ml_task_hub:CurrentTask().starttime = ml_global_information.Now
+			end
+			
+			if (ml_global_information.Now - ml_task_hub:CurrentTask().starttime) > 30000
+				or (
+				(ml_global_information.Now - ml_task_hub:CurrentTask().starttime) > 10000
+				and target.alive
+				and target.hp.current == 0
+				)
+			then
+				EntityList:AddToBlacklist(target.id, 300000)
+				ml_task_hub:CurrentTask().completed = true
+			end
+		end
+	end
+
+	return false
+end
+
+function e_targetupdate:execute()
+
 end
 
 --------- Creates a new REACTIVE_GOAL subtask to kill an enemy
