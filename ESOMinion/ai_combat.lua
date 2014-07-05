@@ -22,7 +22,7 @@ function ai_combatAttack.Create()
     return newinst
 end 
 function ai_combatAttack:Init()
-	
+
 	-- Update
 	self:add(ml_element:create( "TargetUpdate", c_targetupdate, e_targetupdate, 100 ), self.overwatch_elements)
 
