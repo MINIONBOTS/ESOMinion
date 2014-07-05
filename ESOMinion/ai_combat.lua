@@ -92,6 +92,7 @@ function c_targetpdate:evaluate()
 				(ml_global_information.Now - ml_task_hub:CurrentTask().starttime) > 10000
 				and target.alive
 				and target.hp.current == 0
+				and target.distance <= ml_global_information.AttackRange
 				)
 			then
 				EntityList:AddToBlacklist(target.id, 300000)
