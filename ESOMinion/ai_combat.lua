@@ -2,6 +2,7 @@ ai_combat = {}
 ai_combat.combatMoveTmr = 0
 ai_combat.combatEvadeTmr = 0
 ai_combat.combatEvadeLastHP = 0
+ai_combat.history = {}
 
 -- Attack Task
 ai_combatAttack = inheritsFrom(ml_task)
@@ -20,12 +21,9 @@ function ai_combatAttack.Create()
 	newinst.targetPos = {}
 	
     return newinst
-end 
+end
 function ai_combatAttack:Init()
-
-	-- Update
-	self:add(ml_element:create( "TargetUpdate", c_targetupdate, e_targetupdate, 100 ), self.overwatch_elements)
-
+		
 	-- Dead?
 	self:add(ml_element:create( "Dead", c_dead, e_dead, 300 ), self.process_elements)
 	
@@ -53,6 +51,7 @@ function ai_combatAttack:Init()
 	-- Check for other Targets
 	self:add(ml_element:create( "GetNextTarget", c_GetNextTarget, e_GetNextTarget, 75 ), self.process_elements)
 	
+	
     self:AddTaskCheckCEs()
 end
 function ai_combatAttack:task_complete_eval()
@@ -65,47 +64,6 @@ function ai_combatAttack:task_complete_eval()
 end
 function ai_combatAttack:task_complete_execute()
    self.completed = true
-end
-
-
-c_targetpdate = inheritsFrom( ml_cause )
-e_targetupdate = inheritsFrom( ml_effect )
-
-function c_targetpdate:evaluate()
-
-	local task = ml_task_hub:CurrentTask()
-	
-	if task
-		and task.targetID
-		and task.targetPos
-	then
-		local target	= EntityList:Get(task.targetID)
-		local timenow	= ml_global_information.Now
-		
-		if target then
-			if not ml_task_hub:CurrentTask().starttime then
-				ml_task_hub:CurrentTask().starttime = ml_global_information.Now
-			end
-			
-			if (ml_global_information.Now - ml_task_hub:CurrentTask().starttime) > 30000
-				or (
-				(ml_global_information.Now - ml_task_hub:CurrentTask().starttime) > 10000
-				and target.alive
-				and target.hp.current == 0
-				and target.distance <= ml_global_information.AttackRange
-				)
-			then
-				EntityList:AddToBlacklist(target.id, 300000)
-				ml_task_hub:CurrentTask().completed = true
-			end
-		end
-	end
-
-	return false
-end
-
-function e_targetupdate:execute()
-
 end
 
 --------- Creates a new REACTIVE_GOAL subtask to kill an enemy
@@ -321,6 +279,25 @@ function e_GotoAndKill:execute()
 			--Player:SetFacing(tpos.x,tpos.y+(tpos.height/2),tpos.z)
 			
 			if ( not eso_skillmanager.Heal( Player.id ) ) then
+
+				if not ml_task_hub:CurrentTask().timestarted then
+					ml_task_hub:CurrentTask().timestarted = ml_global_information.Now
+				end
+			
+				local timediff = ml_global_information.Now - ml_task_hub:CurrentTask().timestarted
+				
+				if  timediff > 30000 or (
+					timediff > 10000
+					and target.alive
+					and target.hp.current == 0
+				)
+				then
+					d("Blacklisting Target " .. target.id)
+					EntityList:AddToBlacklist(target.id, 300000)
+					ml_task_hub:CurrentTask().completed = true
+					return ml_log(false)
+				end
+
 				eso_skillmanager.AttackTarget( target.id )
 			end
 			
@@ -345,8 +322,6 @@ function DoCombatMovement(target)
 	-- Interrupt/Block
 	   -- GetUnitCastingInfo(string unitTag)
         --Returns: string actionName, number timeStarted, number timeEnding, bool isChannel, integer barType, bool canBlock, bool canInterrupt, bool isChargeUp, bool hideBar 
-
-
 end
 
 ---------
