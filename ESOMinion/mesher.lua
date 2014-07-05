@@ -389,10 +389,12 @@ function mm.OnUpdate( tickcount )
 			local mapid = ml_global_information.CurrentMapID
 			if ( not mm.reloadMeshPending and mapid ~= nil and mm.mapID ~= mapid ) then
 				if (Settings.ESOMinion.DefaultMaps[mapid] ~= nil and (Settings.ESOMinion.DefaultMaps[mapid] ~= "none")) then
-					d("Autoloading Navmesh for this Zone: "..Settings.ESOMinion.DefaultMaps[mapid])
-					mm.reloadMeshPending = true
-					mm.reloadMeshTmr = mm.lasttick
-					mm.reloadMeshName = Settings.ESOMinion.DefaultMaps[mapid]
+					if not e("IsWorldMapOpened()") then
+						d("Autoloading Navmesh for this Zone: "..Settings.ESOMinion.DefaultMaps[mapid])
+						mm.reloadMeshPending = true
+						mm.reloadMeshTmr = mm.lasttick
+						mm.reloadMeshName = Settings.ESOMinion.DefaultMaps[mapid]
+					end
 				end
 			end
 		end
@@ -548,10 +550,15 @@ function mm.SetupMarkers()
 	ml_marker_mgr.RefreshMarkerNames()
 end
 
+register_IsWorldMapOpened = [[
+	function IsWorldMapOpened()
+		return not ZO_WorldMap:IsHidden()
+	end
+]]
+eDoString(register_IsWorldMapOpened)
+
 RegisterEventHandler("ToggleMeshmgr", mm.ToggleMenu)
 RegisterEventHandler("GUI.Update",mm.GUIVarUpdate)
 RegisterEventHandler("Module.Initalize",mm.ModuleInit)
 RegisterEventHandler("Gameloop.NavmeshLoaded",mm.NavMeshUpdate)
 RegisterEventHandler("ChangeMeshDepth",mm.ChangeMDepth)
-
-
