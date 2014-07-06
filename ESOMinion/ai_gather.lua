@@ -250,11 +250,11 @@ function e_Gathering:execute()
 					local playerfound = nil
 					local timeexpired = nil
 					
-					local players = EntityList("nearest,alive,friendly,maxdistance=5")
+					local players = EntityList("player,alive,friendly,maxdistance=5")
 					if players then
 						local index,player = next(players)
 						if index and player then
-							if player.type == g("UNIT_REACTION_PLAYER_ALLY") then
+							if player.type == g("UNIT_TYPE_PLAYER") then
 								playerfound = true
 							end
 						end
