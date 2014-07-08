@@ -286,11 +286,9 @@ function e_GotoAndKill:execute()
 			
 				local timediff = ml_global_information.Now - ml_task_hub:CurrentTask().timestarted
 				
-				if  timediff > 30000 or (
-					timediff > 10000
+				if  timediff > 30000
 					and target.alive
 					and target.hp.current == 0
-				)
 				then
 					d("Blacklisting Target " .. target.id)
 					EntityList:AddToBlacklist(target.id, 300000)
