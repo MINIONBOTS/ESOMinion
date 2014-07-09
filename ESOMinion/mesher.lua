@@ -389,12 +389,12 @@ function mm.OnUpdate( tickcount )
 			local mapid = ml_global_information.CurrentMapID
 			if ( not mm.reloadMeshPending and mapid ~= nil and mm.mapID ~= mapid ) then
 				if (Settings.ESOMinion.DefaultMaps[mapid] ~= nil and (Settings.ESOMinion.DefaultMaps[mapid] ~= "none")) then
-					if not e("IsWorldMapOpened()") then
+
 						d("Autoloading Navmesh for this Zone: "..Settings.ESOMinion.DefaultMaps[mapid])
 						mm.reloadMeshPending = true
 						mm.reloadMeshTmr = mm.lasttick
 						mm.reloadMeshName = Settings.ESOMinion.DefaultMaps[mapid]
-					end
+
 				end
 			end
 		end
