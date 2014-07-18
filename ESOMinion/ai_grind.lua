@@ -324,36 +324,6 @@ function e_MoveToRandomPoint:execute()
 	return ml_log(false)
 end
 
-
-function ai_grind.SetupMarkers()
-    -- add marker templates for grinding
-    local grindMarker = ml_marker:Create("grindTemplate")
-	grindMarker:SetType(GetString("grindMarker"))
-	grindMarker:AddField("string", strings[gCurrentLanguage].contentIDEquals, "")
-	grindMarker:AddField("string", strings[gCurrentLanguage].NOTcontentIDEquals, "")
-    grindMarker:SetTime(300)
-    grindMarker:SetMinLevel(1)
-    grindMarker:SetMaxLevel(50)
-    ml_marker_mgr.AddMarkerTemplate(grindMarker)
-    
-	-- add vendor templates for finding vendor locations
-	local vendorMarker = ml_marker:Create("vendorTemplate")
-	vendorMarker:SetType(GetString("vendorMarker"))
-    vendorMarker:SetMinLevel(1)
-    vendorMarker:SetMaxLevel(50)
-	ml_marker_mgr.AddMarkerTemplate(vendorMarker)
-	
-	
-    -- refresh the manager with the new templates
-    ml_marker_mgr.RefreshMarkerTypes()
-	ml_marker_mgr.RefreshMarkerNames()
-end
-
-function ai_grind.moduleinit()
-	ai_grind.SetupMarkers()
-	
-end
 if ( ml_global_information.BotModes) then
 	ml_global_information.BotModes[GetString("grindMode")] = ai_grind
 end
-RegisterEventHandler("Module.Initalize",ai_grind.moduleinit)

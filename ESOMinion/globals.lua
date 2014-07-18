@@ -86,8 +86,12 @@ function ml_globals.UpdateGlobals()
 		ml_global_information.Player_Level = e("GetUnitLevel(player)")
 		ml_global_information.Player_Dead = e("IsUnitDead(player)")
 		
+		ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
+		ml_global_information.CurrentMapName = e("GetMapName()")
+		ml_global_information.Player_Position = Player.pos
+		
 		ml_global_information.Player_Magicka = {} 
-			local magickaID = g("POWERTYPE_MAGICKA")
+			local magickaID = g("POWERTYPE_MAGICKA")			
 			ml_global_information.Player_Magicka.current,ml_global_information.Player_Magicka.max,ml_global_information.Player_Magicka.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
 			ml_global_information.Player_Magicka.percent = ml_global_information.Player_Magicka.current*100/ml_global_information.Player_Magicka.effectiveMax
 		ml_global_information.Player_Stamina = {} 
@@ -99,18 +103,56 @@ function ml_globals.UpdateGlobals()
 			ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
 			ml_global_information.Player_Ultimate.percent = ml_global_information.Player_Ultimate.current*100/ml_global_information.Player_Ultimate.effectiveMax
 		
-		ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
-		ml_global_information.CurrentMapName = e("GetMapName()")
-		ml_global_information.Player_Position = Player.pos
-		
-		
-		-- Update Debug fields	
+			-- Update Debug fields	
 		dAttackRange = ml_global_information.AttackRange
 		dMapName = e("GetMapName()")
 		dMapZoneIndex = e("GetCurrentMapZoneIndex()")
 		dLocationName = e("GetPlayerLocationName()")
+		
 	end
 end
+
+-- Drawing the Markers
+function ml_globals.DrawMarker(marker)
+	local markertype = marker:GetType()
+	local pos = marker:GetPosition()
+
+    local color = 0
+    local s = 1 -- size
+    local h = 5 -- height
+	
+    if ( markertype == GetString("grindMarker") ) then
+        color = 1 -- red
+    elseif ( markertype == "Fishing Marker" ) then
+        color = 4 --blue
+    elseif ( markertype == "Mining Marker" ) then
+        color = 7 -- yellow	
+    elseif ( markertype == GetString("vendorMarker") ) then
+        color = 8 -- orange
+    end
+    --Building the vertices for the object
+    local t = { 
+        [1] = { pos.x-s, pos.y+s+h, pos.z-s, color },
+        [2] = { pos.x+s, pos.y+s+h, pos.z-s, color  },	
+        [3] = { pos.x,   pos.y-s+h,   pos.z, color  },
+        
+        [4] = { pos.x+s, pos.y+s+h, pos.z-s, color },
+        [5] = { pos.x+s, pos.y+s+h, pos.z+s, color  },	
+        [6] = { pos.x,   pos.y-s+h,   pos.z, color  },
+        
+        [7] = { pos.x+s, pos.y+s+h, pos.z+s, color },
+        [8] = { pos.x-s, pos.y+s+h, pos.z+s, color  },	
+        [9] = { pos.x,   pos.y-s+h,   pos.z, color  },
+        
+        [10] = { pos.x-s, pos.y+s+h, pos.z+s, color },
+        [11] = { pos.x-s, pos.y+s+h, pos.z-s, color  },	
+        [12] = { pos.x,   pos.y-s+h,   pos.z, color  },
+    }
+    
+    local id = RenderManager:AddObject(t)
+    return id
+end
+
 
 -- Init all variables before the rest of the bot loads
 ml_globals.UpdateGlobals()
