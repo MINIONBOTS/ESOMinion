@@ -185,7 +185,11 @@ function ai_mail.VarUpdate(event,data,olddata)
 				_G["gMail".. tostring(value) .."Legendary"] = Settings.ESOMinion["gMail".. tostring(value) .."Legendary"]
 				GUI_UnFoldGroup("MailManager", "Filter")
 			end
-		else
+		elseif key == "gMailEnabled"
+			or key == "gMailRecipient"
+			or key == "gMailSubject"
+			or key == "gMailStackSize"
+		then
 			Settings.ESOMinion[tostring(key)] = tostring(value)
 		end
 	end
@@ -282,10 +286,3 @@ RegisterEventHandler("Module.Initalize", ai_mail.Initialize)
 RegisterEventHandler("ai_mail.toggle", ai_mail.ToggleGUI)
 RegisterEventHandler("Gameloop.Update",ai_mail.GameloopUpdate)
 RegisterEventHandler("GUI.Update",ai_mail.VarUpdate)
-
---.------..------..------..------..------..------..------..------..------..------.
---|I.--. ||N.--. ||K.--. ||T.--. ||R.--. ||O.--. ||C.--. ||I.--. ||T.--. ||Y.--. |
---| (\/) || :(): || :/\: || :/\: || :(): || :/\: || :/\: || (\/) || :/\: || (\/) |
---| :\/: || ()() || :\/: || (__) || ()() || :\/: || :\/: || :\/: || (__) || :\/: |
---| '--'I|| '--'N|| '--'K|| '--'T|| '--'R|| '--'O|| '--'C|| '--'I|| '--'T|| '--'Y|
---`------'`------'`------'`------'`------'`------'`------'`------'`------'`------'
