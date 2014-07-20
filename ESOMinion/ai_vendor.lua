@@ -132,40 +132,8 @@ ml_log("e_gotovendor")
 						if ( e("GetNumStoreItems()") > 0 ) then
 							
 							e_movetovendor.isvendoring = true
-							-- Repair
-							if (e_movetovendor.merchantstep == 0) then
-								e_movetovendor.merchantstep = 1
-								if ( gRepair == "1" and ai_vendor:NeedToRepair()== true ) then
-									d("Repairing items")
-									e("RepairAll()")
-									--ml_global_information.Wait(1000)
-									return ml_log(true)
-								end								
-							end
-							
-							--Autoequip
-							if (e_movetovendor.merchantstep == 1) then
-								e_movetovendor.merchantstep = 2
-								if ( gAutoEquip == "1" ) then
-									d("Auto equipping superior items")
-									eso_autoequip.AutoEquip()
-									--ml_global_information.Wait(1000)
-									return ml_log(true)
-								end								
-							end
-							
-							-- Mark Junk items
-							--if (e_movetovendor.merchantstep == 2) then
-							--	e_movetovendor.merchantstep = 3
-							--	if ( gVendor == "1" ) then
-							--		d("Marking items as junk")
-							--		--ai_vendor.markitems()
-							--		ml_global_information.Wait(1000)
-							--		return ml_log(true)
-							--	end								
-							--end
-							
-							if e_movetovendor.merchantstep == 2 then
+
+							if e_movetovendor.merchantstep == 0 then
 								if gVendor == "1" then
 									if e_movetovendor.slotstocheck == nil then
 										local slots = {}
@@ -173,7 +141,7 @@ ml_log("e_gotovendor")
 										for slot = 1, maxslots do
 											local itemtype = e("GetItemType(1,"..tostring(slot)..")")
 											if itemtype > 0 then
-												slots[slot] = true
+												slots[slot] = itemtype
 											end
 										end
 										e_movetovendor.slotstocheck = slots
@@ -181,19 +149,19 @@ ml_log("e_gotovendor")
 									
 									if ValidTable(e_movetovendor.slotstocheck) then
 										local slot,check = next(e_movetovendor.slotstocheck)
-										if slot and check then
+										if slot and tonumber(check) then
 											ai_vendor:SellItem(slot)
 											e_movetovendor.slotstocheck[slot] = nil
 											return ml_log(true)
 										end
 									end
 								end
-								e_movetovendor.merchantstep = 3
+								e_movetovendor.merchantstep = 1
 							end
 							
 							--Sell Items
-							if (e_movetovendor.merchantstep == 3) then
-								e_movetovendor.merchantstep = 4
+							if (e_movetovendor.merchantstep == 1) then
+								e_movetovendor.merchantstep = 2
 								if ( gVendor == "1" and e("HasAnyJunk(1)") ) then
 									d("Selling Junk Items")				
 									e("SellAllJunk()")
@@ -202,8 +170,19 @@ ml_log("e_gotovendor")
 								end								
 							end
 							
+							-- Repair
+							if (e_movetovendor.merchantstep == 2) then
+								e_movetovendor.merchantstep = 3
+								if ( gRepair == "1" and ai_vendor:NeedToRepair()== true ) then
+									d("Repairing items")
+									e("RepairAll()")
+									--ml_global_information.Wait(1000)
+									return ml_log(true)
+								end								
+							end
+							
 							--Close Store
-							if (e_movetovendor.merchantstep == 4) then
+							if (e_movetovendor.merchantstep == 3) then
 								e_movetovendor.merchantstep = 0
 								e_movetovendor.isvendoring = false
 								e_movetovendor.slotstocheck = nil
@@ -302,3 +281,16 @@ EQUIP_SLOT = {
 	EQUIP_SLOT_FEET = 9,
 	EQUIP_SLOT_HAND = 16,
 }
+--:===============================================================================================================
+--: initialize
+--:===============================================================================================================
+
+function ai_vendor.Initialize()
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor","Vendor and Repair")
+	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("vendorManager"),"eso_vendormanager.OnGuiToggle","Vendor and Repair")
+	RegisterEventHandler("eso_vendormanager.OnGuiToggle", eso_vendormanager.OnGuiToggle)
+end
+RegisterEventHandler("Module.Initalize", ai_vendor.Initialize)
+
+	
