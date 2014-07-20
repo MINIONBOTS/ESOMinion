@@ -67,6 +67,12 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gAutoStart == nil ) then
 		Settings.ESOMinion.gAutoStart = "0"
 	end
+	if not Settings.ESOMinion.gVendor then 
+		Settings.ESOMinion.gVendor = "0"
+	end
+	if not Settings.ESOMinion.gRepair then 
+		Settings.ESOMinion.gRepair = "1"
+	end
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
@@ -92,7 +98,12 @@ function ml_global_information.moduleinit()
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
 	
-  	
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Enable Repair", "gRepair", "Vendor and Repair")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Enable Vendor", "gVendor", "Vendor and Repair")
+	GUI_NewButton(ml_global_information.MainWindow.Name, "VendorSettings", "eso_vendormanager.OnGuiToggle", "Vendor and Repair")
+	RegisterEventHandler("eso_vendormanager.OnGuiToggle", eso_vendormanager.OnGuiToggle)
+
+	
 	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("potiontype"),"gPotiontype",GetString("potionssettings"),"Health,Stamina,Magicka")
@@ -104,12 +115,12 @@ function ml_global_information.moduleinit()
 	-- ADVANCED SETTINGS WINDOW
 	--GUI_NewWindow(ml_global_information.advwindow.Name,ml_global_information.advwindow.x,ml_global_information.advwindow.y,ml_global_information.advwindow.width,ml_global_information.advwindow.height,"",false)
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("skillManager"), "SkillManager.toggle", "Managers")
-	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("meshManager"), "ToggleMeshManager", "Managers")
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("meshManager"), "ToggleMeshmgr", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("markerManager"), "ToggleMarkerMgr", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("blacklistManager"), "ToggleBlacklistMgr", "Managers")	
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("vendorManager"), "VendorManager.toggle", "Managers")	
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")		
-	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
+	--GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
 	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
 	
 	-- LOGIN WINDOW
@@ -147,6 +158,8 @@ function ml_global_information.moduleinit()
 	gAutoStart = Settings.ESOMinion.gAutoStart
 	gPulseTime = Settings.ESOMinion.gPulseTime	
 	gAttackRange = Settings.ESOMinion.gAttackRange
+	gVendor = Settings.ESOMinion.gVendor
+	gRepair = Settings.ESOMinion.gRepair
 	gGather = Settings.ESOMinion.gGather
 	gMount = Settings.ESOMinion.gMount
 	gPot = Settings.ESOMinion.gPot
@@ -158,70 +171,25 @@ function ml_global_information.moduleinit()
 	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
--- setup marker manager callbacks and vars
-	if ( ml_marker_mgr ) then
-		ml_marker_mgr.GetPosition = 	function () return Player.pos end
-		ml_marker_mgr.GetLevel = 		function () return e("GetUnitLevel(player)") end
-		ml_marker_mgr.DrawMarker =		ml_globals.DrawMarker
-		ml_marker_mgr.parentWindow = { Name="MinionBot" }
-		ml_marker_mgr.markerPath = ml_global_information.path.. [[\Navigation\]]
-		ml_globals.RegisterLuaEventCallbackHandlers()
-	end
+	-- setup marker manager callbacks and vars
+	ml_marker_mgr.GetPosition = 	function () return Player.pos end
+	ml_marker_mgr.GetLevel = 		function () return e("GetUnitLevel(player)") end
+	ml_marker_mgr.DrawMarker =		mm.DrawMarker
+	ml_blacklist_mgr.parentWindow = { Name="MinionBot" }
+	ml_marker_mgr.parentWindow = { Name="MinionBot" }
+	ml_globals.RegisterLuaEventCallbackHandlers()
 	
--- setup meshmanager
-	if ( ml_mesh_mgr ) then
-		ml_mesh_mgr.parentWindow.Name = "MinionBot"
-		ml_mesh_mgr.GetMapID = function () return ml_global_information.CurrentMapID end
-		ml_mesh_mgr.GetMapName = function () return ml_global_information.CurrentMapName end
-		ml_mesh_mgr.GetPlayerPos = function () return ml_global_information.Player_Position end
-		ml_mesh_mgr.averagegameunitsize = 2
-		
-	-- Set default meshes SetDefaultMesh(mapid, filename)
-		ml_mesh_mgr.SetDefaultMesh(2,"Glenumbra")
-				
-	-- Setup the marker types we wanna use		
-		local grindMarker = ml_marker:Create("grindTemplate")
-		grindMarker:SetType(GetString("grindMarker"))
-		grindMarker:AddField("string", strings[gCurrentLanguage].contentIDEquals, "")
-		grindMarker:AddField("string", strings[gCurrentLanguage].NOTcontentIDEquals, "")
-		grindMarker:SetTime(300)
-		grindMarker:SetMinLevel(1)
-		grindMarker:SetMaxLevel(50)
-		ml_marker_mgr.AddMarkerTemplate(grindMarker)
-				
-		local vendorMarker = ml_marker:Create("vendorTemplate")
-		vendorMarker:SetType(GetString("vendorMarker"))
-		vendorMarker:SetMinLevel(1)
-		vendorMarker:SetMaxLevel(50)
-		ml_marker_mgr.AddMarkerTemplate(vendorMarker)
-		
-		local mapMarker = ml_marker:Create("mapTemplate")
-		mapMarker:SetType(strings[gCurrentLanguage].mapMarker)
-		mapMarker:AddField("string", strings[gCurrentLanguage].toMapID, "")
-		mapMarker:SetTime(300)
-		mapMarker:SetMinLevel(1)
-		mapMarker:SetMaxLevel(50)
-		ml_marker_mgr.AddMarkerTemplate(mapMarker)
-			
-	-- refresh the manager with the new templates
-		ml_marker_mgr.RefreshMarkerTypes()
-		ml_marker_mgr.RefreshMarkerNames()
-				
-		ml_mesh_mgr.InitMarkers() -- Update the Markers-group in the mesher UI
-	end
-
-
+	-- Init our global variables
+	ml_globals.UpdateGlobals()
 	
--- setup/load blacklist tables
-	if ( ml_blacklist_mgr ) then
-		ml_blacklist_mgr.parentWindow = ml_global_information.MainWindow	
-		ml_blacklist_mgr.path = GetStartupPath() .. [[\LuaMods\ESOMinion\blacklist.info]]
-		ml_blacklist_mgr.ReadBlacklistFile(ml_blacklist_mgr.path)
-		 
-		if not ml_blacklist.BlacklistExists(GetString("monsters")) then
-			ml_blacklist.CreateBlacklist(GetString("monsters"))
-		end
-	end
+	-- setup/load blacklist tables
+	ml_blacklist_mgr.parentWindow = ml_global_information.MainWindow	
+    ml_blacklist_mgr.path = GetStartupPath() .. [[\LuaMods\ESOMinion\blacklist.info]]
+    ml_blacklist_mgr.ReadBlacklistFile(ml_blacklist_mgr.path)
+     
+    if not ml_blacklist.BlacklistExists(GetString("monsters")) then
+        ml_blacklist.CreateBlacklist(GetString("monsters"))
+    end
 
 	if gAutoStart == "1" and not ml_global_information.running then
 		ml_global_information.togglebot(1)
@@ -364,44 +332,19 @@ end
 function ml_global_information.InGameOnUpdate( event, tickcount )
 	ml_global_information.Now = tickcount
 	
-
 	-- show/hide correct windows for gamestate
 	if ( ml_global_information.gamestatechanged == true ) then
 		GUI_WindowVisible(ml_global_information.MainWindow.Name,true)
 		ml_global_information.gamestatechanged = false
 	end
-	
+
 	if ( tickcount - ml_global_information.lasttick > tonumber(gPulseTime) ) then
 		ml_global_information.lasttick = tickcount
 		
-		
 		-- Update global variables
 		ml_globals.UpdateGlobals()
-		
-		-- Mesher OnUpdate
-		ml_mesh_mgr.OnUpdate( tickcount )
 			
-		-- SkillManager OnUpdate
-		eso_skillmanager.OnUpdate( tickcount )
-		
-		-- PartyManager OnUpdate
-		--mc_multibotmanager.OnUpdate( tickcount )
-		
-		-- ml_blacklist.lua
-		ml_blacklist.ClearBlacklists()
-		
-		-- ml_blacklist_mgr.lua
-		ml_blacklist_mgr.UpdateEntryTime()
-		ml_blacklist_mgr.UpdateEntries(tickcount)
-
-
-
-
-		-- Run the Bot
-		if ( NavigationManager:GetNavMeshState() == GLOBAL.MESHSTATE.MESHBUILDING ) then
-			GUI_SetStatusBar("Loading Navigation Mesh...")
-			
-		elseif ( ml_global_information.running ) then		
+		if ( ml_global_information.running ) then		
 					
 			-- Update Marker status
 			if ( gBotMode == GetString("grindMode") and ValidTable(GetCurrentMarker()) and ml_task_hub.shouldRun )then
@@ -410,7 +353,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				local timesince = TimeSince(ml_global_information.MarkerTime)
 				local timeleft = ((GetCurrentMarker():GetTime() * 1000) - timesince) / 1000
 				ml_log("("..tostring(round(timeleft, 1)).."sec) | ")
-			else
+			elseif gBotMode == GetString("grindMode") then
 				ml_log("Random Position | ")
 			end
 			
@@ -441,6 +384,22 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			GUI_SetStatusBar("BOT: Not Running")
 		end
 	end
+	
+	-- Mesher OnUpdate
+	mm.OnUpdate( tickcount )
+		
+	-- SkillManager OnUpdate
+	eso_skillmanager.OnUpdate( tickcount )
+	
+	-- PartyManager OnUpdate
+	--mc_multibotmanager.OnUpdate( tickcount )
+	
+    -- ml_blacklist.lua
+    ml_blacklist.ClearBlacklists()
+    
+    -- ml_blacklist_mgr.lua
+    ml_blacklist_mgr.UpdateEntryTime()
+    ml_blacklist_mgr.UpdateEntries(tickcount)
 end
 
 
