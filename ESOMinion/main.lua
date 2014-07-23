@@ -67,6 +67,12 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gAutoStart == nil ) then
 		Settings.ESOMinion.gAutoStart = "0"
 	end
+	if not Settings.ESOMinion.gVendor then 
+		Settings.ESOMinion.gVendor = "0"
+	end
+	if not Settings.ESOMinion.gRepair then 
+		Settings.ESOMinion.gRepair = "1"
+	end
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
@@ -92,7 +98,10 @@ function ml_global_information.moduleinit()
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
 	
-  	
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Enable Repair", "gRepair", "Vendor and Repair")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Enable Vendor", "gVendor", "Vendor and Repair")
+	GUI_NewButton(ml_global_information.MainWindow.Name, "VendorSettings", "eso_vendormanager.OnGuiToggle", "Vendor and Repair")
+	RegisterEventHandler("eso_vendormanager.OnGuiToggle", eso_vendormanager.OnGuiToggle)
 	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("potiontype"),"gPotiontype",GetString("potionssettings"),"Health,Stamina,Magicka")
@@ -147,6 +156,8 @@ function ml_global_information.moduleinit()
 	gAutoStart = Settings.ESOMinion.gAutoStart
 	gPulseTime = Settings.ESOMinion.gPulseTime	
 	gAttackRange = Settings.ESOMinion.gAttackRange
+	gVendor = Settings.ESOMinion.gVendor
+	gRepair = Settings.ESOMinion.gRepair
 	gGather = Settings.ESOMinion.gGather
 	gMount = Settings.ESOMinion.gMount
 	gPot = Settings.ESOMinion.gPot

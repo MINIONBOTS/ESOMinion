@@ -10,10 +10,10 @@ e_resting = inheritsFrom( ml_effect )
 --:===============================================================================================================
 --: Evaluate
 --:===============================================================================================================  
--- THIS NEEDS AN AGGRO CHECK!
+
 function c_resting:evaluate()
 	
-	if gRest == "0" or ml_global_information.Player_Dead or Player.isswimming then
+	if gRest == "0" or ml_global_information.Player_Dead or e("IsUnitInCombat(player)") or Player.isswimming then
 		return false
 	end
 	
