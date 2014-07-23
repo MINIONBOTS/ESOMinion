@@ -281,20 +281,3 @@ EQUIP_SLOT = {
 	EQUIP_SLOT_FEET = 9,
 	EQUIP_SLOT_HAND = 16,
 }
---:===============================================================================================================
---: initialize
---:===============================================================================================================
-
-function ai_vendor.Initialize()
-	if ( Settings.ESOMinion.gRepair == nil ) then Settings.ESOMinion.gRepair = "1" end
-	if ( Settings.ESOMinion.gVendor == nil ) then Settings.ESOMinion.gVendor = "0" end
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor","Vendor and Repair")
-	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("vendorManager"),"eso_vendormanager.OnGuiToggle","Vendor and Repair")
-	RegisterEventHandler("eso_vendormanager.OnGuiToggle", eso_vendormanager.OnGuiToggle)
-	gRepair = Settings.ESOMinion.gRepair
-	gVendor = Settings.ESOMinion.gVendor
-end
-RegisterEventHandler("Module.Initalize", ai_vendor.Initialize)
-
-	

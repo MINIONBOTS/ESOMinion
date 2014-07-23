@@ -90,17 +90,17 @@ function ml_global_information.moduleinit()
 	--GUI_NewField(ml_global_information.MainWindow.Name,"LocationName","dLocationName",GetString("botStatus"))
 	
 	
-	
 	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("gatherMode"),"gGather",GetString("settings"))	
 	--GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useMount"),"gMount",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
-	
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Enable Repair", "gRepair", "Vendor and Repair")
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Enable Vendor", "gVendor", "Vendor and Repair")
-	GUI_NewButton(ml_global_information.MainWindow.Name, "VendorSettings", "eso_vendormanager.OnGuiToggle", "Vendor and Repair")
+
+	--vendor, repair, vendormanager
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor","Vendor and Repair")
+	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("vendorManager"),"eso_vendormanager.OnGuiToggle","Vendor and Repair")
 	RegisterEventHandler("eso_vendormanager.OnGuiToggle", eso_vendormanager.OnGuiToggle)
 	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
