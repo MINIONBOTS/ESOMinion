@@ -35,7 +35,7 @@ function ai_grind:Init()
 	self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 250 ), self.process_elements)
 
 	--Vendoring
-	self:add(ml_element:create( "GetVendor", c_movetovendor, e_movetovendor, 225 ), self.process_elements)
+	self:add(ml_element:create( "Vendor", c_Vendor, e_Vendor, 225 ), self.process_elements)
 				
 	-- Resting
 	self:add(ml_element:create( "Resting", c_resting, e_resting, 210 ), self.process_elements)	
