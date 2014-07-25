@@ -327,6 +327,6 @@ end
 --: register event handlers
 --:===============================================================================================================  
 
-RegisterEventHandler("VendorManager.toggle", eso_vendormanager.OnGuiToggle)
+RegisterEventHandler("eso_vendormanager.OnGuiToggle", eso_vendormanager.OnGuiToggle)
 RegisterEventHandler("GUI.Update", eso_vendormanager.OnGuiVarUpdate)
 RegisterEventHandler("Module.Initalize", eso_vendormanager.Initialize)
