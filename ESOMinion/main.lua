@@ -101,7 +101,6 @@ function ml_global_information.moduleinit()
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor","Vendor and Repair")
 	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("vendorManager"),"eso_vendormanager.OnGuiToggle","Vendor and Repair")
-	RegisterEventHandler("eso_vendormanager.OnGuiToggle", eso_vendormanager.OnGuiToggle)
 	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("potiontype"),"gPotiontype",GetString("potionssettings"),"Health,Stamina,Magicka")
@@ -543,7 +542,6 @@ function ml_global_information.ResetBot()
 	c_MoveToMarker.allowedToFight = false
 	c_MoveToRandomPoint.randomPoint = nil
 	c_MoveToRandomPoint.randomPointreached = false
-	e_movetovendor.isvendoring = false
 end
 
 function ml_global_information.Wait( seconds ) 
