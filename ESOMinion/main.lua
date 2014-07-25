@@ -522,7 +522,6 @@ function ml_global_information.togglebot(arg)
 		ml_global_information.ResetBot()
 		ml_task_hub:ClearQueues()
 		ml_global_information.UpdateMode()
-		ai_vendor.queue = nil
 	else
 		d("Starting Bot..")
 		ml_global_information.running = true
