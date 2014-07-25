@@ -174,13 +174,14 @@ function e_VendorAndRepair:execute()
 			local _,_,_,_,_,_,_,quality = e("GetItemInfo(1,"..tostring(bagSlot)..")")
 			local stack,maxStack 		= e("GetSlotStackSize(1,"..tostring(bagSlot)..")")
 			if itemType ~= 0 then
-				if 	eso_vendormanager.profile ~= nil and
+				if (eso_vendormanager.profile ~= nil and
 					eso_vendormanager.profile.data ~= nil and
 					eso_vendormanager.profile.data[itemType] ~= nil and
-					eso_vendormanager.profile.data[itemType][quality] ~= nil
+					eso_vendormanager.profile.data[itemType][quality] ~= nil) or 
+					(quality == g("ITEM_QUALITY_TRASH"))
 				then
-					if (eso_vendormanager.profile.data[itemType][quality] == true) or
-						quality == g("ITEM_QUALITY_TRASH")
+					if  (eso_vendormanager.profile.data[itemType][quality] == true) or
+						(quality == g("ITEM_QUALITY_TRASH")
 					then
 						ml_task_hub:CurrentTask().inventory[bagSlot] = {}
 						ml_task_hub:CurrentTask().inventory[bagSlot].name = name
