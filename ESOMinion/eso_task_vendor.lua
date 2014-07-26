@@ -44,7 +44,9 @@ e_Vendor.throttle = 2500
 function c_Vendor:evaluate()
 	if not c_dead:evaluate() and not c_Aggro:evaluate() then
 		if (gVendor == "1" and NeedToVendor()) or (gRepair == "1" and NeedToRepair()) then
-			return true
+			if GetVendor() or GetVendorMarker() then
+				return true
+			end
 		end
 	end
 	return false
@@ -181,7 +183,7 @@ function e_VendorAndRepair:execute()
 						ml_task_hub:CurrentTask().inventory[bagSlot].name = name
 						ml_task_hub:CurrentTask().inventory[bagSlot].stack = stack
 					end
-				elseif (quality == g("ITEM_QUALITY_TRASH")
+				elseif (quality == g("ITEM_QUALITY_TRASH")) then
 					ml_task_hub:CurrentTask().inventory[bagSlot] = {}
 					ml_task_hub:CurrentTask().inventory[bagSlot].name = name
 					ml_task_hub:CurrentTask().inventory[bagSlot].stack = stack
