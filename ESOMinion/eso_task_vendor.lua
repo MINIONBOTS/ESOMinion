@@ -5,7 +5,6 @@
 
 eso_vendortask = inheritsFrom(ml_task)
 eso_vendortask.name = "Vendoring"
-eso_vendortask.time = 0
 
 function eso_vendortask.Create()
 	local newinst = inheritsFrom(eso_vendortask)
@@ -43,11 +42,9 @@ e_Vendor = inheritsFrom( ml_effect )
 e_Vendor.throttle = 2500
 
 function c_Vendor:evaluate()
-	if not c_dead:evaluate() and not c_Aggro:evaluate() and (ml_global_information.Now > eso_vendortask.time) then
+	if not c_dead:evaluate() and not c_Aggro:evaluate() then
 		if (gVendor == "1" and NeedToVendor()) or (gRepair == "1" and NeedToRepair()) then
-			if GetVendor() or GetVendorMarker() then
-				return true
-			end
+			return true
 		end
 	end
 	return false
@@ -217,7 +214,6 @@ function e_VendorAndRepair:execute()
 	end
 
 	e("EndInteraction(15)")
-	eso_vendortask.time = ml_global_information.Now + 300000
 	ml_task_hub:CurrentTask().completed = true
 	d("eso_vendortask -> Vendor Completed")
 	return
