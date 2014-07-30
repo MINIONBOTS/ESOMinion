@@ -198,7 +198,14 @@ function ml_global_information.moduleinit()
 		grindMarker:SetMinLevel(1)
 		grindMarker:SetMaxLevel(50)
 		ml_marker_mgr.AddMarkerTemplate(grindMarker)
-				
+			
+		local gatherMarker = ml_marker:Create("gatherTemplate")
+		gatherMarker:SetType("GatherMarker")
+		gatherMarker:SetTime(300)
+		gatherMarker:SetMinLevel(1)
+		gatherMarker:SetMaxLevel(50)
+		ml_marker_mgr.AddMarkerTemplate(gatherMarker)
+		
 		local vendorMarker = ml_marker:Create("vendorTemplate")
 		vendorMarker:SetType(GetString("vendorMarker"))
 		vendorMarker:SetMinLevel(1)
@@ -420,8 +427,6 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				local timesince = TimeSince(ml_global_information.MarkerTime)
 				local timeleft = ((GetCurrentMarker():GetTime() * 1000) - timesince) / 1000
 				ml_log("("..tostring(round(timeleft, 1)).."sec) | ")
-			else
-				ml_log("Random Position | ")
 			end
 			
 			-- Let the bot tick ;)
