@@ -123,10 +123,8 @@ function ml_globals.DrawMarker(marker)
 	
     if ( markertype == GetString("grindMarker") ) then
         color = 1 -- red
-    elseif ( markertype == "Fishing Marker" ) then
-        color = 4 --blue
-    elseif ( markertype == "Mining Marker" ) then
-        color = 7 -- yellow	
+    elseif ( markertype == "GatherMarker" ) then
+        color = 6 -- green
     elseif ( markertype == GetString("vendorMarker") ) then
         color = 8 -- orange
     end
