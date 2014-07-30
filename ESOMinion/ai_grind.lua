@@ -83,19 +83,19 @@ function c_gringgatherTask:evaluate()
 		-- If we are doing the Markerdance, then gather just in a smaller radius while we move to the markers, else a bigger radius, never gather outside markerradius
 		
 		if ( TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
-			local GList = EntityList("shortestpath,gatherable,maxdistance=20")
-			if ( GList and TableSize(GList)>0) then
-				local id,entry = next(GList)
-				if ( id and entry ) then
-					c_gringgatherTask.target = entry
-					return true
-				end
+
+			local gatherable = eso_gathermanager.NearestGatherable()
+			if (ValidTable(gatherable) and gatherable.distance < 20)then
+				c_gringgatherTask.target = gatherable
+				return true
 			end
+
 		end		
 	end
 	c_gringgatherTask.target = nil
 	return false
 end
+
 function e_gringgatherTask:execute()
 	ml_log("e_gringgatherTask ")
 	Player:Stop()
@@ -261,68 +261,6 @@ function e_MoveToMarker:execute()
 	return ml_log(false)
 end
 
-
-c_MoveToRandomPoint = inheritsFrom( ml_cause )
-e_MoveToRandomPoint = inheritsFrom( ml_effect )
-c_MoveToRandomPoint.randomPoint = nil
-c_MoveToRandomPoint.randomPointreached = false
-function c_MoveToRandomPoint:evaluate()
-	
-	-- We dont have a current randomPoint to goto
-	if ( c_MoveToRandomPoint.randomPoint == nil ) then
-		local ppos = ml_global_information.Player_Position
-		if ( TableSize(ppos)>0)then
-			local p = NavigationManager:GetRandomPointOnCircle(ppos.x,ppos.y,ppos.z,30,5000)
-			if ( p ) then
-				if ( Distance3D(p.x,p.y,p.z,ppos.x,ppos.y,ppos.z) > 25 ) then
-					c_MoveToRandomPoint.randomPoint = p
-					c_MoveToRandomPoint.randomPointreached = false
-					return true
-				end
-			end
-		end
-				
-	else
-		-- We haven't reached the current randomPoint
-		if ( c_MoveToRandomPoint.randomPointreached == false) then			
-			return true
-		end		
-	end			
-    return false
-end
-function e_MoveToRandomPoint:execute()
-	ml_log(" e_MoveToRandomPoint ")
-		
-	-- Move to our random Point
-	if ( c_MoveToRandomPoint.randomPoint ~= nil ) then
-		local dist = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, c_MoveToRandomPoint.randomPoint.x, c_MoveToRandomPoint.randomPoint.z)
-
-		if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
-			ai_mount:Mount()
-		end
-		
-		if  ( dist < 10) then
-			-- We reached our random Point
-			c_MoveToRandomPoint.randomPointreached = true
-			c_MoveToRandomPoint.randomPoint = nil
-			d("Reached Random Point...")
-			return ml_log(true)
-		else
-			-- We need to reach our random Point yet
-			local navResult = tostring(Player:MoveTo(c_MoveToRandomPoint.randomPoint.x,c_MoveToRandomPoint.randomPoint.y,c_MoveToRandomPoint.randomPoint.z,10,false,true,false))
-			if (tonumber(navResult) < 0) then
-				ml_log("e_MoveToRandomPoint result: "..tostring(navResult))
-				return ml_log(false)
-			end
-			return ml_log(true)
-		end
-	
-	else
-		d("BUG in e_MoveToRandomPoint ... I guess..")
-	end
-	
-	return ml_log(false)
-end
 
 if ( ml_global_information.BotModes) then
 	ml_global_information.BotModes[GetString("grindMode")] = ai_grind
