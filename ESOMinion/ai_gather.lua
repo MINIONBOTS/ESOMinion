@@ -1,6 +1,4 @@
--- Handles Looting, Gathering and so on
 
--- Grind
 ai_gathermode = inheritsFrom(ml_task)
 ai_gathermode.name = "GatherMode"
 
@@ -17,8 +15,10 @@ function ai_gathermode.Create()
     return newinst
 end
 
+
+
 function ai_gathermode:Init()
-	
+
 	-- Dead?
 	self:add(ml_element:create( "Dead", c_dead, e_dead, 300 ), self.process_elements)
 	
@@ -40,7 +40,8 @@ function ai_gathermode:Init()
 	-- Gathering
 	self:add(ml_element:create( "Gathering", c_gatherTask, e_gatherTask, 125 ), self.process_elements)
 	
-	-- TODO: Add gathering Markers here if demanded
+	-- Gather Marker
+	self:add( ml_element:create( "GatherMarker", c_MoveToGatherMarker, e_MoveToGatherMarker, 100 ), self.process_elements)
 
 	-- Move to a Randompoint if there is nothing to gather around us
 	self:add( ml_element:create( "MoveToRandomPoint", c_MoveToRandomPoint, e_MoveToRandomPoint, 50 ), self.process_elements)
@@ -54,7 +55,7 @@ end
 function ai_gathermode:task_complete_execute()
     
 end
-if ( ml_global_information.BotModes) then
+if ( ml_global_information.BotModes ) then
 	ml_global_information.BotModes[GetString("gatherMode")] = ai_gathermode
 end
 
@@ -111,21 +112,17 @@ function c_gatherTask:evaluate()
 	if ( gGather == "1" and not ml_global_information.Player_InventoryFull) then
 		-- If gatherMarkers are added, you need to add logic to not try to reach a gatherable outside of the marker radius!!!
 		if ( gBotMode == GetString("gatherMode") ) then
-			local GList = EntityList("shortestpath,gatherable,onmesh")
-			if ( GList and TableSize(GList)>0) then
-				local id,entry = next(GList)
-				if ( id and entry ) then
-					c_gatherTask.target = entry
-					return  c_gatherTask.target ~= nil and TableSize(c_gatherTask.target) > 0
-				end
-			end							
+			local gatherable = eso_gathermanager.NearestGatherable()
+			if ValidTable(gatherable) then
+				c_gatherTask.target = gatherable
+				return true
+			end
 		else
 			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
-				local GList = EntityList("shortestpath,gatherable,maxdistance=20")
-				if ( GList and TableSize(GList)>0) then
-					local id,entry = next(GList)
-					if ( id and entry ) then
-						c_gatherTask.target = entry
+				local gatherable = eso_gathermanager.NearestGatherable()
+				if ValidTable(gatherable) then
+					if gatherable.distance < 20 then
+						c_gatherTask.target = gatherable
 						return true
 					end
 				end
@@ -156,13 +153,12 @@ e_Gathering = inheritsFrom( ml_effect )
 function c_Gathering:evaluate()
 		
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) == 0 ) then
-		local _,gatherable = next(EntityList("shortestpath,gatherable,onmesh"))
-		if (gatherable) then
-			local gPos = gatherable.pos
-			if ( TableSize(gPos) > 0 ) then
-				ml_task_hub:CurrentTask().tPos = gatherable.pos
-			end
+	
+		local gatherable = eso_gathermanager.NearestGatherable()
+		if ValidTable(gatherable) then
+			ml_task_hub:CurrentTask().tPos = gatherable.pos
 		end
+
 	else		
 		return true
 	end
@@ -227,63 +223,64 @@ function e_Gathering:execute()
 			end
 		else
 			-- Grab that thing			
-			local GList = EntityList("onmesh,nearest,gatherable,maxdistance=5")
-			if ( TableSize(GList)>0) then
-				local _,gatherable = next(GList)				
-				if (gatherable) then
-					-- another check if we may picked up a different gatherable/old one is gone meanwhile
-					local tPos = gatherable.pos
-					local dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
-				
-					if (dist > 2) then
-						-- set new gatherable position
-						d("Different gatherable found, setting new position..")
-						ml_task_hub:CurrentTask().tPos = tPos
-						return ml_log(true)
-					end
-					
-					if not ml_task_hub:CurrentTask().timestarted then
-						ml_task_hub:CurrentTask().timestarted = ml_global_information.Now
-					end
-				
-					local timediff = ml_global_information.Now - ml_task_hub:CurrentTask().timestarted
-					local playerfound = nil
-					local timeexpired = nil
-					
-					local players = EntityList("player,alive,friendly,maxdistance=5")
-					if players then
-						local index,player = next(players)
-						if index and player then
-							if player.type == g("UNIT_TYPE_PLAYER") then
-								playerfound = true
-							end
-						end
-					end
-					
-					if timediff > 10000 then	
-						timeexpired = true
-					end
-					
-					if playerfound or timeexpired then
-						d("Blacklisting Gatherable " .. gatherable.id)
-						EntityList:AddToBlacklist(gatherable.id, 300000)
-						ml_task_hub:CurrentTask().completed = true
-						return ml_log(false)
-					end		
-					
-					if ( not e("IsPlayerInteractingWithObject()") ) then
-						Player:Interact( gatherable.id )
-						ml_log("Gathering Node..")
-						ml_global_information.Wait(500)					
-					end
-					
-					return ml_log(true)
-					
-				else
-					d("No gatherable nearby anymore, finishing gathertask")
-					ml_task_hub:CurrentTask().tPos = {}
+			--local GList = EntityList("onmesh,nearest,gatherable,maxdistance=5")
+
+			local gatherable = eso_gathermanager.NearestGatherable()
+			if ValidTable(gatherable) then
+				ml_task_hub:CurrentTask().tPos = gatherable.pos
+			end
+			
+			if ValidTable(gatherable) then
+
+				-- another check if we may picked up a different gatherable/old one is gone meanwhile
+				local tPos = gatherable.pos
+				local dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
+			
+				if (dist > 2) then
+					-- set new gatherable position
+					d("Different gatherable found, setting new position..")
+					ml_task_hub:CurrentTask().tPos = tPos
+					ml_task_hub:CurrentTask().timestarted = nil
 					return ml_log(true)
 				end
+				
+				if not ml_task_hub:CurrentTask().timestarted then
+					ml_task_hub:CurrentTask().timestarted = ml_global_information.Now
+				end
+			
+				local timediff = ml_global_information.Now - ml_task_hub:CurrentTask().timestarted
+				local playerfound = nil
+				local timeexpired = nil
+				
+				local players = EntityList("player,alive,friendly,maxdistance=5")
+				if players then
+					local index,player = next(players)
+					if index and player then
+						if player.type == g("UNIT_TYPE_PLAYER") then
+							playerfound = true
+						end
+					end
+				end
+				
+				if timediff > 10000 then	
+					timeexpired = true
+				end
+				
+				if playerfound or timeexpired then
+					d("Blacklisting Gatherable " .. gatherable.id)
+					EntityList:AddToBlacklist(gatherable.id, 300000)
+					ml_task_hub:CurrentTask().timestarted = nil
+					ml_task_hub:CurrentTask().completed = true
+					return ml_log(false)
+				end		
+				
+				if ( not e("IsPlayerInteractingWithObject()") ) then
+					Player:Interact( gatherable.id )
+					ml_log("Gathering Node..")
+					ml_global_information.Wait(500)					
+				end
+
+				return ml_log(true)
 			else
 				d("No gatherable nearby anymore, finishing gather task")
 				ml_task_hub:CurrentTask().tPos = {}
@@ -296,64 +293,85 @@ function e_Gathering:execute()
 	return ml_log(false)
 end
 
+c_MoveToGatherMarker = inheritsFrom( ml_cause )
+e_MoveToGatherMarker = inheritsFrom( ml_effect )
+e_MoveToGatherMarker.reached = false
+e_MoveToGatherMarker.returned = false
 
-------------
-c_Loot = inheritsFrom( ml_cause )
-e_Loot = inheritsFrom( ml_effect )
-function c_Loot:evaluate()
-	local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
-    return not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull and TableSize(EntityList("nearest,lootable,onmesh,maxdistance=50,exclude="..blackliststring)) > 0
-end
-function e_Loot:execute()
-	ml_log("e_Loot")
-	local CharList = EntityList("lootable,shortestpath,onmesh")
-	if ( TableSize(CharList) > 0 ) then
-		local id,entity = next (CharList)
-		if ( id and entity ) then
-			local tPos = entity.pos
-			
-			if ( entity.distance > 2) then
-				-- MoveIntoInteractRange				
-				if ( tPos ) then					
-					local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,false,false))		
-					if (tonumber(navResult) < 0) then
-						d("e_Loot.MoveIntoCombatRange result: "..tonumber(navResult))					
-					end
-					ml_log("MoveToLootable..")
-					return ml_log(true)
-				end
-			else
-				-- Grab that thing
-				Player:Stop()				
-				Player:Interact( entity.id )
-				ml_log("Looting..")
-				ml_global_information.Wait(500)
-				return ml_log(true)
+function c_MoveToGatherMarker:evaluate()
+	
+	local needmarker = false
+	
+	-- haven't reached, or reached and did not return to the marker
+	if (ml_task_hub:CurrentTask().currentMarker and (not e_MoveToGatherMarker.reached or not e_MoveToGatherMarker.returned)) then
+		return true
+	end
+	
+	-- already reached and returned to the marker once
+	if (ml_task_hub:CurrentTask().currentMarker and (e_MoveToGatherMarker.reached or e_MoveToGatherMarker.returned)) then
+		needmarker = true
+	end
+	
+	--check the timer
+	local timeexpired = false
+	if (ml_task_hub:CurrentTask().currentMarker) then
+		if (ml_task_hub:CurrentTask().currentMarker:GetTime() and ml_task_hub:CurrentTask().currentMarker:GetTime() ~= 0) then
+			if (TimeSince(ml_task_hub:CurrentTask().markerTime) > ml_task_hub:CurrentTask().currentMarker:GetTime() * 1000) then
+				needmarker = true
 			end
 		end
 	end
-	return ml_log(false)	
-end
-
-
-
---------- Loots the items into our bags if "autoloot" issnt activated
-c_LootAll = inheritsFrom( ml_cause )
-e_LootAll = inheritsFrom( ml_effect )
-c_LootAll.ignoreLoot = false
-c_LootAll.ignoreLootTmr = 0
-function c_LootAll:evaluate()
-	-- this is needed in order to make the loot window close when we cannot loot something, this is set in globals.lua event
-    if ( c_LootAll.ignoreLootTmr ~= 0 ) then
-		if ( ml_global_information.Now - c_LootAll.ignoreLootTmr > 1500 ) then
-			c_LootAll.ignoreLootTmr = 0
-			c_LootAll.ignoreLoot = false
+	
+	--get a marker, if needed (and available)
+	if (ml_task_hub:CurrentTask().currentMarker == nil or needmarker == true) then
+		local newmarker = ml_marker_mgr.GetNextMarker("GatherMarker", false)
+		if ValidTable(newmarker) then
+			d("new marker")
+			ml_task_hub:CurrentTask().currentMarker = newmarker
+			ml_task_hub:CurrentTask().markerTime = ml_global_information.Now
+			ml_global_information.MarkerTime = ml_global_information.Now
+			e_MoveToGatherMarker.reached = false
+			e_MoveToGatherMarker.returned = false
+			return true
 		end
 	end
-	return c_LootAll.ignoreLoot == false and not ml_global_information.Player_InventoryFull and (tonumber(e("GetNumLootItems()")) > 0 or tonumber(e("GetLootMoney()")) > 0)
+
+	return false
 end
-function e_LootAll:execute()
-	ml_log("e_LootAll")
-	e("LootAll()")
-	return ml_log(false)	
+
+function e_MoveToGatherMarker:execute()
+	ml_log(" e_MoveToGatherMarker ")
+
+	if (ml_task_hub:CurrentTask().currentMarker ~= false and ml_task_hub:CurrentTask().currentMarker ~= nil) then
+		
+		local pos = ml_task_hub:CurrentTask().currentMarker:GetPosition()
+		local dist = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, pos.x, pos.z)
+
+		if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
+			ai_mount:Mount()
+		elseif gUseMount == "1" and tonumber(gUseMountRange) > dist then
+			ai_mount:Dismount()
+		end
+		
+		if  ( dist < 10 ) then
+			if not e_MoveToGatherMarker.reached then
+				e_MoveToGatherMarker.reached = true
+			elseif e_MoveToGatherMarker.reached then
+				if not e_MoveToGatherMarker.returned then
+					e_MoveToGatherMarker.returned = true
+				end
+			end
+			d("Reached current Marker...")
+			return ml_log(true)		
+		else
+			-- We need to reach our Marker yet			
+			local navResult = tostring(Player:MoveTo(pos.x,pos.y,pos.z,10,false,true,false))
+			if (tonumber(navResult) < 0) then
+				ml_log("e_MoveToMarker result: "..tostring(navResult))
+				return ml_log(false)
+			end
+			return ml_log(true)
+		end
+	end
+	return ml_log(false)
 end
