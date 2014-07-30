@@ -138,6 +138,15 @@ function eso_gathermanager.OnGuiVarUpdate(event,data,...)
 end
 
 --:===============================================================================================================
+--: gui: toggle
+--:===============================================================================================================  
+
+function eso_gathermanager.OnGuiToggle()
+	eso_gathermanager.window.visible = not eso_gathermanager.window.visible
+	GUI_WindowVisible(eso_gathermanager.window.name, eso_gathermanager.window.visible)
+end
+
+--:===============================================================================================================
 --: initialize
 --:===============================================================================================================  
 
