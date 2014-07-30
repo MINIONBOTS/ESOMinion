@@ -89,8 +89,8 @@ function eso_vendormanager.InitializeGui()
 	
 	GUI_NewWindow(window.name, unpack(window.coords))
 	GUI_NewComboBox(window.name, " Type", "vmItemTypeFilter", section, "")
-	GUI_NewButton(window.name, "Save Profile", "eso_vendormanager.SaveProfile")
-	RegisterEventHandler("eso_vendormanager.SaveProfile", eso_vendormanager.SaveProfile)
+	--GUI_NewButton(window.name, "Save Profile", "eso_vendormanager.SaveProfile")
+	--RegisterEventHandler("eso_vendormanager.SaveProfile", eso_vendormanager.SaveProfile)
 
 	if ValidTable(eso_vendormanager.profile) then
 		local itemtypes = eso_vendormanager.profile.itemtypes
@@ -147,6 +147,7 @@ function eso_vendormanager.OnGuiVarUpdate(event,data,...)
 					local debugstr = "VendorManager : " .. ilabel .. " (" .. qlabel .. ") -> " ..
 					tostring(eso_vendormanager.profile.data[handler.itemtype][handler.quality])
 					d(debugstr)
+					eso_vendormanager.SaveProfile()
 				end
 			end
 		end
