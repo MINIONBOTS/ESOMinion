@@ -42,7 +42,7 @@ end
 function eso_gathermanager.NearestGatherable()
 	
 	local gatherables = {}
-	local gatherlist = EntityList("onmesh,gatherable")
+	local gatherlist = EntityList("onmesh,gatherable,noplayersaround=5")
 	
 	if ValidTable(gatherlist) then
 		local id,node = next(gatherlist)
