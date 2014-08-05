@@ -348,10 +348,8 @@ end
 
 function eso_autoequip.AutoEquip()
 
-	local InventoryList = {}
-	local args = { e("GetBagInfo(1)")}    
-	local numArgs = #args
-	local InventoryMax = args[2]
+	local InventoryList = {}	
+	local InventoryMax = ml_global_information.Player_InventorySlots
 	local i = 0
 	local v = 0
 		while(i < tonumber(InventoryMax)) do

@@ -14,7 +14,7 @@ function ai_mail:Mail()
 		gMailStackSize and tonumber(gMailStackSize) and
 		not e("IsUnitInCombat(player)")
 	then
-		local bag,slots = e("GetBagInfo(1)")
+		local slots = ml_global_information.Player_InventorySlots
 		local mailslot = 1
 		local mailslotmax = 6
 		local attachments = 0

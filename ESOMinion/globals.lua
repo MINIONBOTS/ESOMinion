@@ -6,7 +6,7 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	d("Registering Events..")	
 	--mycode = [[
 	--function test()
-	--	local name,slots = GetBagInfo(1)
+	--	local name,slots = e("GetBagSize()")
 		
 	--	return slots
 	--end]]
@@ -80,7 +80,7 @@ function ml_globals.UpdateGlobals()
 				
 		ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
 		ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
-		ml_global_information.Player_InventorySlots = e("GetBagInfo(1)")
+		ml_global_information.Player_InventorySlots = e("GetBagSize()")
 		ml_global_information.Player_InventoryNearlyFull = (e("CheckInventorySpaceSilently(5)") == false)
 		ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)			
 		ml_global_information.Player_Level = e("GetUnitLevel(player)")

@@ -137,7 +137,7 @@ ml_log("e_gotovendor")
 								if gVendor == "1" then
 									if e_movetovendor.slotstocheck == nil then
 										local slots = {}
-										local bag,maxslots = e("GetBagInfo(1)")
+										local maxslots = ml_global_information.Player_InventorySlots
 										for slot = 1, maxslots do
 											local itemtype = e("GetItemType(1,"..tostring(slot)..")")
 											if itemtype > 0 then
