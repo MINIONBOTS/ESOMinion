@@ -238,7 +238,7 @@ function IsPlayerVendoring()
 end
 
 function NeedToVendor()
-	return not e("CheckInventorySpaceSilently(40)")
+	return not e("CheckInventorySpaceSilently(5)")
 end
 
 function NeedToRepair()
