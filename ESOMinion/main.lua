@@ -266,7 +266,7 @@ function ml_global_information.onupdate( event, tickcount )
 		ml_global_information.gamestatechanged = true
 		GUI_WindowVisible(ml_global_information.advwindow.Name,false)
 		GUI_WindowVisible(ml_global_information.MainWindow.Name,false)
-		GUI_WindowVisible(mm.mainwindow.name,false)
+		GUI_WindowVisible(ml_mesh_mgr.mainwindow.name,false)
 		GUI_WindowVisible("Dev",false)
 		GUI_ToggleConsole(false)
 		GUI_WindowVisible(ml_global_information.login.Name,false)
