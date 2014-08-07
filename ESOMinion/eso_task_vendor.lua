@@ -166,7 +166,7 @@ function e_VendorAndRepair:execute()
 	
 	if not ml_task_hub:CurrentTask().inventory then
 		ml_task_hub:CurrentTask().inventory = {}
-		local bagIcon,bagSlots = e("GetBagInfo(1)")
+		local bagSlots = e("GetBagSize(1)")
 		for bagSlot = 0, bagSlots, 1 do
 			local name 	 	 			= e("GetItemName(1,"..tostring(bagSlot)..")")
 			local itemType				= e("GetItemType(1,"..tostring(bagSlot)..")")
