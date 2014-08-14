@@ -31,11 +31,13 @@ end
 
 c_Loot = inheritsFrom( ml_cause )
 e_Loot = inheritsFrom( ml_effect )
+
 function c_Loot:evaluate()
 	local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
     return not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull and
-		TableSize(EntityList("nearest,lootable,onmesh,maxdistance=50,exclude="..blackliststring)) > 0
+		TableSize(EntityList("shortestpath,lootable,onmesh,maxdistance=50,exclude="..blackliststring)) > 0
 end
+
 function e_Loot:execute()
 	ml_log("e_Loot")
 	local CharList = EntityList("lootable,shortestpath,onmesh")
