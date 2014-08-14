@@ -1,3 +1,6 @@
+--:===============================================================================================================
+--: gathermode
+--:===============================================================================================================  
 
 ai_gathermode = inheritsFrom(ml_task)
 ai_gathermode.name = "GatherMode"
@@ -14,8 +17,6 @@ function ai_gathermode.Create()
 	
     return newinst
 end
-
-
 
 function ai_gathermode:Init()
 
@@ -52,19 +53,23 @@ end
 function ai_gathermode:task_complete_eval()	
 	return false
 end
+
 function ai_gathermode:task_complete_execute()
     
 end
+
 if ( ml_global_information.BotModes ) then
 	ml_global_information.BotModes[GetString("gatherMode")] = ai_gathermode
 end
 
+--:===============================================================================================================
+--: gathertask
+--:===============================================================================================================  
 
--- Gather Task
 ai_gatherTask = inheritsFrom(ml_task)
 ai_gatherTask.name = "Gathering"
+
 function ai_gatherTask.Create()
-    --ml_log("combatAttack:Create")
 	local newinst = inheritsFrom(ai_gatherTask)
     
     --ml_task members
@@ -74,13 +79,13 @@ function ai_gatherTask.Create()
     newinst.process_elements = {}
     newinst.overwatch_elements = {} 
 	newinst.tPos = {}
+	newinst.gatherable = nil
+	
     return newinst
 end
+
 function ai_gatherTask:Init()
-		
-	-- Aggro
-	-- Cant add aggro since gather task is also in reactive queue like aggro
-		
+
 	-- LootAll
 	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)		
 	
@@ -92,6 +97,7 @@ function ai_gatherTask:Init()
 		
     self:AddTaskCheckCEs()
 end
+
 function ai_gatherTask:task_complete_eval()	
 	if ( c_dead:evaluate() or c_Aggro:evaluate() or ml_global_information.Player_InventoryFull) then 
 		Player:Stop()
@@ -99,6 +105,7 @@ function ai_gatherTask:task_complete_eval()
 	end
 	return false
 end
+
 function ai_gatherTask:task_complete_execute()
    self.completed = true
 end
@@ -108,6 +115,7 @@ c_gatherTask = inheritsFrom( ml_cause )
 e_gatherTask = inheritsFrom( ml_effect )
 c_gatherTask.throttle = 2500
 c_gatherTask.target = nil
+
 function c_gatherTask:evaluate()
 	if ( gGather == "1" and not ml_global_information.Player_InventoryFull) then
 		-- If gatherMarkers are added, you need to add logic to not try to reach a gatherable outside of the marker radius!!!
@@ -118,10 +126,10 @@ function c_gatherTask:evaluate()
 				return true
 			end
 		else
-			if ( not ml_global_information.Player_InCombat and TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
+			if (not ml_global_information.Player_InCombat and TableSize(EntityList("shortestpath,alive,attackable,targetable,maxpathdistance=45,onmesh")) == 0) then
 				local gatherable = eso_gathermanager.NearestGatherable()
 				if ValidTable(gatherable) then
-					if gatherable.distance < 20 then
+					if (gatherable.pathdistance < 20) then
 						c_gatherTask.target = gatherable
 						return true
 					end
@@ -132,6 +140,7 @@ function c_gatherTask:evaluate()
 	c_gatherTask.target = nil
 	return false
 end
+
 function e_gatherTask:execute()
 	ml_log("e_gatherTask ")
 	Player:Stop()
@@ -150,12 +159,14 @@ end
 ---
 c_Gathering = inheritsFrom( ml_cause )
 e_Gathering = inheritsFrom( ml_effect )
+
 function c_Gathering:evaluate()
 		
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) == 0 ) then
 	
 		local gatherable = eso_gathermanager.NearestGatherable()
 		if ValidTable(gatherable) then
+			ml_task_hub:CurrentTask().gatherable = gatherable
 			ml_task_hub:CurrentTask().tPos = gatherable.pos
 		end
 
@@ -172,13 +183,25 @@ e_Gathering.tmr = 0
 e_Gathering.threshold = 500
 ml_global_information.Player_Sprinting = false
 ml_global_information.Player_SprintingRecharging = false 
+
 function e_Gathering:execute()
 	ml_log("e_Gathering ")
 	if ( TableSize(ml_task_hub:CurrentTask().tPos) > 0 ) then
 		local pPos = Player.pos
 		local tPos = ml_task_hub:CurrentTask().tPos
-		local dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
 		
+		-- try to get path distance instead of distance, else fall back to distance
+		local dist;
+		dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
+
+		if (ml_task_hub:CurrentTask().gatherable) then
+			local gatherable = EntityList:Get(ml_task_hub:CurrentTask().gatherable)
+			if (gatherable) then
+				local dist = gatherable.pathdistance
+			end
+		end
+		
+		-- mount
 		if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
 			ai_mount:Mount()
 		elseif gUseMount == "1" and dist <= 5 then
@@ -222,28 +245,25 @@ function e_Gathering:execute()
 				return true
 			end
 		else
-			-- Grab that thing			
-			--local GList = EntityList("onmesh,nearest,gatherable,maxdistance=5")
-
 			local gatherable = eso_gathermanager.NearestGatherable()
 			if ValidTable(gatherable) then
+				ml_task_hub:CurrentTask().gatherable = gatherable
 				ml_task_hub:CurrentTask().tPos = gatherable.pos
 			end
 			
 			if ValidTable(gatherable) then
-
-				-- another check if we may picked up a different gatherable/old one is gone meanwhile
-				local tPos = gatherable.pos
-				local dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
 			
-				if (dist > 2) then
+				-- another check if we may picked up a different gatherable/old one is gone meanwhile
+				if (gatherable.pathdistance > 2) then
 					-- set new gatherable position
 					d("Different gatherable found, setting new position..")
-					ml_task_hub:CurrentTask().tPos = tPos
+					ml_task_hub:CurrentTask().tPos = gatherable.pos
+					ml_task_hub:CurrentTask().gatherable = gatherable
 					ml_task_hub:CurrentTask().timestarted = nil
 					return ml_log(true)
 				end
 				
+				--arrived at node
 				if not ml_task_hub:CurrentTask().timestarted then
 					ml_task_hub:CurrentTask().timestarted = ml_global_information.Now
 				end
@@ -266,9 +286,14 @@ function e_Gathering:execute()
 					timeexpired = true
 				end
 				
-				if playerfound or timeexpired then
+				-- abandon this node if at node for > 10 seconds, or 
+				-- if playerfound and > 5 seconds (possibly holding node open)
+				if timeexpired or (playerfound and timediff > 5000 and e("IsPlayerInteractingWithObject()")) then
 					d("Blacklisting Gatherable " .. gatherable.id)
+					d("playerfound " .. tostring(playerfound))
+					d("timeexpired " .. tostring(timeexpired))
 					EntityList:AddToBlacklist(gatherable.id, 300000)
+					ml_task_hub:CurrentTask().gatherable = nil
 					ml_task_hub:CurrentTask().timestarted = nil
 					ml_task_hub:CurrentTask().completed = true
 					return ml_log(false)
@@ -284,12 +309,14 @@ function e_Gathering:execute()
 			else
 				d("No gatherable nearby anymore, finishing gather task")
 				ml_task_hub:CurrentTask().tPos = {}
+				ml_task_hub:CurrentTask().gatherable = nil
 				return ml_log(true)
 			end
 		end
 	end
 	ml_error("Bug in e_Gathering() , no case that handled our situation")
 	ml_task_hub:CurrentTask().tPos = {}
+	ml_task_hub:CurrentTask().gatherable = nil
 	return ml_log(false)
 end
 
