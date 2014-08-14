@@ -85,7 +85,7 @@ function c_gringgatherTask:evaluate()
 		if ( TableSize(EntityList("shortestpath,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
 
 			local gatherable = eso_gathermanager.NearestGatherable()
-			if (ValidTable(gatherable) and gatherable.distance < 20)then
+			if (ValidTable(gatherable) and gatherable.pathdistance < 20)then
 				c_gringgatherTask.target = gatherable
 				return true
 			end
@@ -147,7 +147,7 @@ function e_FightToGrindMarker:execute()
 		local newTask = ai_combatAttack.Create()
 		newTask.targetID = c_FightToGrindMarker.target.id		
 		newTask.targetPos = c_FightToGrindMarker.target.pos
-		d("Attacking new target : "..c_FightToGrindMarker.target.name.." ID: "..c_FightToGrindMarker.target.id.." Dist: "..c_FightToGrindMarker.target.distance)
+		d("Attacking new target : "..c_FightToGrindMarker.target.name.." ID: "..c_FightToGrindMarker.target.id.." Dist: "..c_FightToGrindMarker.target.pathdistance)
 		ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
 		c_FightToGrindMarker.target = nil
 	else
