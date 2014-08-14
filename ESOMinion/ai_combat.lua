@@ -258,9 +258,9 @@ function e_GotoAndKill:execute()
 		local tpos = target.pos
 		ml_task_hub:CurrentTask().targetPos = tpos
 		
-		if ( target.distance > ml_global_information.AttackRange or not target.los ) then		
+		if ( target.pathdistance > ml_global_information.AttackRange or not target.los ) then		
 			local rndPath = false
-      if (target.distance>20) then rndPath = true else rndPath = false end					
+      if (target.pathdistance>20) then rndPath = true else rndPath = false end					
 			-- Player:MoveTo(x,y,z,stoppingdistance,navsystem(normal/follow),navpath(straight/random),smoothturns)
 			local navResult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,0.5+(target.radius),false,rndPath,false))
 			if (tonumber(navResult) < 0) then
@@ -385,7 +385,7 @@ function e_GetNextTarget:execute()
 	if ( TableSize( TList ) > 0 ) then
 		local id, E  = next( TList )
 		if ( id ~= nil and id ~= 0 and E ~= nil ) then
-			d("Next Target: "..(E.name).." ID:"..tostring(E.id) .." Distance: "..tostring(E.distance))
+			d("Next Target: "..(E.name).." ID:"..tostring(E.id) .." Distance: "..tostring(E.pathdistance))
 			
 			--[[ Blacklist if we cant select it..happens sometimes when it is outside our select range
 			if (e_SearchTarget.lastID == id ) then
