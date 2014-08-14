@@ -253,7 +253,7 @@ function NeedToRepair()
 end
 
 function GetVendor()
-	local vendorlist = EntityList("nearest,isvendor,onmesh,maxdistance=85")
+	local vendorlist = EntityList("shortestpath,isvendor,onmesh,maxdistance=85")
 	if ValidTable(vendorlist) then
 		local id,vendor = next(vendorlist)
 		if ( id and vendor ) then
