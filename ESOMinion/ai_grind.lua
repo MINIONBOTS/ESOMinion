@@ -82,7 +82,7 @@ function c_gringgatherTask:evaluate()
 		
 		-- If we are doing the Markerdance, then gather just in a smaller radius while we move to the markers, else a bigger radius, never gather outside markerradius
 		
-		if ( TableSize(EntityList("nearest,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
+		if ( TableSize(EntityList("shortestpath,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
 
 			local gatherable = eso_gathermanager.NearestGatherable()
 			if (ValidTable(gatherable) and gatherable.distance < 20)then
