@@ -46,7 +46,7 @@ function e_Loot:execute()
 		if ( id and entity ) then
 			local tPos = entity.pos
 			
-			if ( entity.distance > 2) then
+			if ( entity.pathdistance > 2) then
 				-- MoveIntoInteractRange				
 				if ( tPos ) then					
 					local navResult = tostring(Player:MoveTo(tPos.x,tPos.y,tPos.z,1.5,false,false,false))		
