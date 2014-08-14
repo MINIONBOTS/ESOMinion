@@ -87,11 +87,11 @@ e_MoveToVendor = inheritsFrom( ml_effect )
 function c_MoveToVendor:evaluate()
 	if (gVendor == "1" and NeedToVendor()) or (gRepair == "1" and NeedToRepair()) then
 		if ml_task_hub:CurrentTask().vendor then
-			if ml_task_hub:CurrentTask().vendor.distance > INTERACT_RANGE.VENDOR then
+			if ml_task_hub:CurrentTask().vendor.pathdistance > INTERACT_RANGE.VENDOR then
 				return true
 			end
 		elseif ml_task_hub:CurrentTask().marker then
-			if ml_task_hub:CurrentTask().marker.distance > INTERACT_RANGE.MARKER then
+			if ml_task_hub:CurrentTask().marker.pathdistance > INTERACT_RANGE.MARKER then
 				return true
 			end
 		end
@@ -101,20 +101,20 @@ end
 
 function e_MoveToVendor:execute()
 	if ml_task_hub:CurrentTask().vendor then
-		if ml_task_hub:CurrentTask().vendor.distance >= INTERACT_RANGE.VENDOR then
+		if ml_task_hub:CurrentTask().vendor.pathdistance >= INTERACT_RANGE.VENDOR then
 			local pos = ml_task_hub:CurrentTask().vendor.pos
 			local result = tostring(Player:MoveTo(pos.x,pos.y,pos.z,INTERACT_RANGE.VENDOR-1,false,true,true))
 			if tonumber(result) >= 0 then
-				ml_log("eso_vendortask -> MoveToVendor "..ml_task_hub:CurrentTask().vendor.distance)
+				ml_log("eso_vendortask -> MoveToVendor "..ml_task_hub:CurrentTask().vendor.pathdistance)
 				return ml_log(true)
 			end
 		end
 	elseif ml_task_hub:CurrentTask().marker then
-		if ml_task_hub:CurrentTask().marker.distance > INTERACT_RANGE.MARKER then
+		if ml_task_hub:CurrentTask().marker.pathdistance > INTERACT_RANGE.MARKER then
 			local pos = ml_task_hub:CurrentTask().marker:GetPosition()
 			local result = tostring(Player:MoveTo(pos.x,pos.y,pos.z,INTERACT_RANGE.MARKER-1,false,true,true))
 			if tonumber(result) >= 0 then
-				ml_log("eso_vendortask -> MoveToVendorMarker "..ml_task_hub:CurrentTask().marker.distance)
+				ml_log("eso_vendortask -> MoveToVendorMarker "..ml_task_hub:CurrentTask().marker.pathdistance)
 				return ml_log(true)
 			end
 		end
@@ -131,7 +131,7 @@ e_VendorAndRepair = inheritsFrom( ml_effect )
 e_VendorAndRepair.throttle = math.random(1000,2000)
 
 function c_VendorAndRepair:evaluate()
-	if ml_task_hub:CurrentTask().vendor and ml_task_hub:CurrentTask().vendor.distance <= INTERACT_RANGE.VENDOR then
+	if ml_task_hub:CurrentTask().vendor and ml_task_hub:CurrentTask().vendor.pathdistance <= INTERACT_RANGE.VENDOR then
 		ml_log("eso_vendortask -> Vendoring ")
 		return true
 	end
@@ -273,10 +273,10 @@ function GetVendorMarker()
 			local mpos = marker:GetPosition()
 			local dist = Distance3D(ppos.x,ppos.y,ppos.z,mpos.x,mpos.y,mpos.z)
 			markers[name] = marker
-			markers[name].distance = dist
+			markers[name].pathdistance = dist
 			name,marker = next(markerlist,name)
 		end
-		table.sort(markers,function(a,b) return a.distance < b.distance end)
+		table.sort(markers,function(a,b) return a.pathdistance < b.pathdistance end)
 		local name,marker = next(markers)
 		if name and marker then
 			return marker
