@@ -192,13 +192,17 @@ function e_Gathering:execute()
 		
 		-- try to get path distance instead of distance, else fall back to distance
 		local dist;
-		dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
+		
 
 		if (ml_task_hub:CurrentTask().gatherable) then
 			local gatherable = EntityList:Get(ml_task_hub:CurrentTask().gatherable)
 			if (gatherable) then
 				local dist = gatherable.pathdistance
 			end
+		end
+	
+		if (dist == nil) then
+			dist = Distance3D(tPos.x, tPos.y, tPos.z, pPos.x, pPos.y, pPos.z)
 		end
 		
 		-- mount
