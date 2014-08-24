@@ -292,7 +292,7 @@ function e_Gathering:execute()
 				
 				-- abandon this node if at node for > 10 seconds, or 
 				-- if playerfound and > 5 seconds (possibly holding node open)
-				if timeexpired or (playerfound and timediff > 5000 and e("IsPlayerInteractingWithObject()")) then
+				if timeexpired then
 					d("Blacklisting Gatherable " .. gatherable.id)
 					d("playerfound " .. tostring(playerfound))
 					d("timeexpired " .. tostring(timeexpired))
