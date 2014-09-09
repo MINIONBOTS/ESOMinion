@@ -78,7 +78,7 @@ c_grindgather.throttle = 2500
 c_grindgather.node = nil
 
 function c_grindgather:evaluate()
-	if (not ml_global_information.Player_InventoryFull) then
+	if (gGather == "1" and not ml_global_information.Player_InventoryFull) then
 		local node = eso_gather_manager.ClosestNode()
 		if (ValidTable(node) and node.pathdistance < 30) then
 			c_grindgather.node = node
