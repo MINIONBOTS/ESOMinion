@@ -92,13 +92,16 @@ function c_movetorandom:evaluate()
 	if (c_movetorandom.randompoint == nil) then
 		local ppos = Player.pos
 		local rpos = NavigationManager:GetRandomPointOnCircle(ppos.x,ppos.y,ppos.z,30,5000)
-		local dist = Distance3D(ppos.x,ppos.y,ppos.z,rpos.x,rpos.y,rpos.z)
 		
-		if (rpos and dist > ml_global_information.randomdistance) then
-			c_movetorandom.randompoint = rpos
-			c_movetorandom.randompointreached = false
-			return true
-		end			
+		if ValidTable(rpos) then
+			local dist = Distance3D(ppos.x,ppos.y,ppos.z,rpos.x,rpos.y,rpos.z)
+			
+			if (rpos and dist > ml_global_information.randomdistance) then
+				c_movetorandom.randompoint = rpos
+				c_movetorandom.randompointreached = false
+				return true
+			end
+		end
 	else
 		if (c_movetorandom.randompoint and not c_movetorandom.randompointreached) then			
 			return true
@@ -112,20 +115,23 @@ function e_movetorandom:execute()
 	if (c_movetorandom.randompoint) then
 		local ppos = Player.pos
 		local rpos = c_movetorandom.randompoint
-		local dist = Distance3D(ppos.x,ppos.y,ppos.z,rpos.x,rpos.y,rpos.z)
 		
-		if  (dist < ml_global_information.randomdistance) then
-			c_movetorandom.randompointreached = true
-			c_movetorandom.randompoint = nil
-			return ml_log(true)
-		else
-			Mount()
-			Sprint()
-			ml_log("eso_common -> movetorandom, distance " .. math.floor(dist) .. " -> ")
-
-			local result = tostring(Player:MoveTo(rpos.x,rpos.y,rpos.z,ml_global_information.randomdistance-1,false,false,false))
-			if (tonumber(result) >= 0) then
+		if ValidTable(rpos) then
+			local dist = Distance3D(ppos.x,ppos.y,ppos.z,rpos.x,rpos.y,rpos.z)
+			
+			if  (dist < ml_global_information.randomdistance) then
+				c_movetorandom.randompointreached = true
+				c_movetorandom.randompoint = nil
 				return ml_log(true)
+			else
+				Mount()
+				Sprint()
+				ml_log("eso_common -> movetorandom, distance " .. math.floor(dist) .. " -> ")
+
+				local result = tostring(Player:MoveTo(rpos.x,rpos.y,rpos.z,ml_global_information.randomdistance-1,false,false,false))
+				if (tonumber(result) >= 0) then
+					return ml_log(true)
+				end
 			end
 		end
 	end
