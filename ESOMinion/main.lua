@@ -18,7 +18,10 @@ ml_global_information.WhitelistContentID = ""
 ml_global_information.MarkerTime = 0
 ml_global_information.Player_SprintingRecharging = false
 ml_global_information.Player_Sprinting = false
+ml_global_information.Player_SprintingTime = 0
 ml_global_information.VendorChar = ""
+ml_global_information.gatherdistance = 2.5
+ml_global_information.randomdistance = 10
 
 function ml_global_information.moduleinit()
 	
@@ -100,7 +103,7 @@ function ml_global_information.moduleinit()
 	--vendor, repair, vendormanager
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor","Vendor and Repair")
-	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("vendorManager"),"eso_vendormanager.OnGuiToggle","Vendor and Repair")
+	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("vendorManager"),"eso_vendor_manager.OnGuiToggle","Vendor and Repair")
 	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("potiontype"),"gPotiontype",GetString("potionssettings"),"Health,Stamina,Magicka")
@@ -115,8 +118,8 @@ function ml_global_information.moduleinit()
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("meshManager"), "ToggleMeshManager", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("markerManager"), "ToggleMarkerMgr", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("blacklistManager"), "ToggleBlacklistMgr", "Managers")	
-	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("vendorManager"), "eso_vendormanager.OnGuiToggle", "Managers")
-	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("gatherManager"), "eso_gathermanager.OnGuiToggle", "Managers")	
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("vendorManager"), "eso_vendor_manager.OnGuiToggle", "Managers")
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("gatherManager"), "eso_gather_manager.OnGuiToggle", "Managers")	
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")		
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
 	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
@@ -545,8 +548,8 @@ function ml_global_information.ResetBot()
 	c_MoveToMarker.markerreachedfirsttime = false
 	c_MoveToMarker.markerreached = false
 	c_MoveToMarker.allowedToFight = false
-	c_MoveToRandomPoint.randomPoint = nil
-	c_MoveToRandomPoint.randomPointreached = false
+	c_movetorandom.randompoint = nil
+	c_movetorandom.randompointreached = false
 end
 
 function ml_global_information.Wait( seconds ) 

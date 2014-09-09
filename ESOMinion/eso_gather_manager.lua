@@ -1,36 +1,50 @@
 --:===============================================================================================================
---: ESOMinion [Elder Scrolls Online]
---: GatherManager (7.24.2014)
+--: eso_gather_manager
 --:===============================================================================================================
 
-eso_gathermanager = {}
-eso_gathermanager.profilepath = GetStartupPath() .. [[\LuaMods\ESOMinion\GatherManagerProfiles\]]
-eso_gathermanager.window = { name = GetString("gatherManager"), coords = {270,50,250,350}, visible = false }
+eso_gather_manager = {}
+eso_gather_manager.profilepath = GetStartupPath() .. [[\LuaMods\ESOMinion\SharedProfiles\]]
+eso_gather_manager.window = { name = GetString("gatherManager"), coords = {270,50,250,550}, visible = false }
+eso_gather_manager.version = 2.1
 
 --:===============================================================================================================
 --: load profile
 --:===============================================================================================================  
 
-function eso_gathermanager:LoadProfile()
-	eso_gathermanager.profile, error = persistence.load(eso_gathermanager.profilepath .. "gather.profile")
-	if error then
-		eso_gathermanager.profile = {}
-		for typeIndex,typeName in pairs(eso_gathermanager.types) do
-			eso_gathermanager.profile[typeIndex] = true
-		end
-		eso_gathermanager.SaveProfile()
+function eso_gather_manager:LoadProfile()
+	eso_gather_manager.profile, err = persistence.load(eso_gather_manager.profilepath .. "gather.profile")
+	
+	local initializeprofile;
+	
+	if 	(eso_gather_manager.profile and not eso_gather_manager.profile.version) or
+		(
+		eso_gather_manager.profile
+		and eso_gather_manager.profile.version
+		and eso_gather_manager.profile.version ~= eso_gather_manager.version
+		)
+	then
+		initializeprofile = true
 	end
-	d("GatherManager : Profile Loaded")
+	
+	if err or initializeprofile then
+		eso_gather_manager.profile = {}
+		for typeIndex,typeName in pairs(eso_gather_manager.types) do
+			eso_gather_manager.profile[typeIndex] = true
+		end
+		eso_gather_manager.profile.version = eso_gather_manager.version
+		eso_gather_manager.SaveProfile()
+	end
+	d("GatherManager : Profile Loaded") 
 end
 
 --:===============================================================================================================
 --: save profile
 --:===============================================================================================================  
 
-function eso_gathermanager.SaveProfile()
-	local error = persistence.store(eso_gathermanager.profilepath .. "gather.profile", eso_gathermanager.profile)
-	if error then
-		d("GatherManager : " .. error)
+function eso_gather_manager.SaveProfile()
+	local err = persistence.store(eso_gather_manager.profilepath .. "gather.profile", eso_gather_manager.profile)
+	if err then
+		d("GatherManager : " .. err)
 	end
 	d("GatherManager : Profile Saved")
 end
@@ -39,15 +53,15 @@ end
 --: entity list
 --:===============================================================================================================
 
-function eso_gathermanager.NearestGatherable()
+function eso_gather_manager.ClosestNode()
 	
 	local gatherables = {}
-	local gatherlist = EntityList("onmesh,gatherable,noplayersaround=5")
+	local gatherlist = EntityList("onmesh,gatherable")
 	
 	if ValidTable(gatherlist) then
 		local id,node = next(gatherlist)
 		while (id and node) do
-			if eso_gathermanager.IsGatherable(node) then
+			if eso_gather_manager.IsGatherable(node) then
 				table.insert(gatherables,node)
 			end
 			id,node = next(gatherlist,id)
@@ -74,10 +88,10 @@ end
 --: is gatherable
 --:===============================================================================================================  
 
-function eso_gathermanager.IsGatherable(node)
-	local gathertype = eso_gathermanager.GetType(node)
+function eso_gather_manager.IsGatherable(node)
+	local gathertype = eso_gather_manager.GetType(node)
 	
-	if (gathertype and eso_gathermanager.profile[gathertype] == false) then
+	if (gathertype and eso_gather_manager.profile[gathertype] == false) then
 		return false
 	end
 	
@@ -88,11 +102,11 @@ end
 --: get type
 --:===============================================================================================================
 
-function eso_gathermanager.GetType(node)
-	for type = 1, #eso_gathermanager.types do
-		for language = 1, #eso_gathermanager.languages do
+function eso_gather_manager.GetType(node)
+	for type = 1, #eso_gather_manager.types do
+		for language = 1, #eso_gather_manager.languages do
 		
-			for index,name in pairs(eso_gathermanager.data[type][language]) do
+			for index,name in pairs(eso_gather_manager.data[type][language]) do
 				if (node.name == name) then
 					return type
 				end
@@ -107,29 +121,29 @@ end
 --: toggle gui
 --:===============================================================================================================  
 
-function eso_gathermanager.OnGuiToggle()
-	eso_gathermanager.window.visible = not eso_gathermanager.window.visible
-	GUI_WindowVisible(eso_gathermanager.window.name, eso_gathermanager.window.visible)
+function eso_gather_manager.OnGuiToggle()
+	eso_gather_manager.window.visible = not eso_gather_manager.window.visible
+	GUI_WindowVisible(eso_gather_manager.window.name, eso_gather_manager.window.visible)
 end
 
 --:===============================================================================================================
 --: vars update
 --:===============================================================================================================  
 
-function eso_gathermanager.OnGuiVarUpdate(event,data,...)
+function eso_gather_manager.OnGuiVarUpdate(event,data,...)
 	for key,value in pairs(data) do
 	
 		if key:find("GatherManager") then
 			local handler = assert(loadstring("return " .. key))()
 			
 			if type(handler) == "table" then
-				if eso_gathermanager.profile then
-					eso_gathermanager.profile[handler.gathertype] = (value == "1")
-					eso_gathermanager.SaveProfile()
+				if eso_gather_manager.profile then
+					eso_gather_manager.profile[handler.gathertype] = (value == "1")
+					eso_gather_manager.SaveProfile()
 					
-					local gathertype = eso_gathermanager.types[handler.gathertype]
+					local gathertype = eso_gather_manager.types[handler.gathertype]
 					local debugstr = "GatherManager : " .. gathertype .. " -> " ..
-					tostring(eso_gathermanager.profile[handler.gathertype])
+					tostring(eso_gather_manager.profile[handler.gathertype])
 					--d(debugstr)
 				end
 			end
@@ -141,23 +155,23 @@ end
 --: gui: toggle
 --:===============================================================================================================  
 
-function eso_gathermanager.OnGuiToggle()
-	eso_gathermanager.window.visible = not eso_gathermanager.window.visible
-	GUI_WindowVisible(eso_gathermanager.window.name, eso_gathermanager.window.visible)
+function eso_gather_manager.OnGuiToggle()
+	eso_gather_manager.window.visible = not eso_gather_manager.window.visible
+	GUI_WindowVisible(eso_gather_manager.window.name, eso_gather_manager.window.visible)
 end
 
 --:===============================================================================================================
 --: initialize
 --:===============================================================================================================  
 
-function eso_gathermanager.Initialize() 
-	eso_gathermanager:LoadProfile()
-	GUI_NewWindow(eso_gathermanager.window.name, unpack(eso_gathermanager.window.coords))
-	for index,gathertype in ipairs(eso_gathermanager.types) do
+function eso_gather_manager.Initialize() 
+	eso_gather_manager:LoadProfile()
+	GUI_NewWindow(eso_gather_manager.window.name, unpack(eso_gather_manager.window.coords))
+	for index,gathertype in ipairs(eso_gather_manager.types) do
 		local handler = "{ module = GatherManager, gathertype = " .. tostring(index) .. " } "
-		GUI_NewCheckbox(eso_gathermanager.window.name, " " .. gathertype, handler, GetString("generalSettings"))
-		if eso_gathermanager.profile[index] then
-			if (eso_gathermanager.profile[index] == false) then
+		GUI_NewCheckbox(eso_gather_manager.window.name, " " .. gathertype, handler, GetString("generalSettings"))
+		if eso_gather_manager.profile[index] then
+			if (eso_gather_manager.profile[index] == false) then
 				_G[handler] = "0"
 			else
 				_G[handler] = "1"
@@ -165,40 +179,58 @@ function eso_gathermanager.Initialize()
 		end
 
 	end
-	GUI_UnFoldGroup(eso_gathermanager.window.name, GetString("generalSettings"))
-	GUI_WindowVisible(eso_gathermanager.window.name, eso_gathermanager.window.visible)
+	GUI_UnFoldGroup(eso_gather_manager.window.name, GetString("generalSettings"))
+	GUI_WindowVisible(eso_gather_manager.window.name, eso_gather_manager.window.visible)
 end
 
 --:===============================================================================================================
 --: register event handlers
 --:===============================================================================================================  
 
-RegisterEventHandler("eso_gathermanager.OnGuiToggle", eso_gathermanager.OnGuiToggle)
-RegisterEventHandler("GUI.Update", eso_gathermanager.OnGuiVarUpdate)
-RegisterEventHandler("Module.Initalize", eso_gathermanager.Initialize)
+RegisterEventHandler("eso_gather_manager.OnGuiToggle", eso_gather_manager.OnGuiToggle)
+RegisterEventHandler("GUI.Update", eso_gather_manager.OnGuiVarUpdate)
+RegisterEventHandler("Module.Initalize", eso_gather_manager.Initialize)
 
 --:===============================================================================================================
 --: data
 --:===============================================================================================================
 
-eso_gathermanager.types = {
+eso_gather_manager.types = {
 	[1] = "Blacksmithing",
 	[2] = "Clothing",
 	[3] = "Woodworking",
-	[4] = "Reagents",
-	[5] = "Solvents",
+	[4] = "Pure Water",
+	[5] = "Water Skin",
 	[6] = "AspectRune",
 	[7] = "EssenceRune",
 	[8] = "PotencyRune",
+	[9] = "Blessed Thistle",
+	[10] = "Entoloma",
+	[11] = "Bugloss",
+	[12] = "Columbine",
+	[13] = "Corn Flower",
+	[14] = "Dragonthorn",
+	[15] = "Emetic Russula",
+	[16] = "Imp Stool",
+	[17] = "Lady\'s Smock",
+	[18] = "Luminous Russula",
+	[19] = "Mountain Flower",
+	[20] = "Namira\'s Rot",
+	[21] = "Nirnroot",
+	[22] = "Stinkhorn",
+	[23] = "Violet Copninus",
+	[24] = "Water Hyacinth",
+	[25] = "White Cap",
+	[26] = "Wormwood",
 }
 
-eso_gathermanager.languages = {
+eso_gather_manager.languages = {
 	[1] = "en",
 	[2] = "de",
 	[3] = "fr",
 }
 
-eso_gathermanager.data = {
+eso_gather_manager.data = {
 	[1] = {
 		[1] = {
 			"Iron Ore",
@@ -228,9 +260,9 @@ eso_gathermanager.data = {
 			"Minerai de Fer",
 			"Minerai de Fer Noble",
 			"Orichalc Ore",
-			"Minerai D'orichalque",
+			"Minerai D\'orichalque",
 			"Minerai Dwemer",
-			"Minerai d'Ebonite",
+			"Minerai d\'Ebonite",
 			"Minerai de Calcinium",
 			"Minerai de Galatite",
 			"Quicksilver Ore",
@@ -266,13 +298,13 @@ eso_gathermanager.data = {
 		},
 		[3] = {
 			"Coton",
-			"Fil d'Ebonite",
+			"Fil d\'Ebonite",
 			"Lin",
 			"Herbe de fer",
 			"Jute",
 			"Kreshweed",
 			"Silverweed",
-			"Toile D'araignée",
+			"Toile D\'araignée",
 			"Tissu de Vide",
 			"Silver Weed",
 			"Kresh Weed",
@@ -315,78 +347,25 @@ eso_gathermanager.data = {
 	},
 	[4] = {
 		[1] = {
-			"Blessed Thistle",
-			"Entoloma",
-			"Bugloss",
-			"Columbine",
-			"Corn Flower",
-			"Dragonthorn",
-			"Emetic Russula",
-			"Imp Stool",
-			"Lady's Smock",
-			"Luminous Russula",
-			"Mountain Flower",
-			"Namira's Rot",
-			"Nirnroot",
-			"Stinkhorn",
-			"Violet Copninus",
-			"Water Hyacinth",
-			"White Cap",
-			"Wormwood",
+			"Pure Water",
 		},
 		[2] = {
-			"Benediktenkraut",
-			"Glöckling",
-			"Wolfsauge",
-			"Akelei",
-			"Kornblume",
-			"Drachendorn",
-			"Brechtäubling",
-			"Koboldschemel",
-			"Wiesenschaumkraut",
-			"Leuchttäubling",
-			"Bergblume",
-			"Namiras Fäulnis",
-			"Nirnwurz",
-			"Stinkmorchel",
-			"Violetter Tintling",
-			"Wasserhyazinthe",
-			"Weißkappe",
-			"Wermut",
+			"Reines Wasser",
 		},
 		[3] = {
-			"Chardon Béni",
-			"Entoloma",
-			"Noctuelle",
-			"Ancolie",
-			"Bleuet",
-			"Épine-de-Dragon",
-			"Russule Emetique",
-			"Pied-de-Lutin",
-			"Cardamine des Prés",
-			"Russule Phosphorescente",
-			"Lys des Cimes",
-			"Truffe de Namira",
-			"Nirnrave",
-			"Mutinus Elégans",
-			"Coprin Violet",
-			"Jacinthe D'eau",
-			"Chapeau Blanc",
-			"Absinthe",
+			"Eau Pure",
+
 		},
 	},
 	[5] = {
 		[1] = {
-			"Pure Water",
 			"Water Skin",
 		},
-		[2] = {
-			"Reines Wasser",
+		[2] = {	
 			"Wasserhaut",
 		},
-		[3] = {
-			"Eau Pure",
-			"Outre d'Eau",
+		[3] = {	
+			"Outre d\'Eau",
 		},
 	},
 	[6] = {
@@ -397,7 +376,7 @@ eso_gathermanager.data = {
 			"Aspektrune",
 		},
 		[3] = {
-			"Rune d'Aspect",
+			"Rune d\'Aspect",
 		},
 	},
 	[7] = {
@@ -408,7 +387,7 @@ eso_gathermanager.data = {
 			"Essenzrune",
 		},
 		[3] = {
-			"Rune D'essence",
+			"Rune D\'essence",
 		},
 	},
 	[8] = {
@@ -420,6 +399,204 @@ eso_gathermanager.data = {
 		},
 		[3] = {
 			"Rune de Puissance",
+		},
+	},
+	[9] = {
+		[1] = {
+			"Blessed Thistle",
+		},
+		[2] = {
+			"Benediktenkraut",
+		},
+		[3] = {
+			"Chardon Béni",
+		},
+	},
+	[10] = {
+		[1] = {
+			"Entoloma",
+		},
+		[2] = {
+			"Glöckling",
+		},
+		[3] = {
+			"Entoloma",
+		},
+	},
+	[11] = {
+		[1] = {
+			"Bugloss",
+		},
+		[2] = {
+			"Wolfsauge",
+		},
+		[3] = {
+			"Noctuelle",
+		},
+	},
+	[12] = {
+		[1] = {
+			"Columbine",
+		},
+		[2] = {
+			"Akelei",
+		},
+		[3] = {
+			"Ancolie",
+		},
+	},
+	[13] = {
+		[1] = {
+			"Corn Flower",
+		},
+		[2] = {
+			"Kornblume",
+		},
+		[3] = {
+			"Bleuet",
+		},
+	},
+	[14] = {
+		[1] = {
+			"Dragonthorn",
+		},
+		[2] = {
+			"Drachendorn",
+		},
+		[3] = {
+			"Épine-de-Dragon",
+		},
+	},
+	[15] = {
+		[1] = {
+			"Emetic Russula",
+		},
+		[2] = {
+			"Brechtäubling",
+		},
+		[3] = {
+			"Russule Emetique",
+		},
+	},
+	[16] = {
+		[1] = {
+			"Imp Stool",
+		},
+		[2] = {
+			"Koboldschemel",
+		},
+		[3] = {
+			"Pied-de-Lutin",
+		},
+	},
+	[17] = {
+		[1] = {
+			"Lady\'s Smock",
+		},
+		[2] = {
+			"Wiesenschaumkraut",
+		},
+		[3] = {
+			"Cardamine des Prés",
+		},
+	},
+	[18] = {
+		[1] = {
+			"Luminous Russula",
+		},
+		[2] = {
+			"Leuchttäubling",
+		},
+		[3] = {
+			"Russule Phosphorescente",
+		},
+	},
+	[19] = {
+		[1] = {
+			"Mountain Flower",
+		},
+		[2] = {
+			"Bergblume",
+		},
+		[3] = {
+			"Lys des Cimes",
+		},
+	},
+	[20] = {
+		[1] = {
+			"Namira\'s Rot",
+		},
+		[2] = {
+			"Namiras Fäulnis",
+		},
+		[3] = {
+			"Truffe de Namira",
+		},
+	},
+	[21] = {
+		[1] = {
+			"Nirnroot",
+		},
+		[2] = {
+			"Nirnwurz",
+		},
+		[3] = {
+			"Nirnrave",
+		},
+	},
+	[22] = {
+		[1] = {
+			"Stinkhorn",
+		},
+		[2] = {
+			"Stinkmorchel",
+		},
+		[3] = {
+			"Mutinus Elégans",
+		},
+	},
+	[23] = {
+		[1] = {
+			"Violet Copninus",
+		},
+		[2] = {
+			"Violetter Tintling",
+		},
+		[3] = {
+			"Coprin Violet",
+		},
+	},
+	[24] = {
+		[1] = {
+			"Water Hyacinth",
+		},
+		[2] = {
+			"Wasserhyazinthe",
+		},
+		[3] = {
+			"Jacinthe D\'eau",
+		},
+	},
+	[25] = {
+		[1] = {
+			"White Cap",
+		},
+		[2] = {
+			"Weißkappe",
+		},
+		[3] = {
+			"Chapeau Blanc",
+		},
+	},
+	[26] = {
+		[1] = {
+			"Wormwood",
+		},
+		[2] = {
+			"Wermut",
+		},
+		[3] = {
+			"Absinthe",
 		},
 	},
 }

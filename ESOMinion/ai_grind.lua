@@ -47,7 +47,7 @@ function ai_grind:Init()
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 				
 	-- Gathering - Gathers only in a smaller radius in grindingmode 
-	self:add(ml_element:create( "Gathering", c_gringgatherTask, e_gringgatherTask, 150 ), self.process_elements)
+	self:add(ml_element:create( "Gathering", c_grindgather, e_grindgather, 150 ), self.process_elements)
 	
 	-- Fight in a smaller radius towards the current marker ( this takes care of reaching it and also when running outside the markerradius and we need to move back to marker)
 	-- Only for GrindMarkers!	
@@ -60,7 +60,7 @@ function ai_grind:Init()
 	self:add(ml_element:create( "GetNextTarget", c_CombatTask, e_CombatTask, 50 ), self.process_elements)
 	
 	-- Move to a Randompoint if there is nothing to fight around us
-	self:add( ml_element:create( "MoveToRandomPoint", c_MoveToRandomPoint, e_MoveToRandomPoint, 25 ), self.process_elements)	
+	self:add( ml_element:create( "movetorandom", c_movetorandom, e_movetorandom, 25 ), self.process_elements)	
 			
     self:AddTaskCheckCEs()
 end
@@ -72,41 +72,36 @@ function ai_grind:task_complete_execute()
     
 end
 
-------------
-c_gringgatherTask = inheritsFrom( ml_cause )
-e_gringgatherTask = inheritsFrom( ml_effect )
-c_gringgatherTask.throttle = 2500
-c_gringgatherTask.target = nil
-function c_gringgatherTask:evaluate()
-	if ( gGather == "1" and not ml_global_information.Player_InventoryFull and not ml_global_information.Player_InCombat) then
-		
-		-- If we are doing the Markerdance, then gather just in a smaller radius while we move to the markers, else a bigger radius, never gather outside markerradius
-		
-		if ( TableSize(EntityList("shortestpath,alive,attackable,targetable,maxdistance=45,onmesh")) == 0 ) then
+c_grindgather = inheritsFrom( ml_cause )
+e_grindgather = inheritsFrom( ml_effect )
+c_grindgather.throttle = 2500
+c_grindgather.node = nil
 
-			local gatherable = eso_gathermanager.NearestGatherable()
-			if (ValidTable(gatherable) and gatherable.pathdistance < 20)then
-				c_gringgatherTask.target = gatherable
-				return true
-			end
-
-		end		
+function c_grindgather:evaluate()
+	if (not ml_global_information.Player_InventoryFull) then
+		local node = eso_gather_manager.ClosestNode()
+		if (ValidTable(node) and node.pathdistance < 30) then
+			c_grindgather.node = node
+			return true
+		end
 	end
-	c_gringgatherTask.target = nil
+	
+	c_grindgather.node = nil
 	return false
 end
 
-function e_gringgatherTask:execute()
-	ml_log("e_gringgatherTask ")
-	Player:Stop()
-	local newTask = ai_gatherTask.Create()
+function e_grindgather:execute()
+	ml_log("e_grindgather ")
 	
-	if ( c_gringgatherTask.target ~= nil ) then		
-		newTask.tPos = c_gringgatherTask.target.pos		
-	else
-		ml_error("Bug: GList in e_gringgatherTask is empty!?")
+	Player:Stop()
+	local task = eso_gathertask.Create()
+	
+	if ( c_grindgather.node ~= nil ) then
+		d("eso_grindgather -> added new grindgathertask for " .. c_grindgather.node.name .. ", distance " .. math.floor(c_grindgather.node.pathdistance))
+		task.node = c_grindgather.node
 	end
-	ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
+	
+	ml_task_hub:Add(task.Create(), REACTIVE_GOAL, TP_ASAP)
 	return ml_log(true)
 end
 
@@ -147,7 +142,7 @@ function e_FightToGrindMarker:execute()
 		local newTask = ai_combatAttack.Create()
 		newTask.targetID = c_FightToGrindMarker.target.id		
 		newTask.targetPos = c_FightToGrindMarker.target.pos
-		d("Attacking new target : "..c_FightToGrindMarker.target.name.." ID: "..c_FightToGrindMarker.target.id.." Dist: "..c_FightToGrindMarker.target.pathdistance)
+		d("Attacking new target : "..c_FightToGrindMarker.target.name.." ID: "..c_FightToGrindMarker.target.id.." Dist: "..c_FightToGrindMarker.target.distance)
 		ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
 		c_FightToGrindMarker.target = nil
 	else
@@ -228,12 +223,6 @@ function e_MoveToMarker:execute()
 		
 		local pos = ml_task_hub:CurrentTask().currentMarker:GetPosition()
 		local dist = Distance2D(ml_global_information.Player_Position.x, ml_global_information.Player_Position.z, pos.x, pos.z)
-
-		if gUseMount == "1" and tonumber(gUseMountRange) <= dist then
-			ai_mount:Mount()
-		elseif gUseMount == "1" and tonumber(gUseMountRange) > dist then
-			ai_mount:Dismount()
-		end
 		
 		-- Allow fighting when we are far away from the "outside radius of the marker" , else the bot goes back n forth spinning trying to reach the target outside n going back inside right after
 		if ( dist < 300) then

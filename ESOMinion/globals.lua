@@ -19,16 +19,18 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterForEvent("EVENT_LOOT_ITEM_FAILED", true)
 	RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
 	
-	
 	-- Register a handler on our side:
 	RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE",LuaEventHandler)
 	--RegisterEventHandler("GAME_EVENT_CHARACTER_LIST_RECEIVED",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_INVENTORY_IS_FULL",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_LOOT_ITEM_FAILED",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP",LuaEventHandler)
-	
+
+
 	d("Done registering Event..")
 end
+
+
 
 -- Callback function for Events from ESO
 function LuaEventHandler(...)
@@ -50,7 +52,7 @@ function LuaEventHandler(...)
 		d("LOOT FAILED: Reason "..tostring(args[3]).." ItemName "..args[4])
 		-- Blacklisting the closest entity which we were trying to loot
 		local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
-		local EList = EntityList("shortestpath,lootable,onmesh,maxdistance=3,exclude="..blackliststring)
+		local EList = EntityList("nearest,lootable,onmesh,maxdistance=3,exclude="..blackliststring)
 		
 		if ( not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull ) then
 			
@@ -154,5 +156,17 @@ end
 
 -- Init all variables before the rest of the bot loads
 ml_globals.UpdateGlobals()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
