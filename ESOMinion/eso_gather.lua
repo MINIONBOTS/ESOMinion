@@ -128,7 +128,7 @@ function eso_gathertask:task_complete_eval()
 	end
 	
 	if (ml_task_hub:CurrentTask().nodetime) then
-		if ((ml_global_information.Now - ml_task_hub:CurrentTask().nodetime) > 10000) then
+		if ((ml_global_information.Now - ml_task_hub:CurrentTask().nodetime) > 7500) then
 			d("eso_gather -> ending gather task, time expired")
 			d("eso_gather -> blacklisting " .. ml_task_hub:CurrentTask().node.name)
 			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 300000)	
@@ -136,6 +136,31 @@ function eso_gathertask:task_complete_eval()
 		end
 	end
 	
+	if (ml_task_hub:CurrentTask().node and ml_task_hub:CurrentTask().nodetime == nil) then
+		local node = EntityList:Get(ml_task_hub:CurrentTask().node.id)
+		if (node) then
+			if (node.pathdistance < 15) then
+				local players = EntityList("player,alive,friendly,maxdistance=15")
+				if players then
+					local index,player = next(players)
+					if index and player then
+						if player.type == g("UNIT_TYPE_PLAYER") then
+							local safenode = eso_gather_manager.ClosestNode(true)
+							if (safenode) then
+								if (node.id ~= safenode.id) then
+									d("eso_gather -> ending gather task, possible player is already gathering this node")
+									d("eso_gather -> aborting " .. ml_task_hub:CurrentTask().node.name)
+									EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 300000)	
+									return true
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
 	return false
 end
 
