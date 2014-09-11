@@ -7,6 +7,7 @@
 eso_gather = inheritsFrom(ml_task)
 eso_gather.name = "Gather"
 eso_gather.last = 0
+eso_gather.lastnode = nil
 
 function eso_gather.Create()
 	local newinst = inheritsFrom(eso_gather)
@@ -97,7 +98,7 @@ end
 --:======================================================================================================================================================================
 
 function eso_gathertask:task_complete_eval()
-	
+
 	if (e("IsUnitDead(player)")) then d("eso_gather -> ending gather task, player is dead and needs to revive/release")
 		return true
 	end
@@ -113,7 +114,8 @@ function eso_gathertask:task_complete_eval()
 	if (ml_task_hub:CurrentTask().node) then
 		local node = EntityList:Get(ml_task_hub:CurrentTask().node.id)
 		if (node == nil) then
-			d("eso_gather -> ending gather task, node has been gathered")
+			d("eso_gather -> ending gather task, node not found")
+			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
 			return true
 		end
 	end
@@ -122,7 +124,7 @@ function eso_gathertask:task_complete_eval()
 	if ValidTable(node) then
 		if (ml_task_hub:CurrentTask().node and ml_task_hub:CurrentTask().node.id ~= node.id) then
 			d("eso_gather -> ending gather task, better node found")
-			d("eso_gather -> aborting " .. ml_task_hub:CurrentTask().node.name)
+			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
 			return true
 		end
 	end
@@ -130,8 +132,7 @@ function eso_gathertask:task_complete_eval()
 	if (ml_task_hub:CurrentTask().nodetime) then
 		if ((ml_global_information.Now - ml_task_hub:CurrentTask().nodetime) > 7500) then
 			d("eso_gather -> ending gather task, time expired")
-			d("eso_gather -> blacklisting " .. ml_task_hub:CurrentTask().node.name)
-			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 300000)	
+			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
 			return true
 		end
 	end
@@ -148,9 +149,8 @@ function eso_gathertask:task_complete_eval()
 							local safenode = eso_gather_manager.ClosestNode(true)
 							if (safenode) then
 								if (node.id ~= safenode.id) then
-									d("eso_gather -> ending gather task, possible player is already gathering this node")
-									d("eso_gather -> aborting " .. ml_task_hub:CurrentTask().node.name)
-									EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 300000)	
+									d("eso_gather -> ending gather task, node occupied")
+									EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
 									return true
 								end
 							end
@@ -166,7 +166,7 @@ end
 
 function eso_gathertask:task_complete_execute()
 	if (ml_global_information.Player_Sprinting) then e("OnSpecialMoveKeyUp(1)") end
-	Player:Stop()
+	--Player:Stop()
 	self.completed = true
 end
 
@@ -279,7 +279,6 @@ end
 
 function e_movetonode:execute()
 	if (ml_task_hub:CurrentTask().node and ml_task_hub:CurrentTask().node.pathdistance > ml_global_information.gatherdistance) then
-		Mount()
 		Sprint()
 		ml_log("eso_gather -> movetonode, " .. ml_task_hub:CurrentTask().node.name .. ", distance " .. math.floor(ml_task_hub:CurrentTask().node.pathdistance) .. " -> ")
 		
@@ -380,8 +379,6 @@ function e_MoveToGatherMarker:execute()
 			d("Reached current Marker...")
 			return ml_log(true)		
 		else
-			-- We need to reach our Marker yet
-			Mount()
 			Sprint()			
 			local navResult = tostring(Player:MoveTo(pos.x,pos.y,pos.z,10,false,true,false))
 			if (tonumber(navResult) < 0) then
