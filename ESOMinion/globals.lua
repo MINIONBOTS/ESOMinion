@@ -78,8 +78,7 @@ end
 function ml_globals.UpdateGlobals()
 	
 	if ( Player ~= nil and ml_global_information.lastgamestate == 2) then
-		if (eso_skillmanager) then 	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() end
-				
+						
 		ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
 		ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
 		ml_global_information.Player_InventorySlots = e("GetBagSize()")
@@ -105,7 +104,10 @@ function ml_globals.UpdateGlobals()
 			ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
 			ml_global_information.Player_Ultimate.percent = ml_global_information.Player_Ultimate.current*100/ml_global_information.Player_Ultimate.effectiveMax
 		
-			-- Update Debug fields	
+		-- needs to be here ,else some of the needed globals are not yet set
+		if (eso_skillmanager) then 	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() end
+		
+		-- Update Debug fields			
 		dAttackRange = ml_global_information.AttackRange
 		dMapName = e("GetMapName()")
 		dMapZoneIndex = e("GetCurrentMapZoneIndex()")
