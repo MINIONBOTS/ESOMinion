@@ -114,7 +114,7 @@ function eso_gathertask:task_complete_eval()
 	if (ml_task_hub:CurrentTask().node) then
 		local node = EntityList:Get(ml_task_hub:CurrentTask().node.id)
 		if (node == nil) then
-			d("eso_gather -> ending gather task, node not found")
+			d("eso_gather -> ending gather task, node not found, id: " .. ml_task_hub:CurrentTask().node.id .. "  ")
 			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
 			return true
 		end
@@ -202,7 +202,7 @@ function e_gather:execute()
 	local task = eso_gathertask.Create()
 	
 	if ( c_gather.node ~= nil ) then
-		d("eso_gather -> added new gathertask for " .. c_gather.node.name .. ", distance " .. math.floor(c_gather.node.pathdistance))
+		d("eso_gather -> added new gathertask for id: " .. c_gather.node.id .. " name: " .. c_gather.node.name .. ", distance " .. math.floor(c_gather.node.pathdistance) .. "  ")
 		task.node = c_gather.node
 	end
 	
