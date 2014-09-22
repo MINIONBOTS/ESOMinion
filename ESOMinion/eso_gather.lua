@@ -111,10 +111,18 @@ function eso_gathertask:task_complete_eval()
 		return true
 	end
 	
-	if (ml_task_hub:CurrentTask().node) then
-		local node = EntityList:Get(ml_task_hub:CurrentTask().node.id)
+	if (ml_task_hub:CurrentTask().nodeid) then
+		local node = EntityList:Get(ml_task_hub:CurrentTask().nodeid)
 		if (node == nil) then
-			d("eso_gather -> ending gather task, node not found, id: " .. ml_task_hub:CurrentTask().node.id .. "  ")
+			local dstr = (
+				"eso_gather -> end gathertask, node not found" .. ", " ..
+				"id = " .. ml_task_hub:CurrentTask().node.id .. ", " ..
+				"nodeid = " .. ml_task_hub:CurrentTask().nodeid .. ", "
+			)
+			
+			d(dstr)
+			
+			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().nodeid, 60000)	
 			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
 			return true
 		end
@@ -122,9 +130,9 @@ function eso_gathertask:task_complete_eval()
 	
 	local node = eso_gather_manager.ClosestNode()
 	if ValidTable(node) then
-		if (ml_task_hub:CurrentTask().node and ml_task_hub:CurrentTask().node.id ~= node.id) then
+		if (ml_task_hub:CurrentTask().nodeid and ml_task_hub:CurrentTask().nodeid ~= node.id) then
 			d("eso_gather -> ending gather task, better node found")
-			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
+			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().nodeid, 60000)	
 			return true
 		end
 	end
@@ -132,13 +140,13 @@ function eso_gathertask:task_complete_eval()
 	if (ml_task_hub:CurrentTask().nodetime) then
 		if ((ml_global_information.Now - ml_task_hub:CurrentTask().nodetime) > 7500) then
 			d("eso_gather -> ending gather task, time expired")
-			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
+			EntityList:AddToBlacklist(ml_task_hub:CurrentTask().nodeid, 60000)	
 			return true
 		end
 	end
 	
 	if (ml_task_hub:CurrentTask().node and ml_task_hub:CurrentTask().nodetime == nil) then
-		local node = EntityList:Get(ml_task_hub:CurrentTask().node.id)
+		local node = EntityList:Get(ml_task_hub:CurrentTask().nodeid)
 		if (node) then
 			if (node.pathdistance < 15) then
 				local players = EntityList("player,alive,friendly,maxdistance=15")
@@ -150,7 +158,7 @@ function eso_gathertask:task_complete_eval()
 							if (safenode) then
 								if (node.id ~= safenode.id) then
 									d("eso_gather -> ending gather task, node occupied")
-									EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
+									EntityList:AddToBlacklist(ml_task_hub:CurrentTask().nodeid, 60000)	
 									return true
 								end
 							end
@@ -202,8 +210,18 @@ function e_gather:execute()
 	local task = eso_gathertask.Create()
 	
 	if ( c_gather.node ~= nil ) then
-		d("eso_gather -> added new gathertask for id: " .. c_gather.node.id .. " name: " .. c_gather.node.name .. ", distance " .. math.floor(c_gather.node.pathdistance) .. "  ")
 		task.node = c_gather.node
+		task.nodeid = c_gather.node.id
+		
+		local dstr = (
+			"eso_gather -> new gathertask" .. ", " ..
+			"name = " .. task.node.name .. ", " ..
+			"id = " .. task.node.id .. ", " ..
+			"nodeid = " .. task.nodeid .. ", " ..
+			"pathdistance = " .. math.floor(c_gather.node.pathdistance) .. "  "
+		)
+		
+		d(dstr)
 	end
 	
 	ml_task_hub:Add(task.Create(), REACTIVE_GOAL, TP_ASAP)
