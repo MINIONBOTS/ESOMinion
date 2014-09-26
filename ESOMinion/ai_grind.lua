@@ -92,13 +92,24 @@ end
 
 function e_grindgather:execute()
 	ml_log("e_grindgather ")
-	
 	Player:Stop()
+	
 	local task = eso_gathertask.Create()
 	
-	if ( c_grindgather.node ~= nil ) then
-		d("eso_grindgather -> added new grindgathertask for " .. c_grindgather.node.name .. ", distance " .. math.floor(c_grindgather.node.pathdistance))
+	if (c_gather.node) then
 		task.node = c_grindgather.node
+		task.id = c_grindgather.node.id
+		task.pos = c_grindgather.node.pos
+		task.interacting = false
+		
+		local dstr = (
+			"eso_gather -> creating new grindgather task for " .. task.node.name .. ", " ..
+			"id = " .. task.id .. ", " ..
+			"distance = " .. math.floor(c_grindgather.node.distance) .. ", " ..
+			"pathdistance = " .. math.floor(c_grindgather.node.pathdistance) .. "  "
+		)
+		
+		d(dstr)
 	end
 	
 	ml_task_hub:Add(task.Create(), REACTIVE_GOAL, TP_ASAP)
