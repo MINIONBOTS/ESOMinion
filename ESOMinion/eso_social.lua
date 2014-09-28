@@ -15,7 +15,7 @@ RegisterForEvent("EVENT_AGENT_CHAT_REQUESTED", true)
 
 RegisterEventHandler("GAME_EVENT_CHAT_MESSAGE_CHANNEL",
 	function(event, eventnumber, messagetype, messagefrom, message)
-		if (messagetype == g("CHAT_CHANNEL_WHISPER")) then
+		if (gSocialEnabled == "1" and messagetype == g("CHAT_CHANNEL_WHISPER")) then
 			d("eso_social -> new whisper: [" .. e("zo_strformat(<<1>>,"..messagefrom..")") .. "] " .. message)
 			e("PlaySound(New_Notification)")
 		else
@@ -27,7 +27,7 @@ RegisterEventHandler("GAME_EVENT_CHAT_MESSAGE_CHANNEL",
 
 RegisterEventHandler("GAME_EVENT_AGENT_CHAT_REQUESTED",
 	function(event, eventnumber)
-		if (e("IsAgentChatActive()")) then
+		if (gSocialEnabled == "1" and e("IsAgentChatActive()")) then
 			d("eso_social -> new agent request: [" .. e("zo_strformat(<<1>>,"..event..")") .. "] " .. eventnumber)
 			e("PlaySound(New_Notification)")
 		end
