@@ -143,6 +143,13 @@ function eso_gathertask:task_complete_eval()
 		return true
 	end
 	
+	--timed out
+	if (ml_task_hub:CurrentTask().timedout) then
+		d("eso_gather -> ending gather task, timed out")
+		EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
+		return true
+	end
+	
 	return false
 end
 
@@ -234,6 +241,13 @@ function c_gatherupdate:evaluate()
 		ml_task_hub:CurrentTask().nodegathered = true
 	else
 		ml_task_hub:CurrentTask().nodegathered = false
+	end
+	
+	--time expired
+	if (ml_task_hub:CurrentTask().interacttime and ((ml_global_information.Now - ml_task_hub:CurrentTask().interacttime) > ml_task_hub:CurrentTask().interacttimemax)) then
+		ml_task_hub:CurrentTask().timedout = true
+	else
+		ml_task_hub:CurrentTask().timedout = false
 	end
 	
 	--check if players around
