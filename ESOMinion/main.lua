@@ -76,6 +76,10 @@ function ml_global_information.moduleinit()
 	if not Settings.ESOMinion.gRepair then 
 		Settings.ESOMinion.gRepair = "1"
 	end
+	if not Settings.ESOMinion.gPlaySoundOnWhisper then
+		Settings.ESOMinion.gPlaySoundOnWhisper = "0"
+	end
+	
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
@@ -99,7 +103,8 @@ function ml_global_information.moduleinit()
 	--GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useMount"),"gMount",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
-
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"PlaySound on Whisper","gPlaySoundOnWhisper",GetString("settings"))
+	
 	--vendor, repair, vendormanager
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor","Vendor and Repair")
@@ -119,7 +124,7 @@ function ml_global_information.moduleinit()
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("markerManager"), "ToggleMarkerMgr", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("blacklistManager"), "ToggleBlacklistMgr", "Managers")	
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("vendorManager"), "eso_vendor_manager.OnGuiToggle", "Managers")
-	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("gatherManager"), "eso_gather_manager.OnGuiToggle", "Managers")	
+	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("gatherManager"), "eso_gather_manager.OnGuiToggle", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")		
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
 	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
@@ -169,6 +174,7 @@ function ml_global_information.moduleinit()
 	gPotvalue = Settings.ESOMinion.gPotvalue 
 	gSprint = Settings.ESOMinion.gSprint
 	gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
+	gPlaySoundOnWhisper = Settings.ESOMinion.gPlaySoundOnWhisper
 	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
@@ -492,7 +498,8 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
  			k == "gSprintStopThreshold" or
 			k == "gPotvalue" or
 			k == "gAutoStart" or 
-			k == "gAutoCharacterSelect"
+			k == "gAutoCharacterSelect" or
+			k == "gPlaySoundOnWhisper"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
