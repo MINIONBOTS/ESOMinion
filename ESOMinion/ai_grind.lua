@@ -96,7 +96,7 @@ function e_grindgather:execute()
 	
 	local task = eso_gathertask.Create()
 	
-	if (c_gather.node) then
+	if (c_grindgather.node) then
 		task.node = c_grindgather.node
 		task.id = c_grindgather.node.id
 		task.pos = c_grindgather.node.pos
