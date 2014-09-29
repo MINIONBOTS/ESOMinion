@@ -98,7 +98,7 @@ end
 --:======================================================================================================================================================================
 
 function eso_gathertask:task_complete_eval()
-	if (e("IsUnitDead(player)") or e("IsUnitInCombat(player)") or e("CheckInventorySpaceSilently(1)") == false or c_Aggro:evaluate() or self.playerfound) then
+	if (e("IsUnitDead(player)") or e("CheckInventorySpaceSilently(1)") == false or c_Aggro:evaluate()) then
 		return true
 	end
 
@@ -191,7 +191,7 @@ function e_gathertask:execute()
 		local ppos = Player.pos
 		local tpos = ml_task_hub:CurrentTask().pos
 		local dist = Distance3D(ppos.x,ppos.y,ppos.z,tpos.x,tpos.y,tpos.z)
-		
+			
 		--already in gathering range
 		if (dist <= ml_global_information.gatherdistance) then
 			ml_log("e_gathertask: interacting with (" .. ml_task_hub:CurrentTask().nodename .. ") -> ")
@@ -206,32 +206,37 @@ function e_gathertask:execute()
 					return ml_log(true)
 				end
 			end
+			
+		--move into gathering range
 		elseif (dist > ml_global_information.gatherdistance) then
-			--check for players in real time
-			if (dist < 15 and ml_task_hub:CurrentTask().checkforplayers) then
-				local players = EntityList("player,alive,friendly,maxdistance=30")
-				if (players) then
-					local index,player = next(players)
-					if (index and player) then
-						if (player.type == g("UNIT_TYPE_PLAYER")) then
-							local apos = player.pos
-							local pdist = Distance3D(apos.x,apos.y,apos.z,tpos.x,tpos.y,tpos.z)
-							if (pdist <= 10) then
-								ml_task_hub:CurrentTask().playerfound = true
-								return
-							end
+
+			--playercheck
+			local playerfound = false
+			local players = EntityList("player,alive,friendly,maxdistance=15")
+			if (players) then
+				local index,player = next(players)
+				if (index and player) then
+					if (player.type == g("UNIT_TYPE_PLAYER")) then
+						local apos = player.pos
+						local pdist = Distance3D(apos.x,apos.y,apos.z,tpos.x,tpos.y,tpos.z)
+						if (pdist <= 10) then
+							playerfound = true
 						end
 					end
 				end
 			end
-			--move into gathering range
-			ml_log("e_gathertask: moving to (" .. ml_task_hub:CurrentTask().nodename .. ") distance (" .. math.floor(dist) .. ") -> ")
-			Sprint()
-			local navresult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,ml_global_information.gatherdistance-0.5,false,true,false))
-			if (tonumber(navresult) >= 0) then
-				return ml_log(true)
+			
+			if (not playerfound) then
+				ml_log("e_gathertask: moving to (" .. ml_task_hub:CurrentTask().nodename .. ") distance (" .. math.floor(dist) .. ") -> ")
+				Sprint()
+				local navresult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,ml_global_information.gatherdistance-0.5,false,true,false))
+				if (tonumber(navresult) >= 0) then
+					return ml_log(true)
+				end
+				return ml_log(false)
+			else
+				d("playerfound")
 			end
-			return ml_log(false)
 		end
 	end
 
