@@ -5,7 +5,7 @@
 --: gathering botmode and associated cne's
 
 eso_gather = inheritsFrom(ml_task)
-eso_gather.name = "Gather"
+eso_gather.name = "eso_gather"
 
 function eso_gather.Create()
 
@@ -33,7 +33,7 @@ function eso_gather:Init()
 	self:add(ml_element:create( "Resting", c_resting, e_resting, 225 ), self.process_elements)	
 	self:add(ml_element:create( "Vendor", c_Vendor, e_Vendor, 200 ), self.process_elements)
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
-	self:add(ml_element:create( "Gathering", c_gather, e_gather, 125 ), self.process_elements)
+	self:add(ml_element:create( "Gather", c_gather, e_gather, 125 ), self.process_elements)
 	self:add( ml_element:create( "GatherMarker", c_MoveToGatherMarker, e_MoveToGatherMarker, 100 ), self.process_elements)
 	self:add( ml_element:create( "movetorandom", c_movetorandom, e_movetorandom, 50 ), self.process_elements)
 		
@@ -57,7 +57,7 @@ end
 --:======================================================================================================================================================================
 
 eso_gathertask = inheritsFrom(ml_task)
-eso_gathertask.name = "eso_gather"
+eso_gathertask.name = "eso_gathertask"
 
 function eso_gathertask.Create()
 
@@ -72,18 +72,8 @@ function eso_gathertask.Create()
 
 	--eso_gather members
 	newinst.pos = {}
-	newinst.node = nil
-	newinst.distance = nil
-	newinst.pathdistance = nil
-	
-	newinst.interacting = nil
-	newinst.interacttime = nil
-	newinst.interacttimemax = 7500
-	newinst.timedout = nil
-	
-	newinst.playeraround = nil
-	newinst.nodegathered = nil
-	newinst.nodemissing = nil
+	newinst.nodename = ""
+	newinst.checkforplayers = true
 	
     return newinst
 end
@@ -95,12 +85,10 @@ end
 function eso_gathertask:Init()
 
 	--overwatch_elements
-	self:add(ml_element:create( "gatherupdate", c_gatherupdate, e_gatherupdate, 50 ), self.overwatch_elements)
 	self:add(ml_element:create( "gatherwindow", c_gatherwindow, e_gatherwindow, 25 ), self.overwatch_elements)
 	
 	--process_elements
-	self:add(ml_element:create( "gathernode", c_gathernode, e_gathernode, 100 ), self.process_elements)
-	self:add(ml_element:create( "movetonode", c_movetonode, e_movetonode, 50 ), self.process_elements)
+	self:add(ml_element:create( "gathertask", c_gathertask, e_gathertask, 100 ), self.process_elements)
 	
     self:AddTaskCheckCEs()
 end
@@ -110,46 +98,10 @@ end
 --:======================================================================================================================================================================
 
 function eso_gathertask:task_complete_eval()
-	
-	--end task if player is dead
-	if (e("IsUnitDead(player)")) then
-		d("eso_gather -> ending gather task, player is dead and needs to revive/release")
+	if (e("IsUnitDead(player)") or e("IsUnitInCombat(player)") or e("CheckInventorySpaceSilently(1)") == false or c_Aggro:evaluate() or self.playerfound) then
 		return true
 	end
 
-	--end task if player is in combat
-	if (e("IsUnitInCombat(player)")) then
-		d("eso_gather -> ending gather task, player is in combat or has aggro")
-		return true
-	end
-
-	--end task if player has no bagspace
-	if (not e("CheckInventorySpaceSilently(1)")) then
-		d("eso_gather -> ending gather task, player has no bag space")
-		return true
-	end
-	
-	--end task if node is occupied by another player
-	if (ml_task_hub:CurrentTask().playeraround) then
-		d("eso_gather -> ending gather task, node occupied")
-		EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
-		return true
-	end
-	
-	--end task if node is already gathered
-	if (ml_task_hub:CurrentTask().nodegathered) then
-		d("eso_gather -> ending gather task, node gathered")
-		--EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
-		return true
-	end
-	
-	--timed out
-	if (ml_task_hub:CurrentTask().timedout) then
-		d("eso_gather -> ending gather task, timed out")
-		EntityList:AddToBlacklist(ml_task_hub:CurrentTask().node.id, 60000)	
-		return true
-	end
-	
 	return false
 end
 
@@ -159,7 +111,7 @@ function eso_gathertask:task_complete_execute()
 end
 
 --:======================================================================================================================================================================
---: gather(task)
+--: gather
 --:======================================================================================================================================================================
 --: adds the gather task to reactive queue
 --: this should only be used in gather mode, there is a seperate "add task function" for grind mode
@@ -173,7 +125,7 @@ function c_gather:evaluate()
 	if (not ml_global_information.Player_InventoryFull) then
 		local node = eso_gather_manager.ClosestNode()
 		
-		if ValidTable(node) then
+		if (ValidTable(node)) then
 			c_gather.node = node
 			return true
 		end
@@ -184,107 +136,24 @@ function c_gather:evaluate()
 end
 
 function e_gather:execute()
-	ml_log("e_gather ")
-	Player:Stop()
-	
-	local task = eso_gathertask.Create()
-	
 	if (c_gather.node) then
-		task.node = c_gather.node
-		task.id = c_gather.node.id
+		ml_log("e_gather ")
+		d("eso_gather -> creating new gather task for " .. c_gather.node.name)
+		
+		local task = eso_gathertask.Create()
 		task.pos = c_gather.node.pos
-		task.interacting = false
+		task.nodename = c_gather.node.name
+		ml_task_hub:Add(task.Create(), REACTIVE_GOAL, TP_ASAP)
 		
-		local dstr = (
-			"eso_gather -> creating new gather task for " .. task.node.name .. ", " ..
-			"id = " .. task.id .. ", " ..
-			"distance = " .. math.floor(c_gather.node.distance) .. ", " ..
-			"pathdistance = " .. math.floor(c_gather.node.pathdistance) .. "  "
-		)
-		
-		d(dstr)
+		return ml_log(true)
 	end
 	
-	ml_task_hub:Add(task.Create(), REACTIVE_GOAL, TP_ASAP)
-	return ml_log(true)
-end
-
---:======================================================================================================================================================================
---: gatherupdate
---:======================================================================================================================================================================
---: updates the mathmatical information in overwatch in a single cne to be used in other cne's without recalculating (performance)
-
-c_gatherupdate = inheritsFrom(ml_cause)
-e_gatherupdate = inheritsFrom(ml_effect)
-
-function c_gatherupdate:evaluate()
-
-	--update the task distance
-	if (ml_task_hub:CurrentTask().pos and Player.pos) then
-		local tpos = ml_task_hub:CurrentTask().pos
-		ml_task_hub:CurrentTask().distance = Distance3D(Player.pos.x,Player.pos.y,Player.pos.z,tpos.x,tpos.y,tpos.z)
-	else
-		ml_task_hub:CurrentTask().distance = nil
-	end
-	
-	--update the task pathdistance
-	if (ml_task_hub:CurrentTask().node and EntityList:Get(ml_task_hub:CurrentTask().node.id) and ml_task_hub:CurrentTask().node.pathdistance) then
-		ml_task_hub:CurrentTask().pathdistance = ml_task_hub:CurrentTask().node.pathdistance
-	else
-		ml_task_hub:CurrentTask().pathdistance = nil
-	end
-	
-	--check if node is gathered
-	if ((ml_task_hub:CurrentTask().pathdistance and ml_task_hub:CurrentTask().pathdistance <= ml_global_information.gatherdistance) or
-		(ml_task_hub:CurrentTask().distance and ml_task_hub:CurrentTask().distance <= ml_global_information.gatherdistance)) and (EntityList:Get(ml_task_hub:CurrentTask().node.id) == nil)
-	then
-		ml_task_hub:CurrentTask().nodegathered = true
-	else
-		ml_task_hub:CurrentTask().nodegathered = false
-	end
-	
-	--time expired
-	if (ml_task_hub:CurrentTask().interacttime and ((ml_global_information.Now - ml_task_hub:CurrentTask().interacttime) > ml_task_hub:CurrentTask().interacttimemax)) then
-		ml_task_hub:CurrentTask().timedout = true
-	else
-		ml_task_hub:CurrentTask().timedout = false
-	end
-	
-	--check if players around
-	if 	((ml_task_hub:CurrentTask().pathdistance and ml_task_hub:CurrentTask().pathdistance <= 20) or
-		(ml_task_hub:CurrentTask().distance and ml_task_hub:CurrentTask().distance <= 20)) and (not ml_task_hub:CurrentTask().interacting)
-	then
-		local playeraround = false
-		local players = EntityList("player,alive,friendly,maxdistance=40")
-		if (TableSize(players) > 0) then
-			local index,player = next(players)
-			if (index and player) then
-				if (player.type == g("UNIT_TYPE_PLAYER")) then
-					local apos = player.pos
-					local tpos = ml_task_hub:CurrentTask().pos
-					local dist = Distance3D(apos.x,apos.y,apos.z,tpos.x,tpos.y,tpos.z)
-					
-					if (dist and dist <=10) then
-						playeraround = true
-					end
-				end
-			end
-		end
-		
-		ml_task_hub:CurrentTask().playeraround = playeraround
-	else
-		ml_task_hub:CurrentTask().playeraround = false
-	end
-end
-
-function e_gatherupdate:execute()
-
+	return ml_log(false)
 end
 
 --:======================================================================================================================================================================
 --: gatherwindow
 --:======================================================================================================================================================================
---: gathers all items from the gatherwindow, even if autoloot is off in eso settings
 --: todo: add advanced looting from gatherwindow (ignore junk)
 
 c_gatherwindow = inheritsFrom(ml_cause)
@@ -295,96 +164,79 @@ function c_gatherwindow:evaluate()
 end
 
 function e_gatherwindow:execute()
-	ml_log("e_gatherwindow, looting " .. ml_task_hub:CurrentTask().node.name .. " -> ")
+	ml_log("e_gatherwindow, looting (" .. ml_task_hub:CurrentTask().nodename .. ") -> ")
 	e("LootAll()")
+	ml_global_information.Wait(250)	
 	return ml_log(true)
 end
 
 --:======================================================================================================================================================================
---: gathernode
+--: gathertask
 --:======================================================================================================================================================================
---: gathers the node when the bot is in interact range (set in ml_global_information)
 
-c_gathernode = inheritsFrom(ml_cause)
-e_gathernode = inheritsFrom(ml_effect)
+c_gathertask = inheritsFrom(ml_cause)
+e_gathertask = inheritsFrom(ml_effect)
 
-function c_gathernode:evaluate()
-	if 	(ml_task_hub:CurrentTask().pathdistance and ml_task_hub:CurrentTask().pathdistance <= ml_global_information.gatherdistance) or
-		(ml_task_hub:CurrentTask().distance and ml_task_hub:CurrentTask().distance <= ml_global_information.gatherdistance)
-	then
+function c_gathertask:evaluate()
+	if (ValidTable(ml_task_hub:CurrentTask().pos)) then
 		return true
 	end
 
+	ml_task_hub:CurrentTask().completed = true
 	return false
 end
 
-function e_gathernode:execute()
-	ml_log("e_gathernode, interacting with " .. ml_task_hub:CurrentTask().node.name .. " -> ")
-	
-	if (not e("IsPlayerInteractingWithObject()")) then	
-		if (not ml_task_hub:CurrentTask().interacting) then
-			ml_task_hub:CurrentTask().interacting = true
-			ml_task_hub:CurrentTask().interacttime = ml_global_information.Now
-		end
+function e_gathertask:execute()
+	if (ValidTable(ml_task_hub:CurrentTask().pos)) then
+		local ppos = Player.pos
+		local tpos = ml_task_hub:CurrentTask().pos
+		local dist = Distance3D(ppos.x,ppos.y,ppos.z,tpos.x,tpos.y,tpos.z)
 		
-		Player:Interact(ml_task_hub:CurrentTask().node.id)
-		ml_global_information.Wait(500)					
+		--already in gathering range
+		if (dist <= ml_global_information.gatherdistance) then
+			ml_log("e_gathertask: interacting with (" .. ml_task_hub:CurrentTask().nodename .. ") -> ")
+			local node = eso_gather_manager.ClosestNode()
+			if (ValidTable(node)) then
+				if (node.distance <= ml_global_information.gatherdistance) then
+					if (not e("IsPlayerInteractingWithObject()")) then
+						ml_task_hub:CurrentTask().checkforplayers = false
+						Player:Interact(node.id)
+						ml_global_information.Wait(500)	
+					end
+					return ml_log(true)
+				end
+			end
+		elseif (dist > ml_global_information.gatherdistance) then
+			--check for players in real time
+			if (dist < 15 and ml_task_hub:CurrentTask().checkforplayers) then
+				local players = EntityList("player,alive,friendly,maxdistance=30")
+				if (players) then
+					local index,player = next(players)
+					if (index and player) then
+						if (player.type == g("UNIT_TYPE_PLAYER")) then
+							local apos = player.pos
+							local pdist = Distance3D(apos.x,apos.y,apos.z,tpos.x,tpos.y,tpos.z)
+							if (pdist <= 10) then
+								ml_task_hub:CurrentTask().playerfound = true
+								return
+							end
+						end
+					end
+				end
+			end
+			--move into gathering range
+			ml_log("e_gathertask: moving to (" .. ml_task_hub:CurrentTask().nodename .. ") distance (" .. math.floor(dist) .. ") -> ")
+			Sprint()
+			local navresult = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,ml_global_information.gatherdistance-0.5,false,true,false))
+			if (tonumber(navresult) >= 0) then
+				return ml_log(true)
+			end
+			return ml_log(false)
+		end
 	end
-	
-	return ml_log(true)
-end
 
---:======================================================================================================================================================================
---: movetonode
---:======================================================================================================================================================================
-
-c_movetonode = inheritsFrom(ml_cause)
-e_movetonode = inheritsFrom(ml_effect)
-
-function c_movetonode:evaluate()
-	if 	(ml_task_hub:CurrentTask().pathdistance and ml_task_hub:CurrentTask().pathdistance > ml_global_information.gatherdistance) or
-		(ml_task_hub:CurrentTask().distance and ml_task_hub:CurrentTask().distance > ml_global_information.gatherdistance)
-	then
-		return true
-	end
-
-	return false
-end
-
-function e_movetonode:execute()
-	if (ml_task_hub:CurrentTask().pathdistance) then
-		ml_log("e_movetonode, " .. ml_task_hub:CurrentTask().node.name .. ", pathdistance " .. math.floor(ml_task_hub:CurrentTask().pathdistance) .. " -> ")
-	else
-		ml_log("e_movetonode, " .. ml_task_hub:CurrentTask().node.name .. ", distance " .. math.floor(ml_task_hub:CurrentTask().distance) .. " -> ")
-	end
-	
-	Sprint()
-	
-	local tpos = ml_task_hub:CurrentTask().pos
-	local result = tostring(Player:MoveTo(tpos.x,tpos.y,tpos.z,ml_global_information.gatherdistance-0.5,false,false,false))
-	
-	if (tonumber(result) >= 0) then
-		return ml_log(true)
-	end
-	
+	ml_task_hub:CurrentTask().completed = true
 	return ml_log(false)
-end
-
---:======================================================================================================================================================================
---: movetogathermarker
---:======================================================================================================================================================================
-
-c_movetogathermarker = inheritsFrom(ml_cause)
-e_movetogathermarker = inheritsFrom(ml_effect)
-c_movetogathermarker.reached = false
-c_movetogathermarker.returned = false
-
-function c_movetogathermarker:evaluate()
-	return false
-end
-
-function e_movetogathermarker:execute()
-
 end
 
 --:======================================================================================================================================================================
