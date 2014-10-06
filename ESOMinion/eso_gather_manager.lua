@@ -70,7 +70,7 @@ function eso_gather_manager.ClosestNode(noplayers)
 
 	table.sort(gatherables,
 		function(a,b)
-			return a.distance < b.distance
+			return a.pathdistance < b.pathdistance
 		end
 	)
 
