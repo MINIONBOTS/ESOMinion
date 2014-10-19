@@ -155,14 +155,14 @@ function Sprint()
 		if (not ml_global_information.Player_Sprinting) then
 			if (ml_global_information.Player_Stamina.percent >= tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
 				e("OnSpecialMoveKeyDown(1)")
-				d("eso_common - > starting sprint")
+				--d("eso_common - > starting sprint")
 				ml_global_information.Player_Sprinting = true
 				ml_global_information.Player_SprintingRecharging = false
 			end
 		elseif (ml_global_information.Player_Sprinting) then
 			if (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold)) then
 				e("OnSpecialMoveKeyUp(1)")
-				d("eso_common - > stopping sprint, recharging")
+				--d("eso_common - > stopping sprint, recharging")
 				ml_global_information.Player_Sprinting = false
 				ml_global_information.Player_SprintingRecharging = true
 			end
@@ -172,7 +172,7 @@ function Sprint()
 			then
 				ml_global_information.Player_SprintingTime = ml_global_information.Now
 				e("OnSpecialMoveKeyDown(1)")
-				d("eso_common - > checking sprint")
+				--d("eso_common - > checking sprint")
 				ml_global_information.Player_Sprinting = true
 				ml_global_information.Player_SprintingRecharging = false
 			end
@@ -181,7 +181,7 @@ function Sprint()
 		-- sprint is disabled
 		if (ml_global_information.Player_Sprinting or ml_global_information.Player_SprintingRecharging) then
 			e("OnSpecialMoveKeyUp(1)")
-			d("eso_common - > stopping sprint, sprint disabled")
+			--d("eso_common - > stopping sprint, sprint disabled")
 			ml_global_information.Player_Sprinting = false
 			ml_global_information.Player_SprintingRecharging = false
 		end
