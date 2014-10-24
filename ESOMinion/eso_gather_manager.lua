@@ -55,8 +55,14 @@ end
 
 function eso_gather_manager.ClosestNode(noplayers)
 	
+	local gatherlist;
 	local gatherables = {}
-	local gatherlist = EntityList("onmesh,gatherable,noplayersaround=10")
+	
+	if (noplayers == true) then
+		gatherlist = EntityList("onmesh,gatherable,noplayersaround=10")
+	else
+		gatherlist = EntityList("onmesh,gatherable")
+	end
 	
 	if (ValidTable(gatherlist)) then
 		local id,node = next(gatherlist)
