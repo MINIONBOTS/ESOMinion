@@ -133,7 +133,7 @@ c_gather.node = nil
 
 function c_gather:evaluate()
 	if (not ml_global_information.Player_InventoryFull) then
-		local node = eso_gather_manager.ClosestNode()
+		local node = eso_gather_manager.ClosestNode(true)
 		
 		if (ValidTable(node)) then
 			c_gather.node = node
@@ -217,7 +217,7 @@ function e_gathernode:execute()
 	ml_log("e_gathernode ")
 	
 	if ml_task_hub:CurrentTask().nodereached then
-		local node = eso_gather_manager.ClosestNode()
+		local node = eso_gather_manager.ClosestNode(false)
 		
 		if node and node.distance <= ml_global_information.gatherdistance then
 			if not e("IsPlayerInteractingWithObject()") then
