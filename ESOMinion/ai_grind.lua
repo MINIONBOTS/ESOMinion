@@ -79,7 +79,7 @@ c_grindgather.node = nil
 
 function c_grindgather:evaluate()
 	if (gGather == "1" and not ml_global_information.Player_InventoryFull) then
-		local node = eso_gather_manager.ClosestNode()
+		local node = eso_gather_manager.ClosestNode(true)
 		if (ValidTable(node) and node.pathdistance < 30) then
 			c_grindgather.node = node
 			return true
