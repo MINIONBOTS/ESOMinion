@@ -501,10 +501,9 @@ end
 
 
 function checkForNewPotions(slotID) -- place the potion in your quickslot based on your UI choice.  If stack is at 0 then it check if you have another kind of those potions.
-local inventory = { e("GetBagInfo(1)")}    
-local InventoryMax = inventory[2]
+local bagslots = { e("GetBagSize(1)")}    
 local i = 0
-	while(i< tonumber(InventoryMax))do
+	while(i< tonumber(bagslots))do
 		if(getPotionType(i) == gPotiontype)then
 			e("SelectSlotItem(1,"..tostring(i)..","..tostring(slotID)..")")
 			break
