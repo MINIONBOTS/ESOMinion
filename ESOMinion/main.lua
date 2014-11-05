@@ -80,6 +80,11 @@ function ml_global_information.moduleinit()
 		Settings.ESOMinion.gPlaySoundOnWhisper = "0"
 	end
 	
+	if not Settings.ESOMinion.g_usesoulgemtorevive then Settings.ESOMinion.g_usesoulgemtorevive = "0" end
+	if not Settings.ESOMinion.g_rest then Settings.ESOMinion.g_rest = "1" end
+	if not Settings.ESOMinion.g_resthp then Settings.ESOMinion.g_resthp = "75" end
+	if not Settings.ESOMinion.g_restmp then Settings.ESOMinion.g_restmp = "75" end
+	if not Settings.ESOMinion.g_restsp then Settings.ESOMinion.g_restsp = "10" end
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
@@ -96,7 +101,15 @@ function ml_global_information.moduleinit()
 	--GUI_NewField(ml_global_information.MainWindow.Name,"MapZoneIndex","dMapZoneIndex",GetString("botStatus"))
 	--GUI_NewField(ml_global_information.MainWindow.Name,"LocationName","dLocationName",GetString("botStatus"))
 	
+	--: Dead
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " UseSoulGems", "Settings.ESOMinion.g_usesoulgemtorevive", "Dead")
 	
+	--: Rest
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Rest", "g_rest", "Rest")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name, " RestHP", "g_resthp", "Rest", "0", "100")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name, " RestMP", "g_restmp", "Rest", "0", "100")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name, " RestSP", "g_restsp", "Rest", "0", "100")
+
 	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("gatherMode"),"gGather",GetString("settings"))	
@@ -175,6 +188,12 @@ function ml_global_information.moduleinit()
 	gSprint = Settings.ESOMinion.gSprint
 	gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
 	gPlaySoundOnWhisper = Settings.ESOMinion.gPlaySoundOnWhisper
+	
+	g_usesoulgemtorevive = Settings.ESOMinion.g_usesoulgemtorevive
+	g_rest   = Settings.ESOMinion.g_rest
+	g_resthp = Settings.ESOMinion.g_resthp
+	g_restmp = Settings.ESOMinion.g_restmp
+	g_restsp = Settings.ESOMinion.g_restsp
 	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
@@ -499,7 +518,12 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "gPotvalue" or
 			k == "gAutoStart" or 
 			k == "gAutoCharacterSelect" or
-			k == "gPlaySoundOnWhisper"
+			k == "gPlaySoundOnWhisper" or
+			k == "g_usesoulgemtorevive" or 
+			k == "g_rest" or 
+			k == "g_resthp" or 
+			k == "g_restmp" or 
+			k == "g_restsp"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
@@ -511,8 +535,6 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		elseif ( k == "gBotMode") then        
 			Settings.ESOMinion[tostring(k)] = v
 			ml_global_information.UpdateMode()
-			--mm.NavMeshUpdate()
-		
 		end
 	end
 	GUI_RefreshWindow(ml_global_information.MainWindow.Name)
