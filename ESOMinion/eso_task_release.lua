@@ -22,9 +22,17 @@ function eso_task_release.Create()
     return newinst
 end
 
+--:============================================================================================
+--: initialize
+--:============================================================================================
+
 function eso_task_release:Init()
 	self:AddTaskCheckCEs()
 end
+
+--:============================================================================================
+--: eval complete
+--:============================================================================================
 
 function eso_task_release:task_complete_eval()
 	return not e("IsUnitDead(player)")
@@ -34,6 +42,22 @@ function eso_task_release:task_complete_execute()
 	ml_global_information.ResetBot()
 	self.completed = true
 end
+
+--:============================================================================================
+--: eval failed
+--:============================================================================================
+
+function eso_task_release:task_fail_eval()
+	return false
+end
+
+function eso_task_release:task_fail_execute()
+	self:Terminate()
+end
+
+--:============================================================================================
+--: process
+--:============================================================================================
 
 function eso_task_release:Process()
 	if (self.delay and not self.time) then
