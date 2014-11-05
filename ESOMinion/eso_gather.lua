@@ -23,11 +23,17 @@ end
 
 function eso_gather:Init()
 
-	--process_elements
-	self:add(ml_element:create( "Dead", c_dead, e_dead, 300 ), self.process_elements)
+	--: dead
+    local ke_dead = ml_element:create( "dead", c_dead, e_dead, 300 )
+    self:add( ke_dead, self.process_elements )
+
 	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
 	self:add(ml_element:create( "Aggro", c_Aggro, e_Aggro, 250 ), self.process_elements)
-	self:add(ml_element:create( "Resting", c_resting, e_resting, 225 ), self.process_elements)	
+
+	--: rest
+    local ke_rest = ml_element:create( "rest", c_rest, e_rest, 225 )
+    self:add( ke_rest, self.process_elements )
+	
 	self:add(ml_element:create( "Vendor", c_Vendor, e_Vendor, 200 ), self.process_elements)
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
 	self:add(ml_element:create( "Gather", c_gather, e_gather, 125 ), self.process_elements)
