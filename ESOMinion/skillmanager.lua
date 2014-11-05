@@ -828,6 +828,8 @@ function eso_skillmanager.AttackTarget( TargetID )
 							
 						return true
 					end
+				--else
+					--d(target.name .. " " .. skill.name .. " " ..tostring(eso_skillmanager.CanCast( target, skill )))
 				end
 			end
 		end

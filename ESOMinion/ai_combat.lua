@@ -24,8 +24,9 @@ function ai_combatAttack.Create()
 end
 function ai_combatAttack:Init()
 		
-	-- Dead?
-	self:add(ml_element:create( "Dead", c_dead, e_dead, 300 ), self.process_elements)
+
+    local ke_dead = ml_element:create( "dead", c_dead, e_dead, 300 )
+    self:add( ke_dead, self.process_elements)
 	
 	-- LootAll
 	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
@@ -41,9 +42,6 @@ function ai_combatAttack:Init()
 	
 	-- Looting
 	self:add(ml_element:create( "Loot", c_Loot, e_Loot, 175 ), self.process_elements)
-	
-	-- use Mount
-	--self:add(ml_element:create( "UseMount", c_UseMount, e_UseMount,120 ), self.process_elements)
 	
 	-- Kill Target
 	self:add(ml_element:create( "KillTarget", c_GotoAndKill, e_GotoAndKill, 100 ), self.process_elements)
@@ -129,63 +127,13 @@ function e_Aggro:execute()
 			newTask.targetID = entity.id 
 			newTask.targetPos = entity.pos
       -- Stop sprinting
-      e("OnSpecialMoveKeyUp(1)")
-      ml_global_information.Player_Sprinting = false
+      --e("OnSpecialMoveKeyUp(1)")
+      --ml_global_information.Player_Sprinting = false
       ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
 			return
 		end		
 	end
 	ml_log("eAggro no target")
-end
-
-
----------
-c_resting = inheritsFrom( ml_cause )
-e_resting = inheritsFrom( ml_effect )
-c_resting.hpPercent = math.random(65,95)
-function c_resting:evaluate()
-	if ( Player.isswimming == false and (Player.hp.percent < c_resting.hpPercent or ml_global_information.Player_Magicka.percent < c_resting.hpPercent)) then		
-		return true
-	end	
-	return false
-end
-function e_resting:execute()
-	ml_log(" Resting.. ")
-	c_resting.hpPercent = math.random(45,85)
-		
-	if ( Player:IsMoving() ) then
-		Player:Stop()
-	end
-	
-	eso_skillmanager.Heal( Player.id )
-	return
-end
-
-
-
----------
-c_UseMount = inheritsFrom( ml_cause )
-e_UseMount = inheritsFrom( ml_effect )
-function c_UseMount:evaluate()
-	if(gMount == "1") then
-		if ( Player.isswimming == false and e("IsMounted()") == false and Player.iscasting == false and ml_global_information.Player_InCombat == false) then
-			local ppos = ml_global_information.Player_Position
-			if ( Distance3D(ml_task_hub:CurrentTask().targetPos.x,ml_task_hub:CurrentTask().targetPos.y,ml_task_hub:CurrentTask().targetPos.z,ppos.x,ppos.y,ppos.z) > 35 ) then
-				return true
-			end
-		end	
-	end
-	return false
-end
-function e_UseMount:execute()
-	ml_log("e_useMount.. ")
-		
-	if ( Player:IsMoving() ) then
-		Player:Stop()
-	end
-	e("ToggleMount()")
-	ml_global_information.Wait(500)
-	return
 end
 
 
