@@ -126,9 +126,8 @@ function e_Aggro:execute()
 		if (id and entity) then
 			newTask.targetID = entity.id 
 			newTask.targetPos = entity.pos
-      -- Stop sprinting
-      --e("OnSpecialMoveKeyUp(1)")
-      --ml_global_information.Player_Sprinting = false
+                        e("OnSpecialMoveKeyUp(1)")
+                        ml_global_information.Player_Sprinting = false
       ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
 			return
 		end		
