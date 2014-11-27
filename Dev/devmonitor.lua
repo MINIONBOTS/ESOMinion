@@ -77,6 +77,60 @@ function Dev.ModuleInit()
 	GUI_NewButton("Dev","Cast","AB_Cast","AbilityInfo")
 	RegisterEventHandler("AB_Cast", Dev.Func)
 
+	-- QuestInfo
+	GUI_NewNumeric("Dev","JournalIndex","qJournalIndex","QuestInfo","0","25");
+	GUI_NewNumeric("Dev","StepIndex","qStepIndex","QuestInfo","0","25");
+	GUI_NewNumeric("Dev","ConditionIndex","qConditionIndex","QuestInfo","0","25");
+	GUI_NewNumeric("Dev","ToolIndex","qToolIndex","QuestInfo","0","25");
+	GUI_NewField("Dev","NumJournalQuests","qNumQuests","QuestInfo")
+	GUI_NewField("Dev","NumSteps","qNumSteps","QuestInfo")
+	GUI_NewField("Dev","NumConditions","qNumConditions","QuestInfo")
+	GUI_NewField("Dev","NumTools","qNumTools","QuestInfo")
+	GUI_NewField("Dev","NumRewards","qNumRewards","QuestInfo")
+	GUI_NewField("Dev","ValidIndex","qValidIndex","QuestInfo")
+	GUI_NewField("Dev","Name","qName","QuestInfo")
+	GUI_NewField("Dev","Level","qLevel","QuestInfo")
+	GUI_NewField("Dev","QuestType","qQuestType","QuestInfo")
+	GUI_NewField("Dev","QuestRepeatType","qQuestRepeatType","QuestInfo")
+	GUI_NewField("Dev","IsComplete","qIsComplete","QuestInfo")
+	--GUI_NewField("Dev","IsPushed","qIsPushed","QuestInfo")
+	GUI_NewField("Dev","ConditionType","qConditionType","QuestInfo")
+	GUI_NewField("Dev","ShareIDs","qShareIDs","QuestInfo")
+	GUI_NewField("Dev","TimerCaption","qTimerCaption","QuestInfo")
+	GUI_NewField("Dev","DailyCount","qDailyCount","QuestInfo")
+	
+	GUI_NewButton("Dev","DumpQuestInfo","qQuestInfo","QuestInfo")
+	RegisterEventHandler("qQuestInfo", Dev.Func)
+	GUI_NewButton("Dev","DumpQuestStepInfo","qQuestStepInfo","QuestInfo")
+	RegisterEventHandler("qQuestStepInfo", Dev.Func)
+	GUI_NewButton("Dev","DumpConditionInfo","qQuestConditionInfo","QuestInfo")
+	RegisterEventHandler("qQuestConditionInfo", Dev.Func)
+	GUI_NewButton("Dev","DumpToolInfo","qQuestToolInfo","QuestInfo")
+	RegisterEventHandler("qQuestToolInfo", Dev.Func)
+	GUI_NewButton("Dev","DumpQuestLocInfo","qQuestLocInfo","QuestInfo")
+	RegisterEventHandler("qQuestLocInfo", Dev.Func)
+	GUI_NewButton("Dev","DumpQuestItemInfo","qQuestItemInfo","QuestInfo")
+	RegisterEventHandler("qQuestItemInfo", Dev.Func)
+	GUI_NewButton("Dev","DumpRewardInfo","qQuestRewardInfo","QuestInfo")
+	RegisterEventHandler("qQuestRewardInfo", Dev.Func)
+	GUI_NewButton("Dev","DumpTimerInfo","qQuestRewardInfo","QuestInfo")
+	RegisterEventHandler("qQuestTimerInfo", Dev.Func)
+	GUI_NewButton("Dev","DumpNearestCondition","qQuestNearestCondition","QuestInfo")
+	RegisterEventHandler("qQuestNearestCondition", Dev.Func)
+	GUI_NewButton("Dev","DumpOfferedInfo","qQuestOfferedInfo","QuestInfo")
+	RegisterEventHandler("qQuestOfferedInfo", Dev.Func)
+	GUI_NewButton("Dev","UseQuestItem","qUseQuestItem","QuestInfo")
+	RegisterEventHandler("qUseQuestItem", Dev.Func)
+	GUI_NewButton("Dev","UseQuestTool","qUseQuestTool","QuestInfo")
+	RegisterEventHandler("qUseQuestTool", Dev.Func)
+	GUI_NewButton("Dev","AcceptQuest","qQuestAccept","QuestInfo")
+	RegisterEventHandler("qQuestAccept", Dev.Func)
+	GUI_NewButton("Dev","CompleteQuest","qQuestComplete","QuestInfo")
+	RegisterEventHandler("qQuestComplete", Dev.Func)
+	GUI_NewButton("Dev","AbandonQuest","qQuestAbandon","QuestInfo")
+	RegisterEventHandler("qQuestAbandon", Dev.Func)
+	
+	
 	-- MovementInfo
 	GUI_NewField("Dev","X: ","tb_xPos","Navigation_Movement")
 	GUI_NewField("Dev","Y: ","tb_yPos","Navigation_Movement")
@@ -255,7 +309,12 @@ function Dev.Mov ( arg )
 	end	
 end
 
-function Dev.Func ( arg ) 
+function Dev.Func ( arg )
+	local ji = tostring(qJournalIndex)
+	local si = tostring(qStepIndex)
+	local ci = tostring(qConditionIndex)
+	local ti = tostring(qToolIndex)
+
 	if ( arg == "AB_Cast") then
 		local mytarget
 		if ( ABchartarg == "Player" ) then
@@ -267,7 +326,7 @@ function Dev.Func ( arg )
 			d("Casting.."..ABName.." at "..tostring(mytarget.id))
 			d(AbilityList:Cast(tonumber(ABID),mytarget.id))
 		end
-	end	
+	end
 end
 			
 function Dev.UpdateWindow()
@@ -405,6 +464,29 @@ function Dev.UpdateWindow()
 		ABRadius= 0
 		ABInRange = "false"
 	end
+	
+	-- QuestInfo
+	local ji = tostring(qJournalIndex)
+	local si = tostring(qStepIndex)
+	local ci = tostring(qConditionIndex)
+	local ti = tostring(qToolIndex)
+	
+	qNumQuests = e("GetNumJournalQuests()")
+	qNumSteps = e("GetJournalQuestNumSteps("..ji..")")
+	qNumConditions = e("GetJournalQuestNumConditions("..ji..","..si..")")
+	qNumTools = e("GetQuestToolCount("..ji..")")
+	qNumRewards = e("GetJournalQuestNumRewards("..ji..")")
+	qValidIndex = tostring(e("IsValidQuestIndex("..ji..")"))
+	qName = e("GetJournalQuestName("..ji..")")
+	qLevel = e("GetJournalQuestLevel("..ji..")")
+	qQuestType = e("GetJournalQuestType("..ji..")")
+	qQuestRepeatType = e("GetJournalQuestRepeatType("..ji..")")
+	qIsComplete = tostring(e("GetJournalQuestIsComplete("..ji..")"))
+	--qIsPushed = tostring(e("GetJournalQuestIsPushed("..ji..")"))
+	qConditionType = e("GetJournalQuestConditionType("..ji..","..si..","..ci..")")
+	qShareIDs = e("GetOfferedQuestShareIds()")
+	qTimerCaption = e("GetJournalQuestTimerCaption("..ji..")")
+	qDailyCount = e("GetQuestDailyCount()")
 	
 	-- Movement & Navigation	
 	MovState = tostring(Player:GetMovementState())

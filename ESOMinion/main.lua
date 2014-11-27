@@ -80,6 +80,10 @@ function ml_global_information.moduleinit()
 		Settings.ESOMinion.gPlaySoundOnWhisper = "0"
 	end
 	
+	if not Settings.ESOMinion.gDevTest then
+		Settings.ESOMinion.gDevTest = "0"
+	end
+	
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
@@ -104,6 +108,7 @@ function ml_global_information.moduleinit()
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"PlaySound on Whisper","gPlaySoundOnWhisper",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Enable DevTest","gDevTest",GetString("settings"))
 	
 	--vendor, repair, vendormanager
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
@@ -175,6 +180,7 @@ function ml_global_information.moduleinit()
 	gSprint = Settings.ESOMinion.gSprint
 	gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
 	gPlaySoundOnWhisper = Settings.ESOMinion.gPlaySoundOnWhisper
+	gDevTest = Settings.ESOMinion.gDevTest
 	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
@@ -499,7 +505,8 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "gPotvalue" or
 			k == "gAutoStart" or 
 			k == "gAutoCharacterSelect" or
-			k == "gPlaySoundOnWhisper"
+			k == "gPlaySoundOnWhisper" or
+			k == "gDevTest"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
