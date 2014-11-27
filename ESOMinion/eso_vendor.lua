@@ -184,7 +184,7 @@ function e_VendorAndRepair:execute()
 						ml_task_hub:CurrentTask().inventory[bagSlot].name = name
 						ml_task_hub:CurrentTask().inventory[bagSlot].stack = stack
 					end
-				elseif (quality == g("ITEM_QUALITY_TRASH")) then
+				elseif (quality == g("ITEM_QUALITY_TRASH") and itemType ~= g("ITEMTYPE_TOOL")) then
 					ml_task_hub:CurrentTask().inventory[bagSlot] = {}
 					ml_task_hub:CurrentTask().inventory[bagSlot].name = name
 					ml_task_hub:CurrentTask().inventory[bagSlot].stack = stack

@@ -20,13 +20,13 @@ function ai_grind.Create()
 end
 
 function ai_grind:Init()
-   -- ml_log("combatAttack_Init->")
-	
-	-- Dead?
-	self:add(ml_element:create( "Dead", c_dead, e_dead, 325 ), self.process_elements)
+
+	--: dead
+    local ke_dead = ml_element:create( "dead", c_dead, e_dead, 300 )
+    self:add( ke_dead, self.process_elements)
 	
 	-- LootAll
-	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 300 ), self.process_elements)	
+	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 280 ), self.process_elements)	
 			
 	-- Aggro
 	self:add(ml_element:create( "Aggro", c_Aggro, e_Aggro, 275 ), self.process_elements) --reactive queue
@@ -37,8 +37,9 @@ function ai_grind:Init()
 	--Vendoring
 	self:add(ml_element:create( "Vendor", c_Vendor, e_Vendor, 225 ), self.process_elements)
 				
-	-- Resting
-	self:add(ml_element:create( "Resting", c_resting, e_resting, 210 ), self.process_elements)	
+	--: rest
+    local ke_rest = ml_element:create( "rest", c_rest, e_rest, 200 )
+    self:add( ke_rest, self.process_elements )
 
 	--Potions
 	self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)
@@ -79,7 +80,7 @@ c_grindgather.node = nil
 
 function c_grindgather:evaluate()
 	if (gGather == "1" and not ml_global_information.Player_InventoryFull) then
-		local node = eso_gather_manager.ClosestNode()
+		local node = eso_gather_manager.ClosestNode(true)
 		if (ValidTable(node) and node.pathdistance < 30) then
 			c_grindgather.node = node
 			return true

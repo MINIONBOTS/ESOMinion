@@ -23,8 +23,28 @@ function eso_radar.HandleInit()
     end	
     if ( Settings.ESOMinion.g2dRadarFullScreen == nil ) then
         Settings.ESOMinion.g2dRadarFullScreen = "0"
+    end	    
+	if ( Settings.ESOMinion.gRadarZoom == nil ) then
+        Settings.ESOMinion.gRadarZoom = "10"
     end	
-    if ( Settings.ESOMinion.gRadarShowObjects == nil ) then
+    if ( Settings.ESOMinion.gRadarX == nil ) then
+        Settings.ESOMinion.gRadarX = "50"
+    end		
+    if ( Settings.ESOMinion.gRadarY == nil ) then
+        Settings.ESOMinion.gRadarY = "50"
+    end
+    if ( Settings.ESOMinion.gRadarSize == nil ) then
+        Settings.ESOMinion.gRadarSize = "300"
+    end
+	if ( Settings.ESOMinion.gRadar2dBackground == nil ) then
+        Settings.ESOMinion.gRadar2dBackground = "1"
+    end
+	if ( Settings.ESOMinion.gRadarCentered == nil ) then
+		Settings.ESOMinion.gRadarCentered = "1"
+    end
+	
+	
+	if ( Settings.ESOMinion.gRadarShowObjects == nil ) then
         Settings.ESOMinion.gRadarShowObjects = "0"
     end		
     if ( Settings.ESOMinion.gRadarShowPlayers == nil ) then
@@ -39,95 +59,112 @@ function eso_radar.HandleInit()
     if ( Settings.ESOMinion.gRadarShowMonsters == nil ) then
         Settings.ESOMinion.gRadarShowMonsters = "0"
     end		
-	if ( Settings.ESOMinion.gRadarZoom == nil ) then
-        Settings.ESOMinion.gRadarZoom = "10"
-    end	
-    if ( Settings.ESOMinion.gRadarX == nil ) then
-        Settings.ESOMinion.gRadarX = 5
-    end		
-    if ( Settings.ESOMinion.gRadarY == nil ) then
-        Settings.ESOMinion.gRadarY = 5
-    end	
     
     GUI_NewWindow(eso_radar.MainWindow.Name,eso_radar.MainWindow.x,eso_radar.MainWindow.y,eso_radar.MainWindow.width,eso_radar.MainWindow.height)	
     GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("enableRadar"),"gRadar","Radar" );
     GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("enable2DRadar"),"g2dRadar","Radar" );
     GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("enable3DRadar"),"g3dRadar","Radar" );
-    GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("fullscreenRadar"),"g2dRadarFullScreen","Radar" );
-	GUI_NewNumeric(eso_radar.MainWindow.Name,"Zoom","gRadarZoom","Radar","1","200");    
+    GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("RadarCentered"),"gRadarCentered","Radar" );
+	GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("enable2DRadarBackground"),"gRadar2dBackground","Radar" );	
+	GUI_NewNumeric(eso_radar.MainWindow.Name,"Zoom","gRadarZoom","Radar","1","200");  
+    GUI_NewNumeric(eso_radar.MainWindow.Name,GetString("xPos"),"gRadarX","RadarSettings","0","2000" );
+    GUI_NewNumeric(eso_radar.MainWindow.Name,GetString("yPos"),"gRadarY","RadarSettings","0","1280" );
+	GUI_NewNumeric(eso_radar.MainWindow.Name,GetString("Size"),"gRadarSize","RadarSettings","0","1000" );
+	
     GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showPlayers"),"gRadarShowPlayers","RadarSettings" );
 	GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showNPCs"),"gRadarShowMonsters","RadarSettings" );
     GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showObjects"),"gRadarShowObjects","RadarSettings" );
 	GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showOnlyGatherables"),"gRadarShowOnlyGatherables","RadarSettings" );
 	GUI_NewCheckbox(eso_radar.MainWindow.Name,GetString("showSieges"),"gRadarShowSieges","RadarSettings" );	
-        
-    GUI_NewNumeric(eso_radar.MainWindow.Name,GetString("xPos"),"gRadarX","RadarSettings","0","2000" );
-    GUI_NewNumeric(eso_radar.MainWindow.Name,GetString("yPos"),"gRadarY","RadarSettings","0","1280" );
+
     
     gRadar = Settings.ESOMinion.gRadar
     g2dRadar = Settings.ESOMinion.g2dRadar
     g3dRadar = Settings.ESOMinion.g3dRadar
-    g2dRadarFullScreen = Settings.ESOMinion.g2dRadarFullScreen
+    gRadarCentered = Settings.ESOMinion.gRadarCentered
+	gRadar2dBackground = Settings.ESOMinion.gRadar2dBackground
 	gRadarZoom = Settings.ESOMinion.gRadarZoom
-    gRadarShowMonsters = Settings.ESOMinion.gRadarShowMonsters
+    gRadarX = Settings.ESOMinion.gRadarX
+    gRadarY = Settings.ESOMinion.gRadarY
+	gRadarSize = Settings.ESOMinion.gRadarSize
+	
+	gRadarShowMonsters = Settings.ESOMinion.gRadarShowMonsters
     gRadarShowPlayers = Settings.ESOMinion.gRadarShowPlayers
     gRadarShowObjects = Settings.ESOMinion.gRadarShowObjects
 	gRadarShowOnlyGatherables = Settings.ESOMinion.gRadarShowOnlyGatherables
 	gRadarShowSieges = Settings.ESOMinion.gRadarShowSieges
-    gRadarX = tonumber(Settings.ESOMinion.gRadarX/10)
-    gRadarY = tonumber(Settings.ESOMinion.gRadarY/10)
     
-    if ( gRadar == "0") then GameHacks:SetRadarSettings("gRadar",false) else GameHacks:SetRadarSettings("gRadar",true) end
-    if ( g2dRadar == "0") then GameHacks:SetRadarSettings("g2dRadar",false) else GameHacks:SetRadarSettings("g2dRadar",true) end
-    if ( g3dRadar == "0") then GameHacks:SetRadarSettings("g3dRadar",false) else GameHacks:SetRadarSettings("g3dRadar",true) end
-    if ( g2dRadarFullScreen == "0") then GameHacks:SetRadarSettings("g2dRadarFullScreen",false) else GameHacks:SetRadarSettings("g2dRadarFullScreen",true) end
-	if ( gRadarZoom == "0") then GameHacks:SetRadarSettings("gRadarZoom","5") end	
-    if ( gRadarShowMonsters == "0") then GameHacks:SetRadarSettings("gRadarShowMonsters",false) else GameHacks:SetRadarSettings("gRadarShowMonsters",true) end
-    if ( gRadarShowPlayers == "0") then GameHacks:SetRadarSettings("gRadarShowPlayers",false) else GameHacks:SetRadarSettings("gRadarShowPlayers",true) end
-    if ( gRadarShowObjects == "0") then GameHacks:SetRadarSettings("gRadarShowObjects",false) else GameHacks:SetRadarSettings("gRadarShowObjects",true) end
-	if ( gRadarShowOnlyGatherables == "0") then GameHacks:SetRadarSettings("gRadarShowOnlyGatherables",false) else GameHacks:SetRadarSettings("gRadarShowOnlyGatherables",true) end
-	if ( gRadarShowSieges == "0") then GameHacks:SetRadarSettings("gRadarShowSieges",false) else GameHacks:SetRadarSettings("gRadarShowSieges",true) end
-	
-    if ( tonumber(gRadarX) ~= nil) then GameHacks:SetRadarSettings("gRadarX",tonumber(gRadarX)) end
-    if ( tonumber(gRadarY) ~= nil) then GameHacks:SetRadarSettings("gRadarY",tonumber(gRadarY)) end
-    
+	-- Set values
+	if ( RadarManager ) then		
+		RadarManager.x = tonumber(gRadarX)
+		RadarManager.y = tonumber(gRadarY)
+		RadarManager.size = tonumber(gRadarSize)
+		RadarManager.zoom = tonumber(gRadarZoom)
+		RadarManager.show2d = (g2dRadar == "1")
+		RadarManager.show3d = (g3dRadar == "1")
+		RadarManager.centered = (gRadarCentered == "1")
+		RadarManager.showbackground = (gRadar2dBackground == "1")		
+		RadarManager.show = (gRadar == "1")
+		
+		
+		-- Set Filters
+		eso_radar.UpdateFilters()
+			
+	end
+	    
 	--GUI_NewButton(eso_radar.MainWindow.Name,"Cant See Radar? Press Me","Dev.ChangeMDepth")
 	GUI_UnFoldGroup(eso_radar.MainWindow.Name,"Radar");
 	GUI_UnFoldGroup(eso_radar.MainWindow.Name,"RadarSettings");
     GUI_WindowVisible(eso_radar.MainWindow.Name,false)
 end
 
+function eso_radar.UpdateFilters()
+	RadarManager:ClearFilter()
+	
+	if ( gRadarShowPlayers == "1") then RadarManager:AddFilter("player,alive") end
+	
+	if ( gRadarShowMonsters == "1") then RadarManager:AddFilter("npc,alive") end
+	
+	if ( gRadarShowObjects == "1") then RadarManager:AddFilter("type=3;4;7;8") end
+	
+	if ( gRadarShowOnlyGatherables == "1") then RadarManager:AddFilter("gatherable") end
+	
+	if ( gRadarShowSieges == "1") then RadarManager:AddFilter("type=6") end
+	
+end
+
 function eso_radar.GUIVarUpdate(Event, NewVals, OldVals)
     for k,v in pairs(NewVals) do
-        if (k == "gRadar" or
-            k == "g2dRadar" or 			
-            k == "g3dRadar" or
-            k == "g2dRadarFullScreen" or
-            k == "gRadarShowMonsters" or
-            k == "gRadarShowPlayers" or
-            k == "gRadarShowObjects" or	
-			k == "gRadarShowOnlyGatherables" or
-			k == "gRadarShowSieges")
-        then
+        if (k == "gRadar") then Settings.ESOMinion[tostring(k)] = v RadarManager.show = (v == "1") 
+		elseif (k == "g2dRadar") then Settings.ESOMinion[tostring(k)] = v RadarManager.show2d = (v == "1") 
+		elseif (k == "g3dRadar") then Settings.ESOMinion[tostring(k)] = v RadarManager.show3d = (v == "1") 
+		elseif (k == "gRadarCentered") then Settings.ESOMinion[tostring(k)] = v RadarManager.centered = (v == "1")
+		elseif (k == "gRadar2dBackground") then Settings.ESOMinion[tostring(k)] = v RadarManager.showbackground = (v == "1")		
+        elseif ( k == "gRadarX" and tonumber(v) ~= nil and tonumber(v) < 2000 and tonumber(v) >= 0) then
             Settings.ESOMinion[tostring(k)] = v
-            if ( v == "0") then
-                GameHacks:SetRadarSettings(k,false)
-            else
-                GameHacks:SetRadarSettings(k,true)
-            end
-        end
-        if ( k == "gRadarX" and tonumber(v) ~= nil and tonumber(v) < 2000 and tonumber(v) >= 0) then
-            Settings.ESOMinion[tostring(k)] = v*10
-            GameHacks:SetRadarSettings(k,tonumber(v*10))
-        end
-        if ( k == "gRadarY" and tonumber(v) ~= nil and tonumber(v) < 2000 and tonumber(v) >= 0) then
-            Settings.ESOMinion[tostring(k)] = v*10
-            GameHacks:SetRadarSettings(k,tonumber(v*10))
-        end
-		if ( k == "gRadarZoom" and tonumber(v) ~= nil) then
+            RadarManager.x = tonumber(v)
+        
+        elseif ( k == "gRadarY" and tonumber(v) ~= nil and tonumber(v) < 2000 and tonumber(v) >= 0) then
             Settings.ESOMinion[tostring(k)] = v
-            GameHacks:SetRadarSettings(k,tonumber(v))
-        end
+            RadarManager.y = tonumber(v)
+        
+		elseif ( k == "gRadarSize" and tonumber(v) ~= nil and tonumber(v) < 2000 and tonumber(v) >= 0) then
+            Settings.ESOMinion[tostring(k)] = v
+            RadarManager.size = tonumber(v)
+        
+		elseif ( k == "gRadarZoom" and tonumber(v) ~= nil) then
+            Settings.ESOMinion[tostring(k)] = v
+			RadarManager.zoom = tonumber(v)
+        
+		elseif (k == "gRadarShowPlayers" or
+				k == "gRadarShowMonsters" or
+				k == "gRadarShowObjects" or
+				k == "gRadarShowOnlyGatherables" or
+				k == "gRadarShowSieges" )
+		then 
+			Settings.ESOMinion[tostring(k)] = v
+			eso_radar.UpdateFilters()
+		end
 		
     end
     GUI_RefreshWindow(eso_radar.MainWindow.Name)

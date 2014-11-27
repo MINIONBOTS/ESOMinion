@@ -153,14 +153,14 @@ function Sprint()
 	if (gSprint == "1") then
 		-- sprint is enabled
 		if (not ml_global_information.Player_Sprinting) then
-			if (ml_global_information.Player_Stamina.percent >= tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging) then
+			if (ml_global_information.Player_Stamina.percent >= tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging and not e("IsUnitInCombat(player)")) then
 				e("OnSpecialMoveKeyDown(1)")
 				--d("eso_common - > starting sprint")
 				ml_global_information.Player_Sprinting = true
 				ml_global_information.Player_SprintingRecharging = false
 			end
 		elseif (ml_global_information.Player_Sprinting) then
-			if (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold)) then
+			if (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) or e("IsUnitInCombat(player)")) then
 				e("OnSpecialMoveKeyUp(1)")
 				--d("eso_common - > stopping sprint, recharging")
 				ml_global_information.Player_Sprinting = false
