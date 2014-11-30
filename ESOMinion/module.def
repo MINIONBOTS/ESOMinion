@@ -2,4 +2,4 @@
 Name=ESOMinion
 Dependencies=minionlib
 Version=1
-Files=main.lua,globals.lua,radar.lua,ai_grind.lua,skillmanager.lua,ai_assist.lua,ai_combat.lua,ai_unstuck.lua,ai_autoequip.lua,ai_mail.lua,ai_mount.lua,eso_common.lua,eso_vendor.lua,eso_vendor_manager.lua,eso_gather.lua,eso_gather_manager.lua,eso_social.lua,eso_cne_dead.lua,eso_task_release.lua,eso_task_revive.lua,eso_cne_rest.lua,eso_task_rest.lua,eso_test.lua
+Files=languages.lua,main.lua,globals.lua,radar.lua,ai_grind.lua,skillmanager.lua,ai_assist.lua,ai_combat.lua,ai_unstuck.lua,ai_autoequip.lua,ai_mail.lua,ai_mount.lua,eso_common.lua,eso_vendor.lua,eso_vendor_manager.lua,eso_gather.lua,eso_gather_manager.lua,eso_social.lua,eso_cne_dead.lua,eso_task_release.lua,eso_task_revive.lua,eso_cne_rest.lua,eso_task_rest.lua,eso_test.lua

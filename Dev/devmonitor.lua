@@ -78,10 +78,11 @@ function Dev.ModuleInit()
 	RegisterEventHandler("AB_Cast", Dev.Func)
 
 	-- QuestInfo
-	GUI_NewNumeric("Dev","JournalIndex","qJournalIndex","QuestInfo","0","25");
-	GUI_NewNumeric("Dev","StepIndex","qStepIndex","QuestInfo","0","25");
-	GUI_NewNumeric("Dev","ConditionIndex","qConditionIndex","QuestInfo","0","25");
-	GUI_NewNumeric("Dev","ToolIndex","qToolIndex","QuestInfo","0","25");
+	GUI_NewNumeric("Dev","JournalIndex","qJournalIndex","QuestInfo","1","25");
+	GUI_NewNumeric("Dev","StepIndex","qStepIndex","QuestInfo","1","25");
+	GUI_NewNumeric("Dev","ConditionIndex","qConditionIndex","QuestInfo","1","25");
+	GUI_NewNumeric("Dev","ToolIndex","qToolIndex","QuestInfo","1","25");
+	GUI_NewNumeric("Dev","RewardIndex","qRewardIndex","QuestInfo","1","10");
 	GUI_NewField("Dev","NumJournalQuests","qNumQuests","QuestInfo")
 	GUI_NewField("Dev","NumSteps","qNumSteps","QuestInfo")
 	GUI_NewField("Dev","NumConditions","qNumConditions","QuestInfo")
@@ -113,7 +114,7 @@ function Dev.ModuleInit()
 	RegisterEventHandler("qQuestItemInfo", Dev.Func)
 	GUI_NewButton("Dev","DumpRewardInfo","qQuestRewardInfo","QuestInfo")
 	RegisterEventHandler("qQuestRewardInfo", Dev.Func)
-	GUI_NewButton("Dev","DumpTimerInfo","qQuestRewardInfo","QuestInfo")
+	GUI_NewButton("Dev","DumpTimerInfo","qQuestTimerInfo","QuestInfo")
 	RegisterEventHandler("qQuestTimerInfo", Dev.Func)
 	GUI_NewButton("Dev","DumpNearestCondition","qQuestNearestCondition","QuestInfo")
 	RegisterEventHandler("qQuestNearestCondition", Dev.Func)
@@ -314,6 +315,7 @@ function Dev.Func ( arg )
 	local si = tostring(qStepIndex)
 	local ci = tostring(qConditionIndex)
 	local ti = tostring(qToolIndex)
+	local ri = tostring(qRewardIndex)
 
 	if ( arg == "AB_Cast") then
 		local mytarget
@@ -326,6 +328,83 @@ function Dev.Func ( arg )
 			d("Casting.."..ABName.." at "..tostring(mytarget.id))
 			d(AbilityList:Cast(tonumber(ABID),mytarget.id))
 		end
+	elseif (arg == "qQuestInfo") then
+		questName, backgroundText, activeStepText, activeStepType, activeStepTrackerOverideText, completed, tracked, questLevel, pushed, questType = e("GetJournalQuestInfo("..ji..")")
+		d("questName: "..questName)
+		d("backgroundText: "..backgroundText)
+		d("activeStepText: "..activeStepText)
+		d("activeStepType: "..activeStepType)
+		d("activeStepTrackerOverrideText: "..(activeStepTrackerOverrideText or ""))
+		d("completed: "..tostring(completed))
+		d("tracked: "..tostring(tracked))
+		d("questLevel: "..questLevel)
+		d("pushed: "..tostring(pushed))
+		d("questType: "..questType)
+	elseif(arg == "qQuestStepInfo") then
+		_, stepText, stepType, trackerOverrideText, numConditions = e("GetJournalQuestStepInfo("..ji..","..si..")")
+		d("stepText: "..stepText)
+		d("stepType: "..stepType)
+		d("trackerOverrideText: "..trackerOverrideText)
+		d("numConditions: "..numConditions)
+	elseif(arg == "qQuestConditionInfo") then
+		conditionText, current, max, isFailCondition, isComplete, isCreditShared = e("GetJournalQuestConditionInfo("..ji..","..si..","..ci..")")
+		d("conditiontext: "..conditionText)
+		d("current: "..tostring(currrent))
+		d("max: "..tostring(max))
+		d("isFailCondition: "..tostring(isFailCondition))
+		d("isComplete: "..tostring(isComplete))
+		d("isCreditShared: "..tostring(isCreditShared))
+	elseif(arg == "qQuestToolInfo") then
+		iconFilename, stackCount, isUsable, name = e("GetQuestToolInfo("..ti..")")
+		d("iconFilename: "..iconFilename)
+		d("stackCount: "..stackCount)
+		d("isUsable: "..tostring(isUsable))
+		d("name: "..name)
+	elseif(arg == "qQuestItemInfo") then
+		iconFilename,stackCount,name = e("GetQuestItemInfo("..ji..","..si..","..ci..")")
+		d("iconFilename: "..iconFilename)
+		d("stackCount: "..stackCount)
+		d("name: "..name)	
+	elseif(arg == "qQuestRewardInfo") then
+		rewardType,itemName,amount,iconFile,meetsUsageRequirement,itemQuality = e("GetJournalQuestRewardInfo("..ji..","..ri..")")
+		d("rewardType: "..rewardType)
+		d("itemName: "..itemName)
+		d("amount: "..amount)
+		d("iconFile: "..iconFile)
+		d("meetsUsageRequirement: "..tostring(meetsUsageRequirement))
+		d("itemQuality: "..itemQuality)
+	elseif(arg == "qQuestLocInfo") then
+		zoneName, objectiveName, zoneIndex, poiIndex = e("GetJournalQuestLocationInfo("..ji..")")
+		d("zoneName: "..zoneName)
+		d("objectiveName: "..objectiveName)
+		d("zoneIndex: "..zoneIndex)
+		d("poiIndex: "..poiIndex)
+	elseif(arg == "qQuestTimerInfo") then
+		timerStart,timerEnd,isVisible,isPaused = e("GetJournalQuestTimerInfo("..ji..")")
+		d("timerStart: "..timerStart)
+		d("timerEnd: "..timerEnd)
+		d("isVisible: "..tostring(isVisible))
+		d("isPaused: "..tostring(isPaused))
+	elseif(arg == "qQuestNearestCondition") then
+		foundValidCondition,journalQuestIndex,stepIndex,conditionIndex = e("GetNearestQuestCondition()")
+		d("foundValidCondition: "..tostring(foundValidCondition))
+		d("journalQuestIndex: "..journalQuestIndex)
+		d("stepIndex: "..stepIndex)
+		d("conditionIndex: "..conditionIndex)
+	elseif(arg == "qQuestOfferedInfo") then
+		dialogue,response = e("GetOfferedQuestInfo()")
+		d("dialogue: "..dialogue)
+		d("response: "..response)
+	elseif(arg == "qUseQuestItem") then
+		d(e("UseQuestItem("..ji..","..si..","..ci..")"))
+	elseif(arg == "qUseQuestTool") then
+		d(e("UseQuestTool("..ji..","..ti..")"))
+	elseif(arg == "qQuestAccept") then
+		d(e("AcceptOfferedQuest()"))
+	elseif(arg == "qQuestComplete") then
+		d(e("CompleteQuest()"))
+	elseif(arg == "qQuestAbandon") then
+		d(e("AbandonQuest("..ji..")"))
 	end
 end
 			

@@ -278,6 +278,10 @@ function ml_global_information.moduleinit()
 	if gAutoStart == "1" and not ml_global_information.running then
 		ml_global_information.togglebot(1)
 	end	
+	
+	if gDevTest == "1" then
+		DevTest()
+	end
 end
 
 function test()
