@@ -23,7 +23,48 @@ ml_global_information.VendorChar = ""
 ml_global_information.gatherdistance = 2.5
 ml_global_information.randomdistance = 10
 
+esominion = {}
+
+esominion.login_window		= {name = "Login",				args = { 50, 50, 220, 150, true}}
+esominion.character_window 	= {name = "CharacterSelect",	args = { 50, 50, 220, 150, true}}
+esominion.main_window 		= {name = "ESOMinion", 			args = { 50, 50, 220, 350 }} --not used, atm
+
 function ml_global_information.moduleinit()
+	
+	local window;
+	
+	--: login_window
+	window = esominion.login_window
+	window = WindowManager:NewWindow(window.name,unpack(window.args))
+	
+	if (window) then
+		window:NewCheckBox(" AutoLogin", "gAutoLogin", "Settings")
+		window:NewField(" Account", "aLogin", "Settings")
+		window:NewField(" Password", "aPassword", "Settings")
+		window:UnFold("Settings")
+		window:Hide()
+		
+		esominion.register_var("aLogin", "")
+		esominion.register_var("aPassword", "")
+		esominion.register_var("gAutoLogin", "0")
+	end
+	
+	--: character_window
+	window = esominion.character_window
+	window = WindowManager:NewWindow(window.name,unpack(window.args))
+
+	if (window) then
+		window:NewCheckBox(" AutoSelect", "gAutoSelect", "Settings")
+		window:NewComboBox(" Character", "gAutoCharacterSelect", "Settings", "None")
+		window:UnFold("Settings")
+		window:Hide()
+		
+		esominion.register_var("gAutoSelect", "0")
+		esominion.register_var("gAutoCharacterSelect", "")
+	end
+	
+	--: main_window
+	--: not yet ^^
 	
 	if ( Settings.ESOMinion.gPulseTime == nil ) then
 		Settings.ESOMinion.gPulseTime = "150"
@@ -40,18 +81,6 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gMount == nil ) then
 		Settings.ESOMinion.gMount = "1"
 	end	
-	if ( Settings.ESOMinion.aLogin == nil ) then
-		Settings.ESOMinion.aLogin = ""
-	end
-	if ( Settings.ESOMinion.aPassword == nil ) then
-		Settings.ESOMinion.aPassword = ""
-	end
-	if ( Settings.ESOMinion.gAutoLogin == nil ) then
-		Settings.ESOMinion.gAutoLogin = "0"
-	end
-	if ( Settings.ESOMinion.gAutoCharacterSelect == nil ) then
-		Settings.ESOMinion.gAutoCharacterSelect = ""
-	end
 	if ( Settings.ESOMinion.gPot == nil ) then
 		Settings.ESOMinion.gPot = "0"
 	end
@@ -83,6 +112,7 @@ function ml_global_information.moduleinit()
 	if not Settings.ESOMinion.gDevTest then
 		Settings.ESOMinion.gDevTest = "0"
 	end
+	
 	if not Settings.ESOMinion.g_usesoulgemtorevive then Settings.ESOMinion.g_usesoulgemtorevive = "0" end
 	if not Settings.ESOMinion.g_rest then Settings.ESOMinion.g_rest = "1" end
 	if not Settings.ESOMinion.g_resthp then Settings.ESOMinion.g_resthp = "75" end
@@ -92,10 +122,10 @@ function ml_global_information.moduleinit()
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
-	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("startStop"),"ml_global_information.startStop")
-			
-	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("showradar"),"Radar.toggle")
+	GUI_NewButton(ml_global_information.MainWindow.Name,"StartBot","ml_global_information.startStop")
 	RegisterEventHandler("ml_global_information.startStop", ml_global_information.eventhandler)
+	
+	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("showradar"),"Radar.toggle")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("autoStartBot"),"gAutoStart",GetString("botStatus"))
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
@@ -146,23 +176,6 @@ function ml_global_information.moduleinit()
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")		
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
 	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
-	
-	-- LOGIN WINDOW
-	GUI_NewWindow(ml_global_information.login.Name,ml_global_information.login.x,ml_global_information.login.y,ml_global_information.login.width,ml_global_information.login.height,"",true)
-	GUI_NewField(ml_global_information.login.Name,GetString("aLogin"),"aLogin",GetString("settings"))
-	GUI_NewField(ml_global_information.login.Name,GetString("aPassword"),"aPassword",GetString("settings"))
-	GUI_NewCheckbox(ml_global_information.login.Name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
-	GUI_UnFoldGroup(ml_global_information.login.Name,GetString("settings") )	
-	aLogin = Settings.ESOMinion.aLogin	
-	aPassword = Settings.ESOMinion.aPassword	
-	
-
-	-- CHARACTERSELECT WINDOW
-	GUI_NewWindow(ml_global_information.characterselect.Name,ml_global_information.characterselect.x,ml_global_information.characterselect.y,ml_global_information.characterselect.width,ml_global_information.characterselect.height,"",true)
-	GUI_NewComboBox(ml_global_information.characterselect.Name,GetString("aCharacter"),"gAutoCharacterSelect",GetString("settings"),"None")	
-	GUI_NewCheckbox(ml_global_information.characterselect.Name,GetString("aAutologin"),"gAutoLogin",GetString("settings"))
-	GUI_UnFoldGroup(ml_global_information.characterselect.Name,GetString("settings") )
-	gAutoLogin = Settings.ESOMinion.gAutoLogin
 	
 	-- setup bot mode
     local botModes = "None"
@@ -297,18 +310,22 @@ function ml_global_information.onupdate( event, tickcount )
 	ml_global_information.Now = tickcount
 	
 	local gamestate = GetGameState()
-	-- Reset all windows
+	
 	if (ml_global_information.lastgamestate ~= gamestate) then
-		d("GameState changed to "..tostring(gamestate))
 		ml_global_information.lastgamestate = gamestate
 		ml_global_information.gamestatechanged = true
-		GUI_WindowVisible(ml_global_information.advwindow.Name,false)
-		GUI_WindowVisible(ml_global_information.MainWindow.Name,false)
-		GUI_WindowVisible(ml_mesh_mgr.mainwindow.name,false)
-		GUI_WindowVisible("Dev",false)
+		
+		--: hide all windows
 		GUI_ToggleConsole(false)
-		GUI_WindowVisible(ml_global_information.login.Name,false)
-		GUI_WindowVisible(ml_global_information.characterselect.Name,false)
+		local windows = WindowManager:GetWindowNames()
+		if (windows) then
+			for index,title in pairs(windows) do
+				local window = WindowManager:GetWindow(title)
+				if (window) then
+					window:Hide()
+				end
+			end
+		end
 	end
 	
 	-- Switch according to the gamestate
@@ -331,8 +348,13 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 	
 	-- show/hide correct windows for gamestate
 	if ( ml_global_information.gamestatechanged == true ) then
-		GUI_WindowVisible(ml_global_information.login.Name,true)		
-		ml_global_information.gamestatechanged = false			
+		local window = WindowManager:GetWindow(esominion.login_window.name)
+	
+		if (window and not window.visible) then
+			window:Show()
+		end
+		
+		ml_global_information.gamestatechanged = false		
 	end	
 				
 	if ( tickcount - ml_global_information.lasttick > 10000 ) then
@@ -360,7 +382,13 @@ function ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount
 	
 	-- show/hide correct windows for gamestate
 	if ( ml_global_information.gamestatechanged == true ) then
-		GUI_WindowVisible(ml_global_information.characterselect.Name,true)		
+	
+		local window = WindowManager:GetWindow(esominion.character_window.name)
+	
+		if (window and not window.visible) then
+			window:Show()
+		end
+		
 		ml_global_information.gamestatechanged = false
 		
 		local charcount = e("GetNumCharacters()")
@@ -396,7 +424,7 @@ function ml_global_information.InCharacterSelectScreenOnUpdate( event, tickcount
 		ml_global_information.lasttick = tickcount
 		ml_log("InCharacterSelectScreen: ")
 		
-		if ( gAutoLogin == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "CharacterSelect") then
+		if ( gAutoSelect == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "CharacterSelect") then
 			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
 				ml_log("Select character and login! ")
 				for i = 1, e("GetNumCharacters()") do
@@ -504,7 +532,7 @@ function ml_global_information.eventhandler(arg)
 	if ( arg == "ml_global_information.startStop" or arg == "MINION.toggle") then
 		if ( gBotRunning == "1" ) then
 			gAutoStart = "0"
-			ml_global_information.togglebot("0")			
+			ml_global_information.togglebot("0")
 		else
 			gAutoStart = "1"
 			ml_global_information.togglebot("1")
@@ -539,7 +567,7 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
-		elseif ( k == "gAutoLogin" ) then
+		elseif ( k == "gAutoLogin" or k == "gAutoSelect") then
 			ml_global_information.lasttick = 0
 			Settings.ESOMinion[tostring(k)] = v		
 		elseif ( k == "gBotRunning" ) then
@@ -579,6 +607,20 @@ function ml_global_information.togglebot(arg)
 		gBotRunning = "1"
 		--mc_meshrotation.currentMapTime = ml_global_information.Now
 	end
+	
+	local window = WindowManager:GetWindow(ml_global_information.MainWindow.Name)
+
+	if (window) then
+		local button = window:GetControl("StartBot") or window:GetControl("StopBot")
+		if (button) then
+			button:SetToggleState(ml_task_hub.shouldRun)
+			if (ml_task_hub.shouldRun) then
+				button:SetText("StopBot")
+			else
+				button:SetText("StartBot")
+			end
+		end
+	end
 end
 
 
@@ -607,6 +649,15 @@ function ml_global_information.ToggleAdvMenu()
 		GUI_WindowVisible(ml_global_information.advwindow.Name,true)	
         ml_global_information.advwindowvisible = true
     end
+end
+
+function esominion.register_var(setting, default)
+	if (setting and default) then
+		Settings.ESOMinion[setting] = (
+		Settings.ESOMinion[setting] or default)
+		
+		_G[setting] = Settings.ESOMinion[setting]
+	end
 end
 
 RegisterEventHandler("Module.Initalize",ml_global_information.moduleinit)
