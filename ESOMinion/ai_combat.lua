@@ -164,7 +164,7 @@ function e_GotoAndKill:execute()
 	ml_log("e_GotoAndKill ")
 
 	-- Check for better target while we walk towards out primary target
-  local EList = EntityList("nearest,alive,aggro,attackable,targetable,los,maxdistance=25,onmesh,exclude="..ml_task_hub:CurrentTask().targetID)
+  local EList = EntityList("nearest,hostile,alive,los,onmesh")
   if ( EList ) then
     local id,entity = next(EList)
     if (id and entity) then
