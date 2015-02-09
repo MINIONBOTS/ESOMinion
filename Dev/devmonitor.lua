@@ -78,6 +78,7 @@ function Dev.ModuleInit()
 	RegisterEventHandler("AB_Cast", Dev.Func)
 
 	-- QuestInfo
+	-- Client API
 	GUI_NewNumeric("Dev","JournalIndex","qJournalIndex","QuestInfo","1","25");
 	GUI_NewNumeric("Dev","StepIndex","qStepIndex","QuestInfo","1","25");
 	GUI_NewNumeric("Dev","ConditionIndex","qConditionIndex","QuestInfo","1","25");
@@ -95,11 +96,22 @@ function Dev.ModuleInit()
 	GUI_NewField("Dev","QuestRepeatType","qQuestRepeatType","QuestInfo")
 	GUI_NewField("Dev","IsComplete","qIsComplete","QuestInfo")
 	--GUI_NewField("Dev","IsPushed","qIsPushed","QuestInfo")
-	GUI_NewField("Dev","ConditionType","qConditionType","QuestInfo")
+	GUI_NewField("Dev","ConditionPinType","qConditionPinType","QuestInfo")
 	GUI_NewField("Dev","ShareIDs","qShareIDs","QuestInfo")
 	GUI_NewField("Dev","TimerCaption","qTimerCaption","QuestInfo")
 	GUI_NewField("Dev","DailyCount","qDailyCount","QuestInfo")
 	
+	-- Minion API
+	GUI_NewField("Dev","QuestID","qQuestID","QuestInfo")
+	GUI_NewField("Dev","StepID","qStepID","QuestInfo")
+	GUI_NewField("Dev","ConditionID","qConditionID","QuestInfo")
+	GUI_NewField("Dev","CurrStepIndex","qCurrStepIndex","QuestInfo")
+	GUI_NewField("Dev","CurrCondIndex","qCurrCondIndex","QuestInfo")
+	GUI_NewField("Dev","ConditionType","qConditionType","QuestInfo")
+	GUI_NewField("Dev","ConditionPos","qConditionPos","QuestInfo")
+	
+	GUI_NewButton("Dev","RequestConditionAssistance","qQuestAssistance","QuestInfo")
+	RegisterEventHandler("qQuestAssistance", Dev.Func)
 	GUI_NewButton("Dev","DumpQuestInfo","qQuestInfo","QuestInfo")
 	RegisterEventHandler("qQuestInfo", Dev.Func)
 	GUI_NewButton("Dev","DumpQuestStepInfo","qQuestStepInfo","QuestInfo")
@@ -328,6 +340,8 @@ function Dev.Func ( arg )
 			d("Casting.."..ABName.." at "..tostring(mytarget.id))
 			d(AbilityList:Cast(tonumber(ABID),mytarget.id))
 		end
+	elseif (arg == "qQuestAssistance") then
+		e("RequestJournalQuestConditionAssistance("..ji..","..si..","..ci..")")
 	elseif (arg == "qQuestInfo") then
 		questName, backgroundText, activeStepText, activeStepType, activeStepTrackerOverideText, completed, tracked, questLevel, pushed, questType = e("GetJournalQuestInfo("..ji..")")
 		d("questName: "..questName)
@@ -562,10 +576,27 @@ function Dev.UpdateWindow()
 	qQuestRepeatType = e("GetJournalQuestRepeatType("..ji..")")
 	qIsComplete = tostring(e("GetJournalQuestIsComplete("..ji..")"))
 	--qIsPushed = tostring(e("GetJournalQuestIsPushed("..ji..")"))
-	qConditionType = e("GetJournalQuestConditionType("..ji..","..si..","..ci..")")
+	qConditionPinType = e("GetJournalQuestConditionType("..ji..","..si..","..ci..")")
 	qShareIDs = e("GetOfferedQuestShareIds()")
 	qTimerCaption = e("GetJournalQuestTimerCaption("..ji..")")
-	qDailyCount = e("GetQuestDailyCount()")
+	--qDailyCount = e("GetQuestDailyCount()")
+	
+	local questTable = QuestManager:GetByIndex(tonumber(ji))
+	local stepTable = QuestManager:GetQuestStep(tonumber(ji),tonumber(si))
+	local conditionTable = QuestManager:GetQuestCondition(tonumber(ji),tonumber(si),tonumber(ci))
+	if(ValidTable(questTable)) then
+		qQuestID = questTable.id
+		qCurrStepIndex = questTable.currentstep
+		qCurrCondIndex = questTable.currentcondition
+	end
+	if(ValidTable(stepTable)) then
+		qStepID = stepTable.id
+	end
+	if(ValidTable(conditionTable)) then
+		qConditionID = conditionTable.id
+		qConditionType = conditionTable.type
+		qConditionPos = (math.floor(conditionTable.pos.x * 10) / 10).." / "..(math.floor(conditionTable.pos.y * 10) / 10).." / "..(math.floor(conditionTable.pos.z * 10) / 10)
+	end
 	
 	-- Movement & Navigation	
 	MovState = tostring(Player:GetMovementState())
