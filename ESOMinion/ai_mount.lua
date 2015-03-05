@@ -70,7 +70,17 @@ end
 --:===============================================================================================================
 
 function ai_mount:HaveMount()
-	return not e("IsStableSlotEmpty(1)")
+	--return not e("IsStableSlotEmpty(1)") removed with 1.6 update
+	-- use d(e("GetTotalCollectiblesByCategoryType(2")) ,  but I dont have a mount...
+	--h5. CollectibleCategoryType
+--* COLLECTIBLE_CATEGORY_TYPE_COSTUME
+--* COLLECTIBLE_CATEGORY_TYPE_DLC
+--* COLLECTIBLE_CATEGORY_TYPE_INVALID
+--* COLLECTIBLE_CATEGORY_TYPE_MOUNT
+--* COLLECTIBLE_CATEGORY_TYPE_TROPHY
+--* COLLECTIBLE_CATEGORY_TYPE_VANITY_PET
+
+	return false
 end
 
 function ai_mount:CanMount()
