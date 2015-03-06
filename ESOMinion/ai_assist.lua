@@ -22,7 +22,7 @@ end
 function eso_ai_assist:Process()
 	--ml_log("AssistMode_Process->")
 		
-	if ( ml_global_information.Player_Dead == false ) then
+	if ( ml_global_information.Player_Dead == false ) and ( e("IsMounted()") == false ) then
 		
 		
 		-- LootAll

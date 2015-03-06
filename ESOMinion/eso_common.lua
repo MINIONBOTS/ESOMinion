@@ -22,8 +22,9 @@ function c_LootAll:evaluate()
 			c_LootAll.ignoreLoot = false
 		end
 	end
+	local fckidkwhatthisis=e("GetLootMoney()")
 	return c_LootAll.ignoreLoot == false and not ml_global_information.Player_InventoryFull and (
-		tonumber(e("GetNumLootItems()")) > 0 or tonumber(e("GetLootMoney()")) > 0)
+		tonumber(e("GetNumLootItems()")) > 0 or tonumber(fckidkwhatthisis) > 0)
 end
 
 function e_LootAll:execute()
