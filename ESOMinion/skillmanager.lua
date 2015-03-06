@@ -733,7 +733,7 @@ function eso_skillmanager.CanCast( target, skill )
 		-- TARGET AE CHECK
 		if ( skill.tecount > 0 and skill.terange > 0) then
 			--d("TARGET AE CHECK "..tostring(TableSize(EntityList("alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..targetID))))
-			if ( TableSize(EntityList("alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..targetID)) < skill.tecount) then return false end
+			if ( TableSize(EntityList("alive,attackable,notnpc,nocritter,maxdistance="..skill.terange..",distanceto="..targetID)) < skill.tecount) then return false end
 		end
 		
 		--TODO:: BUFFS N CONDIS

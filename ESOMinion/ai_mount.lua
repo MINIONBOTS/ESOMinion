@@ -70,7 +70,7 @@ end
 --:===============================================================================================================
 
 function ai_mount:HaveMount()
-	return not e("IsStableSlotEmpty(1)")
+	return not e("HasMountSkin()")
 end
 
 function ai_mount:CanMount()

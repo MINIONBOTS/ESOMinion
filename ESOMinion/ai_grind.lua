@@ -110,7 +110,7 @@ e_FightToGrindMarker = inheritsFrom( ml_effect )
 c_FightToGrindMarker.target = nil
 function c_FightToGrindMarker:evaluate()
 	if ( c_MoveToMarker.markerreached == false and c_MoveToMarker.allowedToFight == true) then
-		local EList = EntityList("attackable,targetable,alive,nocritter,shortestpath,onmesh,maxdistance=30") -- add los ?
+		local EList = EntityList("attackable,targetable,notnpc,alive,nocritter,shortestpath,onmesh,maxdistance=30") -- add los ?
 		if ( EList and TableSize(EList) > 0 ) then
 			local id,entry = next(EList)
 			if ( id and entry ) then
@@ -126,7 +126,7 @@ function e_FightToGrindMarker:execute()
 	ml_log("e_FightToGrindMarker ")
 	
 	-- Weakest Aggro in CombatRange first	
-	local TList = ( EntityList("lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance=15") )
+	local TList = ( EntityList("lowesthealth,attackable,targetable,notnpc,alive,aggro,nocritter,onmesh,maxdistance=15") )
 	if ( TableSize( TList ) > 0 ) then
 		local id, E  = next( TList )
 		if ( id ~= nil and id ~= 0 and E ~= nil ) then
