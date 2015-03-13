@@ -360,18 +360,26 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 	if ( tickcount - ml_global_information.lasttick > 10000 ) then
 		ml_global_information.lasttick = tickcount
 		
-		ml_log("InTitleScreen: ")
+		local currentState = tostring(e("PregameStateManager_GetCurrentState()"))
+		if ( currentState == "GammaAdjust" or currentState == "ShowEULA") then
+			e("PregameStateManager_ReenterLoginState()")
+			return
 			
-		if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1" and tostring(e("PregameStateManager_GetCurrentState()")) == "AccountLogin") then
-			d("Trying to login....")			
-			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
-				e("PregameLogin("..aLogin..","..aPassword..")")
-			else
-				ml_log("Login Error detected....trying again in 10 seconds..")
-				e("ZO_Dialogs_ReleaseAllDialogs(true)")
-			end
+		elseif ( currentState == "AccountLogin" ) then
+			ml_log("AccountLogin... ")
 			
-		end	
+			if ( aLogin ~= "" and aPassword ~= "" and gAutoLogin == "1") then
+				d("Trying to login....")			
+				if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
+					e("PregameLogin("..aLogin..","..aPassword..")")
+				else
+					ml_log("Login Error detected....trying again in 10 seconds..")
+					e("ZO_Dialogs_ReleaseAllDialogs(true)")
+				end
+				
+			end	
+		
+		end
 		-- Update the Statusbar on the left/bottom screen
 		GUI_SetStatusBar(ml_GetTraceString())		
 	end
