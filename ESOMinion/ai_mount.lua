@@ -70,7 +70,7 @@ end
 --:===============================================================================================================
 
 function ai_mount:HaveMount()
-	return not e("HasMountSkin()")
+	return e("HasMountSkin()")
 end
 
 function ai_mount:CanMount()
