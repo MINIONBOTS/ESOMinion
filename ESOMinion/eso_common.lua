@@ -9,8 +9,8 @@
 --:===============================================================================================================  
 -- original code
 
-c_LootAll = inheritsFrom( ml_cause )
-e_LootAll = inheritsFrom( ml_effect )
+c_LootAll = ml_cause.Create()
+e_LootAll = ml_effect.Create()
 c_LootAll.ignoreLoot = false
 c_LootAll.ignoreLootTmr = 0
 
@@ -38,8 +38,8 @@ end
 --:=============================================================================================================== 
 -- original code
 
-c_Loot = inheritsFrom( ml_cause )
-e_Loot = inheritsFrom( ml_effect )
+c_Loot = ml_cause.Create()
+e_Loot = ml_effect.Create()
 
 function c_Loot:evaluate()
 	local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
@@ -84,7 +84,7 @@ end
 --: added 9.7.2014
 --: add this cne to move to a random position on the mesh
 
-c_movetorandom = inheritsFrom(ml_cause)
+c_movetorandom = ml_cause.Create()
 e_movetorandom = inheritsFrom(ml_effect)
 c_movetorandom.randompoint = nil
 c_movetorandom.randompointreached = false

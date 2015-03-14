@@ -63,8 +63,8 @@ function ai_combatAttack:task_complete_execute()
 end
 
 --------- Creates a new REACTIVE_GOAL subtask to kill an enemy
-c_CombatTask = inheritsFrom( ml_cause )
-e_CombatTask = inheritsFrom( ml_effect )
+c_CombatTask = ml_cause.Create()
+e_CombatTask = ml_effect.Create()
 c_CombatTask.target = nil
 function c_CombatTask:evaluate()
 	local EList = EntityList("attackable,targetable,notnpc,alive,nocritter,shortestpath,maxdistance=120,onmesh")
@@ -108,8 +108,8 @@ end
 
 
 ------------
-c_Aggro = inheritsFrom( ml_cause )
-e_Aggro = inheritsFrom( ml_effect )
+c_Aggro = ml_cause.Create()
+e_Aggro = ml_effect.Create()
 function c_Aggro:evaluate()
     return Player.isswimming == false and TableSize(EntityList("nearest,alive,aggro,attackable,targetable,maxdistance=28,onmesh")) > 0
     --and ml_global_information.Player_InCombat
@@ -135,8 +135,8 @@ end
 
 
 --------- Goes to and kills our current hub.targetid
-c_GotoAndKill = inheritsFrom( ml_cause )
-e_GotoAndKill = inheritsFrom( ml_effect )
+c_GotoAndKill = ml_cause.Create()
+e_GotoAndKill = ml_effect.Create()
 e_GotoAndKill.ismoving = false
 function c_GotoAndKill:evaluate()
 	-- Check if the enemy is within the "data range" then check for the guy, else it can cause a back n forth spinning
@@ -268,8 +268,8 @@ function DoCombatMovement(target)
 end
 
 ---------
-c_GetNextTarget = inheritsFrom( ml_cause )
-e_GetNextTarget = inheritsFrom( ml_effect )
+c_GetNextTarget = ml_cause.Create()
+e_GetNextTarget = ml_effect.Create()
 function c_GetNextTarget:evaluate()
 	local minLevel = ml_global_information.MarkerMinLevel
     local maxLevel = ml_global_information.MarkerMaxLevel
@@ -356,8 +356,8 @@ end
 
 
 --------------
-c_usePotions = inheritsFrom( ml_cause )
-e_usePotions = inheritsFrom( ml_effect )
+c_usePotions = ml_cause.Create()
+e_usePotions = ml_effect.Create()
 function c_usePotions:evaluate()
 	if(gPot == "0")then
 		return false
