@@ -119,7 +119,6 @@ function ml_global_information.moduleinit()
 	if not Settings.ESOMinion.g_restmp then Settings.ESOMinion.g_restmp = "75" end
 	if not Settings.ESOMinion.g_restsp then Settings.ESOMinion.g_restsp = "10" end
 	
-	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
 	GUI_NewButton(ml_global_information.MainWindow.Name,"StartBot","ml_global_information.startStop")
@@ -165,6 +164,14 @@ function ml_global_information.moduleinit()
 	--GUI_NewButton(ml_global_information.MainWindow.Name, GetString("advancedSettings"), "AdvancedSettings.toggle")
 	--RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
 	
+	-- add quest task/GUI from minionlib
+	if(ml_task_quest_engine) then
+		ml_global_information.AddMode(GetString("questMode"), ml_task_quest_engine)
+	end
+	
+	-- refresh bot mode control
+	ml_global_information.RefreshModeList()
+	
 	-- ADVANCED SETTINGS WINDOW
 	--GUI_NewWindow(ml_global_information.advwindow.Name,ml_global_information.advwindow.x,ml_global_information.advwindow.y,ml_global_information.advwindow.width,ml_global_information.advwindow.height,"",false)
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("skillManager"), "SkillManager.toggle", "Managers")
@@ -176,20 +183,6 @@ function ml_global_information.moduleinit()
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")		
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
 	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
-	
-	-- setup bot mode
-    local botModes = "None"
-    if ( TableSize(ml_global_information.BotModes) > 0) then
-        local i,entry = next ( ml_global_information.BotModes )
-        while i and entry do
-            botModes = botModes..","..i
-            i,entry = next ( ml_global_information.BotModes,i)
-        end
-    end
-	
-    gBotMode_listitems = botModes    
-    gBotMode = Settings.ESOMinion.gBotMode	
-	ml_global_information.UpdateMode()
 	
 	gBotRunning = "0"
 	gAutoStart = Settings.ESOMinion.gAutoStart
@@ -277,7 +270,7 @@ function ml_global_information.moduleinit()
 
 
 	
--- setup/load blacklist tables
+	-- setup/load blacklist tables
 	if ( ml_blacklist_mgr ) then
 		ml_blacklist_mgr.parentWindow = ml_global_information.MainWindow	
 		ml_blacklist_mgr.path = GetStartupPath() .. [[\LuaMods\ESOMinion\blacklist.info]]
@@ -287,6 +280,8 @@ function ml_global_information.moduleinit()
 			ml_blacklist.CreateBlacklist(GetString("monsters"))
 		end
 	end
+	
+	-- setup quest
 
 	if gAutoStart == "1" and not ml_global_information.running then
 		ml_global_information.togglebot(1)
@@ -586,6 +581,37 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		end
 	end
 	GUI_RefreshWindow(ml_global_information.MainWindow.Name)
+end
+
+function ml_global_information.AddMode(modeName, modeTask)
+	if(	ValidTable(ml_global_information.BotModes) and 
+		type(modeName) == "string" and
+		type(modeTask) == "table" and
+		ValidTable(modeTask) and
+		safe_isA(ml_task, modeTask))
+	then
+		ml_global_information.BotModes[modeName] = modeTask
+		if(modeTask.UIInit) then
+			modeTask.UIInit()
+		end
+	end
+end
+
+function ml_global_information.RefreshModeList()
+	if(ValidTable(ml_global_information.BotModes)) then
+		local botModes = "None"
+		if ( TableSize(ml_global_information.BotModes) > 0) then
+			local i,entry = next ( ml_global_information.BotModes )
+			while i and entry do
+				botModes = botModes..","..i
+				i,entry = next ( ml_global_information.BotModes,i)
+			end
+		end
+		
+		gBotMode_listitems = botModes    
+		gBotMode = Settings.ESOMinion.gBotMode
+		ml_global_information.UpdateMode()
+	end
 end
 
 function ml_global_information.UpdateMode()
