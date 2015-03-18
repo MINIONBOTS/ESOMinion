@@ -610,6 +610,7 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
     },                                  
     ["cn"] =                            
     {                               
@@ -1228,6 +1229,7 @@ strings =
 		--mc_main.lua
 		guestserver						= "访问其他服务器",
 		revivecharacters				= "复活其他人",
+		attackNeutral					= "Attack Neutral Targets",
 	},
     ["jp"] =
     {
@@ -1834,6 +1836,7 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
 	},   
     ["de"] =
     {
@@ -2441,6 +2444,7 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
 	},     
     ["fr"] =
     {
@@ -3060,6 +3064,7 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
 	},       
     ["ru"] =
     {
@@ -3665,6 +3670,7 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
 	},    	
 
 }

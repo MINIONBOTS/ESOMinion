@@ -113,6 +113,10 @@ function ml_global_information.moduleinit()
 		Settings.ESOMinion.gDevTest = "0"
 	end
 	
+	if not Settings.ESOMinion.gAttackNeutral then
+		Settings.ESOMinion.gAttackNeutral = "0"
+	end
+	
 	if not Settings.ESOMinion.g_usesoulgemtorevive then Settings.ESOMinion.g_usesoulgemtorevive = "0" end
 	if not Settings.ESOMinion.g_rest then Settings.ESOMinion.g_rest = "1" end
 	if not Settings.ESOMinion.g_resthp then Settings.ESOMinion.g_resthp = "75" end
@@ -152,6 +156,7 @@ function ml_global_information.moduleinit()
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"PlaySound on Whisper","gPlaySoundOnWhisper",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Enable DevTest","gDevTest",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("attackNeutral"),"gAttackNeutral",GetString("settings"))
 	
 	--vendor, repair, vendormanager
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
@@ -207,6 +212,7 @@ function ml_global_information.moduleinit()
 	gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
 	gPlaySoundOnWhisper = Settings.ESOMinion.gPlaySoundOnWhisper
 	gDevTest = Settings.ESOMinion.gDevTest
+	gAttackNeutral = Settings.ESOMinion.gAttackNeutral
 	
 	g_usesoulgemtorevive = Settings.ESOMinion.g_usesoulgemtorevive
 	g_rest   = Settings.ESOMinion.g_rest
@@ -361,9 +367,17 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 		ml_global_information.lasttick = tickcount
 		
 		local currentState = tostring(e("PregameStateManager_GetCurrentState()"))
-		if ( currentState == "GammaAdjust" or currentState == "ShowEULA") then
+		if ( currentState == "GammaAdjust" ) then
 			e("PregameStateManager_ReenterLoginState()")
 			return
+		
+		-- There are 4 different agreement screens and the agree functions for the three other than
+		-- the EULA dialog are not defined in the ESO LUA. For now just force the user to agree to
+		-- these after install or client update, maybe do it automatically later when there is more
+		-- time to spend looking
+		
+		--elseif ( currentstate == "ShowEULA" ) then
+		--	e("AgreeToEULA()")
 			
 		elseif ( currentState == "AccountLogin" ) then
 			ml_log("AccountLogin... ")
@@ -381,7 +395,7 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 		
 		end
 		-- Update the Statusbar on the left/bottom screen
-		GUI_SetStatusBar(ml_GetTraceString())		
+		GUI_SetStatusBar(ml_GetTraceString())
 	end
 end
 
