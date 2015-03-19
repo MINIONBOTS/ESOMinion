@@ -21,7 +21,6 @@ end
 
 function eso_ai_assist:Process()
 	--ml_log("AssistMode_Process->")
-		
 	if ( ml_global_information.Player_Dead == false ) and ( e("IsMounted()") == false ) then
 		
 		
@@ -30,8 +29,10 @@ function eso_ai_assist:Process()
 		
 		if ( sMtargetmode == "None" ) then
 			local target = Player:GetTarget()
-			if ( target and target.attackable and target.alive and target.iscritter == false) then 
-				eso_skillmanager.AttackTarget( target.id )
+			if ( target and target.attackable and target.alive and target.iscritter == false) then
+				if(gPreventAttackingInnocents == "0" or target.hostile) then
+					eso_skillmanager.AttackTarget( target.id )
+				end
 			end		
 		else
 			eso_ai_assist.SetTargetAssist()
