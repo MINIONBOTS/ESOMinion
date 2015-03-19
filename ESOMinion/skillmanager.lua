@@ -734,7 +734,7 @@ function eso_skillmanager.CanCast( target, skill )
 		if ( skill.tecount > 0 and skill.terange > 0) then
 			--d("TARGET AE CHECK "..tostring(TableSize(EntityList("alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..targetID))))
 			local filterstring = "alive,attackable,nocritter,maxdistance="..skill.terange..",distanceto="..targetID
-			if(gAttackNeutral ~= "1") then
+			if(gPreventAttackingInnocents == "1") then
 				filterstring = filterstring..",hostile"
 			end
 			

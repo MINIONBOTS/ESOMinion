@@ -113,8 +113,8 @@ function ml_global_information.moduleinit()
 		Settings.ESOMinion.gDevTest = "0"
 	end
 	
-	if not Settings.ESOMinion.gAttackNeutral then
-		Settings.ESOMinion.gAttackNeutral = "0"
+	if not Settings.ESOMinion.gPreventAttackingInnocents then
+		Settings.ESOMinion.gPreventAttackingInnocents = "1"
 	end
 	
 	if not Settings.ESOMinion.g_usesoulgemtorevive then Settings.ESOMinion.g_usesoulgemtorevive = "0" end
@@ -156,7 +156,7 @@ function ml_global_information.moduleinit()
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"PlaySound on Whisper","gPlaySoundOnWhisper",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Enable DevTest","gDevTest",GetString("settings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("attackNeutral"),"gAttackNeutral",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("preventAttackingInnocents"),"gPreventAttackingInnocents",GetString("settings"))
 	
 	--vendor, repair, vendormanager
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
@@ -212,7 +212,7 @@ function ml_global_information.moduleinit()
 	gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
 	gPlaySoundOnWhisper = Settings.ESOMinion.gPlaySoundOnWhisper
 	gDevTest = Settings.ESOMinion.gDevTest
-	gAttackNeutral = Settings.ESOMinion.gAttackNeutral
+	gPreventAttackingInnocents = Settings.ESOMinion.gPreventAttackingInnocents
 	
 	g_usesoulgemtorevive = Settings.ESOMinion.g_usesoulgemtorevive
 	g_rest   = Settings.ESOMinion.g_rest
@@ -585,7 +585,8 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "g_restmp" or 
 			k == "g_restsp" or
 			k == "gPlaySoundOnWhisper" or
-			k == "gDevTest"
+			k == "gDevTest" or 
+			k == "gPreventAttackingInnocents"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v

@@ -68,7 +68,7 @@ e_CombatTask = ml_effect.Create()
 c_CombatTask.target = nil
 function c_CombatTask:evaluate()
 	local filterstring = "attackable,targetable,alive,nocritter,shortestpath,maxdistance=120,onmesh"
-	if(gAttackNeutral ~= "1") then
+	if(gPreventAttackingInnocents == "1") then
 		filterstring = filterstring..",hostile"
 	end
 	
@@ -89,7 +89,7 @@ function e_CombatTask:execute()
 	ml_log("e_CombatTask ")
 	-- Weakest Aggro in CombatRange first	
 	local filterstring = "lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance="..ml_global_information.AttackRange
-	if(gAttackNeutral ~= "1") then
+	if(gPreventAttackingInnocents == "1") then
 		filterstring = filterstring..",hostile"
 	end
 	
@@ -299,7 +299,7 @@ function c_GetNextTarget:evaluate()
 			filterstring = filterstring..",exclude_contentid="..blacklist
 		end
 		
-		if(gAttackNeutral ~= "1") then
+		if(gPreventAttackingInnocents == "1") then
 			filterstring = filterstring..",hostile"
 		end
 	end
@@ -327,7 +327,7 @@ function e_GetNextTarget:execute()
 			filterstring = filterstring..",exclude_contentid="..blacklist	
 		end
 		
-		if(gAttackNeutral ~= "1") then
+		if(gPreventAttackingInnocents == "1") then
 			filterstring = filterstring..",hostile"
 		end
 	end
@@ -354,7 +354,7 @@ function e_GetNextTarget:execute()
 			filterstring = filterstring..",exclude_contentid="..blacklist
 		end
 		
-		if(gAttackNeutral ~= "1") then
+		if(gPreventAttackingInnocents == "1") then
 			filterstring = filterstring..",hostile"
 		end
 	end

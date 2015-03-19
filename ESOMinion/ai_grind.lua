@@ -111,7 +111,7 @@ c_FightToGrindMarker.target = nil
 function c_FightToGrindMarker:evaluate()
 	if ( c_MoveToMarker.markerreached == false and c_MoveToMarker.allowedToFight == true) then
 		local filterstring = "attackable,targetable,alive,nocritter,shortestpath,onmesh,maxdistance=30"
-		if(gAttackNeutral ~= "1") then
+		if(gPreventAttackingInnocents == "1") then
 			filterstring = filterstring..",hostile"
 		end
 		
@@ -132,7 +132,7 @@ function e_FightToGrindMarker:execute()
 	
 	-- Weakest Aggro in CombatRange first	
 	local filterstring = "lowesthealth,attackable,targetable,alive,aggro,nocritter,onmesh,maxdistance=15"
-	if(gAttackNeutral ~= "1") then
+	if(gPreventAttackingInnocents == "1") then
 		filterstring = filterstring..",hostile"
 	end
 		

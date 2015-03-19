@@ -611,6 +611,7 @@ strings =
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
 		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
     },                                  
     ["cn"] =                            
     {                               
@@ -1230,6 +1231,7 @@ strings =
 		guestserver						= "访问其他服务器",
 		revivecharacters				= "复活其他人",
 		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},
     ["jp"] =
     {
@@ -1837,6 +1839,7 @@ strings =
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
 		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},   
     ["de"] =
     {
@@ -2445,6 +2448,7 @@ strings =
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
 		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},     
     ["fr"] =
     {
@@ -3065,6 +3069,7 @@ strings =
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
 		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},       
     ["ru"] =
     {
@@ -3671,6 +3676,7 @@ strings =
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
 		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},    	
 
 }

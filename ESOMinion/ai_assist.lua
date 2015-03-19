@@ -49,7 +49,7 @@ function eso_ai_assist.SelectTargetExtended(maxrange, los)
 	if (sMtargetmode == "LowestHealth") then filterstring = filterstring..",lowesthealth" end
 	if (sMtargetmode == "Closest") then filterstring = filterstring..",nearest" end
 	if (sMtargetmode == "Biggest Crowd") then filterstring = filterstring..",clustered=600" end
-	if (gAttackNeutral ~= "1") then filterstring = filterstring..",hostile" end
+	if (gPreventAttackingInnocents == "1") then filterstring = filterstring..",hostile" end
 	
 	local TargetList = EntityList(filterstring)
 	if ( TargetList ) then
