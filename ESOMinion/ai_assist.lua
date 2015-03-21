@@ -27,6 +27,10 @@ function eso_ai_assist:Process()
 		-- LootAll
 		if ( c_LootAll:evaluate() ) then e_LootAll:execute() end
 		
+		if( gAssistInitCombat == "0" and not ml_global_information.Player_InCombat ) then
+			return
+		end
+		
 		if ( sMtargetmode == "None" ) then
 			local target = Player:GetTarget()
 			if ( target and target.attackable and target.alive and target.iscritter == false) then
@@ -85,12 +89,17 @@ function eso_ai_assist.moduleinit()
 	if (Settings.ESOMinion.sMmode == nil) then
 		Settings.ESOMinion.sMmode = "Everything"
 	end
+	if (Settings.ESOMinion.gAssistInitCombat == nil) then
+		Settings.ESOMinion.gAssistInitCombat = "0"
+	end
+	
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMtargetmode"),"sMtargetmode",GetString("assistMode"),"None,LowestHealth,Closest,Biggest Crowd");
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMmode"),"sMmode",GetString("assistMode"),"Everything,Players Only")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("startCombat"),"gAssistInitCombat",GetString("assistMode"))
 	
 	sMtargetmode = Settings.ESOMinion.sMtargetmode
 	sMmode = Settings.ESOMinion.sMmode
-	
+	gAssistInitCombat = Settings.ESOMinion.gAssistInitCombat
 end
 
 
@@ -99,4 +108,18 @@ if ( ml_global_information.BotModes ) then
 	ml_global_information.BotModes[GetString("assistMode")] = eso_ai_assist
 end 
 
+function eso_ai_assist.guivarupdate(Event, NewVals, OldVals)
+	for k,v in pairs(NewVals) do
+		if (k == "sMtargetmode" or
+			k == "sMmode" or
+			k == "gAssistInitCombat"
+		)						
+		then
+			Settings.ESOMinion[tostring(k)] = v
+		end
+	end
+	GUI_RefreshWindow(ml_global_information.MainWindow.Name)
+end
+
 RegisterEventHandler("Module.Initalize",eso_ai_assist.moduleinit)
+RegisterEventHandler("GUI.Update",eso_ai_assist.guivarupdate)

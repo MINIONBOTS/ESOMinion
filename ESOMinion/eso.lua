@@ -294,6 +294,7 @@ function ml_global_information.moduleinit()
 		end
 	end
 
+	Player:ClearTarget()
 	if gAutoStart == "1" and not ml_global_information.running then
 		ml_global_information.togglebot(1)
 	end	
@@ -500,9 +501,6 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_blacklist_mgr.UpdateEntryTime()
 		ml_blacklist_mgr.UpdateEntries(tickcount)
 
-
-
-
 		-- Run the Bot
 		if ( NavigationManager:GetNavMeshState() == GLOBAL.MESHSTATE.MESHBUILDING ) then
 			GUI_SetStatusBar("Loading Navigation Mesh...")
@@ -656,6 +654,7 @@ function ml_global_information.ResetBot()
 	c_MoveToMarker.allowedToFight = false
 	c_movetorandom.randompoint = nil
 	c_movetorandom.randompointreached = false
+	Player:ClearTarget()
 end
 
 function ml_global_information.Wait( seconds ) 

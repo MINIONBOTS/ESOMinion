@@ -76,7 +76,6 @@ end
 
 -- Global vars which are used very often and we can just reduce the hammering by getting them once per frame
 function ml_globals.UpdateGlobals()
-	
 	if ( Player ~= nil and ml_global_information.lastgamestate == 2) then
 						
 		ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
