@@ -12,6 +12,8 @@ function eso_ai_assist.Create()
     newinst.process_elements = {}
     newinst.overwatch_elements = {}
             
+	newinst.lastTargetID = 0		
+			
     return newinst
 end
 
@@ -22,17 +24,22 @@ end
 function eso_ai_assist:Process()
 	--ml_log("AssistMode_Process->")
 	if ( ml_global_information.Player_Dead == false ) and ( e("IsMounted()") == false ) then
-		
-		
 		-- LootAll
 		if ( c_LootAll:evaluate() ) then e_LootAll:execute() end
+		
+		-- the client does not clear the target offsets since the 1.6 patch
+		-- this is a workaround so that players can attack manually while the bot is running
+		local target = Player:GetTarget()
+		if(target and target.id ~= self.lastTargetID) then
+			Player:ClearTarget()
+			self.lastTargetID = target.id
+		end
 		
 		if( gAssistInitCombat == "0" and not ml_global_information.Player_InCombat ) then
 			return
 		end
 		
 		if ( sMtargetmode == "None" ) then
-			local target = Player:GetTarget()
 			if ( target and target.attackable and target.alive and target.iscritter == false) then
 				if(gPreventAttackingInnocents == "0" or target.hostile) then
 					eso_skillmanager.AttackTarget( target.id )
