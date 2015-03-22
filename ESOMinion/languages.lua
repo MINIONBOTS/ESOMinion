@@ -411,7 +411,7 @@ strings =
         targetName                      = "Target Name",
         monsters                        = "Monsters",
         fates                           = "Fates",
-        startCombat                     = "Start Combat",
+        startCombat                     = "Initiate Combat",
 		onlySolo						= "Only solo",
 		onlyParty						= "Only in party",
 		alliesNearHPLT					= "Allies HP% <",
@@ -610,6 +610,8 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
     },                                  
     ["cn"] =                            
     {                               
@@ -1228,6 +1230,8 @@ strings =
 		--mc_main.lua
 		guestserver						= "访问其他服务器",
 		revivecharacters				= "复活其他人",
+		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},
     ["jp"] =
     {
@@ -1637,7 +1641,7 @@ strings =
         targetName                      = "Target Name",
         monsters                        = "Monsters",
         fates                           = "Fates",
-        startCombat                     = "Start Combat",
+        startCombat                     = "Initiate Combat",
 		onlySolo						= "Only solo",
 		onlyParty						= "Only in party",
 		alliesNearHPLT					= "Allies HP% <",
@@ -1834,6 +1838,8 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},   
     ["de"] =
     {
@@ -2244,7 +2250,7 @@ strings =
         targetName                      = "Target Name",
         monsters                        = "Monsters",
         fates                           = "Fates",
-        startCombat                     = "Start Combat",
+        startCombat                     = "Initiate Combat",
 		onlySolo						= "Only solo",
 		onlyParty						= "Only in party",
 		alliesNearHPLT					= "Allies HP% <",
@@ -2441,6 +2447,8 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},     
     ["fr"] =
     {
@@ -3060,6 +3068,8 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},       
     ["ru"] =
     {
@@ -3468,7 +3478,7 @@ strings =
         targetName                      = "Target Name",
         monsters                        = "Monsters",
         fates                           = "Fates",
-        startCombat                     = "Start Combat",
+        startCombat                     = "Initiate Combat",
 		onlySolo						= "Only solo",
 		onlyParty						= "Only in party",
 		alliesNearHPLT					= "Allies HP% <",
@@ -3665,6 +3675,8 @@ strings =
 		--mc_main.lua
 		guestserver						= "GuestServer",
 		revivecharacters				= "Revive Others",
+		attackNeutral					= "Attack Neutral Targets",
+		preventAttackingInnocents		= "Prevent Attacking Innocents",
 	},    	
 
 }

@@ -113,6 +113,10 @@ function ml_global_information.moduleinit()
 		Settings.ESOMinion.gDevTest = "0"
 	end
 	
+	if not Settings.ESOMinion.gPreventAttackingInnocents then
+		Settings.ESOMinion.gPreventAttackingInnocents = "1"
+	end
+	
 	if not Settings.ESOMinion.g_usesoulgemtorevive then Settings.ESOMinion.g_usesoulgemtorevive = "0" end
 	if not Settings.ESOMinion.g_rest then Settings.ESOMinion.g_rest = "1" end
 	if not Settings.ESOMinion.g_resthp then Settings.ESOMinion.g_resthp = "75" end
@@ -151,6 +155,7 @@ function ml_global_information.moduleinit()
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"PlaySound on Whisper","gPlaySoundOnWhisper",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Enable DevTest","gDevTest",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("preventAttackingInnocents"),"gPreventAttackingInnocents",GetString("settings"))
 	
 	--vendor, repair, vendormanager
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
@@ -200,6 +205,7 @@ function ml_global_information.moduleinit()
 	gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
 	gPlaySoundOnWhisper = Settings.ESOMinion.gPlaySoundOnWhisper
 	gDevTest = Settings.ESOMinion.gDevTest
+	gPreventAttackingInnocents = Settings.ESOMinion.gPreventAttackingInnocents
 	
 	g_usesoulgemtorevive = Settings.ESOMinion.g_usesoulgemtorevive
 	g_rest   = Settings.ESOMinion.g_rest
@@ -283,6 +289,7 @@ function ml_global_information.moduleinit()
 	
 	-- setup quest
 
+	Player:ClearTarget()
 	if gAutoStart == "1" and not ml_global_information.running then
 		ml_global_information.togglebot(1)
 	end	
@@ -356,9 +363,17 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 		ml_global_information.lasttick = tickcount
 		
 		local currentState = tostring(e("PregameStateManager_GetCurrentState()"))
-		if ( currentState == "GammaAdjust" or currentState == "ShowEULA") then
+		if ( currentState == "GammaAdjust" ) then
 			e("PregameStateManager_ReenterLoginState()")
 			return
+		
+		-- There are 4 different agreement screens and the agree functions for the three other than
+		-- the EULA dialog are not defined in the ESO LUA. For now just force the user to agree to
+		-- these after install or client update, maybe do it automatically later when there is more
+		-- time to spend looking
+		
+		--elseif ( currentstate == "ShowEULA" ) then
+		--	e("AgreeToEULA()")
 			
 		elseif ( currentState == "AccountLogin" ) then
 			ml_log("AccountLogin... ")
@@ -376,7 +391,7 @@ function ml_global_information.InTitleScreenOnUpdate( event, tickcount )
 		
 		end
 		-- Update the Statusbar on the left/bottom screen
-		GUI_SetStatusBar(ml_GetTraceString())		
+		GUI_SetStatusBar(ml_GetTraceString())
 	end
 end
 
@@ -481,9 +496,6 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_blacklist_mgr.UpdateEntryTime()
 		ml_blacklist_mgr.UpdateEntries(tickcount)
 
-
-
-
 		-- Run the Bot
 		if ( NavigationManager:GetNavMeshState() == GLOBAL.MESHSTATE.MESHBUILDING ) then
 			GUI_SetStatusBar("Loading Navigation Mesh...")
@@ -566,7 +578,8 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "g_restmp" or 
 			k == "g_restsp" or
 			k == "gPlaySoundOnWhisper" or
-			k == "gDevTest"
+			k == "gDevTest" or 
+			k == "gPreventAttackingInnocents"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
@@ -667,6 +680,7 @@ function ml_global_information.ResetBot()
 	c_MoveToMarker.allowedToFight = false
 	c_movetorandom.randompoint = nil
 	c_movetorandom.randompointreached = false
+	Player:ClearTarget()
 end
 
 function ml_global_information.Wait( seconds ) 

@@ -12,6 +12,8 @@ function eso_ai_assist.Create()
     newinst.process_elements = {}
     newinst.overwatch_elements = {}
             
+	newinst.lastTargetID = 0		
+			
     return newinst
 end
 
@@ -21,17 +23,27 @@ end
 
 function eso_ai_assist:Process()
 	--ml_log("AssistMode_Process->")
-		
 	if ( ml_global_information.Player_Dead == false ) and ( e("IsMounted()") == false ) then
-		
-		
 		-- LootAll
 		if ( c_LootAll:evaluate() ) then e_LootAll:execute() end
 		
+		-- the client does not clear the target offsets since the 1.6 patch
+		-- this is a workaround so that players can attack manually while the bot is running
+		local target = Player:GetTarget()
+		if(target and target.id ~= self.lastTargetID) then
+			Player:ClearTarget()
+			self.lastTargetID = target.id
+		end
+		
+		if( gAssistInitCombat == "0" and not ml_global_information.Player_InCombat ) then
+			return
+		end
+		
 		if ( sMtargetmode == "None" ) then
-			local target = Player:GetTarget()
-			if ( target and target.attackable and target.alive and target.iscritter == false) then 
-				eso_skillmanager.AttackTarget( target.id )
+			if ( target and target.attackable and target.alive and target.iscritter == false) then
+				if(gPreventAttackingInnocents == "0" or target.hostile) then
+					eso_skillmanager.AttackTarget( target.id )
+				end
 			end		
 		else
 			eso_ai_assist.SetTargetAssist()
@@ -49,6 +61,7 @@ function eso_ai_assist.SelectTargetExtended(maxrange, los)
 	if (sMtargetmode == "LowestHealth") then filterstring = filterstring..",lowesthealth" end
 	if (sMtargetmode == "Closest") then filterstring = filterstring..",nearest" end
 	if (sMtargetmode == "Biggest Crowd") then filterstring = filterstring..",clustered=600" end
+	if (gPreventAttackingInnocents == "1") then filterstring = filterstring..",hostile" end
 	
 	local TargetList = EntityList(filterstring)
 	if ( TargetList ) then
@@ -83,12 +96,17 @@ function eso_ai_assist.moduleinit()
 	if (Settings.ESOMinion.sMmode == nil) then
 		Settings.ESOMinion.sMmode = "Everything"
 	end
+	if (Settings.ESOMinion.gAssistInitCombat == nil) then
+		Settings.ESOMinion.gAssistInitCombat = "0"
+	end
+	
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMtargetmode"),"sMtargetmode",GetString("assistMode"),"None,LowestHealth,Closest,Biggest Crowd");
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMmode"),"sMmode",GetString("assistMode"),"Everything,Players Only")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("startCombat"),"gAssistInitCombat",GetString("assistMode"))
 	
 	sMtargetmode = Settings.ESOMinion.sMtargetmode
 	sMmode = Settings.ESOMinion.sMmode
-	
+	gAssistInitCombat = Settings.ESOMinion.gAssistInitCombat
 end
 
 
@@ -97,4 +115,18 @@ if ( ml_global_information.BotModes ) then
 	ml_global_information.BotModes[GetString("assistMode")] = eso_ai_assist
 end 
 
+function eso_ai_assist.guivarupdate(Event, NewVals, OldVals)
+	for k,v in pairs(NewVals) do
+		if (k == "sMtargetmode" or
+			k == "sMmode" or
+			k == "gAssistInitCombat"
+		)						
+		then
+			Settings.ESOMinion[tostring(k)] = v
+		end
+	end
+	GUI_RefreshWindow(ml_global_information.MainWindow.Name)
+end
+
 RegisterEventHandler("Module.Initalize",eso_ai_assist.moduleinit)
+RegisterEventHandler("GUI.Update",eso_ai_assist.guivarupdate)
