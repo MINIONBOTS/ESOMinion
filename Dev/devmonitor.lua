@@ -588,14 +588,26 @@ function Dev.UpdateWindow()
 		qQuestID = questTable.id
 		qCurrStepIndex = questTable.currentstep
 		qCurrCondIndex = questTable.currentcondition
+	else
+		qQuestID = ""
+		qCurrStepIndex = ""
+		qCurrCondIndex = ""
 	end
+	
 	if(ValidTable(stepTable)) then
 		qStepID = stepTable.id
+	else
+		qStepID = ""
 	end
+	
 	if(ValidTable(conditionTable)) then
 		qConditionID = conditionTable.id
 		qConditionType = conditionTable.type
 		qConditionPos = (math.floor(conditionTable.pos.x * 10) / 10).." / "..(math.floor(conditionTable.pos.y * 10) / 10).." / "..(math.floor(conditionTable.pos.z * 10) / 10)
+	else
+		qConditionID = ""
+		qConditionType = ""
+		qConditionPos = ""
 	end
 	
 	-- Movement & Navigation	

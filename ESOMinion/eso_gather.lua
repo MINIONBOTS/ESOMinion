@@ -180,7 +180,7 @@ end
 --:======================================================================================================================================================================
 
 c_gatherupdate = ml_cause.Create()
-e_gatherupdate = inheritsFrom(ml_effect)
+e_gatherupdate = ml_effect.Create()
 
 function c_gatherupdate:evaluate()
 	return false
@@ -195,7 +195,7 @@ end
 --:======================================================================================================================================================================
 
 c_gatherwindow = ml_cause.Create()
-e_gatherwindow = inheritsFrom(ml_effect)
+e_gatherwindow = ml_effect.Create()
 
 function c_gatherwindow:evaluate()
 	return (e("GetNumLootItems()") > 0 or e("GetLootMoney()") > 0)
@@ -213,7 +213,7 @@ end
 --:======================================================================================================================================================================
 
 c_gathernode = ml_cause.Create()
-e_gathernode = inheritsFrom(ml_effect)
+e_gathernode = ml_effect.Create()
 
 function c_gathernode:evaluate()
 
@@ -260,7 +260,7 @@ end
 --:======================================================================================================================================================================
 
 c_avoidnode = ml_cause.Create()
-e_avoidnode = inheritsFrom(ml_effect)
+e_avoidnode = ml_effect.Create()
 
 function c_avoidnode:evaluate()
 	
@@ -309,7 +309,7 @@ end
 --:======================================================================================================================================================================
 
 c_movetonodepos = ml_cause.Create()
-e_movetonodepos = inheritsFrom(ml_effect)
+e_movetonodepos = ml_effect.Create()
 
 function c_movetonodepos:evaluate()
 

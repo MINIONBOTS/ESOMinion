@@ -20,7 +20,6 @@ function ai_grind.Create()
 end
 
 function ai_grind:Init()
-
 	--: dead
     local ke_dead = ml_element:create( "dead", c_dead, e_dead, 300 )
     self:add( ke_dead, self.process_elements)

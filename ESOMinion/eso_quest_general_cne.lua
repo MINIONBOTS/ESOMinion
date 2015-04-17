@@ -76,7 +76,6 @@ function e_handleaggro:execute()
 			newTask.targetID = entity.id 
 			newTask.targetPos = entity.pos
 			e("OnSpecialMoveKeyUp(1)")
-			ml_global_information.Player_Sprinting = false
 			ml_task_hub:Add(newTask.Create(), REACTIVE_GOAL, TP_ASAP)
 			return
 		end		

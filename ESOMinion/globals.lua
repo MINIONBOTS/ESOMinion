@@ -89,6 +89,7 @@ function ml_globals.UpdateGlobals()
 		ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
 		ml_global_information.CurrentMapName = e("GetMapName()")
 		ml_global_information.Player_Position = Player.pos
+		ml_global_information.Player_Sprinting = Player.issprinting
 		
 		ml_global_information.Player_Magicka = {} 
 			local magickaID = g("POWERTYPE_MAGICKA")			

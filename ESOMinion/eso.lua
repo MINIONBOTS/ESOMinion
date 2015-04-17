@@ -17,7 +17,6 @@ ml_global_information.BlacklistContentID = ""
 ml_global_information.WhitelistContentID = ""
 ml_global_information.MarkerTime = 0
 ml_global_information.Player_SprintingRecharging = false
-ml_global_information.Player_Sprinting = false
 ml_global_information.Player_SprintingTime = 0
 ml_global_information.VendorChar = ""
 ml_global_information.gatherdistance = 2.5
@@ -294,8 +293,12 @@ function ml_global_information.moduleinit()
 		ml_global_information.togglebot(1)
 	end	
 	
-	if gDevTest == "1" then
-		DevTest()
+	if(gDevTest == "0") then
+		gEnableLog = "0"
+		gLogCNE = "0"
+	else
+		gEnableLog = "1"
+		gLogCNE = "1"
 	end
 end
 
@@ -476,7 +479,6 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	if ( tickcount - ml_global_information.lasttick > tonumber(gPulseTime) ) then
 		ml_global_information.lasttick = tickcount
 		
-		
 		-- Update global variables
 		ml_globals.UpdateGlobals()
 		
@@ -500,8 +502,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		if ( NavigationManager:GetNavMeshState() == GLOBAL.MESHSTATE.MESHBUILDING ) then
 			GUI_SetStatusBar("Loading Navigation Mesh...")
 			
-		elseif ( ml_global_information.running ) then		
-					
+		elseif ( ml_global_information.running ) then
 			-- Update Marker status
 			if ( gBotMode == GetString("grindMode") and ValidTable(GetCurrentMarker()) and ml_task_hub.shouldRun )then
 				ml_log("Current Marker:"..GetCurrentMarker():GetName())
@@ -546,10 +547,10 @@ end
 function ml_global_information.eventhandler(arg)
 	if ( arg == "ml_global_information.startStop" or arg == "MINION.toggle") then
 		if ( gBotRunning == "1" ) then
-			gAutoStart = "0"
+			gBotRunning = "0"
 			ml_global_information.togglebot("0")
 		else
-			gAutoStart = "1"
+			gBotRunning = "1"
 			ml_global_information.togglebot("1")
 		end
 	end
@@ -578,7 +579,6 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			k == "g_restmp" or 
 			k == "g_restsp" or
 			k == "gPlaySoundOnWhisper" or
-			k == "gDevTest" or 
 			k == "gPreventAttackingInnocents"
 		)						
 		then
@@ -591,6 +591,15 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 		elseif ( k == "gBotMode") then        
 			Settings.ESOMinion[tostring(k)] = v
 			ml_global_information.UpdateMode()
+		elseif ( k == "gDevTest") then
+			if(v == "0") then
+				gEnableLog = "0"
+				gLogCNE = "0"
+			else
+				gEnableLog = "1"
+				gLogCNE = "1"
+			end
+			Settings.ESOMinion[tostring(k)] = v
 		end
 	end
 	GUI_RefreshWindow(ml_global_information.MainWindow.Name)

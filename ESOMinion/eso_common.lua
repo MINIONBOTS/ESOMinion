@@ -85,7 +85,7 @@ end
 --: add this cne to move to a random position on the mesh
 
 c_movetorandom = ml_cause.Create()
-e_movetorandom = inheritsFrom(ml_effect)
+e_movetorandom = ml_effect.Create()
 c_movetorandom.randompoint = nil
 c_movetorandom.randompointreached = false
 
@@ -157,14 +157,12 @@ function Sprint()
 			if (ml_global_information.Player_Stamina.percent >= tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging and not e("IsUnitInCombat(player)")) then
 				e("OnSpecialMoveKeyDown(1)")
 				--d("eso_common - > starting sprint")
-				ml_global_information.Player_Sprinting = true
 				ml_global_information.Player_SprintingRecharging = false
 			end
 		elseif (ml_global_information.Player_Sprinting) then
 			if (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) or e("IsUnitInCombat(player)")) then
 				e("OnSpecialMoveKeyUp(1)")
 				--d("eso_common - > stopping sprint, recharging")
-				ml_global_information.Player_Sprinting = false
 				ml_global_information.Player_SprintingRecharging = true
 			end
 			--derp check
@@ -174,7 +172,6 @@ function Sprint()
 				ml_global_information.Player_SprintingTime = ml_global_information.Now
 				e("OnSpecialMoveKeyDown(1)")
 				--d("eso_common - > checking sprint")
-				ml_global_information.Player_Sprinting = true
 				ml_global_information.Player_SprintingRecharging = false
 			end
 		end
@@ -183,7 +180,6 @@ function Sprint()
 		if (ml_global_information.Player_Sprinting or ml_global_information.Player_SprintingRecharging) then
 			e("OnSpecialMoveKeyUp(1)")
 			--d("eso_common - > stopping sprint, sprint disabled")
-			ml_global_information.Player_Sprinting = false
 			ml_global_information.Player_SprintingRecharging = false
 		end
 	end
