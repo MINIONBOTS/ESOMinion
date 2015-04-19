@@ -140,7 +140,7 @@ function ml_global_information.moduleinit()
 	--GUI_NewField(ml_global_information.MainWindow.Name,"LocationName","dLocationName",GetString("botStatus"))
 	
 	--: Dead
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " UseSoulGems", "Settings.ESOMinion.g_usesoulgemtorevive", "Dead")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " UseSoulGems", "g_usesoulgemtorevive", "Dead")
 	
 	--: Rest
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Rest", "g_rest", "Rest")
