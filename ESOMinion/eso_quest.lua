@@ -118,3 +118,5 @@ end
 function QuestManager:IsComplete(journalIndex)
 	return e("GetJournalQuestIsComplete("..tostring(journalIndex)..")")
 end
+
+QuestManager.GetNearestObjectiveCallback = eso_quest_helpers.GetNearestQuestObjective
