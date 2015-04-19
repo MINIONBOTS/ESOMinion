@@ -551,10 +551,10 @@ end
 function ml_global_information.eventhandler(arg)
 	if ( arg == "ml_global_information.startStop" or arg == "MINION.toggle") then
 		if ( gBotRunning == "1" ) then
-			gAutoStart = "0"
+			gBotRunning = "0"
 			ml_global_information.togglebot("0")
 		else
-			gAutoStart = "1"
+			gBotRunning = "1"
 			ml_global_information.togglebot("1")
 		end
 	end

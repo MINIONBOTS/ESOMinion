@@ -1,5 +1,5 @@
-c_movetomap = ml_cause.Create()
-e_movetomap = ml_effect.Create()
+c_movetomap = inheritsFrom(ml_cause)
+e_movetomap = inheritsFrom(ml_effect)
 function c_movetomap:evaluate()
 	return false
 end
@@ -7,8 +7,8 @@ function e_movetomap:execute()
 	-- add movetomap task
 end
 
-c_mount = ml_cause.Create()
-e_mount = ml_effect.Create()
+c_mount = inheritsFrom(ml_cause)
+e_mount = inheritsFrom(ml_effect)
 function c_mount:evaluate()
 	if(gUseMount == "1" and ai_mount:CanMount() and not ai_mount:IsMounted()) then
 		local ppos = ml_global_information.Player_Position
@@ -24,8 +24,8 @@ function e_mount:execute()
 	ai_mount:Mount()
 end
 
-c_walktopos = ml_cause.Create()
-e_walktopos = ml_effect.Create()
+c_walktopos = inheritsFrom(ml_cause)
+e_walktopos = inheritsFrom(ml_effect)
 function c_walktopos:evaluate()
 	--[[if (IsLoading() or IsPositionLocked()) then
 		return false
@@ -57,8 +57,8 @@ function e_walktopos:execute()
 	--d(tostring(PathSize))
 end
 
-c_handleaggro = ml_cause.Create()
-e_handleaggro = ml_effect.Create()
+c_handleaggro = inheritsFrom(ml_cause)
+e_handleaggro = inheritsFrom(ml_effect)
 function c_handleaggro:evaluate()
 	if(self.ignoreAggro) then
 		return false
@@ -83,8 +83,8 @@ function e_handleaggro:execute()
 	end
 end
 
-c_updatetarget = ml_cause.Create()
-e_updatetarget = ml_effect.Create()
+c_updatetarget = inheritsFrom(ml_cause)
+e_updatetarget = inheritsFrom(ml_effect)
 function c_updatetarget:evaluate()
 	local target = EntityList:Get(self.targetid)
 	if(ValidTable(target)) then
@@ -100,8 +100,8 @@ function e_updatetarget:execute()
 	self.newPos = nil
 end
 
-c_movetotarget = ml_cause.Create()
-e_movetotarget = ml_effect.Create()
+c_movetotarget = inheritsFrom(ml_cause)
+e_movetotarget = inheritsFrom(ml_effect)
 function c_movetotarget:evaluate()
 	local target = EntityList:Get(self.targetid)
 	if(ValidTable(target)) then
@@ -118,8 +118,8 @@ function e_movetotarget:execute()
 	Player:MoveTo(tpos.x,tpos.y,tpos.z,0.5+(target.radius),false,rndPath,false)
 end
 
-c_attacktarget = ml_cause.Create()
-e_attacktarget = ml_effect.Create()
+c_attacktarget = inheritsFrom(ml_cause)
+e_attacktarget = inheritsFrom(ml_effect)
 function c_attacktarget:evaluate()
 	local target = EntityList:Get(self.targetid)
 	if(ValidTable(target)) then

@@ -144,8 +144,8 @@ end
 --: gather
 --:======================================================================================================================================================================
 
-c_gather = ml_cause.Create()
-e_gather = ml_effect.Create()
+c_gather = inheritsFrom(ml_cause)
+e_gather = inheritsFrom(ml_effect)
 c_gather.throttle = 2500
 c_gather.node = nil
 
@@ -179,7 +179,7 @@ end
 --: gatherupdate
 --:======================================================================================================================================================================
 
-c_gatherupdate = ml_cause.Create()
+c_gatherupdate = inheritsFrom(ml_cause)
 e_gatherupdate = inheritsFrom(ml_effect)
 
 function c_gatherupdate:evaluate()
@@ -194,7 +194,7 @@ end
 --: gatherwindow
 --:======================================================================================================================================================================
 
-c_gatherwindow = ml_cause.Create()
+c_gatherwindow = inheritsFrom(ml_cause)
 e_gatherwindow = inheritsFrom(ml_effect)
 
 function c_gatherwindow:evaluate()
@@ -212,7 +212,7 @@ end
 --: 
 --:======================================================================================================================================================================
 
-c_gathernode = ml_cause.Create()
+c_gathernode = inheritsFrom(ml_cause)
 e_gathernode = inheritsFrom(ml_effect)
 
 function c_gathernode:evaluate()
@@ -259,7 +259,7 @@ end
 --: avoidnode
 --:======================================================================================================================================================================
 
-c_avoidnode = ml_cause.Create()
+c_avoidnode = inheritsFrom(ml_cause)
 e_avoidnode = inheritsFrom(ml_effect)
 
 function c_avoidnode:evaluate()
@@ -308,7 +308,7 @@ end
 --: 
 --:======================================================================================================================================================================
 
-c_movetonodepos = ml_cause.Create()
+c_movetonodepos = inheritsFrom(ml_cause)
 e_movetonodepos = inheritsFrom(ml_effect)
 
 function c_movetonodepos:evaluate()
@@ -353,8 +353,8 @@ end
 --: gathermarker (need/want to redo this asap)
 --:======================================================================================================================================================================
 
-c_MoveToGatherMarker = ml_cause.Create()
-e_MoveToGatherMarker = ml_effect.Create()
+c_MoveToGatherMarker = inheritsFrom(ml_cause)
+e_MoveToGatherMarker = inheritsFrom(ml_effect)
 e_MoveToGatherMarker.reached = false
 e_MoveToGatherMarker.returned = false
 

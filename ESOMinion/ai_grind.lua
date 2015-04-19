@@ -20,7 +20,6 @@ function ai_grind.Create()
 end
 
 function ai_grind:Init()
-
 	--: dead
     local ke_dead = ml_element:create( "dead", c_dead, e_dead, 300 )
     self:add( ke_dead, self.process_elements)
@@ -73,8 +72,8 @@ function ai_grind:task_complete_execute()
     
 end
 
-c_grindgather = ml_cause.Create()
-e_grindgather = ml_effect.Create()
+c_grindgather = inheritsFrom(ml_cause)
+e_grindgather = inheritsFrom(ml_effect)
 c_grindgather.throttle = 2500
 c_grindgather.node = nil
 
@@ -105,8 +104,8 @@ end
 
 
 --------- Creates a new REACTIVE_GOAL subtask to kill an enemy when we are fighting our way towards the current grindmarker
-c_FightToGrindMarker = ml_cause.Create()
-e_FightToGrindMarker = ml_effect.Create()
+c_FightToGrindMarker = inheritsFrom(ml_cause)
+e_FightToGrindMarker = inheritsFrom(ml_effect)
 c_FightToGrindMarker.target = nil
 function c_FightToGrindMarker:evaluate()
 	if ( c_MoveToMarker.markerreached == false and c_MoveToMarker.allowedToFight == true) then
@@ -164,8 +163,8 @@ end
 -- Moves player towards the current marker and makes sure we are still inside tha radius around the marker, moves the player randomly around the maker to kill n find stuff
 -- If Markertime is up, it will pick also the next marker
 -- If there are no Maker in the current mesh, it will pick a random point and go there
-c_MoveToMarker = ml_cause.Create()
-e_MoveToMarker = ml_effect.Create()
+c_MoveToMarker = inheritsFrom(ml_cause)
+e_MoveToMarker = inheritsFrom(ml_effect)
 c_MoveToMarker.markerreachedfirsttime = false
 c_MoveToMarker.markerreached = false
 c_MoveToMarker.allowedToFight = false -- this sh*t is needed else he will go back n forth on the outer side of the marker's 350 radius if an enemy sits at 520 behind that radius -.-

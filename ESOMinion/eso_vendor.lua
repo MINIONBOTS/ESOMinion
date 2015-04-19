@@ -37,8 +37,8 @@ function eso_vendortask:task_complete_execute()
 	self.completed = true
 end
 
-c_Vendor = ml_cause.Create()
-e_Vendor = ml_effect.Create()
+c_Vendor = inheritsFrom(ml_cause)
+e_Vendor = inheritsFrom(ml_effect)
 e_Vendor.throttle = 2500
 
 function c_Vendor:evaluate()
@@ -64,8 +64,8 @@ end
 --: VendorUpdate
 --:===============================================================================================================  
 
-c_VendorUpdate = ml_cause.Create()
-e_VendorUpdate = ml_effect.Create()
+c_VendorUpdate = inheritsFrom(ml_cause)
+e_VendorUpdate = inheritsFrom(ml_effect)
 
 function c_VendorUpdate:evaluate()
 	ml_task_hub:CurrentTask().vendor = GetVendor()
@@ -81,8 +81,8 @@ end
 --: MoveToVendor
 --:===============================================================================================================  
 
-c_MoveToVendor = ml_cause.Create()
-e_MoveToVendor = ml_effect.Create()
+c_MoveToVendor = inheritsFrom(ml_cause)
+e_MoveToVendor = inheritsFrom(ml_effect)
 
 function c_MoveToVendor:evaluate()
 	if (gVendor == "1" and NeedToVendor()) or (gRepair == "1" and NeedToRepair()) then
@@ -127,8 +127,8 @@ end
 --: VendorAndRepair
 --:===============================================================================================================  
 
-c_VendorAndRepair = ml_cause.Create()
-e_VendorAndRepair = ml_effect.Create()
+c_VendorAndRepair = inheritsFrom(ml_cause)
+e_VendorAndRepair = inheritsFrom(ml_effect)
 e_VendorAndRepair.throttle = math.random(1000,2000)
 
 function c_VendorAndRepair:evaluate()

@@ -1,5 +1,5 @@
-c_interact = ml_cause.Create()
-e_interact = ml_effect.Create()
+c_interact = inheritsFrom(ml_cause)
+e_interact = inheritsFrom(ml_effect)
 function c_interact:evaluate()
 	local dataTable = self:GetData()
 	if(ValidTable(dataTable)) then
@@ -27,8 +27,8 @@ end
 
 -- for now simply run through first choice always
 -- eventually create a chatter task that pulls static data choices
-c_chatter = ml_cause.Create()
-e_chatter = ml_effect.Create()
+c_chatter = inheritsFrom(ml_cause)
+e_chatter = inheritsFrom(ml_effect)
 function c_chatter:evaluate()
 	return tonumber(e("GetChatterOptionCount()")) > 0
 end
@@ -36,8 +36,8 @@ function e_chatter:execute()
 	e("SelectChatterOption(1)")
 end
 
-c_acceptquest = ml_cause.Create()
-e_acceptquest = ml_effect.Create()
+c_acceptquest = inheritsFrom(ml_cause)
+e_acceptquest = inheritsFrom(ml_effect)
 function c_acceptquest:evaluate()
 	-- check for both event and offered quest info
 	

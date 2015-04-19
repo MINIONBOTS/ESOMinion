@@ -238,8 +238,8 @@ end
 
 ----- --------
 --------------
-c_autoequip = ml_cause.Create()
-e_autoequip = ml_effect.Create()
+c_autoequip = inheritsFrom(ml_cause)
+e_autoequip = inheritsFrom(ml_effect)
 c_autoequip.wait = 20000
 
  
