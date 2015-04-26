@@ -21,6 +21,7 @@ ml_global_information.Player_SprintingTime = 0
 ml_global_information.VendorChar = ""
 ml_global_information.gatherdistance = 2.5
 ml_global_information.randomdistance = 10
+ml_global_information.autoStartDisabled = false
 
 esominion = {}
 
@@ -293,13 +294,11 @@ function ml_global_information.moduleinit()
 		ml_global_information.togglebot(1)
 	end	
 	
-	if(gDevTest == "0") then
-		gEnableLog = "0"
-		gLogCNE = "0"
-	else
+	if(gDevTest == "1") then
 		gEnableLog = "1"
 		gLogCNE = "1"
 	end
+	
 end
 
 function test()
@@ -533,7 +532,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				GUI_SetStatusBar(ml_GetTraceString())					
 			end
 				
-		elseif ( ml_global_information.running == false and gAutoStart == "1" ) then
+		elseif ( ml_global_information.running == false and gAutoStart == "1" and not ml_global_information.autoStartDisabled) then
 			ml_global_information.togglebot(1)
 		else
 			GUI_SetStatusBar("BOT: Not Running")
@@ -592,13 +591,8 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			Settings.ESOMinion[tostring(k)] = v
 			ml_global_information.UpdateMode()
 		elseif ( k == "gDevTest") then
-			if(v == "0") then
-				gEnableLog = "0"
-				gLogCNE = "0"
-			else
-				gEnableLog = "1"
-				gLogCNE = "1"
-			end
+			gEnableLog = v
+			gLogCNE = v
 			Settings.ESOMinion[tostring(k)] = v
 		end
 	end
@@ -656,6 +650,9 @@ function ml_global_information.togglebot(arg)
 		ml_global_information.ResetBot()
 		ml_task_hub:ClearQueues()
 		ml_global_information.UpdateMode()
+		if(gAutoStart == "1" and ml_global_information.autoStartDisabled == false) then
+			ml_global_information.autoStartDisabled = true
+		end
 	else
 		d("Starting Bot..")
 		ml_global_information.running = true
