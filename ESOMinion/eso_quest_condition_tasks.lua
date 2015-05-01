@@ -12,9 +12,11 @@ function eso_task_quest_condition.Create()
 end
 
 function eso_task_quest_condition:Init()	
-	-- first init any superclass cnes and add task complete/fail cnes
-	self:InitSuper()
+	-- add task complete/fail cnes
 	self:AddTaskCheckCEs()
+	
+	-- InitSuper
+	self:InitSuper()
 end
 
 function eso_task_quest_condition:task_complete_eval()
@@ -50,8 +52,7 @@ function eso_task_quest_condition_interact.Create()
 end
 
 function eso_task_quest_condition_interact:Init()	
-	-- first init any superclass cnes and add task complete/fail cnes
-	self:InitSuper()
+	-- add task complete/fail cnes
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
@@ -60,6 +61,9 @@ function eso_task_quest_condition_interact:Init()
 	
 	local ke_interact = ml_element:create( "Interact", c_interact, e_interact, 20 )
     self:add( ke_interact, self.process_elements)
+	
+	-- InitSuper
+	self:InitSuper()
 end
 
 eso_task_quest_condition_talkto = inheritsFrom(eso_task_quest_condition_interact)
@@ -73,13 +77,15 @@ function eso_task_quest_condition_talkto.Create()
 end
 
 function eso_task_quest_condition_talkto:Init()	
-	-- first init any superclass cnes and add task complete/fail cnes
-	self:InitSuper()
+	-- add task complete/fail cnes
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
 	local ke_chatter = ml_element:create( "Chatter", c_chatter, e_chatter, 20 )
     self:add( ke_chatter, self.process_elements)
+	
+	-- InitSuper
+	self:InitSuper()
 end
 
 eso_task_quest_start = inheritsFrom(eso_task_quest_condition_talkto)
@@ -93,8 +99,7 @@ function eso_task_quest_start.Create()
 end
 
 function eso_task_quest_start:Init()	
-	-- first init any superclass cnes and add task complete/fail cnes
-	self:InitSuper()
+	-- add task complete/fail cnes
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
@@ -104,6 +109,9 @@ function eso_task_quest_start:Init()
 	--clear out the quest event queue for offered/added if it wasn't cleared properly earlier
 	eso_quest_event_queue["offered"] = false
 	eso_quest_event_queue["added"] = {}
+	
+	-- InitSuper
+	self:InitSuper()
 end
 
 function eso_task_quest_start:task_complete_eval()

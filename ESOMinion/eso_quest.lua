@@ -1,5 +1,15 @@
 eso_quest_helpers = {}
 
+function eso_quest_helpers.ModuleInit()
+	--set questmanager callbacks
+	QuestManager.GetNearestObjectiveCallback = eso_quest_helpers.GetNearestQuestObjective
+
+	--add tasks for quest objectives
+	QuestManager.AddObjectiveTask("quest_start", eso_task_quest_start.Create)
+	QuestManager.AddObjectiveTask("quest_condition_interact", eso_task_quest_condition_interact.Create)
+	QuestManager.AddObjectiveTask("quest_condition_talkto", eso_task_quest_condition_talkto.Create)
+end
+
 function eso_quest_helpers.GetNearestQuestObjective()
 	local nearestObjective = nil
 	local nearestDistance = 9999999999
@@ -119,4 +129,4 @@ function QuestManager:IsComplete(journalIndex)
 	return e("GetJournalQuestIsComplete("..tostring(journalIndex)..")")
 end
 
-QuestManager.GetNearestObjectiveCallback = eso_quest_helpers.GetNearestQuestObjective
+RegisterEventHandler("Module.Initalize",eso_quest_helpers.ModuleInit)
