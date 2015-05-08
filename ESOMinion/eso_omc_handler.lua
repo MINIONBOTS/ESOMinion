@@ -55,6 +55,7 @@ function ml_mesh_mgr.OMC_Handler_OnUpdate( tickcount )
 				if ( ValidTable(sPos) ) then
 					if (ml_mesh_mgr.OMCType == "OMC_INTERACT") then						
 						Player:Stop()
+						ml_task_hub:CurrentTask():SetDelay(5000)
 						-- Check for inanimate objects, use those as first guess.
 						if (ml_mesh_mgr.OMCTarget == 0) then
 							local interacts = EntityList("nearest,interacttype=13,maxdistance=5")
@@ -106,16 +107,15 @@ function ml_mesh_mgr.OMC_Handler_OnUpdate( tickcount )
 						local interact = EntityList:Get(tonumber(ml_mesh_mgr.OMCTarget))
 						if (interact) then
 							Player:Interact(interact.id)
-							ml_task_hub:CurrentTask():SetDelay(5000)
-							ml_mesh_mgr.OMCThrottle = Now() + 500
+							return
 						end
 					end
 					
-					--if (not target or not target.targetable or target.distance > 5) then
-					--	ml_mesh_mgr.OMCThrottle = Now() + 100
-					--	ml_mesh_mgr.ResetOMC()
-					--	return
-					--end
+					if (not target or not target.targetable or target.distance > 5) then
+						ml_mesh_mgr.OMCThrottle = Now() + 100
+						ml_mesh_mgr.ResetOMC()
+						return
+					end
 				end
 			end
 		end
