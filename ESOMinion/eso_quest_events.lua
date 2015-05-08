@@ -10,7 +10,7 @@ eso_quest_event_queue["advanced"] = {}
 eso_quest_event_queue["conditioncounterchanged"] = {}
 
 function handle_quest_offered(eventCode)
-	--d("EVENT_QUEST_OFFERED")
+	d("EVENT_QUEST_OFFERED")
 	
 	eso_quest_event_queue["offered"] = true
 end
@@ -141,7 +141,7 @@ end
 
 function eso_quest_event_queue.ModuleInit()
 	RegisterForEvent("EVENT_QUEST_ADDED", true)
-	RegisterEventHandler("GAME_EVENT_QUEST_ADVANCED", handle_quest_advanced)
+	RegisterEventHandler("GAME_EVENT_QUEST_ADDED", handle_quest_added)
 	
 	RegisterForEvent("EVENT_QUEST_ADVANCED", true)
 	RegisterEventHandler("GAME_EVENT_QUEST_ADVANCED", handle_quest_advanced)

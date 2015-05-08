@@ -502,6 +502,8 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			GUI_SetStatusBar("Loading Navigation Mesh...")
 			
 		elseif ( ml_global_information.running ) then
+			ml_mesh_mgr.OMC_Handler_OnUpdate( tickcount )
+			
 			-- Update Marker status
 			if ( gBotMode == GetString("grindMode") and ValidTable(GetCurrentMarker()) and ml_task_hub.shouldRun )then
 				ml_log("Current Marker:"..GetCurrentMarker():GetName())
@@ -529,7 +531,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				ai_unstuck:OnUpdate( tickcount )
 					
 				-- Update the Statusbar on the left/bottom screen
-				GUI_SetStatusBar(ml_GetTraceString())					
+				GUI_SetStatusBar(ml_GetTraceString())			
 			end
 				
 		elseif ( ml_global_information.running == false and gAutoStart == "1" and not ml_global_information.autoStartDisabled) then

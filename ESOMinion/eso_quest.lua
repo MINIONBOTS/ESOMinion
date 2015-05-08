@@ -12,6 +12,9 @@ function eso_quest_helpers.ModuleInit()
 	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_INTERACT_SIMPLE_OBJECT", 			eso_task_quest_condition_interact.Create)
 	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_INTERACT_SIMPLE_OBJECT_IN_STATE", 	eso_task_quest_condition_interact.Create)
 	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_TALK_TO", 							eso_task_quest_condition_talkto.Create)
+	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_SCRIPT_ACTION", 					eso_task_quest_condition_talkto.Create)
+	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_COLLECT_ITEM", 						eso_task_quest_condition_collectitem.Create)
+	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_GOTO_POINT", 						eso_task_moveto.Create)
 end
 
 function eso_quest_helpers.GetNearestQuestObjective()
@@ -63,7 +66,7 @@ function eso_quest_helpers.GetNearestQuestCondition()
 	--first get the nearest quest condition from the client
 	local cVals = QuestManager:GetNearestQuestCondition()
 	if(ValidTable(cVals)) then
-		d(cVals)
+		--d(cVals)
 		local condition = QuestManager:GetQuestCondition(cVals.JournalIndex, cVals.StepIndex, cVals.ConditionIndex)
 		--if GetQuestCondition does not return a table then the quest is complete - it will be picked up by the GetNearestPin functions
 		if(ValidTable(condition)) then
@@ -71,8 +74,14 @@ function eso_quest_helpers.GetNearestQuestCondition()
 				d("Nearest quest condition at ("..tostring(condition.pos.x)..","..tostring(condition.pos.y)..","..tostring(condition.pos.z)..")")
 				
 				--build query table, this will be used to check for available static data
-				local questid = QuestManager.GetQuestId(cVals.JournalIndex)
+				local questid = QuestManager:GetQuestId(cVals.JournalIndex)
 				condition["queryTable"] = {["questid"] = questid, ["conditionid"] = condition.id}
+				condition.paramsTable = {}
+				condition.paramsTable.journalindex = cVals.JournalIndex
+				condition.paramsTable.stepindex = cVals.StepIndex
+				condition.paramsTable.conditionindex = cVals.ConditionIndex
+				condition.paramsTable.type = condition.type
+				condition.paramsTable.radius = condition.radius
 				
 				return condition
 			end

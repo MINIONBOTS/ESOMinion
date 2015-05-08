@@ -7,6 +7,7 @@
 --		handling stuck
 
 eso_task_moveto = inheritsFrom(ml_task)
+eso_task_moveto.name = "MOVETOPOS"
 function eso_task_moveto.Create()
     local newinst = inheritsFrom(eso_task_moveto)
     
@@ -25,12 +26,12 @@ function eso_task_moveto.Create()
     return newinst
 end
 
-function eso_task_moveto:Init()	
-	-- first init any superclass cnes and add task complete/fail cnes
-	self:InitSuper()
+function eso_task_moveto:Init()
 	self:AddTaskCheckCEs()
 
-	-- now init class cnes
+	local ke_endinteract = ml_element:create( "EndInteract", c_endinteract, e_endinteract, 25 )
+    self:add( ke_endinteract, self.overwatch_elements)
+	
 	local ke_movetomap = ml_element:create( "MoveToMap", c_movetomap, e_movetomap, 25 )
     self:add( ke_movetomap, self.process_elements)
 	
@@ -47,7 +48,7 @@ function eso_task_moveto:task_complete_eval()
 	end]]
 
 	local myPos = Player.pos
-	local gotoPos = pos
+	local gotoPos = self.pos
 	
 	local distance = Distance3D(myPos.x, myPos.y, myPos.z, gotoPos.x, gotoPos.y, gotoPos.z)
 	return distance < self.range 
@@ -68,22 +69,42 @@ function eso_task_moveto:task_complete_execute()
 end
 
 eso_task_moveto_kill = inheritsFrom(eso_task_moveto)
+eso_task_moveto_kill.name = "MOVETOKILL"
 function eso_task_moveto_kill.Create()
     local newinst = inheritsFrom(eso_task_moveto_kill)
     
+	--ml_task members
+    newinst.valid = true
+    newinst.completed = false
+    newinst.subtask = nil
+    newinst.auxiliary = false
+    newinst.process_elements = {}
+    newinst.overwatch_elements = {}
+	
 	-- within 30 we'll use combat movement instead
 	newinst.range = 30
 	newinst.targetid = 0
+	newinst.name = "MOVETOKILL"
     
     return newinst
 end
 
 function eso_task_moveto_kill:Init()	
-	-- first init any superclass cnes and add task complete/fail cnes
-	self:InitSuper()
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
+	local ke_endinteract = ml_element:create( "EndInteract", c_endinteract, e_endinteract, 25 )
+    self:add( ke_endinteract, self.overwatch_elements)
+	
+	local ke_movetomap = ml_element:create( "MoveToMap", c_movetomap, e_movetomap, 25 )
+    self:add( ke_movetomap, self.process_elements)
+	
+	local ke_mount = ml_element:create( "Mount", c_mount, e_mount, 20 )
+    self:add( ke_mount, self.process_elements)
+   
+    local ke_walktopos = ml_element:create( "WalkToPos", c_walktopos, e_walktopos, 10 )
+    self:add( ke_walktopos, self.process_elements)
+	
 	local ke_updatetarget = ml_element:create( "UpdateTarget", c_updatetarget, e_updatetarget, 10 )
     self:add( ke_updatetarget, self.overwatch_elements)
 end
@@ -115,38 +136,66 @@ function eso_task_moveto_kill:task_complete_execute()
 end
 
 eso_task_moveto_interact = inheritsFrom(eso_task_moveto)
+eso_task_moveto_interact.name = "MOVETOINTERACT"
 function eso_task_moveto_interact.Create()
     local newinst = inheritsFrom(eso_task_moveto_interact)
     
+	--ml_task members
+    newinst.valid = true
+    newinst.completed = false
+    newinst.subtask = nil
+    newinst.auxiliary = false
+    newinst.process_elements = {}
+    newinst.overwatch_elements = {}
+	
 	-- within 30 we'll use combat movement instead
 	newinst.range = 1.5
 	newinst.targetid = 0
+	newinst.name = "MOVETOINTERACT"
     
     return newinst
 end
 
 function eso_task_moveto_interact:Init()	
-	-- first init any superclass cnes and add task complete/fail cnes
-	self:InitSuper()
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
+	local ke_endinteract = ml_element:create( "EndInteract", c_endinteract, e_endinteract, 25 )
+    self:add( ke_endinteract, self.overwatch_elements)
+	
+	local ke_movetomap = ml_element:create( "MoveToMap", c_movetomap, e_movetomap, 25 )
+    self:add( ke_movetomap, self.process_elements)
+	
+	local ke_mount = ml_element:create( "Mount", c_mount, e_mount, 20 )
+    self:add( ke_mount, self.process_elements)
+   
+    local ke_walktopos = ml_element:create( "WalkToPos", c_walktopos, e_walktopos, 10 )
+    self:add( ke_walktopos, self.process_elements)
+	
 	local ke_updatetarget = ml_element:create( "UpdateTarget", c_updatetarget, e_updatetarget, 10 )
     self:add( ke_updatetarget, self.overwatch_elements)
 end
 
 eso_task_killtarget = inheritsFrom(ml_task)
+eso_task_killtarget.name = "KILLTARGET"
 function eso_task_killtarget.Create()
     local newinst = inheritsFrom(eso_task_killtarget)
     
+	--ml_task members
+    newinst.valid = true
+    newinst.completed = false
+    newinst.subtask = nil
+    newinst.auxiliary = false
+    newinst.process_elements = {}
+    newinst.overwatch_elements = {}
+	
+	newinst.name = "KILLTARGET"
 	newinst.targetid = 0
     newinst.targetfunction = nil
     return newinst
 end
 
 function eso_task_killtarget:Init()	
-	-- first init any superclass cnes and add task complete/fail cnes
-	self:InitSuper()
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
