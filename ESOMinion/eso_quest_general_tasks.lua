@@ -169,7 +169,10 @@ function eso_task_moveto_interact:Init()
 	local ke_mount = ml_element:create( "Mount", c_mount, e_mount, 20 )
     self:add( ke_mount, self.process_elements)
    
-    local ke_walktopos = ml_element:create( "WalkToPos", c_walktopos, e_walktopos, 10 )
+	local ke_dismount = ml_element:create( "Disount", c_dismount, e_dismount, 20 )
+    self:add( ke_dismount, self.process_elements)
+   
+  local ke_walktopos = ml_element:create( "WalkToPos", c_walktopos, e_walktopos, 10 )
     self:add( ke_walktopos, self.process_elements)
 	
 	local ke_updatetarget = ml_element:create( "UpdateTarget", c_updatetarget, e_updatetarget, 10 )

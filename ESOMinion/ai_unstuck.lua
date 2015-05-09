@@ -131,15 +131,16 @@ function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 	if ( tonumber(stuckcount) < 8 and tonumber(stuckcount) > 0) then
 		d("Stuck? Distance Moved: "..tostring(distmoved) .. " StuckCount: "..tostring(stuckcount) )
 		Player:Jump()
+        
 				
-		local i = math.random(0,1)
-		if ( i == 0 ) then
-			Player:SetMovement(1,3)
-			ai_unstuck.ismoving = true
-		elseif ( i == 1 ) then
-			Player:SetMovement(1,4)
-			ai_unstuck.ismoving = true
-		end
+		--local i = math.random(0,1)
+		--if ( i == 0 ) then
+		--  Player:SetMovement(1,3)
+		--	ai_unstuck.ismoving = true
+		--elseif ( i == 1 ) then
+		--	Player:SetMovement(1,4)
+		--	ai_unstuck.ismoving = true
+		--end
 	end
 	
 	if ( tonumber(stuckcount) > 20 ) then

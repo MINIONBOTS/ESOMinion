@@ -36,13 +36,29 @@ function c_mount:evaluate()
 		local dist = Distance3D(pos.x,pos.y,pos.z,ppos.x,ppos.y,ppos.z)
 		return dist > tonumber(gUseMountRange)
 	end
-	
 	return false
 	
 end
 function e_mount:execute()
 	ai_mount:Mount()
 end
+
+c_dismount = ml_cause.Create()
+e_dismount = ml_effect.Create()
+function c_dismount:evaluate()
+	if(ai_mount:IsMounted()) then
+		local ppos = ml_global_information.Player_Position
+		local pos = self.task.pos
+		local dist = Distance3D(pos.x,pos.y,pos.z,ppos.x,ppos.y,ppos.z)
+		return dist < 6.0
+	end
+	return false
+	
+end
+function e_dismount:execute()
+	ai_mount:Dismount()
+end
+
 
 c_walktopos = ml_cause.Create()
 e_walktopos = ml_effect.Create()
@@ -73,7 +89,22 @@ function e_walktopos:execute()
 	local gotoPos = self.task.pos
 	--d("Moving to ("..tostring(gotoPos.x)..","..tostring(gotoPos.y)..","..tostring(gotoPos.z)..")")	
 	--d("Move To vars"..tostring(gotoPos.x)..","..tostring(gotoPos.y)..","..tostring(gotoPos.z)..","..tostring(ml_task_hub:CurrentTask().range *0.75)..","..tostring(ml_task_hub:CurrentTask().useFollowMovement or false)..","..tostring(gRandomPaths=="1"))
-	local PathSize = Player:MoveTo(tonumber(gotoPos.x),tonumber(gotoPos.y),tonumber(gotoPos.z),tonumber(range), self.task.useFollowMovement or false, false)
+	if (self.lastAvoidanceCheck == nil or ml_global_information.Now - self.lastAvoidanceCheck > 500) then
+    self.lastAvoidanceCheck = ml_global_information.Now
+    local avoidPlease = EntityList("npc,alive,friendly,maxdistance=100")
+    if ValidTable(avoidPlease) then
+      local avoidpos = {}
+      local id,entity = next(avoidPlease)
+      while ( entity ) do
+        table.insert(avoidpos,{ x=entity.pos.x, y=entity.pos.y, z=entity.pos.z, r=1.2 })
+        id,entity = next(avoidPlease,id)
+      end
+      d("Setting " .. TableSize(avoidpos) .. " obstructed areas")
+      NavigationManager:AddNavObstacles(avoidpos)
+    end
+  end
+  
+  local PathSize = Player:MoveTo(tonumber(gotoPos.x),tonumber(gotoPos.y),tonumber(gotoPos.z),tonumber(range), self.task.useFollowMovement or false, false,false)
 	--d(tostring(PathSize))
 end
 

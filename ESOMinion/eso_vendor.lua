@@ -103,7 +103,7 @@ function e_MoveToVendor:execute()
 	if ml_task_hub:CurrentTask().vendor then
 		if ml_task_hub:CurrentTask().vendor.distance >= INTERACT_RANGE.VENDOR then
 			local pos = ml_task_hub:CurrentTask().vendor.pos
-			local result = tostring(Player:MoveTo(pos.x,pos.y,pos.z,INTERACT_RANGE.VENDOR-1,false,true,true))
+			local result = tostring(Player:MoveTo(pos.x,pos.y,pos.z,INTERACT_RANGE.VENDOR-1,false,true,false))
 			
 			if tonumber(result) >= 0 then
 				ml_log("eso_vendortask -> MoveToVendor "..ml_task_hub:CurrentTask().vendor.distance)
@@ -113,7 +113,7 @@ function e_MoveToVendor:execute()
 	elseif ml_task_hub:CurrentTask().marker then
 		if ml_task_hub:CurrentTask().marker.distance > INTERACT_RANGE.MARKER then
 			local pos = ml_task_hub:CurrentTask().marker:GetPosition()
-			local result = tostring(Player:MoveTo(pos.x,pos.y,pos.z,INTERACT_RANGE.MARKER-1,false,true,true))
+			local result = tostring(Player:MoveTo(pos.x,pos.y,pos.z,INTERACT_RANGE.MARKER-1,false,true,false))
 			if tonumber(result) >= 0 then
 				ml_log("eso_vendortask -> MoveToVendorMarker "..ml_task_hub:CurrentTask().marker.distance)
 				return ml_log(true)

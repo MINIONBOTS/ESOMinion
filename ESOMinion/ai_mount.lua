@@ -91,7 +91,7 @@ function ai_mount.Initialize()
 	ai_mount.throttle  = 5000
 	
 	if Settings.ESOMinion.gUseMount == nil then Settings.ESOMinion.gUseMount = "1" end
-	if Settings.ESOMinion.gUseMountRange == nil then Settings.ESOMinion.gUseMountRange = "30" end
+	if Settings.ESOMinion.gUseMountRange == nil then Settings.ESOMinion.gUseMountRange = "100" end
 	
 	local window = ml_global_information.MainWindow
 	GUI_NewCheckbox(window.Name,"UseMount","gUseMount",GetString("settings"))
