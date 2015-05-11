@@ -2,7 +2,7 @@ c_interact = ml_cause.Create()
 e_interact = ml_effect.Create()
 function c_interact:evaluate()
 	local target = nil
-	local range = 3
+	local range = 5
 	local dataTable = self.task:GetData()
 	if(ValidTable(dataTable)) then
 		if(dataTable["id"]) then

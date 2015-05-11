@@ -483,6 +483,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		
 		-- Mesher OnUpdate
 		ml_mesh_mgr.OnUpdate( tickcount )
+		ml_mesh_mgr.OMC_Handler_OnUpdate( tickcount )	
 			
 		-- SkillManager OnUpdate
 		eso_skillmanager.OnUpdate( tickcount )
@@ -502,7 +503,6 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			GUI_SetStatusBar("Loading Navigation Mesh...")
 			
 		elseif ( ml_global_information.running ) then
-			ml_mesh_mgr.OMC_Handler_OnUpdate( tickcount )
 			
 			-- Update Marker status
 			if ( gBotMode == GetString("grindMode") and ValidTable(GetCurrentMarker()) and ml_task_hub.shouldRun )then

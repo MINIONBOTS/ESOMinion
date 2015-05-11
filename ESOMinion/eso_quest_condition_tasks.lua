@@ -26,9 +26,13 @@ end
 function eso_task_quest_condition:task_complete_eval()
 	local conditionTable = eso_quest_event_queue["conditioncounterchanged"]
 	if(TableSize(conditionTable) > 0) then
+		d("testcomplete1")
+		d(self.queryTable)
 		local questTable = QuestManager:Get(self.queryTable.questID)
 		if(ValidTable(questTable)) then
+			d("testcomplete2")
 			if(conditionTable[questTable.name]) then
+				d("testcomplete3")
 				self.questname = questTable.name
 				return true
 			end

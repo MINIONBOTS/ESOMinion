@@ -75,7 +75,7 @@ function eso_quest_helpers.GetNearestQuestCondition()
 				
 				--build query table, this will be used to check for available static data
 				local questid = QuestManager:GetQuestId(cVals.JournalIndex)
-				condition["queryTable"] = {["questid"] = questid, ["conditionid"] = condition.id}
+				condition["queryTable"] = {["questID"] = questid, ["conditionID"] = condition.id}
 				condition.paramsTable = {}
 				condition.paramsTable.journalindex = cVals.JournalIndex
 				condition.paramsTable.stepindex = cVals.StepIndex
