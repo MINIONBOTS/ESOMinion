@@ -10,7 +10,7 @@ function c_movetointeract:evaluate()
 	
 	return false
 end
-function e_movetointeract:execute()	
+function e_movetointeract:execute()
 	local moveTask = eso_task_moveto_interact.Create()
 	if(ValidTable(moveTask)) then
 		moveTask.pos = self.task.pos
@@ -213,9 +213,9 @@ function e_walktopos:execute()
 	local gotoPos = self.task.pos
 	--d("Moving to ("..tostring(gotoPos.x)..","..tostring(gotoPos.y)..","..tostring(gotoPos.z)..")")	
 	--d("Move To vars"..tostring(gotoPos.x)..","..tostring(gotoPos.y)..","..tostring(gotoPos.z)..","..tostring(ml_task_hub:CurrentTask().range *0.75)..","..tostring(ml_task_hub:CurrentTask().useFollowMovement or false)..","..tostring(gRandomPaths=="1"))
-	if (self.lastAvoidanceCheck == nil or ml_global_information.Now - self.lastAvoidanceCheck > 500) then
+	if (self.lastAvoidanceCheck == nil or ml_global_information.Now - self.lastAvoidanceCheck > 200) then
     self.lastAvoidanceCheck = ml_global_information.Now
-    local avoidPlease = EntityList("npc,alive,friendly,maxdistance=100")
+    local avoidPlease = EntityList("npc,alive,friendly,maxdistance=30")
     if ValidTable(avoidPlease) then
       local avoidpos = {}
       local id,entity = next(avoidPlease)
