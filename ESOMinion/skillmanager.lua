@@ -322,7 +322,6 @@ function eso_skillmanager.EditorButtonHandler(event)
 end
 
 function eso_skillmanager.RefreshSkillList()
-
 	if ( TableSize( eso_skillmanager.SkillProfile ) > 0 ) then
 		local i,s = next ( eso_skillmanager.SkillProfile )
 		while i and s do			
@@ -789,7 +788,6 @@ function eso_skillmanager.CanCast( target, skill )
 end
 
 function eso_skillmanager.AttackTarget( TargetID )	
-	
 	-- Throttle to not cast too fast & interrupt channeling spells
 	if ( ml_global_information.Now - eso_skillmanager.lastcastTmr < 500 ) then return false end
 	
@@ -899,6 +897,21 @@ function eso_skillmanager.ReleaseCheck()
 					eso_skillmanager.releasechecklastID = 0
 				end
 			end		
+		end
+	end
+end
+
+-- When skills morph or increase rank the old IDs are no longer valid
+-- UpdateSkills() will iterate the skill list, find invalid skill IDs,
+-- and update them by checking the abilitylist for the root/base ID of
+-- the missing skill.
+-- TODO Add event handler for skill morph/rank up to update
+function eso_skillmanager.UpdateSkills()
+	if ( TableSize( eso_skillmanager.SkillProfile ) > 0 ) then
+		local i,s = next ( eso_skillmanager.SkillProfile )
+		while i and s do			
+			eso_skillmanager.CreateNewSkillEntry(s)
+			i,s = next ( eso_skillmanager.SkillProfile , i )
 		end
 	end
 end

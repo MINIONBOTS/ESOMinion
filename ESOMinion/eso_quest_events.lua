@@ -8,11 +8,20 @@ eso_quest_event_queue["objectivesupdated"] = false
 eso_quest_event_queue["added"] = {}
 eso_quest_event_queue["advanced"] = {}
 eso_quest_event_queue["conditioncounterchanged"] = {}
+eso_quest_event_queue["completed"] = {}
+eso_quest_event_queue["completedialog"] = {}
 
 function handle_quest_offered(eventCode)
 	d("EVENT_QUEST_OFFERED")
 	
 	eso_quest_event_queue["offered"] = true
+end
+
+function handle_quest_complete_dialog(eventCode, _, journalIndex)
+	d("EVENT_QUEST_COMPLETE_DIALOG")
+	
+	local completeTable = eso_quest_event_queue["completedialog"]
+	completeTable[journalIndex] = true
 end
 
 function handle_objectives_updated(eventCode)
@@ -60,7 +69,7 @@ function handle_quest_advanced(eventCode, _, journalIndex, questName, isPushed, 
 	}
 end
 
-function handle_quest_complete(	eventCode, _, 
+function handle_quest_completed(	eventCode, _, 
 								questName,
 								level,
 								previousXP,
@@ -74,8 +83,8 @@ function handle_quest_complete(	eventCode, _,
 	--d("questName: "..questName)
 	--d("level: "..level)
 	
-	local addedTable = eso_quest_event_queue["complete"]
-	addedTable[questName] = 
+	local completedTable = eso_quest_event_queue["completed"]
+	completedTable[questName] = 
 	{	
 		["eventCode"] = eventCode,
 		["questName"] = questName,
@@ -147,7 +156,10 @@ function eso_quest_event_queue.ModuleInit()
 	RegisterEventHandler("GAME_EVENT_QUEST_ADVANCED", handle_quest_advanced)
 	
 	RegisterForEvent("EVENT_QUEST_COMPLETE", true)
-	RegisterEventHandler("GAME_EVENT_QUEST_COMPLETE", handle_quest_complete)
+	RegisterEventHandler("GAME_EVENT_QUEST_COMPLETE", handle_quest_completed)
+	
+	RegisterForEvent("EVENT_QUEST_COMPLETE_DIALOG", true)
+	RegisterEventHandler("GAME_EVENT_QUEST_COMPLETE_DIALOG", handle_quest_complete_dialog)
 	
 	RegisterForEvent("EVENT_QUEST_CONDITION_COUNTER_CHANGED", true)
 	RegisterEventHandler("GAME_EVENT_QUEST_CONDITION_COUNTER_CHANGED", handle_quest_condition_counter_changed)
@@ -160,3 +172,16 @@ function eso_quest_event_queue.ModuleInit()
 end
 
 RegisterEventHandler("Module.Initalize",eso_quest_event_queue.ModuleInit)
+
+	--[[RegisterForEvent("EVENT_QUEST_POSITION_REQUEST_COMPLETE", true)
+	RegisterEventHandler("GAME_EVENT_QUEST_POSITION_REQUEST_COMPLETE",
+		function (eventCode, _, taskId, pinType,xLoc, yLoc, areaRadius, insideCurrentMapWorld, isBreadcrumb)
+			d("eventCode: "..tostring(eventCode))
+			d("taskId: "..tostring(taskId))
+			d("pinType: "..tostring(pinType))
+			d("xLoc: "..tostring(xLoc))
+			d("yLoc: "..tostring(yLoc))
+			d("areaRadius: "..tostring(areaRadius))
+			d("insideCurrentMapWorld: "..tostring(insideCurrentMapWorld))
+			d("isBreadCrumb: "..tostring(isBreadCrumb))
+		end	)]]

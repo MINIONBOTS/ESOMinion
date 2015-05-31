@@ -69,7 +69,10 @@ function LuaEventHandler(...)
 	
 	elseif ( args[1] == "GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP" ) then
 		d("Combat Tip ID : "..tostring(args[3]))
+		ml_global_information.lastCombatTip[args[3]] = ml_global_information.Now
 		-- ID 1 - Block
+		-- ID 2 - Staggered
+		-- ID 4 - Dodge
 		
 	end
 end
@@ -86,7 +89,7 @@ function ml_globals.UpdateGlobals()
 		ml_global_information.Player_Level = e("GetUnitLevel(player)")
 		ml_global_information.Player_Dead = e("IsUnitDead(player)")
 		
-		ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
+		ml_global_information.CurrentMapID = Player.worldid
 		ml_global_information.CurrentMapName = e("GetMapName()")
 		ml_global_information.Player_Position = Player.pos
 		ml_global_information.Player_Sprinting = Player.issprinting
@@ -112,6 +115,7 @@ function ml_globals.UpdateGlobals()
 		dMapName = e("GetMapName()")
 		dMapZoneIndex = e("GetCurrentMapZoneIndex()")
 		dLocationName = e("GetPlayerLocationName()")
+		
 		
 	end
 end

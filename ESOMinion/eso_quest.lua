@@ -6,6 +6,9 @@ function eso_quest_helpers.ModuleInit()
 
 	--add tasks for quest objectives
 	QuestManager.AddObjectiveTask("MAP_PIN_TYPE_QUEST_OFFER", 								eso_task_quest_start.Create)
+	QuestManager.AddObjectiveTask("MAP_PIN_TYPE_ASSISTED_QUEST_ENDING", 					eso_task_quest_complete.Create)
+	QuestManager.AddObjectiveTask("MAP_PIN_TYPE_TRACKED_QUEST_ENDING", 						eso_task_quest_complete.Create)
+	QuestManager.AddObjectiveTask("MAP_PIN_TYPE_QUEST_COMPLETE", 							eso_task_quest_complete.Create)
 	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_INTERACT_MONSTER", 					eso_task_quest_condition_interact.Create)
 	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_INTERACT_OBJECT", 					eso_task_quest_condition_interact.Create)
 	QuestManager.AddObjectiveTask("QUEST_CONDITION_TYPE_INTERACT_OBJECT_IN_STATE", 			eso_task_quest_condition_interact.Create)
@@ -67,21 +70,38 @@ function eso_quest_helpers.GetNearestQuestCondition()
 	local cVals = QuestManager:GetNearestQuestCondition()
 	if(ValidTable(cVals)) then
 		--d(cVals)
-		local condition = QuestManager:GetQuestCondition(cVals.JournalIndex, cVals.StepIndex, cVals.ConditionIndex)
+		local condition = QuestManager:GetQuestCondition(cVals.journalindex, cVals.stepindex, cVals.conditionindex)
 		--if GetQuestCondition does not return a table then the quest is complete - it will be picked up by the GetNearestPin functions
 		if(ValidTable(condition)) then
-			if(NavigationManager:IsOnMesh(condition.pos)) then
-				d("Nearest quest condition at ("..tostring(condition.pos.x)..","..tostring(condition.pos.y)..","..tostring(condition.pos.z)..")")
+			-- some quest objectives are slightly off mesh on tables etc
+			-- use the closest point and check the distance to see if we could reach it from mesh
+			local pos = nil
+			local dist = 0.0
+			if(condition.worldid == ml_global_information.CurrentMapID) then
+				pos = NavigationManager:GetClosestPointOnMesh(condition.pos,true)
+				dist = Distance2D(p.pos.x, p.pos.z, pos.x, pos.z)
+			end
+			
+			if(condition.worldid ~= ml_global_information.CurrentMapID or (pos ~= nil and dist < 5)) then --? probably have to tweak this
+				d("Nearest quest condition at ("..tostring(condition.pos.x)..","..tostring(condition.pos.y)..","..tostring(condition.pos.z)..") on worldid "..tostring(condition.worldid))
 				
 				--build query table, this will be used to check for available static data
-				local questid = QuestManager:GetQuestId(cVals.JournalIndex)
+				local questid = QuestManager:GetQuestId(cVals.journalindex)
 				condition["queryTable"] = {["questID"] = questid, ["conditionID"] = condition.id}
 				condition.paramsTable = {}
-				condition.paramsTable.journalindex = cVals.JournalIndex
-				condition.paramsTable.stepindex = cVals.StepIndex
-				condition.paramsTable.conditionindex = cVals.ConditionIndex
+				condition.paramsTable.journalindex = cVals.journalindex
+				condition.paramsTable.stepindex = cVals.stepindex
+				condition.paramsTable.conditionindex = cVals.conditionindex
 				condition.paramsTable.type = condition.type
 				condition.paramsTable.radius = condition.radius
+				
+				local questName = QuestManager:Get(questid).name
+				condition.paramsTable.questname = questName
+				
+				--use the recalculated position if it exists
+				if(pos ~= nil) then
+					condition.pos = pos
+				end
 				
 				return condition
 			end
@@ -93,12 +113,35 @@ function eso_quest_helpers.GetNearestQuestCondition()
 end
 
 function eso_quest_helpers.GetNearestOfferPin()
-	local pl = PinList("nearest,onmesh,type="..tostring(g("MAP_PIN_TYPE_QUEST_OFFER")))
+	local pl = PinList("nearest,type="..tostring(g("MAP_PIN_TYPE_QUEST_OFFER")))
 	if ( pl ) then
 		local p = pl[1]
 		if(ValidTable(p)) then
-			d("Nearest quest offer at ("..tostring(p.pos.x)..","..tostring(p.pos.y)..","..tostring(p.pos.z)..")")
-			return p
+			local pos = nil
+			local dist = 0.0
+			--I believe the pinlist only contains pins for the current worldid, but will leave this here for now
+			if(p.worldid == ml_global_information.CurrentMapID) then
+				pos = NavigationManager:GetClosestPointOnMesh(p.pos,true)
+				dist = Distance2D(p.pos.x, p.pos.z, pos.x, pos.z)
+			end
+		
+			if(pos ~= nil and dist < 5) then
+				d("Nearest quest offer at ("..tostring(p.pos.x)..","..tostring(p.pos.y)..","..tostring(p.pos.z)..")")
+				p.paramsTable = {}
+				p.paramsTable.journalindex = p.journalindex
+				p.paramsTable.stepindex = p.stepindex
+				p.paramsTable.conditionindex = p.conditionindex
+				p.pos = pos
+				
+				local quest = QuestManager:GetByIndex(p.journalindex)
+				if(ValidTable(quest)) then
+					p.paramsTable.questname = quest.name
+					p.queryTable = {}
+					p.queryTable.questID = quest.id
+				end
+				
+				return p
+			end
 		else
 			d("No valid quest offer pins found")
 			return nil
@@ -113,36 +156,90 @@ function eso_quest_helpers.GetNearestEndingPin()
 	local nearestEndingPin = nil
 	local playerPos = ml_global_information.Player_Position
 	--have to check both MAP_PIN_TYPE_ASSISTED_QUEST_ENDING and MAP_PIN_TYPE_TRACKED_QUEST_ENDING
-	local pl = PinList("nearest,onmesh,type="..tostring(g("MAP_PIN_TYPE_ASSISTED_QUEST_ENDING")))
+	local pl = PinList("nearest,type="..tostring(g("MAP_PIN_TYPE_ASSISTED_QUEST_ENDING")))
 	if ( pl ) then
 		local p = pl[1]
 		if(ValidTable(p)) then
-			nearestEndingPos = p.pos
-			nearestEndingPin = p
-			nearestDistance = Distance2D(playerPos.x, playerPos.y, playerPos.z, nearestEndingPos.x, nearestEndingPos.y, nearestEndingPos.z)
+			local pos = nil
+			local dist = 0.0
+			--I believe the pinlist only contains pins for the current worldid, but will leave this here for now
+			if(p.worldid == ml_global_information.CurrentMapID) then
+				pos = NavigationManager:GetClosestPointOnMesh(p.pos,true)
+				dist = Distance2D(p.pos.x, p.pos.z, pos.x, pos.z)
+			end
+			
+			--d(pos)
+			--d(dist)
+		
+			if(pos ~= nil and dist < 5) then
+				nearestEndingPos = p.pos
+				p.pos = pos
+				nearestEndingPin = p
+				nearestDistance = Distance2D(playerPos.x, playerPos.y, playerPos.z, nearestEndingPos.x, nearestEndingPos.y, nearestEndingPos.z)
+			end
 		end  
 	end
 	
-	pl = PinList("nearest,onmesh,type="..tostring(g("MAP_PIN_TYPE_TRACKED_QUEST_ENDING")))
+	pl = PinList("nearest,type="..tostring(g("MAP_PIN_TYPE_TRACKED_QUEST_ENDING")))
 		if ( pl ) then
 		local p = pl[1]
 		if(ValidTable(p)) then
 			local distance = Distance2D(playerPos.x, playerPos.y, playerPos.z, p.pos.x, p.pos.y, p.pos.z)
 			if(distance < nearestDistance or nearestDistance == 0.0) then
-				nearestEndingPos = p.pos
-				nearestEndingPin = p
-				nearestDistance = distance
+				local pos = nil
+				local dist = 0.0
+				--I believe the pinlist only contains pins for the current worldid, but will leave this here for now
+				if(p.worldid == ml_global_information.CurrentMapID) then
+					pos = NavigationManager:GetClosestPointOnMesh(p.pos,true)
+					dist = Distance2D(p.pos.x, p.pos.z, pos.x, pos.z)
+				end
+					
+				--d(pos)
+				--d(dist)
+				
+				if(pos ~= nil and dist < 5) then
+					nearestEndingPos = p.pos
+					p.pos = pos
+					nearestEndingPin = p
+					nearestDistance = distance
+				end
 			end
 		end  
 	end
 	
 	if(ValidTable(nearestEndingPin)) then
 		d("Nearest quest ending at ("..tostring(nearestEndingPos.x)..","..tostring(nearestEndingPos.y)..","..tostring(nearestEndingPos.z)..")")
+		local p = nearestEndingPin
+		p.paramsTable = {}
+		p.paramsTable.journalindex = p.journalindex
+		p.paramsTable.stepindex = p.stepindex
+		p.paramsTable.conditionindex = p.conditionindex
+		
+		local quest = QuestManager:GetByIndex(p.journalindex)
+		if(ValidTable(quest)) then
+			p.paramsTable.questname = quest.name
+			p.queryTable = {}
+			p.queryTable.questID = quest.id
+		end
 	else
 		d("No valid quest ending pins found")
 	end
 	
 	return nearestEndingPin
+end
+
+function eso_quest_helpers.GetNearestQuestEntity(questID)
+	local entity = nil
+	local elist = EntityList(questID, "nearest")
+	if(ValidTable(elist)) then
+		_, entity = next(elist)
+	end
+	
+	return entity
+end
+
+function eso_quest_helpers.GetQuestEntityList(questID)
+	return EntityList(questID,"")
 end
 
 --extend the QuestManager here for now

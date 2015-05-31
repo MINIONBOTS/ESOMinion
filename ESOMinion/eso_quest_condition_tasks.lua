@@ -14,6 +14,7 @@ function eso_task_quest_condition.Create()
 	
     --eso_task_quest_condition members
     newinst.name = "QUEST_CONDITION"
+	newinst.mapID = 0
     
     return newinst
 end
@@ -26,13 +27,10 @@ end
 function eso_task_quest_condition:task_complete_eval()
 	local conditionTable = eso_quest_event_queue["conditioncounterchanged"]
 	if(TableSize(conditionTable) > 0) then
-		d("testcomplete1")
 		d(self.queryTable)
 		local questTable = QuestManager:Get(self.queryTable.questID)
 		if(ValidTable(questTable)) then
-			d("testcomplete2")
 			if(conditionTable[questTable.name]) then
-				d("testcomplete3")
 				self.questname = questTable.name
 				return true
 			end
@@ -106,11 +104,17 @@ function eso_task_quest_condition_collectitem:Init()
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
+	local ke_movetomap = ml_element:create( "MoveToMap", c_movetomap, e_movetomap, 30 )
+    self:add( ke_movetomap, self.process_elements)
+	
 	local ke_movetointeract = ml_element:create( "MoveToInteract", c_movetointeract, e_movetointeract, 25 )
     self:add( ke_movetointeract, self.process_elements)
 	
 	local ke_interactitem = ml_element:create( "InteractItem", c_interactitem, e_interactitem, 20 )
     self:add( ke_interactitem, self.process_elements)
+	
+	local ke_pinoffmap = ml_element:create( "PinOffMap", c_pinoffmap, e_pinoffmap, 05 )
+    self:add( ke_pinoffmap, self.process_elements)
 end
 
 eso_task_quest_condition_interact = inheritsFrom(eso_task_quest_condition)
@@ -137,11 +141,17 @@ function eso_task_quest_condition_interact:Init()
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
+	local ke_movetomap = ml_element:create( "MoveToMap", c_movetomap, e_movetomap, 30 )
+    self:add( ke_movetomap, self.process_elements)
+	
 	local ke_movetointeract = ml_element:create( "MoveToInteract", c_movetointeract, e_movetointeract, 25 )
     self:add( ke_movetointeract, self.process_elements)
 	
 	local ke_interact = ml_element:create( "Interact", c_interact, e_interact, 20 )
     self:add( ke_interact, self.process_elements)
+	
+	local ke_pinoffmap = ml_element:create( "PinOffMap", c_pinoffmap, e_pinoffmap, 05 )
+    self:add( ke_pinoffmap, self.process_elements)
 end
 
 eso_task_quest_condition_talkto = inheritsFrom(eso_task_quest_condition_interact)
@@ -168,14 +178,22 @@ function eso_task_quest_condition_talkto:Init()
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
+	local ke_movetomap = ml_element:create( "MoveToMap", c_movetomap, e_movetomap, 30 )
+    self:add( ke_movetomap, self.process_elements)
+	
 	local ke_movetointeract = ml_element:create( "MoveToInteract", c_movetointeract, e_movetointeract, 25 )
     self:add( ke_movetointeract, self.process_elements)
 	
-	local ke_interact = ml_element:create( "Interact", c_interact, e_interact, 20 )
+	local ke_chatter = ml_element:create( "Chatter", c_chatter, e_chatter, 20 )
+    self:add( ke_chatter, self.process_elements)	
+	
+	local ke_interact = ml_element:create( "Interact", c_interact, e_interact, 15 )
     self:add( ke_interact, self.process_elements)
 	
-	local ke_chatter = ml_element:create( "Chatter", c_chatter, e_chatter, 20 )
-    self:add( ke_chatter, self.process_elements)
+	local ke_pinoffmap = ml_element:create( "PinOffMap", c_pinoffmap, e_pinoffmap, 05 )
+    self:add( ke_pinoffmap, self.process_elements)
+	
+
 end
 
 eso_task_quest_start = inheritsFrom(eso_task_quest_condition_talkto)
@@ -202,17 +220,23 @@ function eso_task_quest_start:Init()
 	self:AddTaskCheckCEs()
 
 	-- now init class cnes
+	local ke_movetomap = ml_element:create( "MoveToMap", c_movetomap, e_movetomap, 35 )
+    self:add( ke_movetomap, self.process_elements)
+	
+	local ke_acceptquest = ml_element:create( "AcceptQuest", c_acceptquest, e_acceptquest, 30 )
+    self:add( ke_acceptquest, self.process_elements)
+	
 	local ke_movetointeract = ml_element:create( "MoveToInteract", c_movetointeract, e_movetointeract, 25 )
     self:add( ke_movetointeract, self.process_elements)
-	
-	local ke_interact = ml_element:create( "Interact", c_interact, e_interact, 15 )
-    self:add( ke_interact, self.process_elements)
 	
 	local ke_chatter = ml_element:create( "Chatter", c_chatter, e_chatter, 20 )
     self:add( ke_chatter, self.process_elements)
 	
-	local ke_acceptquest = ml_element:create( "AcceptQuest", c_acceptquest, e_acceptquest, 30 )
-    self:add( ke_acceptquest, self.process_elements)
+	local ke_interact = ml_element:create( "Interact", c_interact, e_interact, 15 )
+    self:add( ke_interact, self.process_elements)
+	
+	local ke_pinoffmap = ml_element:create( "PinOffMap", c_pinoffmap, e_pinoffmap, 05 )
+    self:add( ke_pinoffmap, self.process_elements)
 	
 	--clear out the quest event queue for offered/added if it wasn't cleared properly earlier
 	eso_quest_event_queue["offered"] = false
@@ -226,6 +250,64 @@ end
 function eso_task_quest_start:task_complete_execute()
 	eso_quest_event_queue["offered"] = false
 	eso_quest_event_queue["added"] = {}
+	
+	self.completed = true
+end
+
+eso_task_quest_complete = inheritsFrom(eso_task_quest_condition_talkto)
+eso_task_quest_complete.name = "QUEST_COMPLETE"
+function eso_task_quest_complete.Create()
+    local newinst = inheritsFrom(eso_task_quest_complete)
+    
+	--ml_task members
+    newinst.valid = true
+    newinst.completed = false
+    newinst.subtask = nil
+    newinst.auxiliary = false
+    newinst.process_elements = {}
+    newinst.overwatch_elements = {}
+	
+    --eso_task_quest_complete members
+    newinst.name = "QUEST_COMPLETE"
+
+    return newinst
+end
+
+function eso_task_quest_complete:Init()
+	-- add task complete/fail cnes
+	self:AddTaskCheckCEs()
+
+	-- now init class cnes
+	local ke_movetomap = ml_element:create( "MoveToMap", c_movetomap, e_movetomap, 35 )
+    self:add( ke_movetomap, self.process_elements)
+	
+	local ke_completequest = ml_element:create( "CompleteQuest", c_completequest, e_completequest, 30 )
+    self:add( ke_completequest, self.process_elements)
+	
+	local ke_movetointeract = ml_element:create( "MoveToInteract", c_movetointeract, e_movetointeract, 25 )
+    self:add( ke_movetointeract, self.process_elements)
+	
+	local ke_chatter = ml_element:create( "Chatter", c_chatter, e_chatter, 20 )
+    self:add( ke_chatter, self.process_elements)
+	
+	local ke_interact = ml_element:create( "Interact", c_interact, e_interact, 15 )
+    self:add( ke_interact, self.process_elements)
+	
+	local ke_pinoffmap = ml_element:create( "PinOffMap", c_pinoffmap, e_pinoffmap, 05 )
+    self:add( ke_pinoffmap, self.process_elements)
+	
+	eso_quest_event_queue.completedialog[self.paramsTable.journalindex] = nil
+	eso_quest_event_queue.completed[self.paramsTable.questname] = nil
+end
+
+function eso_task_quest_complete:task_complete_eval()
+	return eso_quest_event_queue.completed[self.paramsTable.questname] ~= nil
+end
+
+function eso_task_quest_complete:task_complete_execute()
+	local quest_name = QuestManager:Get(self.queryTable.questID).name
+	eso_quest_event_queue.completed[self.paramsTable.questname] = nil
+	eso_quest_event_queue.completedialog[self.paramsTable.journalindex] = nil
 	
 	self.completed = true
 end

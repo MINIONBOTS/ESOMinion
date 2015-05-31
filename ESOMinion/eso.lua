@@ -22,6 +22,8 @@ ml_global_information.VendorChar = ""
 ml_global_information.gatherdistance = 2.5
 ml_global_information.randomdistance = 10
 ml_global_information.autoStartDisabled = false
+ml_global_information.lastCombatTip = {}
+ml_global_information.idlePulseCount = 0
 
 esominion = {}
 
@@ -258,14 +260,16 @@ function ml_global_information.moduleinit()
 		vendorMarker:SetMinLevel(1)
 		vendorMarker:SetMaxLevel(50)
 		ml_marker_mgr.AddMarkerTemplate(vendorMarker)
+			
+		-- add map markers for world navigation
+		-- though the function is defined in minionlib we call it from
+		-- game lua since not all games use map markers yet and we want
+		-- to avoid confusing users by including useless marker types
+		ml_nav_manager.AddMapMarkerTemplate()
 		
-		--local mapMarker = ml_marker:Create("mapTemplate")
-		--mapMarker:SetType(strings[gCurrentLanguage].mapMarker)
-		--mapMarker:AddField("string", "toMapID", "")
-		--mapMarker:SetTime(300)
-		--mapMarker:SetMinLevel(1)
-		--mapMarker:SetMaxLevel(50)
-		--ml_marker_mgr.AddMarkerTemplate(mapMarker)
+		-- setup nav_manager nodes using markers
+		ml_nav_manager.UpdateNavNodes()
+		
 			
 	-- refresh the manager with the new templates
 		ml_marker_mgr.RefreshMarkerTypes()
