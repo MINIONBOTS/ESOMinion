@@ -27,7 +27,7 @@ function ai_combatAttack:Init()
     self:add( ke_dead, self.process_elements)
 	
 	-- LootAll
-	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
+	self:add(ml_element:create( "LootAll", c_lootcorpses, e_lootcorpses, 275 ), self.process_elements)	
 	
 	--Autoequip
 	self:add(ml_element:create( "Autoequip", c_autoequip, e_autoequip, 225 ), self.process_elements)

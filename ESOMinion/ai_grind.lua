@@ -25,7 +25,7 @@ function ai_grind:Init()
     self:add( ke_dead, self.process_elements)
 	
 	-- LootAll
-	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 280 ), self.process_elements)	
+	self:add(ml_element:create( "LootAll", c_lootcorpses, e_lootcorpses, 280 ), self.process_elements)	
 			
 	-- Aggro
 	self:add(ml_element:create( "Aggro", c_Aggro, e_Aggro, 275 ), self.process_elements) --reactive queue

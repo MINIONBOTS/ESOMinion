@@ -1783,7 +1783,6 @@ function eso_skillmanager.AddDefaultConditions()
 			end 
 		end
 		if (skill.tnbuffthis == "1") then
-			d("checking to see if employee is missing buff")
 			if not eso_skillmanager.MissingBuff(target, realskilldata.id) then 
 				return true
 			end

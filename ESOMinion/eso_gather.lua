@@ -27,7 +27,7 @@ function eso_gather:Init()
     local ke_dead = ml_element:create( "dead", c_dead, e_dead, 300 )
     self:add( ke_dead, self.process_elements )
 
-	self:add(ml_element:create( "LootAll", c_LootAll, e_LootAll, 275 ), self.process_elements)	
+	self:add(ml_element:create( "LootAll", c_lootcorpses, e_lootcorpses, 275 ), self.process_elements)	
 	self:add(ml_element:create( "Aggro", c_Aggro, e_Aggro, 250 ), self.process_elements)
 
 	--: rest

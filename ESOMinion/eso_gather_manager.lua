@@ -104,8 +104,7 @@ end
 
 function eso_gather_manager.IsGatherable(node)
 	local gathertype = eso_gather_manager.GetType(node)
-	
-	if (gathertype and eso_gather_manager.profile[gathertype] == false) then
+	if (gathertype and eso_gather_manager.profile.types[gathertype] == false) then
 		return false
 	end
 	
@@ -147,14 +146,9 @@ function eso_gather_manager.OnGuiVarUpdate(event,data,...)
 			local handler = assert(loadstring("return " .. key))()
 			
 			if type(handler) == "table" then
-				if eso_gather_manager.profile then
+				if (eso_gather_manager.profile and eso_gather_manager.profile.types) then
 					eso_gather_manager.profile.types[handler.gathertype] = (value == "1")
 					eso_gather_manager.SaveProfile()
-					
-					--local gathertype = eso_gather_manager.types[handler.gathertype]
-					--local debugstr = "GatherManager : " .. gathertype .. " -> " ..
-					--tostring(eso_gather_manager.profile[handler.gathertype])
-					--d(debugstr)
 				end
 			end
 		end
