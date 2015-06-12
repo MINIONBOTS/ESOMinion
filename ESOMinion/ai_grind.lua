@@ -65,6 +65,42 @@ function ai_grind:Init()
     self:AddTaskCheckCEs()
 end
 
+--[[
+function eso_task_grind:Init()
+    local ke_dead = ml_element:create( "Dead", c_dead, e_dead, 300 )
+    self:add(ke_dead, self.overwatch_elements)
+	
+	local ke_rest = ml_element:create( "Rest", c_rest, e_rest, 35 )
+    self:add(ke_rest, self.overwatch_elements)
+    
+	local ke_autoEquip = ml_element:create( "AutoEquip", c_autoequip, e_autoequip, 45 )
+    self:add( ke_autoEquip, self.process_elements)
+	
+	local ke_addHuntlog = ml_element:create( "AddHuntlog", c_grind_addhuntlogtask, e_grind_addhuntlogtask, 40 )
+    self:add(ke_addHuntlog, self.process_elements)
+	
+	local ke_returnToMap = ml_element:create( "ReturnToMap", c_returntomap, e_returntomap, 35 )
+    self:add(ke_returnToMap, self.process_elements)
+	
+	 local ke_addFate = ml_element:create( "AddFate", c_add_fate, e_add_fate, 30 )
+    self:add(ke_addFate, self.process_elements)
+
+    local ke_returnToMarker = ml_element:create( "ReturnToMarker", c_returntomarker, e_returntomarker, 25 )
+    self:add(ke_returnToMarker, self.process_elements)
+    
+    local ke_nextMarker = ml_element:create( "NextMarker", c_nextgrindmarker, e_nextgrindmarker, 20 )
+    self:add(ke_nextMarker, self.process_elements)
+	
+    local ke_addKillTarget = ml_element:create( "AddKillTarget", c_add_killtarget, e_add_killtarget, 15 )
+    self:add(ke_addKillTarget, self.process_elements)
+	
+    local ke_fateWait = ml_element:create( "FateWait", c_fatewait, e_fatewait, 10 )
+    self:add(ke_fateWait, self.process_elements)
+  
+    self:AddTaskCheckCEs()
+end
+--]]
+
 function ai_grind:task_complete_eval()	
 	return false
 end

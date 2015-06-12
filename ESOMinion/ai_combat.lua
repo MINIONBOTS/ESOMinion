@@ -252,7 +252,7 @@ function e_GotoAndKill:execute()
 					return ml_log(false)
 				end
 
-				eso_skillmanager.AttackTarget( target.id )
+				eso_skillmanager.Cast( target )
 			end
 			
 			DoCombatMovement(target)

@@ -1,57 +1,69 @@
---:===============================================================================================================
---: eso_gather_manager
---:===============================================================================================================
-
 eso_gather_manager = {}
 eso_gather_manager.profilepath = GetStartupPath() .. [[\LuaMods\ESOMinion\SharedProfiles\]]
 eso_gather_manager.window = { name = GetString("gatherManager"), coords = {270,50,250,550}, visible = false }
-eso_gather_manager.version = 2.1
-
---:===============================================================================================================
---: load profile
---:===============================================================================================================  
+eso_gather_manager.version = 2.2
+eso_gather_manager.profile = {}
 
 function eso_gather_manager:LoadProfile()
 	eso_gather_manager.profile, err = persistence.load(eso_gather_manager.profilepath .. "gather.profile")
 	
-	local initializeprofile;
+	local requiresUpdate = false
+	local requiresInitialize = false
 	
-	if 	(eso_gather_manager.profile and not eso_gather_manager.profile.version) or
-		(
-		eso_gather_manager.profile
-		and eso_gather_manager.profile.version
-		and eso_gather_manager.profile.version ~= eso_gather_manager.version
-		)
-	then
-		initializeprofile = true
-	end
-	
-	if err or initializeprofile then
-		eso_gather_manager.profile = {}
-		for typeIndex,typeName in pairs(eso_gather_manager.types) do
-			eso_gather_manager.profile[typeIndex] = true
+	if (ValidTable(eso_gather_manager.profile)) then
+		local profile = eso_gather_manager.profile
+		local version = tonumber(profile.version)
+		
+		if (not version) then
+			requiresInitialize = true
+		elseif (version and version ~= eso_gather_manager.version) then
+			requiresUpdate = true
 		end
-		eso_gather_manager.profile.version = eso_gather_manager.version
-		eso_gather_manager.SaveProfile()
+	else
+		requiresInitialize = true
 	end
-	d("GatherManager : Profile Loaded") 
-end
+	
+	if (requiresInitialize) then
+		eso_gather_manager.profile = {}
+		local profile = eso_gather_manager.profile
+		profile.types = {}
+		
+		for typeIndex,typeName in pairs(eso_gather_manager.types) do
+			profile.types[typeIndex] = true
+		end
+		profile.version = eso_gather_manager.version
+		eso_gather_manager.SaveProfile()
 
---:===============================================================================================================
---: save profile
---:===============================================================================================================  
+		d("GatherManager : Profile Initialized") 
+	elseif (requiresUpdate) then
+		local profile = eso_gather_manager.profile
+		if (not profile.types) then
+			profile.types = {}
+		end
+		
+		for typeIndex,typeName in pairs(eso_gather_manager.types) do
+			if (profile.types[typeIndex] == nil) then
+				profile.types[typeIndex] = true
+			end
+		end
+		
+		profile.version = eso_gather_manager.version
+		eso_gather_manager.SaveProfile()
+		
+		d("GatherManager : Profile Version Updated") 
+	end
+	
+	d("GatherManager : Profile Load Complete") 
+end
 
 function eso_gather_manager.SaveProfile()
 	local err = persistence.store(eso_gather_manager.profilepath .. "gather.profile", eso_gather_manager.profile)
 	if err then
-		d("GatherManager : " .. err)
+		d("GatherManager : Error encountered during SaveProfile() [" .. err .. "]")
+	else
+		d("GatherManager : Profile Saved")
 	end
-	d("GatherManager : Profile Saved")
 end
-
---:===============================================================================================================
---: entity list
---:===============================================================================================================
 
 function eso_gather_manager.ClosestNode(noplayers)
 	
@@ -90,10 +102,6 @@ function eso_gather_manager.ClosestNode(noplayers)
 	return nil
 end
 
---:===============================================================================================================
---: is gatherable
---:===============================================================================================================  
-
 function eso_gather_manager.IsGatherable(node)
 	local gathertype = eso_gather_manager.GetType(node)
 	
@@ -103,10 +111,6 @@ function eso_gather_manager.IsGatherable(node)
 	
 	return true
 end
-
---:===============================================================================================================
---: get type
---:===============================================================================================================
 
 function eso_gather_manager.GetType(node)
 	for type = 1, #eso_gather_manager.types do
@@ -123,33 +127,33 @@ function eso_gather_manager.GetType(node)
 	return nil
 end
 
---:===============================================================================================================
---: toggle gui
---:===============================================================================================================  
+function eso_gather_manager.ToggleAllTypes(switch)
+	local f = _G
+	for k,v in pairs(f) do
+		if (k:find("module = GatherManager")) then
+			f[k] = (switch and "1") or "0"
+		end
+	end
+end
 
 function eso_gather_manager.OnGuiToggle()
 	eso_gather_manager.window.visible = not eso_gather_manager.window.visible
 	GUI_WindowVisible(eso_gather_manager.window.name, eso_gather_manager.window.visible)
 end
 
---:===============================================================================================================
---: vars update
---:===============================================================================================================  
-
 function eso_gather_manager.OnGuiVarUpdate(event,data,...)
 	for key,value in pairs(data) do
-	
 		if key:find("GatherManager") then
 			local handler = assert(loadstring("return " .. key))()
 			
 			if type(handler) == "table" then
 				if eso_gather_manager.profile then
-					eso_gather_manager.profile[handler.gathertype] = (value == "1")
+					eso_gather_manager.profile.types[handler.gathertype] = (value == "1")
 					eso_gather_manager.SaveProfile()
 					
-					local gathertype = eso_gather_manager.types[handler.gathertype]
-					local debugstr = "GatherManager : " .. gathertype .. " -> " ..
-					tostring(eso_gather_manager.profile[handler.gathertype])
+					--local gathertype = eso_gather_manager.types[handler.gathertype]
+					--local debugstr = "GatherManager : " .. gathertype .. " -> " ..
+					--tostring(eso_gather_manager.profile[handler.gathertype])
 					--d(debugstr)
 				end
 			end
@@ -157,36 +161,41 @@ function eso_gather_manager.OnGuiVarUpdate(event,data,...)
 	end
 end
 
---:===============================================================================================================
---: gui: toggle
---:===============================================================================================================  
 
 function eso_gather_manager.OnGuiToggle()
 	eso_gather_manager.window.visible = not eso_gather_manager.window.visible
 	GUI_WindowVisible(eso_gather_manager.window.name, eso_gather_manager.window.visible)
 end
 
---:===============================================================================================================
---: initialize
---:===============================================================================================================  
 
 function eso_gather_manager.Initialize() 
 	eso_gather_manager:LoadProfile()
+	
 	GUI_NewWindow(eso_gather_manager.window.name, unpack(eso_gather_manager.window.coords))
-	for index,gathertype in ipairs(eso_gather_manager.types) do
+	GUI_NewButton(eso_gather_manager.window.name, "Select All", "GatherManagerSelectAll", GetString("generalSettings"))
+	GUI_NewButton(eso_gather_manager.window.name, "De-Select All", "GatherManagerUnselectAll", GetString("generalSettings"))
+	
+	for index,gathertype in pairsByKeys(eso_gather_manager.types) do
 		local handler = "{ module = GatherManager, gathertype = " .. tostring(index) .. " } "
-		GUI_NewCheckbox(eso_gather_manager.window.name, " " .. gathertype, handler, GetString("generalSettings"))
-		if eso_gather_manager.profile[index] then
-			if (eso_gather_manager.profile[index] == false) then
-				_G[handler] = "0"
-			else
-				_G[handler] = "1"
-			end
+		GUI_NewCheckbox(eso_gather_manager.window.name, gathertype, handler, GetString("generalSettings"))
+		if (eso_gather_manager.profile.types[index]) then
+			_G[handler] = (eso_gather_manager.profile.types[index] == false and "0") or "1"
 		end
-
 	end
+	
 	GUI_UnFoldGroup(eso_gather_manager.window.name, GetString("generalSettings"))
 	GUI_WindowVisible(eso_gather_manager.window.name, eso_gather_manager.window.visible)
+end
+
+function eso_gather_manager.HandleButtons( Event, Button )	
+	if ( Event == "GUI.Item" and string.find(Button,"GatherManager") ~= nil ) then
+		d(Button)
+		if (Button == "GatherManagerSelectAll") then
+			eso_gather_manager.ToggleAllTypes(true)
+		elseif (Button == "GatherManagerUnselectAll") then
+			eso_gather_manager.ToggleAllTypes(false)
+		end
+	end
 end
 
 --:===============================================================================================================
@@ -196,6 +205,7 @@ end
 RegisterEventHandler("eso_gather_manager.OnGuiToggle", eso_gather_manager.OnGuiToggle)
 RegisterEventHandler("GUI.Update", eso_gather_manager.OnGuiVarUpdate)
 RegisterEventHandler("Module.Initalize", eso_gather_manager.Initialize)
+RegisterEventHandler("GUI.Item", eso_gather_manager.HandleButtons)
 
 --:===============================================================================================================
 --: data

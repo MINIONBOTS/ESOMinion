@@ -1,6 +1,5 @@
 ml_globals = {}
 
-
 -- our version of EVENT_MANAGER:RegisterForEvent("Globals_Common", EVENT_GLOBAL_MOUSE_DOWN, OnGlobalMouseDown)
 function ml_globals.RegisterLuaEventCallbackHandlers()
 	d("Registering Events..")	
@@ -18,6 +17,8 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterForEvent("EVENT_INVENTORY_IS_FULL", true)
 	RegisterForEvent("EVENT_LOOT_ITEM_FAILED", true)
 	RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
+	RegisterForEvent("EVENT_CHAT_MESSAGE_CHANNEL", true)
+	RegisterForEvent("EVENT_AGENT_CHAT_REQUESTED", true)
 	
 	-- Register a handler on our side:
 	RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE",LuaEventHandler)
@@ -25,12 +26,28 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterEventHandler("GAME_EVENT_INVENTORY_IS_FULL",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_LOOT_ITEM_FAILED",LuaEventHandler)
 	RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP",LuaEventHandler)
+	
 
+	RegisterEventHandler("GAME_EVENT_CHAT_MESSAGE_CHANNEL",
+		function(event, eventnumber, messagetype, messagefrom, message)
+			if (gPlaySoundOnWhisper == "1" and tonumber(messagetype) == g("CHAT_CHANNEL_WHISPER")) then
+				d("eso_social -> new whisper: [" .. e("zo_strformat(<<1>>,"..messagefrom..")") .. "] " .. message)
+				PlaySound(GetStartupPath() .. [[\MinionFiles\Sounds\Alarm1.wav]])
+			end
+		end
+	)
+	
+	RegisterEventHandler("GAME_EVENT_AGENT_CHAT_REQUESTED",
+		function(event, eventnumber)
+			if (gPlaySoundOnWhisper == "1" and e("IsAgentChatActive()")) then
+				d("eso_social -> new agent request: [" .. e("zo_strformat(<<1>>,"..event..")") .. "] " .. eventnumber)
+				PlaySound(GetStartupPath() .. [[\MinionFiles\Sounds\Alarm1.wav]])
+			end
+		end
+	)
 
 	d("Done registering Event..")
 end
-
-
 
 -- Callback function for Events from ESO
 function LuaEventHandler(...)
@@ -55,7 +72,6 @@ function LuaEventHandler(...)
 		local EList = EntityList("nearest,lootable,onmesh,maxdistance=3,exclude="..blackliststring)
 		
 		if ( not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull ) then
-			
 			if ( TableSize(EList) > 0 ) then			
 				local id, entry = next ( EList )
 				if ( id and entry ) then
@@ -63,14 +79,20 @@ function LuaEventHandler(...)
 					ml_blacklist.AddBlacklistEntry(GetString("monsters"), entry.id, entry.name, ml_global_information.Now+180000)
 				end
 			end
-			c_LootAll.ignoreLootTmr = ml_global_information.Now
-			c_LootAll.ignoreLoot = true
+			c_lootcorpses.ignoreLootTimer = ml_global_information.Now
+			c_lootcorpses.ignoreLoot = true
 		end
 	
 	elseif ( args[1] == "GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP" ) then
-		d("Combat Tip ID : "..tostring(args[3]))
-		-- ID 1 - Block
+		local tips = {
+			[1] = "BLOCK",
+			[2] = "OFF-BALANCE/EXPLOIT",
+			[3] = "INTERRUPT",
+			[4] = "DODGE/AVOID",
+			[18] = "BREAK CC",
+		}
 		
+		d("Combat Tip : "..tostring(args[3]).." : "..tostring(tips[tonumber(args[3])]))
 	end
 end
 
@@ -85,10 +107,14 @@ function ml_globals.UpdateGlobals()
 		ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)			
 		ml_global_information.Player_Level = e("GetUnitLevel(player)")
 		ml_global_information.Player_Dead = e("IsUnitDead(player)")
+		ml_global_information.CurrentMapID = Player.worldid
+		ml_global_information.CurrentMapName = e("GetMapNameByIndex("..tostring(Player.worldid)..")")
+		--ml_global_information.CurrentMapName = e("GetZoneNameByIndex("..tostring(ml_global_information.CurrentMapID)..")")
 		
-		ml_global_information.CurrentMapID = e("GetCurrentMapZoneIndex()")
-		ml_global_information.CurrentMapName = e("GetMapName()")
 		ml_global_information.Player_Position = Player.pos
+		ml_global_information.Player_ClassID = e("GetUnitClassId(player)")
+		ml_global_information.Player_Race = e("GetUnitRace(player)")
+		ml_global_information.Player_Alliance = e("GetUnitAlliance(player)")
 		
 		ml_global_information.Player_Magicka = {} 
 			local magickaID = g("POWERTYPE_MAGICKA")			
@@ -111,7 +137,6 @@ function ml_globals.UpdateGlobals()
 		dMapName = e("GetMapName()")
 		dMapZoneIndex = e("GetCurrentMapZoneIndex()")
 		dLocationName = e("GetPlayerLocationName()")
-		
 	end
 end
 
@@ -153,12 +178,6 @@ function ml_globals.DrawMarker(marker)
     local id = RenderManager:AddObject(t)
     return id
 end
-
-
--- Init all variables before the rest of the bot loads
-ml_globals.UpdateGlobals()
-
-
 
 
 

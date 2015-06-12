@@ -153,7 +153,7 @@ function e_attacktarget:execute()
 			return ml_log(false)
 		end]]
 
-		eso_skillmanager.AttackTarget( target.id )
+		eso_skillmanager.Cast( target )
 	end
 end
 

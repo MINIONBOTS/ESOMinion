@@ -23,6 +23,9 @@ ml_global_information.VendorChar = ""
 ml_global_information.gatherdistance = 2.5
 ml_global_information.randomdistance = 10
 ml_global_information.autoStartDisabled = false
+ml_global_information.CurrentClass = nil
+ml_global_information.CurrentClassID = nil
+ml_global_information.idlePulseCount = 0
 
 esominion = {}
 
@@ -484,15 +487,13 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	if ( tickcount - ml_global_information.lasttick > tonumber(gPulseTime) ) then
 		ml_global_information.lasttick = tickcount
 		
-		
-		-- Update global variables
+		-- Update global variables \\ THIS MUST REMAIN THE FIRST UPDATE, OTHERWISE THERE WILL BE MISSING GLOBALS.
 		ml_globals.UpdateGlobals()
+		
+		ml_global_information.CheckClass()
 		
 		-- Mesher OnUpdate
 		ml_mesh_mgr.OnUpdate( tickcount )
-			
-		-- SkillManager OnUpdate
-		eso_skillmanager.OnUpdate( tickcount )
 		
 		-- PartyManager OnUpdate
 		--mc_multibotmanager.OnUpdate( tickcount )
@@ -534,7 +535,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				end
 				
 				-- Unstuck OnUpdate
-				ai_unstuck:OnUpdate( tickcount )
+				--ai_unstuck:OnUpdate( tickcount )
 					
 				-- Update the Statusbar on the left/bottom screen
 				GUI_SetStatusBar(ml_GetTraceString())					
@@ -619,6 +620,16 @@ function ml_global_information.UpdateMode()
     end
 end
 
+function ml_global_information.CheckClass()
+	if (ml_globals) then
+		if (not ml_global_information.CurrentClass or (ml_global_information.CurrentClass and ml_global_information.CurrentClass ~= Player.class)) then
+			ml_global_information.CurrentClass = Player.class
+			ml_global_information.CurrentClassID = e("GetUnitClassId(player)")
+			eso_skillmanager.UseDefaultProfile()
+		end
+	end
+end
+
 function ml_global_information.togglebot(arg)
 	if arg == "0" then	
 		d("Stopping Bot..")
@@ -657,7 +668,6 @@ end
 
 
 function ml_global_information.ResetBot()
-
 	Player:Stop()
 	c_MoveToMarker.markerreachedfirsttime = false
 	c_MoveToMarker.markerreached = false

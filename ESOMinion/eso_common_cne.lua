@@ -9,26 +9,28 @@
 --:===============================================================================================================  
 -- original code
 
-c_LootAll = inheritsFrom(ml_cause)
-e_LootAll = inheritsFrom(ml_effect)
-c_LootAll.ignoreLoot = false
-c_LootAll.ignoreLootTmr = 0
-
-function c_LootAll:evaluate()
+c_lootcorpses = inheritsFrom(ml_cause)
+e_lootcorpses = inheritsFrom(ml_effect)
+c_lootcorpses.ignoreLoot = false
+c_lootcorpses.ignoreLootTimer = 0
+function c_lootcorpses:evaluate()
 	-- this is needed in order to make the loot window close when we cannot loot something, this is set in globals.lua event
-    if ( c_LootAll.ignoreLootTmr ~= 0 ) then
-		if ( ml_global_information.Now - c_LootAll.ignoreLootTmr > 1500 ) then
-			c_LootAll.ignoreLootTmr = 0
-			c_LootAll.ignoreLoot = false
+    if ( c_lootcorpses.ignoreLootTimer ~= 0 ) then
+		if ( TimeSince(c_lootcorpses.ignoreLootTimer) > 1500 ) then
+			c_lootcorpses.ignoreLootTimer = 0
+			c_lootcorpses.ignoreLoot = false
 		end
 	end
-	local fckidkwhatthisis=e("GetLootMoney()")
-	return c_LootAll.ignoreLoot == false and not ml_global_information.Player_InventoryFull and (
-		tonumber(e("GetNumLootItems()")) > 0 or tonumber(fckidkwhatthisis) > 0)
+	
+	local money = e("GetLootMoney()")
+	
+	return (c_lootcorpses.ignoreLoot == false and 
+		((not ml_global_information.Player_InventoryFull and tonumber(e("GetNumLootItems()")) > 0) or
+		tonumber(money) > 0))
 end
 
-function e_LootAll:execute()
-	ml_log("e_LootAll")
+function e_lootcorpses:execute()
+	ml_log("e_lootcorpses")
 	e("LootAll()")
 	return ml_log(false)	
 end
@@ -140,71 +142,65 @@ function e_movetorandom:execute()
 	return ml_log(false)
 end
 
---:======================================================================================================================================================================
---: sprint
---:======================================================================================================================================================================
---: added 9.7.2014
---: add this function to any movement cne's that require a sprint option
+c_dead = inheritsFrom(ml_cause)
+e_dead = inheritsFrom(ml_effect)
+function c_dead:evaluate()
+	return e("IsUnitDead(player)")
+end
+function e_dead:execute()
+	local haveSoulGems = select(9, e("GetDeathInfo()"))
+	
+	local newTask = eso_task_death.Create()
+	newTask.useSoulGem = (haveSoulGems and g_usesoulgemtorevive == "1")
+	ml_task_hub:Add(newTask, REACTIVE_GOAL, TP_IMMEDIATE)
+	return ml_log(true)
+end
 
-function Sprint()
-	if (ml_global_information.Player_Stamina.percent >= 99) then
-		ml_global_information.Player_SprintingRecharging = false
+c_rest = inheritsFrom(ml_cause)
+e_rest = inheritsFrom(ml_effect)
+function c_rest:evaluate()
+	if  g_rest == "1" and
+		not e("IsUnitDead(player)") and
+		not e("IsUnitInCombat(player)") and
+		not Player.isswimming and
+		not Player.iscasting
+	then
+		local hpp = ml_global_information.Player_Health.percent
+		local mpp = ml_global_information.Player_Magicka.percent
+		local spp = ml_global_information.Player_Stamina.percent
+		
+		if ((tonumber(g_resthp) > 0 and hpp < tonumber(g_resthp)) or
+			(tonumber(g_restmp) > 0 and mpp < tonumber(g_restmp)) or
+			(tonumber(g_restsp) > 0 and spp < tonumber(g_restsp)))
+		then
+			return true
+		end
 	end
 	
-	if (gSprint == "1") then
-		-- sprint is enabled
-		if (not ml_global_information.Player_Sprinting) then
-			if (ml_global_information.Player_Stamina.percent >= tonumber(gSprintStopThreshold) and not ml_global_information.Player_SprintingRecharging and not e("IsUnitInCombat(player)")) then
-				e("OnSpecialMoveKeyDown(1)")
-				--d("eso_common - > starting sprint")
-				ml_global_information.Player_Sprinting = true
-				ml_global_information.Player_SprintingRecharging = false
-			end
-		elseif (ml_global_information.Player_Sprinting) then
-			if (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold) or e("IsUnitInCombat(player)")) then
-				e("OnSpecialMoveKeyUp(1)")
-				--d("eso_common - > stopping sprint, recharging")
-				ml_global_information.Player_Sprinting = false
-				ml_global_information.Player_SprintingRecharging = true
-			end
-			--derp check
-			if  (ml_global_information.Player_Stamina.percent == 100 and Player:IsMoving() and not e("IsUnitInCombat(player)")) and (
-				(ml_global_information.Now - ml_global_information.Player_SprintingTime) > 5000)
-			then
-				ml_global_information.Player_SprintingTime = ml_global_information.Now
-				e("OnSpecialMoveKeyDown(1)")
-				--d("eso_common - > checking sprint")
-				ml_global_information.Player_Sprinting = true
-				ml_global_information.Player_SprintingRecharging = false
-			end
-		end
-	else
-		-- sprint is disabled
-		if (ml_global_information.Player_Sprinting or ml_global_information.Player_SprintingRecharging) then
-			e("OnSpecialMoveKeyUp(1)")
-			--d("eso_common - > stopping sprint, sprint disabled")
-			ml_global_information.Player_Sprinting = false
-			ml_global_information.Player_SprintingRecharging = false
-		end
+	return false
+end
+function e_rest:execute()
+	local newTask = eso_task_rest.Create()
+	ml_task_hub:Add(newTask, REACTIVE_GOAL, TP_IMMEDIATE)
+	return ml_log(true)
+end
+
+c_lockpick = inheritsFrom(ml_cause)
+e_lockpick = inheritsFrom(ml_effect)
+function c_lockpick:evaluate()
+	if (gBotMode == GetString("assistMode") and gAssistDoLockpick == "0") then
+		return false
 	end
+	
+	local isInteracting = e("IsPlayerInteractingWithObject()")
+	local lockTime = e("GetLockpickingTimeLeft()")
+	
+	return (isInteracting and lockTime > 0)
+end
+function e_lockpick:execute()
+	local newTask = eso_task_lockpick.Create()
+	ml_task_hub:Add(newTask, REACTIVE_GOAL, TP_IMMEDIATE)
 end
 
---:======================================================================================================================================================================
---: mount
---:======================================================================================================================================================================
---: not added yet (todo)
---: add this function to any movement cne's that require a mount option
 
-function Mount()
-	return
-end
 
---:======================================================================================================================================================================
---: dismount
---:======================================================================================================================================================================
---: not added yet (todo)
---: add this function to any movement cne's that require a dismount
-
-function Dismount()
-	return
-end
