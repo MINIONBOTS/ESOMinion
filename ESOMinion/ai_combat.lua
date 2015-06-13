@@ -234,26 +234,7 @@ function e_GotoAndKill:execute()
 			Player:SetTarget(target.id)
 			--Player:SetFacing(tpos.x,tpos.y+(tpos.height/2),tpos.z)
 			
-			if ( not eso_skillmanager.Heal( Player.id ) ) then
-
-				if not ml_task_hub:CurrentTask().timestarted then
-					ml_task_hub:CurrentTask().timestarted = ml_global_information.Now
-				end
-			
-				local timediff = ml_global_information.Now - ml_task_hub:CurrentTask().timestarted
-				
-				if  timediff > 30000
-					and target.alive
-					and target.hp.current == 0
-				then
-					d("Blacklisting Target " .. target.id)
-					EntityList:AddToBlacklist(target.id, 300000)
-					ml_task_hub:CurrentTask().completed = true
-					return ml_log(false)
-				end
-
-				eso_skillmanager.Cast( target )
-			end
+			eso_skillmanager.Cast( target )
 			
 			DoCombatMovement(target)
 			
@@ -274,8 +255,8 @@ function DoCombatMovement(target)
 	end
 	
 	-- Interrupt/Block
-	   -- GetUnitCastingInfo(string unitTag)
-        --Returns: string actionName, number timeStarted, number timeEnding, bool isChannel, integer barType, bool canBlock, bool canInterrupt, bool isChargeUp, bool hideBar 
+	-- GetUnitCastingInfo(string unitTag)
+    --Returns: string actionName, number timeStarted, number timeEnding, bool isChannel, integer barType, bool canBlock, bool canInterrupt, bool isChargeUp, bool hideBar 
 end
 
 ---------
@@ -406,7 +387,7 @@ function c_usePotions:evaluate()
 		end
 	elseif(gPotiontype =="Magicka")then
 		if((ml_global_information.Player_InCombat == true) and (ml_global_information.Player_Magicka.percent <= tonumber(gPotvalue))) then
-			if(haveAndNotCoolDownPotion(16) == true)then
+			if (haveAndNotCoolDownPotion(16) == true) then
 				d("using potion:"..gPotiontype)
 				ml_log("using potion :"..gPotiontype)
 				return true
@@ -424,7 +405,6 @@ function c_usePotions:evaluate()
 	
 	return false
 end
-
 
 
 function e_usePotions:execute()

@@ -124,6 +124,7 @@ eso_skillmanager.Variables = {
 	SKM_PPowGT = { default = 0, cast = "number", profile = "ppowgt", section = "fighting"   },
 	SKM_PPowLT = { default = 0, cast = "number", profile = "ppowlt", section = "fighting"   },
 	
+	SKM_TRG = { default = "Target", cast = "string", profile = "trg", section = "fighting"  },
 	SKM_THPGT = { default = 0, cast = "number", profile = "thpgt", section = "fighting"  },
 	SKM_THPLT = { default = 0, cast = "number", profile = "thplt", section = "fighting"  },
 	
@@ -256,8 +257,8 @@ function eso_skillmanager.ModuleInit()
 	
     GUI_NewButton(eso_skillmanager.mainwindow.name,GetString("saveProfile"),"SMSaveEvent")
     RegisterEventHandler("SMSaveEvent",eso_skillmanager.SaveProfile)
-	--GUI_NewButton(eso_skillmanager.mainwindow.name,GetString("clearProfile"),"SMClearEvent")
-    --RegisterEventHandler("SMClearEvent",eso_skillmanager.ClearProfilePrompt)
+	GUI_NewButton(eso_skillmanager.mainwindow.name,GetString("clearProfile"),"SMClearEvent")
+    RegisterEventHandler("SMClearEvent",eso_skillmanager.ClearProfilePrompt)
     GUI_NewField(eso_skillmanager.mainwindow.name,GetString("newProfileName"),"gSMnewname",GetString("skillEditor"))
     GUI_NewButton(eso_skillmanager.mainwindow.name,GetString("newProfile"),"newSMProfileEvent",GetString("skillEditor"))
     RegisterEventHandler("newSMProfileEvent",eso_skillmanager.NewProfile)
@@ -290,13 +291,13 @@ function eso_skillmanager.ModuleInit()
 	GUI_NewField(eso_skillmanager.editwindow.name,GetString("prevSkillIDNot"),"SKM_NPSkillID",GetString("basicDetails"))
 	GUI_NewField(eso_skillmanager.editwindow.name,GetString("smthrottle"),"SKM_THROTTLE",GetString("basicDetails"))
 
-	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("playerHPGT"),"SKM_PHPL",GetString("playerHPMPTP"))
-	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("playerHPLT"),"SKM_PHPB",GetString("playerHPMPTP"))
+	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("playerHPGT"),"SKM_PHPGT",GetString("playerHPMPTP"))
+	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("playerHPLT"),"SKM_PHPLT",GetString("playerHPMPTP"))
 	GUI_NewComboBox(eso_skillmanager.editwindow.name,GetString("smskpowertype"),"SKM_POWERTYPE",GetString("playerHPMPTP"),"Magicka,Stamina,Ultimate");
 	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("playerPowerGT"),"SKM_PPowGT",GetString("playerHPMPTP"))
 	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("playerPowerLT"),"SKM_PPowLT",GetString("playerHPMPTP"))
 
-	--GUI_NewComboBox(eso_skillmanager.editwindow.name,GetString("skmTRG"),"SKM_TRG",GetString("target"),"Target,Ground Target,SMN DoT,SMN Bane,Cast Target,Player,Party,PartyS,Low TP,Low MP,Pet,Ally,Tank,Tankable Target,Tanked Target,Heal Priority,Dead Ally,Dead Party")
+	GUI_NewComboBox(eso_skillmanager.editwindow.name,GetString("skmTRG"),"SKM_TRG",GetString("target"),"Target,Self")
 	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("targetHPGT"),"SKM_THPGT",GetString("target"))
 	GUI_NewNumeric(eso_skillmanager.editwindow.name,GetString("targetHPLT"),"SKM_THPLT",GetString("target"))
 	
@@ -1129,195 +1130,8 @@ function eso_skillmanager.GetSkillTarget(skill, entity, maxrange)
 		if (target.id == Player.id) then
 			return nil
 		end
-	elseif ( skill.trg == "Tankable Target") then
-		local newtarget = eso_skillmanager.GetTankableTarget(maxrange)
-		if (newtarget) then
-			target = newtarget
-			TID = newtarget.id
-		else
-			return nil
-		end
-	elseif ( skill.trg == "Tanked Target") then
-		local newtarget = eso_skillmanager.GetTankedTarget(maxrange)
-		if (newtarget) then
-			target = newtarget
-			TID = newtarget.id
-		else
-			return nil
-		end
-	elseif ( skill.trg == "Pet" ) then
-		if ( pet ) then
-			if ( eso_skillmanager.IsPetSummonSkill(skillid) and pet.alive ) then 
-				return nil 
-			else
-				target = pet
-				TID = pet.id
-			end
-		else
-			TID = PID
-		end
-	elseif ( skill.trg == "Party" ) then
-		if ( not IsNullString(skill.ptbuff) or not IsNullString(skill.ptnbuff)) then
-			local newtarget = PartyMemberWithBuff(skill.ptbuff, skill.ptnbuff, maxrange)
-			if (newtarget) then
-				target = newtarget
-				TID = newtarget.id
-			 else
-				return nil
-			end
-		else
-			local ally = nil
-			if ( skill.npc == "1" ) then
-				ally = GetBestPartyHealTarget( true, maxrange )
-			else
-				ally = GetBestPartyHealTarget( false, maxrange )
-			end
-			
-			if ( ally ) then
-				target = ally
-				TID = ally.id
-			else
-				return nil
-			end
-		end
-	elseif ( skill.trg == "PartyS" ) then
-		if (not IsNullString(skill.ptbuff) or not IsNullString(skill.ptnbuff)) then
-			local newtarget = PartySMemberWithBuff(skill.ptbuff, skill.ptnbuff, maxrange)
-			if (newtarget) then
-				target = newtarget
-				TID = newtarget.id
-			else
-				return nil
-			end
-		else
-			local ally = GetLowestHPParty( skill )
-			if ( ally ) then
-				target = ally
-				TID = ally.id
-			else
-				return nil
-			end
-		end
-	elseif ( skill.trg == "Tank" ) then
-		local ally = GetBestTankHealTarget( maxrange )
-		if ( ally and ally.id ~= PID) then
-			target = ally
-			TID = ally.id
-		else
-			return nil
-		end
-	elseif ( skill.trg == "Ally" ) then
-		local ally = nil
-		if ( skill.npc == "1" ) then
-			ally = GetBestHealTarget( true, maxrange )
-		else
-			ally = GetBestHealTarget( false, maxrange )
-		end
-		
-		if ( ally and ally.id ~= PID) then
-			target = ally
-			TID = ally.id
-		end	
-	elseif ( skill.trg == "Dead Party" or skill.trg == "Dead Ally") then
-		local ally = nil
-		if (skill.trg == "Dead Party") then
-			ally = GetBestRevive( true, skill.trgtype )
-		else
-			ally = GetBestRevive( false, skill.trgtype )
-		end 
-		
-		if ( ally and ally.id ~= PID ) then
-			if IsReviveSkill(skillid) then
-				target = ally
-				TID = ally.id
-			else
-				TID = PID
-			end
-		else
-			return nil
-		end
-	elseif ( skill.trg == "Casting Target" ) then
-		local ci = entity.castinginfo
-		if ( ci ) then
-			target = EntityList:Get(ci.channeltargetid)
-			TID = ci.channeltargetid
-		else
-			return nil
-		end
-	elseif ( skill.trg == "SMN DoT" ) then
-		local newtarget = GetBestDoTTarget()
-		if (newtarget) then
-			target = newtarget
-			TID = newtarget.id
-		else
-			return nil
-		end
-	elseif ( skill.trg == "SMN Bane" ) then
-		local newtarget = GetBestBaneTarget()
-		if (newtarget) then
-			target = newtarget
-			TID = newtarget.id
-		else
-			return nil
-		end
 	elseif ( skill.trg == "Player" ) then
 		TID = PID
-	elseif ( skill.trg == "Low TP" ) then
-		local ally = GetLowestTPParty( maxrange, skill.trgtype )
-		if ( ally ) then
-			target = ally
-			TID = ally.id
-		else
-			return nil
-		end
-	elseif ( skill.trg == "Low MP" ) then
-		local ally = GetLowestMPParty( maxrange, skill.trgtype )
-		if ( ally ) then
-			target = ally
-			TID = ally.id
-		else
-			return nil
-		end
-	elseif ( skill.trg == "Heal Priority" and tonumber(skill.hpriohp) > 0 ) then
-		local priorities = {
-			[1] = skill.hprio1,
-			[2] = skill.hprio2,
-			[3] = skill.hprio3,
-			[4] = skill.hprio4,
-		}
-		
-		local healTargets = {}
-		healTargets["Self"] = Player
-		healTargets["Tank"] = GetBestTankHealTarget( maxrange )
-		if ( skill.npc == "1" ) then
-			healTargets["Party"] = GetBestPartyHealTarget( true, maxrange )
-			healTargets["Any"] = GetBestHealTarget( true, maxrange )
-		else
-			healTargets["Party"] = GetBestPartyHealTarget( false, maxrange )
-			healTargets["Any"] = GetBestHealTarget( false, maxrange ) 
-		end
-		
-		local ally = nil
-		for i,trgstring in ipairs(priorities) do
-			if (healTargets[trgstring]) then
-				local htarget = healTargets[trgstring]
-				if (tonumber(skill.hpriohp) > htarget.hp.percent) then
-					ally = htarget
-				end
-			end
-			if (ally) then
-				break
-			end
-		end
-		
-		if ( ally ) then
-			eso_skillmanager.DebugOutput( skill.prio, "Heal Priority: Target Selection : "..ally.name)
-			target = ally
-			TID = ally.id
-		else
-			eso_skillmanager.DebugOutput( skill.prio, "Heal Priority: Target Selection : nil")
-			return nil
-		end
 	end
 	
 	if (ValidTable(target) and TID ~= 0) then
@@ -1463,6 +1277,10 @@ function eso_skillmanager.CanCast(prio, entity)
 		return 0
 	end
 	--]]
+	
+	if (skill.trg == "Self") then
+		entity = Player
+	end
 	
 	eso_skillmanager.CurrentSkill = skill
 	eso_skillmanager.CurrentSkillData = realskilldata	
@@ -1707,7 +1525,7 @@ function eso_skillmanager.AddDefaultConditions()
 		local target = eso_skillmanager.CurrentTarget
 		
 		local throttle = tonumber(skill.throttle) or 0
-		if ( throttle > 0 and skill.timelastused and (TimeSince(skill.timelastused) < (throttle * 1000))) then 
+		if ( throttle > 0 and skill.timelastused and (TimeSince(skill.timelastused) < (throttle))) then 
 			return true
 		end
 		return false
