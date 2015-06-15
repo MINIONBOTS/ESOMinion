@@ -21,11 +21,16 @@ eso_skillmanager.bestAOE = 0
 eso_skillmanager.latencyTimer = 0
 eso_skillmanager.resetTimer = 0
 
+eso_skillmanager.lastAvoid = 0
+eso_skillmanager.lastBreak = 0
+eso_skillmanager.lastInterrupt = 0
+
 eso_skillmanager.TIP_BLOCK = 1
 eso_skillmanager.TIP_EXPLOIT = 2
 eso_skillmanager.TIP_INTERRUPT = 3
 eso_skillmanager.TIP_AVOID = 4
 eso_skillmanager.TIP_BREAK = 18
+eso_skillmanager.TIP_INTERRUPT2 = 19
 
 --[[
 Player:RollDodge()
@@ -107,7 +112,8 @@ eso_skillmanager.Variables = {
 	SKM_ID = { default = 0, cast = "number", profile = "skillID", section = "main"},
 	SKM_SKILLTYPE = { default = GetString("smsktypedmg"), cast = "string", profile = "skilltype", section = "main"},
 	SKM_Prio = { default = 0, cast = "number", profile = "prio", section = "main"},
-	SKM_ENABLED = { default = "0", cast = "string", profile = "enabled", section = "main"},
+	SKM_ATKRNG = { default = "0", cast = "string", profile = "atkrng", section = "main"},
+	SKM_ENABLED = { default = "0", cast = "string", profile = "enabled", section = "main"},	
 	
 	SKM_Combat = { default = "In Combat", cast = "string", profile = "ooc", section = "fighting"  },
 	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"   },
@@ -280,6 +286,7 @@ function eso_skillmanager.ModuleInit()
     GUI_NewField(eso_skillmanager.editwindow.name,GetString("maMarkerID"),"SKM_ID",GetString("skillDetails"))
 	GUI_NewField(eso_skillmanager.editwindow.name,GetString("maMarkerName"),"SKM_NAME",GetString("skillDetails"))
 	GUI_NewField(eso_skillmanager.editwindow.name,GetString("alias"),"SKM_ALIAS",GetString("skillDetails"))
+	GUI_NewCheckbox(eso_skillmanager.editwindow.name,GetString("setsAttackRange"),"SKM_ATKRNG",GetString("skillDetails"))
 	GUI_NewCheckbox(eso_skillmanager.editwindow.name,GetString("enabled"),"SKM_ENABLED",GetString("skillDetails"))
 	--GUI_NewComboBox(eso_skillmanager.editwindow.name,GetString("skmCombat"),"SKM_Combat",GetString("skillDetails"),"In Combat,Out of Combat,Any")
 	
@@ -950,27 +957,33 @@ function eso_skillmanager.ToggleMenu()
 end
 
 function eso_skillmanager.GetAttackRange()
-	local maxRange = 5
-	
-	local classID = ml_global_information.CurrentClassID
-	if (classID) then
-	
-		--[1] = "DragonKnight",
-		--[2] = "Sorcerer",
-		--[3] = "Nightblade",
-		--[6] = "Templar",
-	
-		if (classID == 1) then
-			maxRange = 5
-		elseif (classID == 2) then
-			maxRange = 10
-		elseif (classID == 3) then
-			maxRange = 5
-		elseif (classID == 6) then
-			maxRange = 5
-		end		
+	local maxrange = 5 -- 5 is the melee sword attack range
+	if ( Player ) then	
+		if ( gAttackRange == GetString("aRange")) then
+			maxrange = 28
+		elseif ( gAttackRange == GetString("aAutomatic")) then		
+			-- Check if we have a target to check our skills against
+			target = Player:GetTarget()
+			if ( not target ) then
+				target = Player
+			end
+			
+			if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
+				for k,v in pairs(eso_skillmanager.SkillProfile) do					
+					-- Get Max Attack Range for global use
+					if (v.atkrng == "1" and v.trg == "Target") then
+						local skillid = eso_skillmanager.GetRealSkillID(v.skillID)
+						if (AbilityList:IsTargetInRange(skillid,target.id) and AbilityList:CanCast(skillid,target.id) == 10) then
+							if ( v.maxRange > maxrange) then
+								maxrange = v.maxRange
+							end	
+						end
+					end				
+				end
+			end
+		end
 	end
-	return maxRange
+	return maxrange
 end
 
 function eso_skillmanager.Cast( entity )
@@ -1012,38 +1025,68 @@ function eso_skillmanager.Cast( entity )
 		local interruptable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_INTERRUPT)
 		if (ValidTable(interruptable)) then
 			if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
-				e("PerformInterrupt()")
-				eso_skillmanager.latencyTimer = Now() + 300
-				d("Attempting to interrupt enemy.")
-				return true
+				if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
+					e("PerformInterrupt()")
+					eso_skillmanager.latencyTimer = Now() + 300
+					eso_skillmanager.lastBreak = Now()
+					d("Attempting to interrupt enemy.")
+					return true
+				end
+			end
+		end
+		
+		local interruptable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_INTERRUPT2)
+		if (ValidTable(interruptable)) then
+			if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
+				if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
+					e("PerformInterrupt()")
+					eso_skillmanager.latencyTimer = Now() + 300
+					eso_skillmanager.lastBreak = Now()
+					d("Attempting to interrupt enemy attack.")
+					return true
+				end
 			end
 		end
 		
 		local breakable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_BREAK)
 		if (ValidTable(breakable)) then
 			if (not isAssistMode or (isAssistMode and gAssistDoBreak == "1")) then
-				local direction = math.random(0,1) == 1 and 4 or 5
-				Player:RollDodge(direction)
-				eso_skillmanager.latencyTimer = Now() + 300
-				d("Attempting to break CC.")
-				return true
+				if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
+					local validRolls = GetValidRollDirections()
+					if (validRolls) then
+						local direction = GetRandomEntry(validRolls)
+						Player:RollDodge(direction)
+						eso_skillmanager.latencyTimer = Now() + 300
+						eso_skillmanager.lastBreak = Now()
+						d("Attempting to break CC.")
+						return true
+					end
+				end
 			end
 		end
 		
 		local avoidable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_AVOID)
 		if (ValidTable(avoidable)) then
 			if (not isAssistMode or (isAssistMode and gAssistDoAvoid == "1")) then
-				local direction = math.random(0,1) == 1 and 4 or 5
-				Player:RollDodge(direction)
-				eso_skillmanager.latencyTimer = Now() + 300
-				d("Attempting to avoid attack.")
-				return true
+				if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
+					if (ml_global_information.Player_Stamina.percent > 50) then
+						local validRolls = GetValidRollDirections()
+						if (validRolls) then
+							local direction = GetRandomEntry(validRolls)
+							Player:RollDodge(direction)
+							eso_skillmanager.latencyTimer = Now() + 300
+							eso_skillmanager.lastBreak = Now()
+							d("Attempting to break CC.")
+							return true
+						end
+					end
+				end
 			end
 		end
 	end
 	
 	--This call is here to refresh the action list in case new skills are equipped. May not be necessary for ESO.
-	local al = AbilityList("")
+	local al = AbilityList("") 
 	if (ValidTable(eso_skillmanager.SkillProfile)) then
 		for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
 			local result = eso_skillmanager.CanCast(prio, entity)
@@ -1053,9 +1096,9 @@ function eso_skillmanager.Cast( entity )
 				--local realID = tonumber(skill.skillID)
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				local action = AbilityList:Get(realID)
-				d("Attempting to cast ability ID : "..tostring(realID))
+				--d("Attempting to cast ability ID : "..tostring(realID))
 				if ( action and AbilityList:Cast(realID,TID)) then
-					skill.timelastused = Now()
+					skill.timelastused = Now() + 2000
 					eso_skillmanager.prevSkillID = realID
 					eso_skillmanager.resetTimer = Now() + 4000
 					
@@ -1250,7 +1293,8 @@ function eso_skillmanager.CanCast(prio, entity)
 	local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 
 	--Pull the real skilldata, if we can't find it, consider it uncastable.	
-	local realskilldata = eso_skillmanager.GetAbilitySafe(realID) 
+	--local realskilldata = eso_skillmanager.GetAbilitySafe(realID) 
+	local realskilldata = AbilityList:Get(realID)
 	if (not realskilldata) then
 		eso_skillmanager.DebugOutput( prio, "Ability failed safeness check for "..skill.name.."["..tostring(prio).."]" )
 		return 0
@@ -1525,7 +1569,7 @@ function eso_skillmanager.AddDefaultConditions()
 		local target = eso_skillmanager.CurrentTarget
 		
 		local throttle = tonumber(skill.throttle) or 0
-		if ( throttle > 0 and skill.timelastused and (TimeSince(skill.timelastused) < (throttle))) then 
+		if ( throttle > 0 and skill.timelastused and TimeSince(skill.timelastused) < throttle) then 
 			return true
 		end
 		return false

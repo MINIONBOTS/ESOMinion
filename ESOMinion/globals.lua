@@ -1,4 +1,7 @@
 ml_globals = {}
+ml_globals.level1Timer = 0
+ml_globals.level2Timer = 0
+ml_globals.level3Timer = 0
 
 -- our version of EVENT_MANAGER:RegisterForEvent("Globals_Common", EVENT_GLOBAL_MOUSE_DOWN, OnGlobalMouseDown)
 function ml_globals.RegisterLuaEventCallbackHandlers()
@@ -17,8 +20,8 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterForEvent("EVENT_INVENTORY_IS_FULL", true)
 	RegisterForEvent("EVENT_LOOT_ITEM_FAILED", true)
 	RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
-	RegisterForEvent("EVENT_CHAT_MESSAGE_CHANNEL", true)
-	RegisterForEvent("EVENT_AGENT_CHAT_REQUESTED", true)
+	--RegisterForEvent("EVENT_CHAT_MESSAGE_CHANNEL", true)
+	--RegisterForEvent("EVENT_AGENT_CHAT_REQUESTED", true)
 	
 	-- Register a handler on our side:
 	RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE",LuaEventHandler)
@@ -28,23 +31,23 @@ function ml_globals.RegisterLuaEventCallbackHandlers()
 	RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP",LuaEventHandler)
 	
 
-	RegisterEventHandler("GAME_EVENT_CHAT_MESSAGE_CHANNEL",
-		function(event, eventnumber, messagetype, messagefrom, message)
-			if (gPlaySoundOnWhisper == "1" and tonumber(messagetype) == g("CHAT_CHANNEL_WHISPER")) then
-				d("eso_social -> new whisper: [" .. e("zo_strformat(<<1>>,"..messagefrom..")") .. "] " .. message)
-				PlaySound(GetStartupPath() .. [[\MinionFiles\Sounds\Alarm1.wav]])
-			end
-		end
-	)
+	--RegisterEventHandler("GAME_EVENT_CHAT_MESSAGE_CHANNEL",
+		--function(event, eventnumber, messagetype, messagefrom, message)
+			--if (gPlaySoundOnWhisper == "1" and tonumber(messagetype) == g("CHAT_CHANNEL_WHISPER")) then
+				--d("eso_social -> new whisper: [" .. e("zo_strformat(<<1>>,"..messagefrom..")") .. "] " .. message)
+				--PlaySound(GetStartupPath() .. [[\MinionFiles\Sounds\Alarm1.wav]])
+			--end
+		--end
+	--)
 	
-	RegisterEventHandler("GAME_EVENT_AGENT_CHAT_REQUESTED",
-		function(event, eventnumber)
-			if (gPlaySoundOnWhisper == "1" and e("IsAgentChatActive()")) then
-				d("eso_social -> new agent request: [" .. e("zo_strformat(<<1>>,"..event..")") .. "] " .. eventnumber)
-				PlaySound(GetStartupPath() .. [[\MinionFiles\Sounds\Alarm1.wav]])
-			end
-		end
-	)
+	--RegisterEventHandler("GAME_EVENT_AGENT_CHAT_REQUESTED",
+		--function(event, eventnumber)
+			--if (gPlaySoundOnWhisper == "1" and e("IsAgentChatActive()")) then
+				--d("eso_social -> new agent request: [" .. e("zo_strformat(<<1>>,"..event..")") .. "] " .. eventnumber)
+				--PlaySound(GetStartupPath() .. [[\MinionFiles\Sounds\Alarm1.wav]])
+			--end
+		--end
+	--)
 
 	d("Done registering Event..")
 end
@@ -71,7 +74,7 @@ function LuaEventHandler(...)
 		local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
 		local EList = EntityList("nearest,lootable,onmesh,maxdistance=3,exclude="..blackliststring)
 		
-		if ( not ml_global_information.Player_InCombat and not ml_global_information.Player_InventoryFull ) then
+		if ( not ml_global_information.Player_InCombat and not InventoryFull() ) then
 			if ( TableSize(EList) > 0 ) then			
 				local id, entry = next ( EList )
 				if ( id and entry ) then
@@ -79,8 +82,8 @@ function LuaEventHandler(...)
 					ml_blacklist.AddBlacklistEntry(GetString("monsters"), entry.id, entry.name, ml_global_information.Now+180000)
 				end
 			end
-			c_lootcorpses.ignoreLootTimer = ml_global_information.Now
-			c_lootcorpses.ignoreLoot = true
+			c_lootwindow.ignoreLootTimer = ml_global_information.Now
+			c_lootwindow.ignoreLoot = true
 		end
 	
 	elseif ( args[1] == "GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP" ) then
@@ -99,44 +102,49 @@ end
 -- Global vars which are used very often and we can just reduce the hammering by getting them once per frame
 function ml_globals.UpdateGlobals()
 	if ( Player ~= nil and ml_global_information.lastgamestate == 2) then
-						
-		ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
-		ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
-		ml_global_information.Player_InventorySlots = e("GetBagSize()")
-		ml_global_information.Player_InventoryNearlyFull = (e("CheckInventorySpaceSilently(5)") == false)
-		ml_global_information.Player_InventoryFull = (e("CheckInventorySpaceSilently(1)") == false)			
-		ml_global_information.Player_Level = e("GetUnitLevel(player)")
-		ml_global_information.Player_Dead = e("IsUnitDead(player)")
-		ml_global_information.CurrentMapID = Player.worldid
-		ml_global_information.CurrentMapName = e("GetMapNameByIndex("..tostring(Player.worldid)..")")
-		--ml_global_information.CurrentMapName = e("GetZoneNameByIndex("..tostring(ml_global_information.CurrentMapID)..")")
 		
+		ml_global_information.Player_Health = Player.hp or { current = 0, max = 0, percent = 0 }
+		ml_global_information.CurrentMapID = Player.worldid
 		ml_global_information.Player_Position = Player.pos
-		ml_global_information.Player_ClassID = e("GetUnitClassId(player)")
-		ml_global_information.Player_Race = e("GetUnitRace(player)")
-		ml_global_information.Player_Alliance = e("GetUnitAlliance(player)")
 		
 		ml_global_information.Player_Magicka = {} 
-			local magickaID = g("POWERTYPE_MAGICKA")			
-			ml_global_information.Player_Magicka.current,ml_global_information.Player_Magicka.max,ml_global_information.Player_Magicka.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-			ml_global_information.Player_Magicka.percent = ml_global_information.Player_Magicka.current*100/ml_global_information.Player_Magicka.effectiveMax
+		local powertypeMagicka = 0		
+		ml_global_information.Player_Magicka.current,ml_global_information.Player_Magicka.max,ml_global_information.Player_Magicka.effectiveMax = e("GetUnitPower(player,"..powertypeMagicka..")")
+		ml_global_information.Player_Magicka.percent = ml_global_information.Player_Magicka.current*100/ml_global_information.Player_Magicka.effectiveMax
+		
 		ml_global_information.Player_Stamina = {} 
-			local magickaID = g("POWERTYPE_STAMINA")
-			ml_global_information.Player_Stamina.current,ml_global_information.Player_Stamina.max,ml_global_information.Player_Stamina.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-			ml_global_information.Player_Stamina.percent = ml_global_information.Player_Stamina.current*100/ml_global_information.Player_Stamina.effectiveMax
+		local powertypeStamina = 6
+		ml_global_information.Player_Stamina.current,ml_global_information.Player_Stamina.max,ml_global_information.Player_Stamina.effectiveMax = e("GetUnitPower(player,"..powertypeStamina..")")
+		ml_global_information.Player_Stamina.percent = ml_global_information.Player_Stamina.current*100/ml_global_information.Player_Stamina.effectiveMax
+		
 		ml_global_information.Player_Ultimate = {} 
-			local magickaID = g("POWERTYPE_ULTIMATE")
-			ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..magickaID..")")
-			ml_global_information.Player_Ultimate.percent = ml_global_information.Player_Ultimate.current*100/ml_global_information.Player_Ultimate.effectiveMax
+		local powertypeUltimate = 10
+		ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..powertypeUltimate..")")
+		ml_global_information.Player_Ultimate.percent = ml_global_information.Player_Ultimate.current*100/ml_global_information.Player_Ultimate.effectiveMax
+		
+		if (TimeSince(ml_globals.level1Timer) > 500 or ml_globals.level1Timer == 0) then
+			ml_global_information.Player_InCombat = e("IsUnitInCombat(player)")
+		end
+		
+		if (TimeSince(ml_globals.level2Timer) > 1500 or ml_globals.level1Timer == 0) then
+			ml_global_information.Player_InventorySlots = e("GetBagSize(1)")
+			ml_global_information.Player_InventoryFreeSlots = e("GetNumBagFreeSlots(1)")
+			ml_global_information.CurrentMapName = e("GetPlayerLocationName()")
+		end
+		
+		if (TimeSince(ml_globals.level3Timer) > 5000 or ml_globals.level1Timer == 0) then
+			ml_global_information.Player_Level = e("GetUnitLevel(player)")			
+		end
 		
 		-- needs to be here ,else some of the needed globals are not yet set
-		if (eso_skillmanager) then 	ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() end
+		if (eso_skillmanager) then 	
+			ml_global_information.AttackRange = eso_skillmanager.GetAttackRange() 
+		end
 		
 		-- Update Debug fields			
 		dAttackRange = ml_global_information.AttackRange
-		dMapName = e("GetMapName()")
-		dMapZoneIndex = e("GetCurrentMapZoneIndex()")
-		dLocationName = e("GetPlayerLocationName()")
+		dMapName = ml_global_information.CurrentMapName
+		gStatusMapID = Player.worldid
 	end
 end
 
