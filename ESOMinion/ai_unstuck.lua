@@ -12,7 +12,7 @@ ai_unstuck.lastmount = 0
 
 function ai_unstuck:OnUpdate( tick )
 	
-	if ( ml_global_information.Player_Dead == true) then 
+	if ( Player.dead ) then 
 		ai_unstuck.Reset()
 		return
 	end
@@ -112,13 +112,13 @@ function ai_unstuck.HandleStuck()
 	Player:Stop() -- force the recreation of a new path
 	
 	Player:SetMovement(1,2) -- try walking backwards a bit
-	ml_global_information.Wait( 1500 )
+	ml_task_hub:CurrentTask():SetDelay(math.random(1500,1750))
 	ai_unstuck.stuckcounter = 0	
 end
 
 function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 	
-	if ( ml_global_information.Player_Dead == true) then 
+	if ( Player.dead ) then 
 		ai_unstuck.Reset()
 		return
 	end
@@ -131,7 +131,8 @@ function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 	if ( tonumber(stuckcount) < 8 and tonumber(stuckcount) > 0) then
 		d("Stuck? Distance Moved: "..tostring(distmoved) .. " StuckCount: "..tostring(stuckcount) )
 		Player:Jump()
-				
+		
+		--[[
 		local i = math.random(0,1)
 		if ( i == 0 ) then
 			Player:SetMovement(1,3)
@@ -140,6 +141,7 @@ function ai_unstuck.stuckhandler( event, distmoved, stuckcount )
 			Player:SetMovement(1,4)
 			ai_unstuck.ismoving = true
 		end
+		--]]
 	end
 	
 	if ( tonumber(stuckcount) > 20 ) then
