@@ -1,7 +1,7 @@
 --:===============================================================================================================
 --: ESOMinion [Elder Scrolls Online]
 --: eso_task_vendor (7.25.2014)
---:=============================================================================================================== 
+--:===============================================================================================================
 
 eso_vendortask = inheritsFrom(ml_task)
 eso_vendortask.name = "Vendoring"
@@ -26,7 +26,7 @@ function eso_vendortask:Init()
 end
 
 function eso_vendortask:task_complete_eval()
-	if c_dead:evaluate() or c_Aggro:evaluate() then
+	if c_dead:evaluate() or c_aggro:evaluate() then
 		return true
 	end
 	return false
@@ -42,11 +42,9 @@ e_Vendor = inheritsFrom(ml_effect)
 e_Vendor.throttle = 2500
 
 function c_Vendor:evaluate()
-	if not c_dead:evaluate() and not c_Aggro:evaluate() then
-		if (gVendor == "1" and NeedToVendor()) or (gRepair == "1" and NeedToRepair()) then
-			if GetVendor() or GetVendorMarker() then
-				return true
-			end
+	if (gVendor == "1" and NeedToVendor()) or (gRepair == "1" and NeedToRepair()) then
+		if GetVendor() or GetVendorMarker() then
+			return true
 		end
 	end
 	return false
@@ -55,8 +53,8 @@ end
 function e_Vendor:execute()
 	Player:Stop()
 	d("eso_vendortask -> Creating Vendor Task")
-	local task = eso_vendortask.Create()
-	ml_task_hub:Add(task.Create(), REACTIVE_GOAL, TP_ASAP)
+	local newTask = eso_vendortask.Create()
+	ml_task_hub:Add(newTask, REACTIVE_GOAL, TP_IMMEDIATE)
 	return ml_log(true)
 end
 
@@ -130,7 +128,6 @@ end
 c_VendorAndRepair = inheritsFrom(ml_cause)
 e_VendorAndRepair = inheritsFrom(ml_effect)
 e_VendorAndRepair.throttle = math.random(1000,2000)
-
 function c_VendorAndRepair:evaluate()
 	if ml_task_hub:CurrentTask().vendor and ml_task_hub:CurrentTask().vendor.distance <= INTERACT_RANGE.VENDOR then
 		ml_log("eso_vendortask -> Vendoring ")
@@ -167,7 +164,7 @@ function e_VendorAndRepair:execute()
 	
 	if not ml_task_hub:CurrentTask().inventory then
 		ml_task_hub:CurrentTask().inventory = {}
-		local bagSlots = e("GetBagSize(1)")
+		local bagSlots = ml_global_information.Player_InventorySlots
 		for bagSlot = 0, bagSlots, 1 do
 			local name 	 	 			= e("GetItemName(1,"..tostring(bagSlot)..")")
 			local itemType				= e("GetItemType(1,"..tostring(bagSlot)..")")
@@ -205,13 +202,15 @@ function e_VendorAndRepair:execute()
 	end
 	
 	if gVendor == "1" and not ml_task_hub:CurrentTask().junksold then
-		d("eso_vendortask -> SellingJunk ") e("SellAllJunk()")
+		d("eso_vendortask -> SellingJunk ") 
+		e("SellAllJunk()")
 		ml_task_hub:CurrentTask().junksold = true
 		return ml_log(true)
 	end
 	
 	if gRepair == "1" and not ml_task_hub:CurrentTask().repaired then
-		d("eso_vendortask -> Repairing ") e("RepairAll()")
+		d("eso_vendortask -> Repairing ") 
+		e("RepairAll()")
 		ml_task_hub:CurrentTask().repaired = true
 		return ml_log(true)
 	end
@@ -239,7 +238,7 @@ function IsPlayerVendoring()
 end
 
 function NeedToVendor()
-	return not e("CheckInventorySpaceSilently(5)")
+	return InventoryNearlyFull()
 end
 
 function NeedToRepair()

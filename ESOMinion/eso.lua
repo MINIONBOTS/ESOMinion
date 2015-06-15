@@ -140,7 +140,7 @@ function ml_global_information.moduleinit()
 	GUI_NewField(ml_global_information.MainWindow.Name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
 	
 	GUI_NewField(ml_global_information.MainWindow.Name,"MapName","dMapName",GetString("botStatus"))
-	--GUI_NewField(ml_global_information.MainWindow.Name,"MapZoneIndex","dMapZoneIndex",GetString("botStatus"))
+	GUI_NewField(ml_global_information.MainWindow.Name,"MapID","gStatusMapID",GetString("botStatus"))
 	--GUI_NewField(ml_global_information.MainWindow.Name,"LocationName","dLocationName",GetString("botStatus"))
 	
 	--: Dead
@@ -549,9 +549,6 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	end
 end
 
-
-
-
 function ml_global_information.eventhandler(arg)
 	if ( arg == "ml_global_information.startStop" or arg == "MINION.toggle") then
 		if ( gBotRunning == "1" ) then
@@ -642,12 +639,12 @@ function ml_global_information.togglebot(arg)
 		if(gAutoStart == "1" and ml_global_information.autoStartDisabled == false) then
 			ml_global_information.autoStartDisabled = true
 		end
+		SafeStop()
 	else
 		d("Starting Bot..")
 		ml_global_information.running = true
 		ml_task_hub.shouldRun = true
 		gBotRunning = "1"
-		--mc_meshrotation.currentMapTime = ml_global_information.Now
 	end
 	
 	local window = WindowManager:GetWindow(ml_global_information.MainWindow.Name)
@@ -665,15 +662,13 @@ function ml_global_information.togglebot(arg)
 	end
 end
 
-
-
 function ml_global_information.ResetBot()
-	Player:Stop()
-	c_MoveToMarker.markerreachedfirsttime = false
-	c_MoveToMarker.markerreached = false
-	c_MoveToMarker.allowedToFight = false
-	c_movetorandom.randompoint = nil
-	c_movetorandom.randompointreached = false
+	SafeStop()
+	--c_MoveToMarker.markerreachedfirsttime = false
+	--c_MoveToMarker.markerreached = false
+	--c_MoveToMarker.allowedToFight = false
+	--c_movetorandom.randompoint = nil
+	--c_movetorandom.randompointreached = false
 	Player:ClearTarget()
 end
 
