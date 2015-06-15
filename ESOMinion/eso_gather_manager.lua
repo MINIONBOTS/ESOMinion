@@ -66,7 +66,6 @@ function eso_gather_manager.SaveProfile()
 end
 
 function eso_gather_manager.ClosestNode(noplayers)
-	
 	local gatherlist;
 	local gatherables = {}
 	
@@ -79,7 +78,7 @@ function eso_gather_manager.ClosestNode(noplayers)
 	if (ValidTable(gatherlist)) then
 		local id,node = next(gatherlist)
 		while (id and node) do
-			if (eso_gather_manager.IsGatherable(node)) then
+			if (eso_gather_manager.IsGatherable(node) and not IsBlacklisted(node)) then
 				table.insert(gatherables,node)
 			end
 			id,node = next(gatherlist,id)
@@ -128,9 +127,18 @@ end
 
 function eso_gather_manager.ToggleAllTypes(switch)
 	local f = _G
-	for k,v in pairs(f) do
-		if (k:find("module = GatherManager")) then
-			f[k] = (switch and "1") or "0"
+	for key,value in pairs(f) do
+		if (key:find("module = GatherManager")) then
+			local newValue = (switch and "1") or "0"
+			f[key] = newValue
+			
+			local handler = assert(loadstring("return " .. key))()
+			if type(handler) == "table" then
+				if (eso_gather_manager.profile and eso_gather_manager.profile.types) then
+					eso_gather_manager.profile.types[handler.gathertype] = (newValue == "1")
+					eso_gather_manager.SaveProfile()
+				end
+			end
 		end
 	end
 end

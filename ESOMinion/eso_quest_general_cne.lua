@@ -7,56 +7,6 @@ function e_movetomap:execute()
 	-- add movetomap task
 end
 
-c_mount = inheritsFrom(ml_cause)
-e_mount = inheritsFrom(ml_effect)
-function c_mount:evaluate()
-	if(gUseMount == "1" and ai_mount:CanMount() and not ai_mount:IsMounted()) then
-		local ppos = ml_global_information.Player_Position
-		local pos = self.pos
-		local dist = Distance3D(pos.x,pos.y,pos.z,ppos.x,ppos.y,ppos.z)
-		return dist > tonumber(gUseMountRange)
-	end
-	
-	return false
-	
-end
-function e_mount:execute()
-	ai_mount:Mount()
-end
-
-c_walktopos = inheritsFrom(ml_cause)
-e_walktopos = inheritsFrom(ml_effect)
-function c_walktopos:evaluate()
-	--[[if (IsLoading() or IsPositionLocked()) then
-		return false
-	end
-	
-	if ((ActionList:IsCasting() and not ml_task_hub:CurrentTask().interruptCasting) or IsMounting()) then
-		return false
-	end]]
-	 
-	local myPos = Player.pos
-	local gotoPos = self.pos
-	local distance = Distance3D(myPos.x, myPos.y, myPos.z, gotoPos.x, gotoPos.y, gotoPos.z)
-	--d("Bot Position: ("..tostring(myPos.x)..","..tostring(myPos.y)..","..tostring(myPos.z)..")")
-	--d("MoveTo Position: ("..tostring(gotoPos.x)..","..tostring(gotoPos.y)..","..tostring(gotoPos.z)..")")
-	--d("Current Distance: "..tostring(distance))
-	--d("Execute Distance: "..tostring(ml_task_hub:CurrentTask().range))
-	
-	if (distance > self.range) then
-		return true
-	end
-	
-    return false
-end
-function e_walktopos:execute()
-	local gotoPos = self.pos
-	--d("Moving to ("..tostring(gotoPos.x)..","..tostring(gotoPos.y)..","..tostring(gotoPos.z)..")")	
-	--d("Move To vars"..tostring(gotoPos.x)..","..tostring(gotoPos.y)..","..tostring(gotoPos.z)..","..tostring(ml_task_hub:CurrentTask().range *0.75)..","..tostring(ml_task_hub:CurrentTask().useFollowMovement or false)..","..tostring(gRandomPaths=="1"))
-	local PathSize = Player:MoveTo(tonumber(gotoPos.x),tonumber(gotoPos.y),tonumber(gotoPos.z),tonumber(range), useFollowMovement or false, false)
-	--d(tostring(PathSize))
-end
-
 c_handleaggro = inheritsFrom(ml_cause)
 e_handleaggro = inheritsFrom(ml_effect)
 function c_handleaggro:evaluate()
@@ -134,27 +84,7 @@ end
 function e_attacktarget:execute()
 	Player:SetFacing(tpos.x,tpos.y,tpos.z,false)
 	Player:SetTarget(target.id)
-	
-	if ( not eso_skillmanager.Heal( Player.id ) ) then
-
-		--[[if not ml_task_hub:CurrentTask().timestarted then
-			ml_task_hub:CurrentTask().timestarted = ml_global_information.Now
-		end
-	
-		local timediff = ml_global_information.Now - ml_task_hub:CurrentTask().timestarted
-		
-		if  timediff > 30000
-			and target.alive
-			and target.hp.current == 0
-		then
-			d("Blacklisting Target " .. target.id)
-			EntityList:AddToBlacklist(target.id, 300000)
-			ml_task_hub:CurrentTask().completed = true
-			return ml_log(false)
-		end]]
-
-		eso_skillmanager.Cast( target )
-	end
+	eso_skillmanager.Cast( target )
 end
 
 

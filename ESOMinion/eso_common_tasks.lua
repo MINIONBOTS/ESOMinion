@@ -23,8 +23,8 @@ function eso_task_death:Init()
 end
 
 function eso_task_death:task_complete_eval()
-	return ((not self.useSoulGem and not e("IsUnitDead(player)")) or 
-		(self.useSoulGem and not Player.isghost and not e("IsUnitDead(player)")))
+	return ((not self.useSoulGem and not Player.dead) or 
+		(self.useSoulGem and not Player.isghost and not Player.dead))
 end
 
 function eso_task_death:task_complete_execute()
@@ -90,7 +90,7 @@ function eso_task_rest:task_complete_eval()
 	local spp = ml_global_information.Player_Stamina.percent
 	
 	if Player:IsMoving() then
-		Player:Stop()
+		SafeStop()
 	end
 	
 	 if ((hpp > math.random(90,99) or tonumber(g_resthp) == 0) and 
@@ -108,8 +108,8 @@ end
 
 function eso_task_rest:task_fail_eval()
 	return (
-		e("IsUnitDead(player)") or
-		e("IsUnitInCombat(player)") or
+		Player.dead or
+		ml_global_information.Player_InCombat or
 		Player.isswimming or
 		Player.iscasting or 
 		Now() > self.maxTime
@@ -153,13 +153,16 @@ function eso_task_lockpick:task_complete_eval()
 			local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
 			if (not isChamberSolved) then
 				e("StartSettingChamber(" .. i .. ")")
+				e("PlaySound(Lockpicking_lockpick_contact)")
+				e("PlaySound(Lockpicking_chamber_start)")
 				self.currentChamber = i
 				self.delay = Now() + 500
 			end
 		end
 	else
 		local chamberStress = e("GetSettingChamberStress()")
-		if (chamberStress > 0) then
+		if (chamberStress >= 0.2) then
+			e("PlaySound(Lockpicking_chamber_stress)")
 			e("StopSettingChamber()")
 			d("Chamber "..tostring(self.currentChamber).." is solved.")
 			self.currentChamber = 0
@@ -177,15 +180,405 @@ function eso_task_lockpick:task_complete_eval()
 	return false
 end
 function eso_task_lockpick:task_complete_execute()
+	e("PlaySound(Lockpicking_unlocked)")
+	e("PlaySound(Lockpicking_success)")
 	self.completed = true
 end
 
 function eso_task_lockpick:task_fail_eval()
 	return (
-		e("IsUnitDead(player)") or
-		e("IsUnitInCombat(player)")
+		Player.dead or
+		ml_global_information.Player_InCombat
 	)
 end
 function eso_task_lockpick:task_fail_execute()
 	self:Terminate()
+end
+
+eso_task_movetopos = inheritsFrom(ml_task)
+function eso_task_movetopos.Create()
+    local newinst = inheritsFrom(eso_task_movetopos)
+    
+    --ml_task members
+    newinst.valid = true
+    newinst.completed = false
+    newinst.subtask = nil
+    newinst.auxiliary = false
+    newinst.process_elements = {}
+    newinst.overwatch_elements = {}
+    
+    --eso_task_movetopos members
+    newinst.name = "MOVETOPOS"
+    newinst.pos = 0
+    newinst.range = 1.5
+    newinst.pauseTimer = 0
+    newinst.remainMounted = false
+    newinst.useFollowMovement = false
+	newinst.use3d = false
+	newinst.dismountDistance = 15
+	newinst.failTimer = 0
+	
+	newinst.distanceCheckTimer = 0
+	newinst.lastPosition = nil
+	newinst.lastDistance = 0
+    
+    return newinst
+end
+
+function eso_task_movetopos:Init()	
+	local ke_mount = ml_element:create( "Mount", c_mount, e_mount, 20 )
+    self:add( ke_mount, self.process_elements)
+    
+    local ke_sprint = ml_element:create( "Sprint", c_sprint, e_sprint, 15 )
+    self:add( ke_sprint, self.process_elements)
+    
+    local ke_walkToPos = ml_element:create( "WalkToPos", c_walktopos, e_walktopos, 5 )
+    self:add( ke_walkToPos, self.process_elements)
+    
+    self:AddTaskCheckCEs()
+end
+
+function eso_task_movetopos:task_complete_eval()
+	if (ml_mesh_mgr.loadingMesh ) then
+		return true
+	end
+
+    if (ValidTable(self.pos)) then
+        local myPos = Player.pos
+		local gotoPos = self.pos
+		
+		local distance = 0.0
+		if (self.use3d) then
+			distance = Distance3D(myPos.x, myPos.y, myPos.z, gotoPos.x, gotoPos.y, gotoPos.z)
+		else
+			distance = Distance2D(myPos.x, myPos.z, gotoPos.x, gotoPos.z)
+		end 		
+	
+		if (distance <= self.range) then
+			return true
+		end
+    end    
+    return false
+end
+
+function eso_task_movetopos:task_complete_execute()
+    SafeStop()
+	if (not self.remainMounted and ai_mount:CanDismount()) then
+		ai_mount:Dismount()
+	end
+    self.completed = true
+end
+
+function eso_task_movetopos:task_fail_eval()
+	if (not Player:IsMoving()) then
+		if (self.failTimer == 0) then
+			self.failTimer = Now() + 5000
+		end
+	else
+		if (self.failTimer ~= 0) then
+			self.failTimer = 0
+		end
+	end
+	
+	return (Player.dead or (self.failTimer ~= 0 and Now() > self.failTimer))
+end
+function eso_task_movetopos:task_fail_execute()
+	SafeStop()
+    self.valid = false
+end
+
+eso_task_movetointeract = inheritsFrom(ml_task)
+function eso_task_movetointeract.Create()
+    local newinst = inheritsFrom(eso_task_movetointeract)
+    
+    --ml_task members
+    newinst.valid = true
+    newinst.completed = false
+    newinst.subtask = nil
+    newinst.auxiliary = false
+    newinst.process_elements = {}
+    newinst.overwatch_elements = {}
+    newinst.name = "MOVETOINTERACT"
+	
+	newinst.started = Now()
+	newinst.interact = 0
+    newinst.lastinteract = 0
+	newinst.delayTimer = 0
+	newinst.pos = false
+	newinst.use3d = true
+	newinst.lastDistance = nil
+	newinst.failTimer = 0
+	newinst.forceLOS = false
+	newinst.interactRange = 4
+	newinst.dismountDistance = newinst.interactRange + 10
+	newinst.range = 4
+	newinst.postDelay = 0
+	newinst.checkLootable = false
+	
+    return newinst
+end
+
+function eso_task_movetointeract:Init()	
+	local ke_mount = ml_element:create( "Mount", c_mount, e_mount, 20 )
+    self:add( ke_mount, self.process_elements)
+    
+    local ke_sprint = ml_element:create( "Sprint", c_sprint, e_sprint, 15 )
+    self:add( ke_sprint, self.process_elements)
+	
+	local ke_walkToPos = ml_element:create( "WalkToPos", c_walktopos, e_walktopos, 5 )
+    self:add( ke_walkToPos, self.process_elements)
+	
+	self:AddTaskCheckCEs()
+end
+
+function eso_task_movetointeract:task_complete_eval()
+	local isInteracting = e("IsPlayerInteractingWithObject()")
+	if (isInteracting) then
+		return true
+	end
+	
+	self.dismountDistance = self.interactRange + 10
+	
+	if (self.interact ~= 0) then
+		local interact = EntityList:Get(tonumber(self.interact))
+		if (not interact) then
+			return true
+		else
+			if (self.checkLootable) then
+				local found = false
+				local lootables = EntityList("lootable,onmesh,maxdistance=30")
+				if (ValidTable(lootables)) then
+					for i,entity in pairs(lootables) do
+						if (entity.id == interact.id) then
+							found = true
+							if (found) then
+								break
+							end
+						end
+					end
+				end
+				if (not found) then
+					return true
+				end
+			end
+		end
+	end
+	
+	if (self.interact ~= 0) then
+		local interact = EntityList:Get(tonumber(self.interact))
+		if (interact and interact.targetable and interact.distance < 15) then
+			Player:SetTarget(interact.id)
+			local ipos = shallowcopy(interact.pos)
+			local p,dist = NavigationManager:GetClosestPointOnMesh(ipos,false)
+			if (ValidTable(p)) then
+				if (not deepcompare(self.pos,p,true)) then
+					self.pos = p
+				end
+			end
+		end
+	end
+	
+	if (self.interact ~= 0 and Now() > self.lastinteract) then
+		if (not isInteracting) then
+			local interact = EntityList:Get(tonumber(self.interact))
+			local forceLOS = self.forceLOS
+			if (not forceLOS or (forceLOS and interact.los)) then
+				if (interact and interact.distance < self.range) then
+					if (Player:IsMoving()) then
+						SafeStop()
+						return false
+					end
+				end
+				if (interact and interact.distance <= self.interactRange) then
+					Player:SetFacing(interact.pos.x,interact.pos.y,interact.pos.z)
+					Player:Interact(interact.id)
+					self.lastDistance = interact.pathdistance
+					self.lastinteract = Now() + 500
+				end
+			end
+		end
+	end
+	
+	return false
+end
+
+function eso_task_movetointeract:task_complete_execute()
+    SafeStop()
+	self.completed = true
+	if (self.postDelay > 0) then
+		d("Delaying task.")
+		ml_task_hub:CurrentTask():SetDelay(math.random(tonumber(self.postDelay)-500,tonumber(self.postDelay)+500))
+	end
+end
+
+function eso_task_movetointeract:task_fail_eval()
+	if (self.interact ~= 0) then
+		local interact = EntityList:Get(tonumber(self.interact))
+		if (interact) then
+			if (self.avoidPlayers) then
+				local ppos = Player.pos
+				local npos = interact.pos
+				local distance = Distance3D(ppos.x,ppos.y,ppos.z,npos.x,npos.y,npos.z)
+				
+				if (distance < 8) then
+					local players = EntityList("nearest,type=1")
+					if (players) then
+						local index,player = next(players)
+						if (index and player) then
+							local apos = player.pos
+							local pdistance = Distance3D(apos.x,apos.y,apos.z,npos.x,npos.y,npos.z)
+							if (pdistance < (distance+2)) then
+								EntityList:AddToBlacklist(interact.id,60000)
+								d("Temporarily blacklisting object to avoid player collision.")
+								return true
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	if (not c_walktopos:evaluate() and not Player:IsMoving()) then
+		if (self.failTimer == 0) then
+			self.failTimer = Now() + 15000
+		end
+	else
+		if (self.failTimer ~= 0) then
+			self.failTimer = 0
+		end
+	end
+	
+	return (Player.dead or (self.failTimer ~= 0 and Now() > self.failTimer))
+end
+
+function eso_task_movetointeract:task_fail_execute()
+	SafeStop()
+    self.valid = false
+end
+
+
+eso_task_combat = inheritsFrom(ml_task)
+eso_task_combat.name = "ESO_COMBAT_ATTACK"
+function eso_task_combat.Create()
+    --ml_log("combatAttack:Create")
+	local newinst = inheritsFrom(eso_task_combat)
+    
+    --ml_task members
+    newinst.valid = true
+    newinst.completed = false
+    newinst.subtask = nil
+    newinst.process_elements = {}
+    newinst.overwatch_elements = {}
+	newinst.targetID = 0
+	newinst.pos = {}
+	
+	newinst.lastMovement = 0
+	newinst.movementDelay = 0
+	
+    return newinst
+end
+function eso_task_combat:Init()	
+	--Potions
+	--self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)	
+	
+	local ke_mount = ml_element:create( "Mount", c_mount, e_mount, 20 )
+    self:add( ke_mount, self.process_elements)
+    
+    local ke_sprint = ml_element:create( "Sprint", c_sprint, e_sprint, 15 )
+    self:add( ke_sprint, self.process_elements)
+	
+    self:AddTaskCheckCEs()
+end
+
+function eso_task_combat:Process()	
+	target = EntityList:Get(self.targetID)
+	if ValidTable(target) then
+		
+		self.pos = target.pos
+		
+		local currentTarget = Player:GetTarget()
+		if (not currentTarget or (currentTarget and currentTarget.id ~= target.id)) then
+			Player:SetTarget(target.id)
+		end
+		
+		local ppos = Player.pos
+		local pos = target.pos
+		local range = ml_global_information.AttackRange
+		
+		local dist = Distance3D(ppos.x,ppos.y,ppos.z,pos.x,pos.y,pos.z)
+		if (ml_global_information.AttackRange > 5) then
+			if ((not InCombatRange(target.id) or (not target.los and not CanAttack(target.id))) and not Player.ischanneling) then
+				if (Now() > self.movementDelay) then
+					local path = Player:MoveTo(pos.x,pos.y,pos.z, 2, false, false, true)
+					self.movementDelay = Now() + 1000
+				end
+			end
+			if (InCombatRange(target.id)) then
+				if (ai_mount:CanDismount()) then
+					ai_mount:Dismount()
+				end
+				if (Player:IsMoving() and (target.los or CanAttack(target.id))) then
+					SafeStop()
+				end
+				--if (not EntityIsFrontTight(target)) then
+					Player:SetFacing(pos.x,pos.y,pos.z) 
+				--end
+			end
+			if (InCombatRange(target.id) and target.attackable and target.alive) then
+				eso_skillmanager.Cast( target )
+			end
+		else
+			if (not InCombatRange(target.id) or (not target.los and not CanAttack(target.id))) then
+				Player:MoveTo(pos.x,pos.y,pos.z, 2, false, false, true)
+				ml_task_hub:CurrentTask().lastMovement = Now()
+			end
+			if (target.distance <= 15) then
+				if (ai_mount:CanDismount()) then
+					ai_mount:Dismount()
+				end
+			end
+			if (InCombatRange(target.id)) then
+				Player:SetFacing(pos.x,pos.y,pos.z) 
+				if (target.los or CanAttack(target.id)) then
+					Player:Stop()
+				end
+			end
+			eso_skillmanager.Cast( target )
+		end
+	end
+      
+    --Process regular elements.
+    if (TableSize(self.process_elements) > 0) then
+		ml_cne_hub.clear_queue()
+		ml_cne_hub.eval_elements(self.process_elements)
+		ml_cne_hub.queue_to_execute()
+		ml_cne_hub.execute()
+		return false
+	else
+		ml_debug("no elements in process table")
+	end
+end
+
+function eso_task_combat:task_complete_eval()
+	local target = EntityList:Get(self.targetID)
+    if (not target or not target.alive or target.hp.percent == 0 or not target.attackable) then
+        return true
+    end
+end
+function eso_task_combat:task_complete_execute()
+    Player:Stop()
+	self.completed = true
+end
+
+function eso_task_combat:task_fail_eval()	
+	if (not Player.alive or Player.isswimming) then
+		return true
+	end
+	
+	return false
+end
+function eso_task_combat:task_fail_execute()
+	Player:Stop()
+	self.valid = false
 end

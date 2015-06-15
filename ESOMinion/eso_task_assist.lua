@@ -21,15 +21,15 @@ function eso_task_assist:Init()
 	local ke_pickLocks = ml_element:create( "PickLocks", c_lockpick, e_lockpick, 25 )
     self:add(ke_pickLocks, self.process_elements)
 	
-	local ke_lootCorpses = ml_element:create( "LootCorpses", c_lootcorpses, e_lootcorpses, 24 )
-    self:add(ke_lootCorpses, self.process_elements)
+	--local ke_lootwindow = ml_element:create( "lootwindow", c_lootwindow, e_lootwindow, 24 )
+	--self:add(ke_lootwindow, self.process_elements)
 	
 	self:AddTaskCheckCEs()
 end
 
 function eso_task_assist:Process()
 	--ml_log("AssistMode_Process->")
-	if ( ml_global_information.Player_Dead == false ) and ( e("IsMounted()") == false ) then
+	if ( Player.alive ) and ( e("IsMounted()") == false ) then
 		-- the client does not clear the target offsets since the 1.6 patch
 		-- this is a workaround so that players can attack manually while the bot is running
 		local target = Player:GetTarget()
@@ -154,6 +154,7 @@ function eso_task_assist.ModuleInit()
 	gAssistDoInterrupt = Settings.ESOMinion.gAssistDoInterrupt
 	gAssistDoExploit = Settings.ESOMinion.gAssistDoExploit
 	gAssistDoAvoid = Settings.ESOMinion.gAssistDoAvoid
+	
 	gAssistDoBlock = Settings.ESOMinion.gAssistDoBlock
 	gAssistDoBreak = Settings.ESOMinion.gAssistDoBreak
 	gAssistDoLockpick = Settings.ESOMinion.gAssistDoLockpick

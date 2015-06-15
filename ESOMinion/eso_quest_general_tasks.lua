@@ -172,7 +172,7 @@ end
 
 function eso_task_killtarget:task_fail_eval()
 	-- this task will go in reactive queue so it must have death check
-	if(e("IsUnitDead(player)")) then
+	if (Player.dead) then
 		return true
 	end
 	
