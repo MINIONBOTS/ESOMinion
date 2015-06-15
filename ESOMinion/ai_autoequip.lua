@@ -256,7 +256,7 @@ end
 function e_autoequip:execute()
 	ml_log("e_autoequip.. ")
 	eso_autoequip.HandleAutoEquip()
-	ml_global_information.Wait(500)
+	ml_task_hub:CurrentTask():SetDelay(math.random(500,750))
 end
 
 

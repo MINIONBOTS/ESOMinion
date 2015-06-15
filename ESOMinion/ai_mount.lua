@@ -17,25 +17,16 @@ ai_mount = {}
 --:===============================================================================================================
 
 function ai_mount:Mount()
-	if (ml_global_information.Now - ai_mount.lastmount) < ai_mount.throttle then
-		return
-	end
-	
-	if ai_mount:HaveMount() and ai_mount:CanMount() and not ai_mount:IsMounted() then
+	if (TimeSince(ai_mount.lastmount) >= ai_mount.throttle) then
 		d("Mounting")
-		
-		if Player:IsMoving() then
-			Player:Stop()
-		end
 		
 		if e("IsInteractionPending()") then
 			e("EndPendingInteraction()")
 		end
 		
 		e("ToggleMount()")
-		
-		ml_global_information.Wait(500)
-		ai_mount.lastmount = ml_global_information.Now
+		ml_task_hub:CurrentTask():SetDelay(math.random(500,750))
+		ai_mount.lastmount = Now()
 	end
 end
 
@@ -44,24 +35,16 @@ end
 --:===============================================================================================================
 
 function ai_mount:Dismount()
-	if (ml_global_information.Now - ai_mount.lastmount) < ai_mount.throttle then
-		return
-	end
-	
-	if ai_mount:HaveMount() and ai_mount:IsMounted() then
+	if (TimeSince(ai_mount.lastmount) >= ai_mount.throttle) then
 		d("Dismounting")
-		
-		if Player:IsMoving() then
-			Player:Stop()
-		end
 		
 		if e("IsInteractionPending()") then
 			e("EndPendingInteraction()")
 		end
-		
+
 		e("ToggleMount()")
-		
-		ai_mount.lastmount = ml_global_information.Now
+		ml_task_hub:CurrentTask():SetDelay(math.random(500,750))
+		ai_mount.lastmount = Now()
 	end
 end
 
@@ -74,8 +57,15 @@ function ai_mount:HaveMount()
 end
 
 function ai_mount:CanMount()
-	return Player.onmesh and not Player.isswimming and not ml_global_information.Player_InCombat and
-		 not Player.iscasting and tonumber(e("GetChatterOptionCount()")) == 0
+	return Player.onmesh and not Player.isswimming and not ml_global_information.Player_InCombat and not ai_mount:IsMounted() and
+		 not Player.iscasting and tonumber(e("GetChatterOptionCount()")) == 0 and TimeSince(ai_mount.lastmount) >= ai_mount.throttle
+		 and ai_mount:HaveMount()
+end
+
+function ai_mount:CanDismount()
+	return Player.onmesh and not Player.isswimming and not ml_global_information.Player_InCombat and ai_mount:IsMounted() and
+		 not Player.iscasting and tonumber(e("GetChatterOptionCount()")) == 0 and TimeSince(ai_mount.lastmount) >= ai_mount.throttle
+		 and ai_mount:HaveMount()
 end
 
 function ai_mount:IsMounted()
@@ -91,7 +81,7 @@ function ai_mount.Initialize()
 	ai_mount.throttle  = 5000
 	
 	if Settings.ESOMinion.gUseMount == nil then Settings.ESOMinion.gUseMount = "1" end
-	if Settings.ESOMinion.gUseMountRange == nil then Settings.ESOMinion.gUseMountRange = "30" end
+	if Settings.ESOMinion.gUseMountRange == nil then Settings.ESOMinion.gUseMountRange = "100" end
 	
 	local window = ml_global_information.MainWindow
 	GUI_NewCheckbox(window.Name,"UseMount","gUseMount",GetString("settings"))

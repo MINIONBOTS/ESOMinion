@@ -181,6 +181,7 @@ strings =
 		skmMissBuff 					= "Missing Buff",
 		skmOrBuffDura					= "Or Buff Dura <=",
 		skmAndBuffDura					= "And Buff Dura >",
+		skmTRG							= "Skill Target",
 		
 		prevSkillID						= "Previous Skill ID",
 		AdvancedSettings				= "Advanced Settings",
@@ -811,6 +812,7 @@ strings =
 		skmMissBuff					 	= "没有状态",
 		skmOrBuffDura					= "或者状态持续时间 <=",
 		skmAndBuffDura					= "和状态持续时间 >",
+		skmTRG							= "技能目标",
 		
         prevSkillID						= "先前的技能 ID",
 		advancedSettings				= "高级设置",
@@ -1451,6 +1453,7 @@ strings =
 		skmMissBuff 					= "Missing Buff",
 		skmOrBuffDura					= "Or Buff Dura <=",
 		skmAndBuffDura					= "And Buff Dura >",
+		skmTRG							= "Skill Target",
 		
 		prevSkillID						= "前スキル ID",
 		advancedSettings				= "高度設定",
@@ -2082,6 +2085,7 @@ strings =
 		skmMissBuff 					= "Missing Buff",
 		skmOrBuffDura					= "Or Buff Dura <=",
 		skmAndBuffDura					= "And Buff Dura >",
+		skmTRG							= "Skill Target",
 		
 		prevSkillID						= "Previous Skill ID",
 		AdvancedSettings				= "Advanced Settings",
@@ -2713,6 +2717,7 @@ strings =
 		skmMissBuff 					= "Missing Buff",
 		skmOrBuffDura					= "Or Buff Dura <=",
 		skmAndBuffDura					= "And Buff Dura >",
+		skmTRG							= "Skill Target",
 		
 		prevSkillID						= "ID compétence Précédente",
 		AdvancedSettings				= "Configuration Avancé",
@@ -3353,6 +3358,7 @@ strings =
 		skmMissBuff 					= "Missing Buff",
 		skmOrBuffDura					= "Or Buff Dura <=",
 		skmAndBuffDura					= "And Buff Dura >",
+		skmTRG							= "Skill Target",
 		
 		prevSkillID						= "Previous Skill ID",
 		AdvancedSettings				= "Advanced Settings",

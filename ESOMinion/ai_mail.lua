@@ -12,7 +12,7 @@ function ai_mail:Mail()
 	if  gMailEnabled and gMailEnabled == "1" and
 		gMailRecipient and gMailRecipient ~= "" and
 		gMailStackSize and tonumber(gMailStackSize) and
-		not e("IsUnitInCombat(player)")
+		not ml_global_information.Player_InCombat
 	then
 		local slots = ml_global_information.Player_InventorySlots
 		local mailslot = 1
