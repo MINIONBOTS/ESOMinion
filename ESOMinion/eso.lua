@@ -33,7 +33,7 @@ esominion.login_window		= {name = "Login",				args = { 50, 50, 220, 150, true}}
 esominion.character_window 	= {name = "CharacterSelect",	args = { 50, 50, 220, 150, true}}
 esominion.main_window 		= {name = "ESOMinion", 			args = { 50, 50, 220, 350 }} --not used, atm
 
-function ml_global_information.moduleinit()
+function ml_global_information.ModuleInit()
 	
 	local window;
 	
@@ -79,21 +79,9 @@ function ml_global_information.moduleinit()
 	if ( Settings.ESOMinion.gAttackRange == nil ) then
         Settings.ESOMinion.gAttackRange = GetString("aAutomatic")
     end
-	if ( Settings.ESOMinion.gGather == nil ) then
-		Settings.ESOMinion.gGather = "1"
-	end
 	if ( Settings.ESOMinion.gMount == nil ) then
 		Settings.ESOMinion.gMount = "1"
 	end	
-	if ( Settings.ESOMinion.gPot == nil ) then
-		Settings.ESOMinion.gPot = "0"
-	end
-	if ( Settings.ESOMinion.gPotiontype == nil ) then
-		Settings.ESOMinion.gPotiontype = "Health"
-	end
-	if ( Settings.ESOMinion.gPotvalue == nil ) then
-		Settings.ESOMinion.gPotvalue = "27"
-	end
 	if ( Settings.ESOMinion.gSprint == nil ) then
 		Settings.ESOMinion.gSprint = "0"
  	end
@@ -109,16 +97,17 @@ function ml_global_information.moduleinit()
 	if not Settings.ESOMinion.gRepair then 
 		Settings.ESOMinion.gRepair = "1"
 	end
-	if not Settings.ESOMinion.gPlaySoundOnWhisper then
-		Settings.ESOMinion.gPlaySoundOnWhisper = "0"
-	end
-	
+	--if not Settings.ESOMinion.gPlaySoundOnWhisper then
+		--Settings.ESOMinion.gPlaySoundOnWhisper = "0"
+	--end
 	if not Settings.ESOMinion.gDevTest then
 		Settings.ESOMinion.gDevTest = "0"
 	end
-	
 	if not Settings.ESOMinion.gPreventAttackingInnocents then
 		Settings.ESOMinion.gPreventAttackingInnocents = "1"
+	end
+	if not Settings.ESOMinion.gLootBodies then
+		Settings.ESOMinion.gLootBodies = "1"
 	end
 	
 	if not Settings.ESOMinion.g_usesoulgemtorevive then Settings.ESOMinion.g_usesoulgemtorevive = "0" end
@@ -126,50 +115,70 @@ function ml_global_information.moduleinit()
 	if not Settings.ESOMinion.g_resthp then Settings.ESOMinion.g_resthp = "75" end
 	if not Settings.ESOMinion.g_restmp then Settings.ESOMinion.g_restmp = "75" end
 	if not Settings.ESOMinion.g_restsp then Settings.ESOMinion.g_restsp = "10" end
-	
+	if not Settings.ESOMinion.gPotionUse then Settings.ESOMinion.gPotionUse = "1" end
+	if not Settings.ESOMinion.gPotionHP then Settings.ESOMinion.gPotionHP = "30" end
+	if not Settings.ESOMinion.gPotionMP then Settings.ESOMinion.gPotionMP = "5" end
+	if not Settings.ESOMinion.gPotionSP then Settings.ESOMinion.gPotionSP = "5" end
 	
 	-- MAIN WINDOW
 	GUI_NewWindow(ml_global_information.MainWindow.Name,ml_global_information.MainWindow.x,ml_global_information.MainWindow.y,ml_global_information.MainWindow.width,ml_global_information.MainWindow.height)
 	GUI_NewButton(ml_global_information.MainWindow.Name,"StartBot","ml_global_information.startStop")
-	RegisterEventHandler("ml_global_information.startStop", ml_global_information.eventhandler)
+	RegisterEventHandler("ml_global_information.startStop", ml_global_information.EventHandler)
 	
 	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("showradar"),"Radar.toggle")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("botEnabled"),"gBotRunning",GetString("botStatus"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("autoStartBot"),"gAutoStart",GetString("botStatus"))
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("botMode"),"gBotMode",GetString("botStatus"),"None")
 	GUI_NewField(ml_global_information.MainWindow.Name,GetString("attackRange"),"dAttackRange",GetString("botStatus"))
-	
-	GUI_NewField(ml_global_information.MainWindow.Name,"MapName","dMapName",GetString("botStatus"))
 	GUI_NewField(ml_global_information.MainWindow.Name,"MapID","gStatusMapID",GetString("botStatus"))
-	--GUI_NewField(ml_global_information.MainWindow.Name,"LocationName","dLocationName",GetString("botStatus"))
+	
+	
+	-- setup bot mode
+    local botModes = "None"
+    if (ValidTable(ml_global_information.BotModes)) then
+		for name,task in pairs(ml_global_information.BotModes) do
+			if (botModes == "None") then
+				botModes = name
+			else
+				botModes = botModes..","..name
+			end
+			task:UIInit()
+		end
+    end
+	
+    gBotMode_listitems = botModes    
+    gBotMode = Settings.ESOMinion.gBotMode	
+	ml_global_information.UpdateMode()
 	
 	--: Dead
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " UseSoulGems", "g_usesoulgemtorevive", "Dead")
 	
-	--: Rest
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name, " Rest", "g_rest", "Rest")
-	GUI_NewNumeric(ml_global_information.MainWindow.Name, " RestHP", "g_resthp", "Rest", "0", "100")
-	GUI_NewNumeric(ml_global_information.MainWindow.Name, " RestMP", "g_restmp", "Rest", "0", "100")
-	GUI_NewNumeric(ml_global_information.MainWindow.Name, " RestSP", "g_restsp", "Rest", "0", "100")
+	local group = "Dead/Rest/Healing"
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, "UseSoulGems", "g_usesoulgemtorevive", group)
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, "Rest", "g_rest", group)
+	GUI_NewNumeric(ml_global_information.MainWindow.Name, "Rest HP % <", "g_resthp", group, "0", "100")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name, "Rest MP % <", "g_restmp", group, "0", "100")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name, "Rest SP % <", "g_restsp", group, "0", "100")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name, "Use Potions", "gPotionUse",group)
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,"Potion HP % <","gPotionHP",group,"0","100")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,"Potion MP % <","gPotionMP",group,"0","100")
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,"Potion SP % <","gPotionSP",group,"0","100")
 
-	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"10","10000")
-	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("gatherMode"),"gGather",GetString("settings"))	
+	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("pulseTime"),"gPulseTime",GetString("settings"),"100","1000")
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Dev Logging","gDevTest",GetString("settings"))
+	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("attackRange"),"gAttackRange",GetString("settings"),GetString("aAutomatic")..","..GetString("aRange")..","..GetString("aMelee"));	
 	--GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useMount"),"gMount",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("useSprint"),"gSprint",GetString("settings"))
  	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("sprintStopThreshold"),"gSprintStopThreshold",GetString("settings"),"0","100")
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"PlaySound on Whisper","gPlaySoundOnWhisper",GetString("settings"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Enable DevTest","gDevTest",GetString("settings"))
+	--GUI_NewCheckbox(ml_global_information.MainWindow.Name,"PlaySound on Whisper","gPlaySoundOnWhisper",GetString("settings"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("preventAttackingInnocents"),"gPreventAttackingInnocents",GetString("settings"))
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Loot Bodies","gLootBodies",GetString("settings"))
 	
 	--vendor, repair, vendormanager
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableRepair"),"gRepair","Vendor and Repair")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("enableSelling"),"gVendor","Vendor and Repair")
 	GUI_NewButton(ml_global_information.MainWindow.Name,GetString("vendorManager"),"eso_vendor_manager.OnGuiToggle","Vendor and Repair")
 	
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("usepotion"),"gPot",GetString("potionssettings"))
-	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("potiontype"),"gPotiontype",GetString("potionssettings"),"Health,Stamina,Magicka")
-	GUI_NewNumeric(ml_global_information.MainWindow.Name,GetString("potusebelow"),"gPotvalue",GetString("potionssettings"),"1","100")
+	
 	
 	--GUI_NewButton(ml_global_information.MainWindow.Name, GetString("advancedSettings"), "AdvancedSettings.toggle")
 	--RegisterEventHandler("AdvancedSettings.toggle", ml_global_information.ToggleAdvMenu)
@@ -183,22 +192,8 @@ function ml_global_information.moduleinit()
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("vendorManager"), "eso_vendor_manager.OnGuiToggle", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("gatherManager"), "eso_gather_manager.OnGuiToggle", "Managers")
 	GUI_NewButton(ml_global_information.MainWindow.Name, GetString("AutoEquipManager"), "autoequip.toggle", "Managers")		
-	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
+	--GUI_UnFoldGroup(ml_global_information.MainWindow.Name,"Managers" )
 	--GUI_WindowVisible(ml_global_information.advwindow.Name,false)
-	
-	-- setup bot mode
-    local botModes = "None"
-    if ( TableSize(ml_global_information.BotModes) > 0) then
-        local i,entry = next ( ml_global_information.BotModes )
-        while i and entry do
-            botModes = botModes..","..i
-            i,entry = next ( ml_global_information.BotModes,i)
-        end
-    end
-	
-    gBotMode_listitems = botModes    
-    gBotMode = Settings.ESOMinion.gBotMode	
-	ml_global_information.UpdateMode()
 	
 	gBotRunning = "0"
 	gAutoStart = Settings.ESOMinion.gAutoStart
@@ -206,23 +201,23 @@ function ml_global_information.moduleinit()
 	gAttackRange = Settings.ESOMinion.gAttackRange
 	gVendor = Settings.ESOMinion.gVendor
 	gRepair = Settings.ESOMinion.gRepair
-	gGather = Settings.ESOMinion.gGather
 	gMount = Settings.ESOMinion.gMount
-	gPot = Settings.ESOMinion.gPot
-	gPotiontype = Settings.ESOMinion.gPotiontype
-	gPotlevel = Settings.ESOMinion.gPotlevel
-	gPotvalue = Settings.ESOMinion.gPotvalue 
 	gSprint = Settings.ESOMinion.gSprint
 	gSprintStopThreshold = Settings.ESOMinion.gSprintStopThreshold
-	gPlaySoundOnWhisper = Settings.ESOMinion.gPlaySoundOnWhisper
+	--gPlaySoundOnWhisper = Settings.ESOMinion.gPlaySoundOnWhisper
 	gDevTest = Settings.ESOMinion.gDevTest
 	gPreventAttackingInnocents = Settings.ESOMinion.gPreventAttackingInnocents
+	gLootBodies = Settings.ESOMinion.gLootBodies
 	
 	g_usesoulgemtorevive = Settings.ESOMinion.g_usesoulgemtorevive
 	g_rest   = Settings.ESOMinion.g_rest
 	g_resthp = Settings.ESOMinion.g_resthp
 	g_restmp = Settings.ESOMinion.g_restmp
 	g_restsp = Settings.ESOMinion.g_restsp
+	gPotionUse = Settings.ESOMinion.gPotionUse
+	gPotionHP = Settings.ESOMinion.gPotionHP
+	gPotionMP = Settings.ESOMinion.gPotionMP
+	gPotionSP = Settings.ESOMinion.gPotionSP
 	
 	GUI_UnFoldGroup(ml_global_information.MainWindow.Name,GetString("botStatus") )
 		
@@ -284,8 +279,6 @@ function ml_global_information.moduleinit()
 				
 		ml_mesh_mgr.InitMarkers() -- Update the Markers-group in the mesher UI
 	end
-
-
 	
 -- setup/load blacklist tables
 	if ( ml_blacklist_mgr ) then
@@ -300,26 +293,23 @@ function ml_global_information.moduleinit()
 
 	Player:ClearTarget()
 	if gAutoStart == "1" and not ml_global_information.running then
-		ml_global_information.togglebot(1)
+		ml_global_information.ToggleBot(1)
 	end	
 	
-	if(gDevTest == "1") then
-		gEnableLog = "1"
-		gLogCNE = "1"
-	end
-	
+	gEnableLog = (gDevTest == "1") and "1" or "0"
+	gLogCNE = (gDevTest == "1") and "1" or "0"
 end
 
-function test()
-	mycode = [[
-	function getmapid()
-		return GetCurrentMapZoneIndex()
-	end
-	]]
-	eDoString(mycode)
-end
+--function test()
+	--mycode = [[
+	--function getmapid()
+		--return GetCurrentMapZoneIndex()
+	--end
+	--]]
+	--eDoString(mycode)
+--end
 
-function ml_global_information.onupdate( event, tickcount )
+function ml_global_information.OnUpdate( event, tickcount )
 	ml_global_information.Now = tickcount
 	
 	local gamestate = GetGameState()
@@ -542,50 +532,51 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			end
 				
 		elseif ( ml_global_information.running == false and gAutoStart == "1" and not ml_global_information.autoStartDisabled) then
-			ml_global_information.togglebot(1)
+			ml_global_information.ToggleBot(1)
 		else
 			GUI_SetStatusBar("BOT: Not Running")
 		end
 	end
 end
 
-function ml_global_information.eventhandler(arg)
+function ml_global_information.EventHandler(arg)
 	if ( arg == "ml_global_information.startStop" or arg == "MINION.toggle") then
 		if ( gBotRunning == "1" ) then
 			gBotRunning = "0"
-			ml_global_information.togglebot("0")
+			ml_global_information.ToggleBot("0")
 		else
 			gBotRunning = "1"
-			ml_global_information.togglebot("1")
+			ml_global_information.ToggleBot("1")
 		end
 	end
 end
 
-function ml_global_information.guivarupdate(Event, NewVals, OldVals)
+function ml_global_information.GUIVarUpdate(Event, NewVals, OldVals)
 	for k,v in pairs(NewVals) do
-		if (k == "gEnableLog" or
-			k == "gGather" or
-			k == "gMount" or
+		if (k == "gMount" or
 			k == "gVendor" or
 			k == "gRepair" or
 			k == "aLogin" or
 			k == "aPassword" or
-			k == "gPot" or
-			k == "gPotiontype" or
+			k == "gPotionUse" or
+			k == "gPotionCombatOnly" or
+			k == "gPotionHP" or
+			k == "gPotionMP" or
+			k == "gPotionSP" or
 			k == "gSprint" or
  			k == "gSprintStopThreshold" or
-			k == "gPotvalue" or
 			k == "gAutoStart" or 
 			k == "gAutoCharacterSelect" or
-			k == "gPlaySoundOnWhisper" or
+			--k == "gPlaySoundOnWhisper" or
 			k == "g_usesoulgemtorevive" or 
 			k == "g_rest" or 
 			k == "g_resthp" or 
 			k == "g_restmp" or 
 			k == "g_restsp" or
-			k == "gPlaySoundOnWhisper" or
+			--k == "gPlaySoundOnWhisper" or
 			k == "gDevTest" or 
-			k == "gPreventAttackingInnocents"
+			k == "gPreventAttackingInnocents" or
+			k == "gLootBodies"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
@@ -593,7 +584,7 @@ function ml_global_information.guivarupdate(Event, NewVals, OldVals)
 			ml_global_information.lasttick = 0
 			Settings.ESOMinion[tostring(k)] = v		
 		elseif ( k == "gBotRunning" ) then
-			ml_global_information.togglebot(v)			
+			ml_global_information.ToggleBot(v)			
 		elseif ( k == "gBotMode") then        
 			Settings.ESOMinion[tostring(k)] = v
 			ml_global_information.UpdateMode()
@@ -627,7 +618,7 @@ function ml_global_information.CheckClass()
 	end
 end
 
-function ml_global_information.togglebot(arg)
+function ml_global_information.ToggleBot(arg)
 	if arg == "0" then	
 		d("Stopping Bot..")
 		ml_global_information.running = false
@@ -664,11 +655,6 @@ end
 
 function ml_global_information.ResetBot()
 	SafeStop()
-	--c_MoveToMarker.markerreachedfirsttime = false
-	--c_MoveToMarker.markerreached = false
-	--c_MoveToMarker.allowedToFight = false
-	--c_movetorandom.randompoint = nil
-	--c_movetorandom.randompointreached = false
 	Player:ClearTarget()
 end
 
@@ -697,7 +683,7 @@ function esominion.register_var(setting, default)
 	end
 end
 
-RegisterEventHandler("Module.Initalize",ml_global_information.moduleinit)
-RegisterEventHandler("Gameloop.Update",ml_global_information.onupdate)
-RegisterEventHandler("GUI.Update",ml_global_information.guivarupdate)
-RegisterEventHandler("MINION.toggle", ml_global_information.eventhandler)
+RegisterEventHandler("Module.Initalize",ml_global_information.ModuleInit)
+RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate)
+RegisterEventHandler("GUI.Update",ml_global_information.GUIVarUpdate)
+RegisterEventHandler("MINION.toggle", ml_global_information.EventHandler)

@@ -264,25 +264,10 @@ function GetVendor()
 end
 
 function GetVendorMarker()
-	local markerlist = ml_marker_mgr.GetList(GetString("vendorMarker"), false, false)
-	local markers = {}
-	if ValidTable(markerlist) then
-		local name,marker = next(markerlist)
-		while ( name and marker ) do
-			local ppos = Player.pos
-			local mpos = marker:GetPosition()
-			local dist = Distance3D(ppos.x,ppos.y,ppos.z,mpos.x,mpos.y,mpos.z)
-			markers[name] = marker
-			markers[name].distance = dist
-			name,marker = next(markerlist,name)
-		end
-		table.sort(markers,function(a,b) return a.distance < b.distance end)
-		local name,marker = next(markers)
-		if name and marker then
-			return marker
-		end
-	end
-	return nil
+	local marker = nil
+	marker = ml_marker_mgr.GetClosestMarker( ppos.x, ppos.y, ppos.z, 300, GetString("vendorMarker"), false)
+	
+	return marker
 end
 
 --:===============================================================================================================

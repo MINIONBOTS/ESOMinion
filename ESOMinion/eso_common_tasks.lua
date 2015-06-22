@@ -221,6 +221,8 @@ function eso_task_movetopos.Create()
 	newinst.distanceCheckTimer = 0
 	newinst.lastPosition = nil
 	newinst.lastDistance = 0
+	
+	newinst.abortFunction = nil
     
     return newinst
 end
@@ -241,6 +243,25 @@ end
 function eso_task_movetopos:task_complete_eval()
 	if (ml_mesh_mgr.loadingMesh ) then
 		return true
+	end
+	
+	if (self.abortFunction) then
+		if (type(self.abortFunction) == "function") then
+			local retval = self.abortFunction()
+			if (retval == true) then
+				return true
+			end
+		elseif (type(self.abortFunction) == "table") then
+			local abortFunctions = self.abortFunction
+			for i,fn in pairs(abortFunctions) do
+				if (type(fn) == "function") then
+					local retval = fn()
+					if (retval == true) then
+						return true
+					end
+				end
+			end
+		end
 	end
 
     if (ValidTable(self.pos)) then
@@ -298,7 +319,9 @@ function eso_task_movetointeract.Create()
     newinst.auxiliary = false
     newinst.process_elements = {}
     newinst.overwatch_elements = {}
-    newinst.name = "MOVETOINTERACT"
+	
+    newinst.name = "ESO_MOVETOINTERACT"
+	newinst.creator = ""
 	
 	newinst.started = Now()
 	newinst.interact = 0
@@ -312,7 +335,8 @@ function eso_task_movetointeract.Create()
 	newinst.interactRange = 4
 	newinst.dismountDistance = newinst.interactRange + 10
 	newinst.range = 4
-	newinst.postDelay = 0
+	newinst.waitForInteract = false
+	newinst.waitingForInteract = false
 	newinst.checkLootable = false
 	
     return newinst
@@ -334,7 +358,15 @@ end
 function eso_task_movetointeract:task_complete_eval()
 	local isInteracting = e("IsPlayerInteractingWithObject()")
 	if (isInteracting) then
-		return true
+		if (self.waitForInteract) then
+			self.waitingForInteract = true
+		else
+			return true
+		end
+	else
+		if (self.waitingForInteract) then
+			return true
+		end
 	end
 	
 	self.dismountDistance = self.interactRange + 10
@@ -405,10 +437,6 @@ end
 function eso_task_movetointeract:task_complete_execute()
     SafeStop()
 	self.completed = true
-	if (self.postDelay > 0) then
-		d("Delaying task.")
-		ml_task_hub:CurrentTask():SetDelay(math.random(tonumber(self.postDelay)-500,tonumber(self.postDelay)+500))
-	end
 end
 
 function eso_task_movetointeract:task_fail_eval()
@@ -441,7 +469,7 @@ function eso_task_movetointeract:task_fail_eval()
 	
 	if (not c_walktopos:evaluate() and not Player:IsMoving()) then
 		if (self.failTimer == 0) then
-			self.failTimer = Now() + 15000
+			self.failTimer = Now() + 5000
 		end
 	else
 		if (self.failTimer ~= 0) then
@@ -479,8 +507,8 @@ function eso_task_combat.Create()
     return newinst
 end
 function eso_task_combat:Init()	
-	--Potions
-	--self:add(ml_element:create( "GetPotions", c_usePotions, e_usePotions, 190 ), self.process_elements)	
+	local ke_usePotion = ml_element:create( "UsePotion", c_usepotion, e_usepotion, 25 )
+    self:add(ke_usePotion, self.process_elements)
 	
 	local ke_mount = ml_element:create( "Mount", c_mount, e_mount, 20 )
     self:add( ke_mount, self.process_elements)

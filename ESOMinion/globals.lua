@@ -71,19 +71,16 @@ function LuaEventHandler(...)
 	elseif (args[1] == "GAME_EVENT_LOOT_ITEM_FAILED" ) then
 		d("LOOT FAILED: Reason "..tostring(args[3]).." ItemName "..args[4])
 		-- Blacklisting the closest entity which we were trying to loot
-		local blackliststring = ml_blacklist.GetExcludeString(GetString("monsters")) or ""
-		local EList = EntityList("nearest,lootable,onmesh,maxdistance=3,exclude="..blackliststring)
 		
-		if ( not ml_global_information.Player_InCombat and not InventoryFull() ) then
-			if ( TableSize(EList) > 0 ) then			
-				local id, entry = next ( EList )
-				if ( id and entry ) then
-					d("Cannot loot "..entry.name..", blacklisting it")
-					ml_blacklist.AddBlacklistEntry(GetString("monsters"), entry.id, entry.name, ml_global_information.Now+180000)
+		local el = EntityList("nearest,lootable,onmesh,maxdistance=4")
+		if (ValidTable(el)) then
+			local id,entity = next(el)
+			if (id and entity) then
+				EntityList:AddToBlacklist(entity.id,180000)
+				if (ml_task_hub:CurrentTask().name == "ESO_MOVETOINTERACT" and newinst.creator == "lootbodies") then
+					ml_task_hub:CurrentTask():Terminate()
 				end
 			end
-			c_lootwindow.ignoreLootTimer = ml_global_information.Now
-			c_lootwindow.ignoreLoot = true
 		end
 	
 	elseif ( args[1] == "GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP" ) then
@@ -93,6 +90,7 @@ function LuaEventHandler(...)
 			[3] = "INTERRUPT",
 			[4] = "DODGE/AVOID",
 			[18] = "BREAK CC",
+			[19] = "INTERRUPT EFFECT",
 		}
 		
 		d("Combat Tip : "..tostring(args[3]).." : "..tostring(tips[tonumber(args[3])]))
@@ -143,7 +141,6 @@ function ml_globals.UpdateGlobals()
 		
 		-- Update Debug fields			
 		dAttackRange = ml_global_information.AttackRange
-		dMapName = ml_global_information.CurrentMapName
 		gStatusMapID = Player.worldid
 	end
 end

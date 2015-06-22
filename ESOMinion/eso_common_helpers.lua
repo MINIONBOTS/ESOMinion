@@ -198,8 +198,8 @@ end
 function GetNearestGrind()
 	local minLevel = ml_global_information.MarkerMinLevel
     local maxLevel = ml_global_information.MarkerMaxLevel
-    local whitelist = ml_global_information.WhitelistContentID --GetWhitelistIDString()
-    local blacklist = ml_global_information.BlacklistContentID --GetBlacklistIDString()
+    local whitelist = ml_global_information.WhitelistContentID
+    local blacklist = ml_global_information.BlacklistContentID
 	
 	local target = nil
 	local el = nil
@@ -215,19 +215,19 @@ function GetNearestGrind()
 	if (not ValidTable(el)) then
 		if (whitelist and whitelist ~= "") then
 			d("Checking whitelist section.")
-			el = EntityList("shortestpath,attackable,alive,nocritter,targeting=0,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
+			el = EntityList("shortestpath,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
 			if (not ValidTable(el)) then
-				el = EntityList("nearest,attackable,alive,nocritter,targeting=0,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
+				el = EntityList("nearest,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
 			end
 		elseif (blacklist and blacklist ~= "") then
 			d("Checking blacklist section.")
-			local filterstring = "shortestpath,attackable,alive,nocritter,targeting=0,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist
+			local filterstring = "shortestpath,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist
 			if (gPreventAttackingInnocents == "1") then
 				filterstring = filterstring..",hostile"
 			end
 			el = EntityList(filterstring)
 			if (not ValidTable(el)) then
-				filterstring = "nearest,attackable,alive,nocritter,targeting=0,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist
+				filterstring = "nearest,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist
 				if (gPreventAttackingInnocents == "1") then
 					filterstring = filterstring..",hostile"
 				end
@@ -255,8 +255,175 @@ function GetNearestGrind()
 			target = entity
 		end
 	else
-		d("el was not valid.")
+		d("[GetNearestGrind]:Was unable to find valid targets.")
 	end
 	
 	return target
+end
+
+function GetWeightedPotionTable(t, ideal)		
+	local tSize = TableSize(t)
+	local increments = (1 / tSize)
+	
+	--Need to determine if the ideal value's place in the list.
+	local place = 0
+	for i,value in pairsByKeys(t) do
+		place = place + 1
+		if (ideal == i) then
+			break
+		end
+	end
+	
+	if (place == 1) then
+		for i,weight in pairsByKeys(t) do
+			local decrement = (i - place) * increments
+			t[i] = (weight - decrement)
+		end
+	elseif (place == tSize) then
+		for i,weight in pairsByKeys(t) do
+			local decrement = (place - i) * increments
+			t[i] = (1 - decrement)
+		end
+	else
+		local wrapExtra = ((tSize - place) * increments)
+		for i,weight in pairsByKeys(t) do
+			if (i > place) then
+				local decrement = (i - place) * increments
+				t[i] = (weight - decrement)
+			end
+			if (i < place) then
+				local decrement = (place - i) * increments
+				t[i] = (weight - decrement - wrapExtra)
+			end
+		end
+	end
+	
+	return t
+end
+
+function GetIdealPotion(percentage,available)
+	--For now, since I'm a scrub, I'm just guessing that each level heals 10% more than the last, 
+	--which should be a decent basis with 5 levels.
+	--Will re-adjust as necessary
+	local unweightedOptions = {
+		[1] = 1,
+		[2] = 1,
+		[3] = 1,
+		[4] = 1,
+		[5] = 1,
+	}
+	
+	local weightedTable = nil
+	if (percentage >= 90) then
+		weightedTable = GetWeightedPotionTable(unweightedOptions, 1)
+	elseif (percentage >= 75) then
+		weightedTable = GetWeightedPotionTable(unweightedOptions, 2)
+	elseif (percentage >= 60) then
+		weightedTable = GetWeightedPotionTable(unweightedOptions, 3)
+	elseif (percentage >= 45) then
+		weightedTable = GetWeightedPotionTable(unweightedOptions, 4)
+	else
+		weightedTable = GetWeightedPotionTable(unweightedOptions, 5)
+	end
+	
+	for strength,weight in pairsByKeys(weightedTable,function(a,b) return weightedTable[a] > weightedTable[b] end) do
+		if (available[strength]) then
+			return available[strength]
+		end
+	end
+	
+	return nil
+end
+
+function FindHealthPotion()
+	local slots = {}
+	
+	for i = 9,16 do
+		local slotIcon = e("GetSlotTexture("..tostring(i)..")")
+		if (slotIcon:find("consumable_potion_001") ~= nil) then
+			local strength = string.gsub(slotIcon,"/esoui/art/icons/consumable_potion_001_type_00","")
+			strength = string.gsub(strength,".dds","")
+			strength = tonumber(strength) or 1
+			
+			if (slots[strength] == nil) then
+				local slotUsable = e("IsSlotUsable("..tostring(i)..")")
+				local slotCooldownRemain, slotCooldownDuration, slotGlobal = e("GetSlotCooldownInfo("..tostring(i)..")")
+				local slotItemCount = e("GetSlotItemCount("..tostring(i)..")")
+				
+				if (slotItemCount > 0 and slotUsable and slotCooldownRemain == 0) then
+					slots[strength] = i
+				end
+			end
+		end
+	end
+	
+	if (ValidTable(slots)) then
+		local hpp = ml_global_information.Player_Health.percent
+		local idealSlot = GetIdealPotion(hpp,slots)
+		return idealSlot
+	end
+	
+	return nil
+end
+
+function FindMagickaPotion()
+	local slots = {}
+	
+	for i = 9,16 do
+		local slotIcon = e("GetSlotTexture("..tostring(i)..")")
+		if (slotIcon:find("consumable_potion_002") ~= nil) then
+			local strength = string.gsub(slotIcon,"/esoui/art/icons/consumable_potion_002_type_00","")
+			strength = string.gsub(strength,".dds","")
+			strength = tonumber(strength) or 1
+			
+			if (slots[strength] == nil) then
+				local slotUsable = e("IsSlotUsable("..tostring(i)..")")
+				local slotCooldownRemain, slotCooldownDuration, slotGlobal = e("GetSlotCooldownInfo("..tostring(i)..")")
+				local slotItemCount = e("GetSlotItemCount("..tostring(i)..")")
+				
+				if (slotItemCount > 0 and slotUsable and slotCooldownRemain == 0) then
+					slots[strength] = i
+				end
+			end
+		end
+	end
+	
+	if (ValidTable(slots)) then
+		local hpp = ml_global_information.Player_Health.percent
+		local idealSlot = GetIdealPotion(hpp,slots)
+		return idealSlot
+	end
+	
+	return nil
+end
+
+function FindStaminaPotion()
+	local slots = {}
+	
+	for i = 9,16 do
+		local slotIcon = e("GetSlotTexture("..tostring(i)..")")
+		if (slotIcon:find("consumable_potion_003") ~= nil) then
+			local strength = string.gsub(slotIcon,"/esoui/art/icons/consumable_potion_003_type_00","")
+			strength = string.gsub(strength,".dds","")
+			strength = tonumber(strength) or 1
+			
+			if (slots[strength] == nil) then
+				local slotUsable = e("IsSlotUsable("..tostring(i)..")")
+				local slotCooldownRemain, slotCooldownDuration, slotGlobal = e("GetSlotCooldownInfo("..tostring(i)..")")
+				local slotItemCount = e("GetSlotItemCount("..tostring(i)..")")
+				
+				if (slotItemCount > 0 and slotUsable and slotCooldownRemain == 0) then
+					slots[strength] = i
+				end
+			end
+		end
+	end
+	
+	if (ValidTable(slots)) then
+		local hpp = ml_global_information.Player_Health.percent
+		local idealSlot = GetIdealPotion(hpp,slots)
+		return idealSlot
+	end
+	
+	return nil
 end

@@ -1,52 +1,10 @@
---:======================================================================================================================================================================
---: eso_common
---:======================================================================================================================================================================
---: edited 9.8.2014
---: commonly used cne's used by multiple modes/ other cne's
-
---:===============================================================================================================
---: LootAll
---:===============================================================================================================  
--- original code
-
-c_lootwindow = inheritsFrom(ml_cause)
-e_lootwindow = inheritsFrom(ml_effect)
-c_lootwindow.ignoreLoot = false
-c_lootwindow.ignoreLootTimer = 0
-function c_lootwindow:evaluate()
-	-- this is needed in order to make the loot window close when we cannot loot something, this is set in globals.lua event
-    if ( c_lootwindow.ignoreLootTimer ~= 0 ) then
-		if ( TimeSince(c_lootwindow.ignoreLootTimer) > 1500 ) then
-			c_lootwindow.ignoreLootTimer = 0
-			c_lootwindow.ignoreLoot = false
-		end
-	end
-	
-	local money = e("GetLootMoney()")
-	
-	return (c_lootwindow.ignoreLoot == false and 
-		((not InventoryFull() and tonumber(e("GetNumLootItems()")) > 0) or
-		tonumber(money) > 0))
-end
-
-function e_lootwindow:execute()
-	ml_log("e_lootwindow")
-	e("LootAll()")
-	return ml_log(false)	
-end
-
---:===============================================================================================================
---: Loot
---:=============================================================================================================== 
--- original code
-
 c_lootbodies = inheritsFrom(ml_cause)
 e_lootbodies = inheritsFrom(ml_effect)
 c_lootbodies.id = 0
 c_lootbodies.pos = nil
 function c_lootbodies:evaluate()
 	local isInteracting = e("IsPlayerInteractingWithObject()")	
-	if (InventoryFull() or isInteracting or ml_global_information.Player_InCombat) then
+	if (InventoryFull() or isInteracting or ml_global_information.Player_InCombat or gLootBodies == "0") then
 		return false
 	end
 	
@@ -57,7 +15,7 @@ function c_lootbodies:evaluate()
 	local lootables = EntityList("nearest,lootable,onmesh,maxdistance=30")
 	if (ValidTable(lootables)) then
 		local id,entity = next(lootables)
-		if (ValidTable(entity)) then
+		if (ValidTable(entity) and not IsBlacklisted(entity)) then
 			c_lootbodies.id = entity.id
 			c_lootbodies.pos = entity.pos
 			return true
@@ -69,6 +27,7 @@ end
 
 function e_lootbodies:execute()
 	local newTask = eso_task_movetointeract.Create()
+	newTask.creator = "lootbodies"
 	newTask.pos = c_lootbodies.pos
 	newTask.interact = c_lootbodies.id
 	newTask.interactRange = 4
@@ -88,7 +47,6 @@ c_movetorandom = inheritsFrom(ml_cause)
 e_movetorandom = inheritsFrom(ml_effect)
 c_movetorandom.randompoint = nil
 c_movetorandom.randompointreached = false
-
 function c_movetorandom:evaluate()
 	if (c_movetorandom.randompoint == nil) then
 		local ppos = Player.pos
@@ -273,17 +231,20 @@ function c_returntomarker:evaluate()
 		
 		if (gBotMode == GetString("grindMode")) then
 			local targetid = ml_task_hub:CurrentTask().targetid or 0
-			if (distance > 300 or (targetid == 0 and distance > 25)) then
+			local gatherid = ml_task_hub:CurrentTask().gatherid or 0
+			if ((targetid == 0 and (gatherid == 0 or gGather == "0") and distance > 25)) then
 				return true
 			end
 		end
 		
         if (gBotMode == GetString("gatherMode")) then
 			local gatherid = ml_task_hub:CurrentTask().gatherid or 0
-			if (distance > 300 or (gatherid == 0 and distance > 25)) then
+			if ((gatherid == 0 and distance > 25)) then
 				return true
 			end
         end
+	else
+		d("Can't return, no marker set.")
     end
     
     return false
@@ -295,6 +256,28 @@ function e_returntomarker:execute()
     newTask.pos = markerPos
     newTask.range = math.random(5,15)
 	newTask.remainMounted = true
+	newTask.abortFunction = function()
+		if (gBotMode == GetString("grindMode")) then
+			local newTarget = GetNearestGrind()
+			if (ValidTable(newTarget)) then
+				return true
+			end
+			
+			if (gGather == "1") then
+				local node = eso_gather_manager.ClosestNode(true)
+				if (ValidTable(node)) then
+					return true
+				end
+			end
+		end
+		if (gBotMode == GetString("gatherMode")) then
+			local node = eso_gather_manager.ClosestNode(true)
+			if (ValidTable(node)) then
+				return true
+			end
+		end
+		return false
+	end
     ml_task_hub:CurrentTask():AddSubTask(newTask)
 end
 
@@ -361,8 +344,9 @@ function c_mount:evaluate()
 		local pos = ml_task_hub:CurrentTask().pos
 		local dist = Distance3D(pos.x,pos.y,pos.z,ppos.x,ppos.y,ppos.z)
 		local remainMounted = ml_task_hub:CurrentTask().remainMounted or false
+		local dismountDistance = ml_task_hub:CurrentTask().dismountDistance or 15
 		if (not remainMounted) then
-			if (dist < ml_task_hub:CurrentTask().dismountDistance) then
+			if (dist < dismountDistance) then
 				return true
 			end
 		end
@@ -395,12 +379,12 @@ function c_sprint:evaluate()
 		if (ml_global_information.Player_Stamina.percent < tonumber(gSprintStopThreshold)) then
 			c_sprint.setRecharging = true
 			return true
-		elseif (ml_global_information.Player_InCombat or not Player:IsMoving()) then
+		elseif (ml_global_information.Player_InCombat or not Player:IsMoving() or ai_mount:IsMounted()) then
 			c_sprint.setRecharging = false
 			return true
 		end		
 	else
-		if (gSprint == "1") then
+		if (gSprint == "1" and not ai_mount:IsMounted()) then
 			if (ml_global_information.Player_Stamina.percent >= tonumber(gSprintStopThreshold)) then
 				if (not ml_global_information.Player_SprintingRecharging and not ml_global_information.Player_InCombat) then
 					c_sprint.setRecharging = false
@@ -420,4 +404,58 @@ function e_sprint:execute()
 	end
 	ml_global_information.Player_SprintingRecharging = c_sprint.setRecharging
 	c_sprint.timer = Now() + 1000
+end
+
+c_usepotion = inheritsFrom(ml_cause)
+e_usepotion = inheritsFrom(ml_effect)
+c_usepotion.slot = 0
+e_usepotion.timer = 0
+function c_usepotion:evaluate()
+	if (Player.dead or 
+		gPotionUse == "0" or 
+		(gBotMode == GetString("assistMode") and gAssistUsePotions == "0") or
+		not ml_global_information.Player_InCombat or
+		Now() < e_usepotion.timer) 
+	then
+		return false
+	end
+	
+	--Reset tempvars.
+	c_usepotion.slot = 0
+	
+	local hpp = ml_global_information.Player_Health.percent
+	local mpp = ml_global_information.Player_Magicka.percent
+	local spp = ml_global_information.Player_Stamina.percent
+	
+	if (tonumber(gPotionHP) > 0 and hpp <= tonumber(gPotionHP)) then
+		local slot = FindHealthPotion()
+		if (slot) then
+			c_usepotion.slot = slot
+			return true
+		end
+	end
+	
+	if (tonumber(gPotionMP) > 0 and mpp <= tonumber(gPotionMP)) then
+		local slot = FindMagickaPotion()
+		if (slot) then
+			c_usepotion.slot = slot
+			return true
+		end
+	end
+	
+	if (tonumber(gPotionSP) > 0 and spp <= tonumber(gPotionSP)) then
+		local slot = FindStaminaPotion()
+		if (slot) then
+			c_usepotion.slot = slot
+			return true
+		end
+	end
+	
+	return false
+end
+function e_usepotion:execute()
+	local slot = tostring(c_usepotion.slot)
+	e("OnSlotDown("..slot..")")
+	e("OnSlotUp("..slot..")")
+	e_usepotion.timer = Now() + 3000
 end

@@ -24,6 +24,11 @@ function ai_mount:Mount()
 			e("EndPendingInteraction()")
 		end
 		
+		if (Player.issprinting) then
+			d("Release the sprint key.")
+			e("OnSpecialMoveKeyUp(1)")
+		end
+		
 		e("ToggleMount()")
 		ml_task_hub:CurrentTask():SetDelay(math.random(500,750))
 		ai_mount.lastmount = Now()

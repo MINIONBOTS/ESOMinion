@@ -961,7 +961,21 @@ function eso_skillmanager.GetAttackRange()
 	if ( Player ) then	
 		if ( gAttackRange == GetString("aRange")) then
 			maxrange = 28
-		elseif ( gAttackRange == GetString("aAutomatic")) then		
+		elseif ( gAttackRange == GetString("aAutomatic")) then
+		
+			local lightAttack = e("GetSlotBoundId(1)")
+			--local heavyAttack = e("GetSlotBoundId(1)")
+			
+			if (lightAttack > 0) then
+				local ability = AbilityList:Get(lightAttack)
+				if (ValidTable(ability)) then
+					maxrange = ability.range
+				end
+			else
+				d("Could not find the ability ID for light attack.")
+			end
+			
+			--[[
 			-- Check if we have a target to check our skills against
 			target = Player:GetTarget()
 			if ( not target ) then
@@ -981,6 +995,7 @@ function eso_skillmanager.GetAttackRange()
 					end				
 				end
 			end
+			--]]
 		end
 	end
 	return maxrange
@@ -1277,6 +1292,9 @@ function eso_skillmanager.CanCast(prio, entity)
 	if (not entity) then
 		return 0
 	end
+	
+	local gameCameraActive = e("IsGameCameraActive()")
+	local interactionCameraActive = e("IsInteractionCameraActive()")
 	
 	local prio = tonumber(prio) or 0
 	if (prio == 0) then

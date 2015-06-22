@@ -17,6 +17,10 @@ function eso_task_gather.Create()
     return newinst
 end
 
+function eso_task_gather:UIInit()
+	d("Initializing Gather UI.")
+end
+
 function eso_task_gather:Init()
     local ke_dead = ml_element:create( "Dead", c_dead, e_dead, 300 )
     self:add( ke_dead, self.overwatch_elements )
@@ -26,8 +30,6 @@ function eso_task_gather:Init()
 	
 	local ke_aggro = ml_element:create( "Aggro", c_aggro, e_aggro, 200 )
 	self:add( ke_aggro, self.overwatch_elements )
-	
-	--self:add(ml_element:create( "LootAll", c_lootwindow, e_lootwindow, 275 ), self.process_elements)	
 	
 	local ke_autoEquip = ml_element:create( "AutoEquip", c_autoequip, e_autoequip, 200 )
 	self:add( ke_autoEquip, self.process_elements)
@@ -44,11 +46,11 @@ function eso_task_gather:Init()
 	local ke_findGatherable = ml_element:create( "FindGatherable", c_findgatherable, e_findgatherable, 80 )
 	self:add( ke_findGatherable, self.process_elements )
 	
-	local ke_returnToMarker = ml_element:create( "ReturnToMarker", c_returntomarker, e_returntomarker, 75 )
-	self:add( ke_returnToMarker, self.process_elements )
-	
-	local ke_nextMarker = ml_element:create( "NextMarker", c_nextgathermarker, e_nextgathermarker, 70 )
+	local ke_nextMarker = ml_element:create( "NextMarker", c_nextgathermarker, e_nextgathermarker, 75 )
 	self:add( ke_nextMarker, self.process_elements )
+	
+	local ke_returnToMarker = ml_element:create( "ReturnToMarker", c_returntomarker, e_returntomarker, 70 )
+	self:add( ke_returnToMarker, self.process_elements )
 	
 	local ke_moveToGatherable = ml_element:create( "MoveToGatherable", c_movetogatherable, e_movetogatherable, 50 )
 	self:add( ke_moveToGatherable, self.process_elements )
@@ -59,11 +61,6 @@ end
 if ( ml_global_information.BotModes ) then
 	ml_global_information.BotModes[GetString("gatherMode")] = eso_task_gather
 end
-
---function eso_gathertask:task_complete_execute()
-	--if (ml_global_information.Player_Sprinting) then e("OnSpecialMoveKeyUp(1)") end
-	--self.completed = true
---end
 
 c_findgatherable = inheritsFrom(ml_cause)
 e_findgatherable = inheritsFrom(ml_effect)
@@ -143,11 +140,11 @@ function c_movetogatherable:evaluate()
 end
 function e_movetogatherable:execute()
 	local newTask = eso_task_movetointeract.Create()
+	newTask.creator = "movetogatherable"
 	newTask.pos = e_movetogatherable.pos
 	newTask.interact = ml_task_hub:CurrentTask().gatherid
-	newTask.interactRange = 8
+	newTask.interactRange = 7
 	newTask.avoidPlayers = true
-	newTask.postDelay = 4000
 	ml_task_hub:CurrentTask():AddSubTask(newTask)	
 	
 	return ml_log(false)
@@ -165,39 +162,45 @@ function c_nextgathermarker:evaluate()
     if ( ml_task_hub:CurrentTask().currentMarker ~= nil and ml_task_hub:CurrentTask().currentMarker ~= 0 ) then
 		
         local marker = nil
-        
+		local ppos = Player.pos
         -- first check to see if we have no initiailized marker
         if (ml_task_hub:CurrentTask().currentMarker == false) then --default init value
-            marker = ml_marker_mgr.GetNextMarker("GatherMarker", ml_task_hub:CurrentTask().filterLevel)
-			if (marker == nil) then
-				return false
-			end	
+            --marker = ml_marker_mgr.GetNextMarker("GatherMarker", ml_task_hub:CurrentTask().filterLevel)		
+			marker = ml_marker_mgr.GetClosestMarker( ppos.x, ppos.y, ppos.z, 5000, "GatherMarker", ml_task_hub:CurrentTask().filterLevel)
+			if (not marker) then
+				d("No marker was found.")
+			end
 		end
-        
-        -- next check to see if our level is out of range
-        if (marker == nil) then
-            if (ValidTable(ml_task_hub:CurrentTask().currentMarker)) then
-                if 	(ml_task_hub:CurrentTask().filterLevel) and
-					(ml_global_information.Player_Level < ml_task_hub:CurrentTask().currentMarker:GetMinLevel() or 
-                    ml_global_information.Player_Level > ml_task_hub:CurrentTask().currentMarker:GetMaxLevel()) 
-                then
-                    marker = ml_marker_mgr.GetNextMarker("GatherMarker", ml_task_hub:CurrentTask().filterLevel)
-                end
-            end
-        end
-        
-        -- last check if our time has run out
-        if (marker == nil) then
-			if (ValidTable(ml_task_hub:CurrentTask().currentMarker)) then
-				local expireTime = ml_task_hub:CurrentTask().markerTime
-				if (Now() > expireTime) then
-					ml_debug("Getting Next Marker, TIME IS UP!")
-					marker = ml_marker_mgr.GetNextMarker("GatherMarker", ml_task_hub:CurrentTask().filterLevel)
-				else
-					return false
+		
+		local gatherid = ml_task_hub:CurrentTask().gatherid
+		if (gatherid == 0) then
+			-- next check to see if our level is out of range
+			if (marker == nil) then
+				if (ValidTable(ml_task_hub:CurrentTask().currentMarker)) then
+					if 	(ml_task_hub:CurrentTask().filterLevel) and
+						(ml_global_information.Player_Level < ml_task_hub:CurrentTask().currentMarker:GetMinLevel() or 
+						ml_global_information.Player_Level > ml_task_hub:CurrentTask().currentMarker:GetMaxLevel()) 
+					then
+						--marker = ml_marker_mgr.GetNextMarker("GatherMarker", ml_task_hub:CurrentTask().filterLevel)
+						marker = ml_marker_mgr.GetClosestMarker( ppos.x, ppos.y, ppos.z, 5000, "GatherMarker", ml_task_hub:CurrentTask().filterLevel)
+					end
 				end
 			end
-        end
+			
+			-- last check if our time has run out
+			if (marker == nil) then
+				if (ValidTable(ml_task_hub:CurrentTask().currentMarker)) then
+					if (ml_task_hub:CurrentTask().currentMarker:GetTime() ~= 0) then
+						local expireTime = ml_task_hub:CurrentTask().markerTime
+						if (Now() > expireTime) then
+							ml_debug("Getting Next Marker, TIME IS UP!")
+							--marker = ml_marker_mgr.GetNextMarker("GatherMarker", ml_task_hub:CurrentTask().filterLevel)
+							marker = ml_marker_mgr.GetClosestMarker( ppos.x, ppos.y, ppos.z, 5000, "GatherMarker", ml_task_hub:CurrentTask().filterLevel)
+						end
+					end
+				end
+			end
+		end
         
         if (ValidTable(marker)) then
             e_nextgathermarker.marker = marker
@@ -214,5 +217,4 @@ function e_nextgathermarker:execute()
 	ml_global_information.MarkerTime = Now() + (ml_task_hub:CurrentTask().currentMarker:GetTime() * 1000)
     ml_global_information.MarkerMinLevel = ml_task_hub:CurrentTask().currentMarker:GetMinLevel()
     ml_global_information.MarkerMaxLevel = ml_task_hub:CurrentTask().currentMarker:GetMaxLevel()
-	--gStatusMarkerName = ml_task_hub:ThisTask().currentMarker:GetName()
 end

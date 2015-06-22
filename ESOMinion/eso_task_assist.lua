@@ -21,8 +21,8 @@ function eso_task_assist:Init()
 	local ke_pickLocks = ml_element:create( "PickLocks", c_lockpick, e_lockpick, 25 )
     self:add(ke_pickLocks, self.process_elements)
 	
-	--local ke_lootwindow = ml_element:create( "lootwindow", c_lootwindow, e_lootwindow, 24 )
-	--self:add(ke_lootwindow, self.process_elements)
+	local ke_usePotion = ml_element:create( "UsePotion", c_usepotion, e_usepotion, 15 )
+    self:add(ke_usePotion, self.process_elements)
 	
 	self:AddTaskCheckCEs()
 end
@@ -105,8 +105,7 @@ function eso_task_assist.GetTarget()
 	return target
 end
 
-function eso_task_assist.ModuleInit()
-	
+function eso_task_assist:UIInit()
 	if (Settings.ESOMinion.gAssistTargetMode == nil) then
 		Settings.ESOMinion.gAssistTargetMode = "None"
 	end
@@ -134,18 +133,21 @@ function eso_task_assist.ModuleInit()
 	if (Settings.ESOMinion.gAssistDoLockpick == nil) then
 		Settings.ESOMinion.gAssistDoLockpick = "1"
 	end
+	if (Settings.ESOMinion.gAssistUsePotions == nil) then
+		Settings.ESOMinion.gAssistUsePotions = "1"
+	end
 	
 	
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMtargetmode"),"gAssistTargetMode",GetString("assistMode"),"None,LowestHealth,Closest,Biggest Crowd");
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMmode"),"gAssistTargetType",GetString("assistMode"),"Everything,Players Only")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("startCombat"),"gAssistInitCombat",GetString("assistMode"))
 	
+	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Use Potions","gAssistUsePotions",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Interrupts","gAssistDoInterrupt",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Exploits","gAssistDoExploit",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Dodges","gAssistDoAvoid",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Blocks","gAssistDoBlock",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform CC Breaks","gAssistDoBreak",GetString("assistMode"))
-	
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Lockpicks","gAssistDoLockpick",GetString("assistMode"))
 	
 	gAssistTargetMode = Settings.ESOMinion.gAssistTargetMode
@@ -175,7 +177,8 @@ function eso_task_assist.GUIVarUpdate(Event, NewVals, OldVals)
 			k == "gAssistDoAvoid" or 
 			k == "gAssistDoBlock" or 
 			k == "gAssistDoBreak" or
-			k == "gAssistDoLockpick"
+			k == "gAssistDoLockpick" or
+			k == "gAssistUsePotions"
 		)						
 		then
 			Settings.ESOMinion[tostring(k)] = v
@@ -184,5 +187,4 @@ function eso_task_assist.GUIVarUpdate(Event, NewVals, OldVals)
 	GUI_RefreshWindow(ml_global_information.MainWindow.Name)
 end
 
-RegisterEventHandler("Module.Initalize",eso_task_assist.ModuleInit)
 RegisterEventHandler("GUI.Update",eso_task_assist.GUIVarUpdate)
