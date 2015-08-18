@@ -265,6 +265,7 @@ end
 
 function GetVendorMarker()
 	local marker = nil
+	local ppos = Player.pos
 	marker = ml_marker_mgr.GetClosestMarker( ppos.x, ppos.y, ppos.z, 300, GetString("vendorMarker"), false)
 	
 	return marker
