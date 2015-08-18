@@ -3837,5 +3837,54 @@ function GetString(stringName)
 	end
 end
 
+function GetUSString(stringName)
+	if strings["us"][stringName] == nil then
+		return "%" .. tostring(stringName) .. "%"
+	else
+		return strings["us"][stringName]
+	end
+end
+
+function GetStringKey(translatedString)
+	local strings = strings
+	for language,data in pairs(strings) do
+		for skey,s in pairs(data) do
+			if (s == translatedString) then
+				return tostring(skey)
+			end
+		end
+	end
+	
+	return ""
+end
+
+function Retranslate(translatedString)
+	local stringTable = strings
+	for language,data in pairs(stringTable) do
+		for skey,s in pairs(data) do
+			if (s == translatedString) then
+				return GetString(skey)
+			end
+		end
+	end
+	
+	d("Could not find a translation for ["..translatedString.."].")
+	return translatedString
+end
+
+function GetStringList(stringList,delimiter)
+	local outputString = ""
+	for k in StringSplit(stringList,delimiter) do
+		local addstring = GetString(k)
+		if (outputString == "") then
+			outputString = addstring
+		else
+			outputString = outputString..delimiter..addstring
+		end
+	end
+	
+	return outputString
+end
+
 RegisterEventHandler("ESOMinion.setlanguage", SetLanguage)
 

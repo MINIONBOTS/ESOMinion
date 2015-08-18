@@ -151,8 +151,8 @@ function e_nextgrindmarker:execute()
 	ml_global_information.MarkerTime = Now() + (ml_task_hub:CurrentTask().currentMarker:GetTime() * 1000)
     ml_global_information.MarkerMinLevel = ml_task_hub:CurrentTask().currentMarker:GetMinLevel()
     ml_global_information.MarkerMaxLevel = ml_task_hub:CurrentTask().currentMarker:GetMaxLevel()
-	ml_global_information.BlacklistContentID = ml_task_hub:CurrentTask().currentMarker:GetFieldValue(strings[gCurrentLanguage].NOTcontentIDEquals)
-	ml_global_information.WhitelistContentID = ml_task_hub:CurrentTask().currentMarker:GetFieldValue(strings[gCurrentLanguage].contentIDEquals)	
+	ml_global_information.BlacklistContentID = ml_task_hub:CurrentTask().currentMarker:GetFieldValue(GetUSString("NOTcontentIDEquals"))
+	ml_global_information.WhitelistContentID = ml_task_hub:CurrentTask().currentMarker:GetFieldValue(GetUSString("contentIDEquals"))
 	--gStatusMarkerName = ml_task_hub:ThisTask().currentMarker:GetName()
 end
 
