@@ -1,4 +1,0 @@
-eso_navdata = {}
-
-
-
