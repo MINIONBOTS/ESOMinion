@@ -1,1 +1,0 @@
-eso_placeholder = {}
