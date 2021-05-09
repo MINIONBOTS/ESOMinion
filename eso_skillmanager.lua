@@ -42,26 +42,26 @@ eso_skillmanager.GUI = {
 	skillbook = {
 		name = GetString("Skill Book"),
 		visible = true,
-		open = true,
+		open = false,
 		id = 0,
 		height = 0, width = 350, x = 500, y = 500,
 	},
 	manager = {
 		name = GetString("Skill Manager"),
 		visible = true,
-		open = true,
+		open = false,
 		height = 0, width = 0, x = 500, y = 500,
 	},
 	editor = {
 		name = GetString("Skill Editor"),
 		visible = true,
-		open = true,
+		open = false,
 		height = 0, width = 350, x = 0, y = 0,
 	},
 	profile = {
 		name = "Profile",
 		visible = true,
-		open = true,
+		open = false,
 	},
 }
 
