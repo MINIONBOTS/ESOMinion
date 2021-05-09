@@ -1,5 +1,14 @@
 dev = {}
-
+ml_global_information.MainWindow = { Name="MinionBot", x=50, y=50, width=220, height=350 }
+ml_global_information.advwindow = { Name="AdvandedSettings", x=250, y=200 , width=200, height=170 }
+ml_global_information.login = { Name="AutoLogin", x=100, y=100 , width=230, height=140 }
+ml_global_information.characterselect = { Name="CharacterSelect", x=100, y=100 , width=250, height=150 }
+ml_global_information.drawMode = 1
+ml_global_information.AttackRange = 5
+ml_global_information.Now = 0
+ml_global_information.yield = {}
+ml_global_information.nextRun = 0
+ml_global_information.BotModes = {}
 function ml_global_information.Init()
 	-- Update default meshes.
 	do
