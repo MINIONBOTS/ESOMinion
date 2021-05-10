@@ -9,6 +9,8 @@ ml_global_information.Now = 0
 ml_global_information.yield = {}
 ml_global_information.nextRun = 0
 ml_global_information.BotModes = {}
+ml_global_information.lastWeaponCheck = 0
+ml_global_information.idlePulseCount = 0
 function ml_global_information.Init()
 	-- Update default meshes.
 	do

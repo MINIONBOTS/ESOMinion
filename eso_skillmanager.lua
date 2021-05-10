@@ -1,4 +1,60 @@
 -- Skillmanager for adv. skill customization
+
+-- CanAbilityBeUsedFromHotbar(number abilityId, number HotBarCategory hotbarCategory)
+   -- Returns: boolean canBeUsed 
+   
+--[[ fix ui list
+
+trg
+skill
+	.used
+	.name
+	.id
+	.prio
+	.minrange
+	.maxrange
+	.previd
+	.nprevid
+	.ptrg
+	.combat
+	.throttle
+	.timelastused
+	
+	health
+	.phpgt
+	.phplt
+	
+	.powertype
+	.ppowgt
+	.ppowlt
+	
+	.pbuffthis
+	.pnbuffthis
+	.tbuffthis
+	.tnbuffthis
+	
+	.pbuff
+	.pnbuff
+	.tbuff
+	.tnbuff
+	
+	target hp
+	.thpgt
+	.thplt
+	
+	casting
+	.iscasting
+	
+	aoe
+	.tecount
+	.tecount2
+	.terange
+	
+	ally aoe
+	.tacount
+	.tarange
+	
+]]
 eso_skillmanager = {}
 eso_skillmanager.version = "2.0";
 eso_skillmanager.lastTick = 0
@@ -14,6 +70,7 @@ eso_skillmanager.editwindow = { name = GetString("skillEditor"), x = 250, y = 50
 eso_skillmanager.confirmwindow = { name = GetString("confirm"), x = 250, y = 50, w = 250, h = 120}
 eso_skillmanager.SkillBook = {}
 eso_skillmanager.SkillProfile = {}
+eso_skillmanager.SkillProfiles = {"None"}
 eso_skillmanager.prevSkillID = ""
 eso_skillmanager.prevSkillList = {}
 eso_skillmanager.copiedSkill = {}
@@ -143,45 +200,52 @@ eso_skillmanager.HeavyAttacks = {
 eso_skillmanager.Variables = {
 	SKM_NAME = { default = "", cast = "string", profile = "name", section = "main"},
 	SKM_ALIAS = { default = "", cast = "string", profile = "alias", section = "main"},
-	SKM_ID = { default = 0, cast = "number", profile = "skillID", section = "main"},
+	SKM_ID = { default = false, cast = "number", profile = "skillID", section = "main"},
 	SKM_SKILLTYPE = { default = GetString("smsktypedmg"), cast = "string", profile = "skilltype", section = "main"},
-	SKM_Prio = { default = 0, cast = "number", profile = "prio", section = "main"},
+	SKM_Prio = { default = false, cast = "number", profile = "prio", section = "main"},
 	SKM_ATKRNG = { default = "0", cast = "string", profile = "atkrng", section = "main"},
 	SKM_ENABLED = { default = "0", cast = "string", profile = "enabled", section = "main"},	
 	
 	SKM_Combat = { default = "In Combat", cast = "string", profile = "ooc", section = "fighting"  },
-	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"   },
-	SKM_MinR = { default = 0, cast = "number", profile = "minRange", section = "fighting"   },
+	SKM_CASTTIME = { default = false, cast = "number", profile = "casttime", section = "fighting"   },
+	SKM_MinR = { default = false, cast = "number", profile = "minRange", section = "fighting"   },
 	SKM_MaxR = { default = 30, cast = "number", profile = "maxRange", section = "fighting"   },
 	
-	SKM_PSkillID = { default = "", cast = "string", profile = "previd", section = "fighting"  },
-	SKM_NPSkillID = { default = "", cast = "string", profile = "nprevid", section = "fighting"  },
-	SKM_THROTTLE = { default = 0, cast = "number", profile = "throttle", section = "fighting" },  
+	SKM_THROTTLE = { default = false, cast = "number", profile = "throttle", section = "fighting" },  
 	
-	SKM_PHPGT = { default = 0, cast = "number", profile = "phpgt", section = "fighting"   },
-	SKM_PHPLT = { default = 0, cast = "number", profile = "phplt", section = "fighting"   },
+	SKM_PHPGT = { default = false, cast = "number", profile = "phpgt", section = "fighting"   },
+	SKM_PHPLT = { default = false, cast = "number", profile = "phplt", section = "fighting"   },
 	SKM_POWERTYPE = { default = "Magicka", cast = "string", profile = "powertype", section = "fighting"},
-	SKM_PPowGT = { default = 0, cast = "number", profile = "ppowgt", section = "fighting"   },
-	SKM_PPowLT = { default = 0, cast = "number", profile = "ppowlt", section = "fighting"   },
+	SKM_PPowGT = { default = false, cast = "number", profile = "ppowgt", section = "fighting"   },
+	SKM_PPowLT = { default = false, cast = "number", profile = "ppowlt", section = "fighting"   },
 	
 	SKM_TRG = { default = "Target", cast = "string", profile = "trg", section = "fighting"  },
-	SKM_THPGT = { default = 0, cast = "number", profile = "thpgt", section = "fighting"  },
-	SKM_THPLT = { default = 0, cast = "number", profile = "thplt", section = "fighting"  },
+	SKM_THPGT = { default = false, cast = "number", profile = "thpgt", section = "fighting"  },
+	SKM_THPLT = { default = false, cast = "number", profile = "thplt", section = "fighting"  },
 	
-	SKM_TECount = { default = 0, cast = "number", profile = "tecount", section = "fighting"  },
-	SKM_TECount2 = { default = 0, cast = "number", profile = "tecount2", section = "fighting" },
-	SKM_TERange = { default = 0, cast = "number", profile = "terange", section = "fighting"  },
-	SKM_TACount = { default = 0, cast = "number", profile = "tacount", section = "fighting"  },
-	SKM_TARange = { default = 0, cast = "number", profile = "tarange", section = "fighting"  },
+	SKM_TECount = { default = false, cast = "number", profile = "tecount", section = "fighting"  },
+	SKM_TECount2 = { default = false, cast = "number", profile = "tecount2", section = "fighting" },
+	SKM_TERange = { default = false, cast = "number", profile = "terange", section = "fighting"  },
+	SKM_TACount = { default = false, cast = "number", profile = "tacount", section = "fighting"  },
+	SKM_TARange = { default = false, cast = "number", profile = "tarange", section = "fighting"  },
 	
-	--[[ -------Skill Chains
+	 -------Skill Chains
 	SKM_PSkillID = { default = "", cast = "string", profile = "pskill", section = "fighting"  },
 	SKM_NPSkillID = { default = "", cast = "string", profile = "npskill", section = "fighting"  },
 	SKM_PCSkillID = { default = "", cast = "string", profile = "pcskill", section = "fighting"  },
 	SKM_NPCSkillID = { default = "", cast = "string", profile = "npcskill", section = "fighting"  },
 	SKM_NSkillID = { default = "", cast = "string", profile = "nskill", section = "fighting"  },
 	SKM_NSkillPrio = { default = "", cast = "string", profile = "nskillprio", section = "fighting"  },
-	--]]
+	
+	SKM_PHPL = { default = false, cast = "number", profile = "phpl", section = "fighting"   },
+	SKM_PHPB = { default = false, cast = "number", profile = "phpb", section = "fighting"   },
+	SKM_PUnderAttack = { default = false, cast = "boolean", profile = "punderattack", section = "fighting"  },
+	SKM_PUnderAttackMelee = { default = false, cast = "boolean", profile = "punderattackmelee", section = "fighting"  },
+	SKM_PPowL = { default = false, cast = "number", profile = "ppowl", section = "fighting"   },
+	SKM_PPowB = { default = false, cast = "number", profile = "ppowb", section = "fighting"   },
+	SKM_PMPPL = { default = false, cast = "number", profile = "pmppl", section = "fighting"   },
+	SKM_PMPPB = { default = false, cast = "number", profile = "pmppb", section = "fighting"   },
+	
 
 	--SKM_OnlySolo = { default = "0", cast = "string", profile = "onlysolo", section = "fighting"  },
 	--SKM_OnlyParty = { default = "0", cast = "string", profile = "onlyparty", section = "fighting"  },
@@ -199,11 +263,11 @@ eso_skillmanager.Variables = {
 	SKM_NPC = { default = "0", cast = "string", profile = "npc", section = "fighting"  },
 	SKM_PTRG = { default = "Any", cast = "string", profile = "ptrg", section = "fighting" },
 	SKM_PGTRG = { default = "Direct", cast = "string", profile = "pgtrg", section = "fighting"  },
-	SKM_THPADV = { default = 0, cast = "number", profile = "thpadv", section = "fighting"  },
+	SKM_THPADV = { default = false, cast = "number", profile = "thpadv", section = "fighting"  },
 	--]]
 	
 	--[[ -------Party
-	SKM_HPRIOHP = { default = 0, cast = "number", profile = "hpriohp", section = "fighting"  },
+	SKM_HPRIOHP = { default = false, cast = "number", profile = "hpriohp", section = "fighting"  },
 	SKM_HPRIO1 = { default = "None", cast = "string", profile = "hprio1", section = "fighting"  },
 	SKM_HPRIO2 = { default = "None", cast = "string", profile = "hprio2", section = "fighting"  },
 	SKM_HPRIO3 = { default = "None", cast = "string", profile = "hprio3", section = "fighting"  },
@@ -211,13 +275,13 @@ eso_skillmanager.Variables = {
 	--]]
 	
 	--[[ -------Party
-	SKM_PTCount = { default = 0, cast = "number", profile = "ptcount", section = "fighting"   },
-	SKM_PTHPL = { default = 0, cast = "number", profile = "pthpl", section = "fighting"   },
-	SKM_PTHPB = { default = 0, cast = "number", profile = "pthpb", section = "fighting"   },
-	SKM_PTMPL = { default = 0, cast = "number", profile = "ptmpl", section = "fighting"   },
-	SKM_PTMPB = { default = 0, cast = "number", profile = "ptmpb", section = "fighting"   },
-	SKM_PTTPL = { default = 0, cast = "number", profile = "pttpl", section = "fighting"   },
-	SKM_PTTPB = { default = 0, cast = "number", profile = "pttpb", section = "fighting"   },
+	SKM_PTCount = { default = false, cast = "number", profile = "ptcount", section = "fighting"   },
+	SKM_PTHPL = { default = false, cast = "number", profile = "pthpl", section = "fighting"   },
+	SKM_PTHPB = { default = false, cast = "number", profile = "pthpb", section = "fighting"   },
+	SKM_PTMPL = { default = false, cast = "number", profile = "ptmpl", section = "fighting"   },
+	SKM_PTMPB = { default = false, cast = "number", profile = "ptmpb", section = "fighting"   },
+	SKM_PTTPL = { default = false, cast = "number", profile = "pttpl", section = "fighting"   },
+	SKM_PTTPB = { default = false, cast = "number", profile = "pttpb", section = "fighting"   },
 	SKM_PTBuff = { default = "", cast = "string", profile = "ptbuff", section = "fighting"  },
 	SKM_PTNBuff = { default = "", cast = "string", profile = "ptnbuff", section = "fighting"  },
 	--]]
@@ -232,21 +296,12 @@ eso_skillmanager.Variables = {
 	SKM_PBuff = { default = "", cast = "string", profile = "pbuff", section = "fighting"  },
 	SKM_PNBuffThis = { default = "", cast = "string", profile = "pnbuffthis", section = "fighting"  },
 	SKM_PNBuff = { default = "", cast = "string", profile = "pnbuff", section = "fighting"  },
-	
-	--[[ ------- Player Buffs
-	SKM_PBuffDura = { default = 0, cast = "number", profile = "pbuffdura", section = "fighting" },
-	SKM_PNBuffDura = { default = 0, cast = "number", profile = "pnbuffdura", section = "fighting"   },
-	--]]
-	
+		
 	SKM_TBuffThis = { default = "", cast = "string", profile = "tbuffthis", section = "fighting"  },
 	SKM_TBuff = { default = "", cast = "string", profile = "tbuff", section = "fighting"  },
 	SKM_TNBuffThis = { default = "", cast = "string", profile = "tnbuffthis", section = "fighting"  },
 	SKM_TNBuff = { default = "", cast = "string", profile = "tnbuff", section = "fighting"  },
 	
-	--[[ ------- Target Buffs
-	SKM_TBuffOwner = { default = "Player", cast = "string", profile = "tbuffowner", section = "fighting"  },
-	SKM_TNBuffDura = { default = 0, cast = "number", profile = "tnbuffdura", section = "fighting"   },
-	--]]
 	
 	--SKM_PPos = { default = "None", cast = "string", profile = "ppos", section = "fighting"  },
 	
@@ -263,9 +318,13 @@ eso_skillmanager.Variables = {
 }
 
 function eso_skillmanager.ModuleInit() 	
-    if (Settings.ESOMinion.gSMlastprofile == nil) then
-        Settings.ESOMinion.gSMlastprofile = "None"
-    end
+
+	for varname,info in pairs(eso_skillmanager.Variables) do
+		_G[varname] = info.default
+	end
+	
+	local uuid = GetUUID()
+	
 	if (Settings.ESOMinion.SMDefaultProfiles == nil) then
 		Settings.ESOMinion.SMDefaultProfiles = {}
 	end	
@@ -285,8 +344,45 @@ function eso_skillmanager.ModuleInit()
 		Settings.ESOMinion.SMDefaultProfiles[6] = "Templar"
 	end
 	
+	
+	eso_skillmanager.UpdateProfiles()
 	eso_skillmanager.UseDefaultProfile()
 	eso_skillmanager.AddDefaultConditions()
+	gSkillProfileNewIndex = 1
+	gSMlastprofileNew = esominion.GetSetting("gSMlastprofileNew","None")
+	gSMprofile = esominion.GetSetting("gSMprofile","None")
+	gSkillProfileNewIndex = GetKeyByValue(gSMlastprofileNew,eso_skillmanager.SkillProfiles)
+	
+	gSkillManagerPrefered = esominion.GetSetting("gSkillManagerPrefered",{})
+	
+end
+
+function eso_skillmanager.CheckPreferedList(weaponID)
+	d("check prefered skillProfiles")
+	if table.valid(gSkillManagerPrefered) then
+		if weaponID ~= 0 then
+			local checkProfile = gSkillManagerPrefered[weaponID]
+			if checkProfile then
+				local newval = GetKeyByValue(checkProfile,eso_skillmanager.SkillProfiles)
+				if newval then
+					gSkillProfileNewIndex = newval
+					Settings.ESOMinion.gSkillProfileNewIndex = newval
+					Settings.ESOMinion.gSMlastprofileNew = checkProfile
+					
+					gSMprofile = checkProfile
+					Settings.ESOMinion.gSMprofile = checkProfile
+					eso_skillmanager.ReadFile(checkProfile)
+				end
+			end
+		end
+	end
+end
+function eso_skillmanager.SetPreferedList()
+	d("Set prefered skillProfiles")
+	local weaponID = e("GetSlotBoundId(1)")
+	d("Weapon ["..tostring(weaponID).."] set to prefered ["..tostring(gSMprofile).."]")
+	gSkillManagerPrefered[weaponID] = gSMprofile
+	Settings.ESOMinion.gSkillManagerPrefered = gSkillManagerPrefered
 end
 
 function eso_skillmanager.GUIVarUpdate(Event, NewVals, OldVals)
@@ -297,7 +393,7 @@ function eso_skillmanager.GUIVarUpdate(Event, NewVals, OldVals)
             --GUI_WindowVisible(eso_skillmanager.editwindow.name,false)		
             --GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
             eso_skillmanager.UpdateCurrentProfileData()
-			Settings.ESOMinion["gSMlastprofile"] = v
+			Settings.ESOMinion["gSMlastprofileNew"] = v
 			eso_skillmanager.SetDefaultProfile()
 		end
 		
@@ -359,7 +455,7 @@ function eso_skillmanager.ReadFile(strFile)
 						end
 						
 						-- try to update the names 
-						--[[
+						
 						local found = false
 						for i, actiontype in pairsByKeys(eso_skillmanager.ActionTypes) do
 							local AbilityList = AbilityList("type="..tostring(actiontype))
@@ -374,7 +470,7 @@ function eso_skillmanager.ReadFile(strFile)
 								break
 							end
 						end
-						--]]
+						
 						
 						sortedSkillList = TableInsertSort(sortedSkillList,tonumber(newskill.prio),newskill)
 						newskill = {}
@@ -488,7 +584,7 @@ function eso_skillmanager.UseProfile(strName)
 	--GUI_WindowVisible(eso_skillmanager.editwindow.name,false)		
 	--GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
 	eso_skillmanager.UpdateCurrentProfileData()
-	Settings.ESOMinion.gSMlastprofile = strName
+	Settings.ESOMinion.gSMlastprofileNew = strName
 end
 
 function eso_skillmanager.ButtonHandler(event, Button)
@@ -612,7 +708,7 @@ function eso_skillmanager.SaveProfile()
 
 		gSMprofile_listitems = gSMprofile_listitems..","..filename
 		gSMprofile = filename
-		Settings.ESOMinion.gSMlastprofile = filename
+		Settings.ESOMinion.gSMlastprofileNew = filename
 		
 		eso_skillmanager.WriteToFile(filename)
     elseif (gSMprofile ~= nil and gSMprofile ~= "None" and gSMprofile ~= "") then
@@ -679,9 +775,10 @@ function eso_skillmanager.UpdateProfiles()
         while i and profile do				
             profile = string.gsub(profile, ".lua", "")
             profiles = profiles..","..profile
-            if ( Settings.ESOMinion.gSMlastprofile ~= nil and Settings.ESOMinion.gSMlastprofile == profile ) then
+            if ( Settings.ESOMinion.gSMlastprofileNew ~= nil and Settings.ESOMinion.gSMlastprofileNew == profile ) then
                 found = profile
             end
+			table.insert(eso_skillmanager.SkillProfiles,profile)
             i,profile = next ( profilelist,i)
         end		
     else
@@ -728,7 +825,8 @@ function eso_skillmanager.UpdateCurrentProfileData()
 	end
 end
 function eso_skillmanager.BuildSkillsList()
-
+	d("build new skill list")
+	eso_skillmanager.lastskillidcheck = e("GetSlotBoundId(1)")
 	for i = 1,33 do
 		local skillid = e("GetAbilityIdByIndex("..i..")")
 		local skillName, skillTexture, skillRank, skillSlotType, skillpassive, skillVisable = e("GetAbilityInfoByIndex("..i..")")
@@ -739,17 +837,19 @@ function eso_skillmanager.BuildSkillsList()
 		eso_skillmanager.skillsbyid[skillid] = {id = skillid, index = i ,name = skillName, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillChannelTime, channeltime = skillChannelTime}
 		eso_skillmanager.skillsbyname[skillName] = {id = skillid, index = i ,name = skillName, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillChannelTime, channeltime = skillChannelTime}
 		
-		if skillName == "Light Attack" then
-			eso_skillmanager.lastskillidcheck = skillid
-			eso_skillmanager.lastskillindexcheck = i
-		end
 		ml_global_information.AttackRange = math.max(skillRange,ml_global_information.AttackRange)
 	end
 	return eso_skillmanager.skillsbyindex
 end
 --+Rebuilds the UI Entries for the SkillbookList
 function eso_skillmanager.RefreshSkillBook()
-    local SkillList = eso_skillmanager.BuildSkillsList()
+    local SkillList = nil
+	if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then 	
+		SkillList = eso_skillmanager.BuildSkillsList()
+	else
+		SkillList = eso_skillmanager.skillsbyindex
+	end
+	
     if ( ValidTable( SkillList ) ) then
 		for i,skill in spairs(SkillList, function( skill,a,b ) return skill[a].name < skill[b].name end) do
 			eso_skillmanager.CreateNewSkillBookEntry(skill.id)
@@ -929,7 +1029,6 @@ function eso_skillmanager.GetAttackRange()
 end
 
 function eso_skillmanager.Cast( entity )
-d("start cast check")
 	if (not entity) then
 		return false
 	end
@@ -1469,8 +1568,8 @@ function eso_skillmanager.AddDefaultConditions()
 		
 		return false
 	end
-	}]]
-	eso_skillmanager.AddConditional(conditional)
+	}
+	eso_skillmanager.AddConditional(conditional)]]
 	
 	conditional = { name = "Min/Max Range Check"
 	, eval = function()	
@@ -1538,7 +1637,7 @@ function eso_skillmanager.AddDefaultConditions()
 		local target = eso_skillmanager.CurrentTarget
 		
 		if ( skill.ptrg ~= "Any" ) then
-			if (( skill.ptrg == "Enemy" and (not target or not target.attackable)) or 
+			if (( skill.ptrg == "Enemy" and (not target or not target.attackable)) or -- check this
 				( skill.ptrg == "Player" and (not target or target.type ~= 1))) 
 			then 
 				return true 
@@ -1610,7 +1709,7 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)
 	
-	conditional = { name = "Player HP/Power Checks"	
+	--[[conditional = { name = "Player HP/Power Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
@@ -1644,7 +1743,7 @@ function eso_skillmanager.AddDefaultConditions()
 		return false
 	end
 	}
-	eso_skillmanager.AddConditional(conditional)
+	eso_skillmanager.AddConditional(conditional)]]
 	
 	--[[conditional = { name = "Player Single Buff Check"	
 	, eval = function()	
@@ -1663,8 +1762,8 @@ function eso_skillmanager.AddDefaultConditions()
 		end			
 		return false
 	end
-	}]]
-	eso_skillmanager.AddConditional(conditional)
+	}
+	eso_skillmanager.AddConditional(conditional)]]
 	
 	--[[conditional = { name = "Target Single Buff Check"	
 	, eval = function()	
@@ -1684,8 +1783,8 @@ function eso_skillmanager.AddDefaultConditions()
 		end			
 		return false
 	end
-	}]]
-	eso_skillmanager.AddConditional(conditional)
+	}
+	eso_skillmanager.AddConditional(conditional)]]
 	
 	--[[conditional = { name = "Player Buff Checks"	
 	, eval = function()	
@@ -1726,8 +1825,8 @@ function eso_skillmanager.AddDefaultConditions()
 		end	
 		return false
 	end
-	}]]
-	eso_skillmanager.AddConditional(conditional)
+	}
+	eso_skillmanager.AddConditional(conditional)]]
 	
 	--[[conditional = { name = "Target HP Checks"	
 	, eval = function()	
@@ -1746,8 +1845,8 @@ function eso_skillmanager.AddDefaultConditions()
 		
 		return false
 	end
-	}]]
-	eso_skillmanager.AddConditional(conditional)
+	}
+	eso_skillmanager.AddConditional(conditional)]]
 	
 	conditional = { name = "Target Casting Checks"	
 	, eval = function()	
@@ -1828,12 +1927,7 @@ function eso_skillmanager.DrawSkillBook()
 		local contentwidth = GUI:GetContentRegionAvailWidth()
 		
 		eso_skillmanager.GUI.skillbook.x = x; eso_skillmanager.GUI.skillbook.y = y; eso_skillmanager.GUI.skillbook.width = width; eso_skillmanager.GUI.skillbook.height = height;
-		
-		--GUI_Capture(GUI:Checkbox("This Job Only",geso_skillmanagerFilterJob),"geso_skillmanagerFilterJob")
-		--GUI_Capture(GUI:Checkbox("Usable Only",geso_skillmanagerFilterUsable),"geso_skillmanagerFilterUsable")
-		
-		eso_skillmanager.SkillBook = eso_skillmanager.BuildSkillsList()
-		
+				
 		if (table.valid(eso_skillmanager.SkillBook)) then
 			for key, skillInfo in spairs(eso_skillmanager.SkillBook) do
 				if ( GUI:Button(skillInfo.name.." ["..tostring(skillInfo.id).."]",width,20)) then
@@ -1842,6 +1936,8 @@ function eso_skillmanager.DrawSkillBook()
 				
 				end
 			end
+		else
+			eso_skillmanager.SkillBook = eso_skillmanager.BuildSkillsList()
 		end
 	end
 	GUI:End()
@@ -1861,9 +1957,7 @@ function eso_skillmanager.DrawSkillEditor(prio)
 				
 				GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Name")); GUI:NextColumn(); GUI:Text(skill.name); GUI:NextColumn();
 				GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Alias")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_ALIAS",SKM_ALIAS),"SKM_ALIAS"); GUI:NextColumn();
-				GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("ID")); GUI:NextColumn(); GUI:Text(skill.id); GUI:NextColumn();
-				GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Type")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TYPE",SKM_TYPE,0,0),"SKM_TYPE"); GUI:NextColumn();
-				GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Used")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_ON",SKM_ON),"SKM_ON"); GUI:NextColumn();		
+				GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("ID")); GUI:NextColumn(); GUI:Text(skill.skillID); GUI:NextColumn();	
 				
 				GUI:Columns(1)
 				
@@ -1875,116 +1969,83 @@ function eso_skillmanager.DrawSkillEditor(prio)
 end
 
 function eso_skillmanager.Draw()
+	local gamestate = GetGameState()
+	if (gamestate == ESO.GAMESTATE.INGAME) then
 
-	if ( eso_skillmanager.GUI.skillbook.open ) then 
-	
-		eso_skillmanager.DrawSkillBook()
+		if ( eso_skillmanager.GUI.skillbook.open ) then 
+		
+			eso_skillmanager.DrawSkillBook()
 
-	
-		GUI:SetNextWindowSize(250,400,GUI.SetCond_Once) --set the next window size, only on first ever	
-		GUI:SetNextWindowCollapsed(false,GUI.SetCond_Once)
 		
-		local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
-		GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], (255/255))
-		
-		eso_skillmanager.GUI.profile.visible, eso_skillmanager.GUI.profile.open = GUI:Begin(eso_skillmanager.GUI.profile.name, eso_skillmanager.GUI.profile.open)
-		
-		local contentwidth = GUI:GetContentRegionAvailWidth()
-		if table.valid(eso_skillmanager.SkillProfile) then
-			for prio,skillInfo in spairs(eso_skillmanager.SkillProfile) do
+			GUI:SetNextWindowSize(250,400,GUI.SetCond_Once) --set the next window size, only on first ever	
+			GUI:SetNextWindowCollapsed(false,GUI.SetCond_Once)
 			
-				if (GUI:Button(skillInfo.name,contentwidth,20)) then -- skill to edit
+			local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+			GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], (255/255))
+			
+			eso_skillmanager.GUI.profile.visible, eso_skillmanager.GUI.profile.open = GUI:Begin(eso_skillmanager.GUI.profile.name, eso_skillmanager.GUI.profile.open)
+			
+			local contentwidth = GUI:GetContentRegionAvailWidth()
+			if table.valid(eso_skillmanager.SkillProfile) then
+			
+			
+				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
+				
+				if (GUI:Button("Set Weapon Prefered Profile",contentwidth,20)) then -- skill to edit
+					eso_skillmanager.SetPreferedList()
 				end
-					
-				if (GUI:IsItemHovered()) then
-					if (GUI:IsMouseClicked(0)) then
-						eso_skillmanager.GUI.skillbook.id = prio
-					elseif (GUI:IsMouseClicked(1)) then
-						eso_skillmanager.GUI.skillbook.id = 0
-						eso_skillmanager.SkillProfile[prio] = nil
-						eso_skillmanager.SaveProfile()
+				
+				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
+				GUI:Separator()
+				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
+				for prio,skillInfo in spairs(eso_skillmanager.SkillProfile) do
+				
+					if (GUI:Button(skillInfo.name,contentwidth,20)) then -- skill to edit
+					end
+						
+					if (GUI:IsItemHovered()) then
+						if (GUI:IsMouseClicked(0)) then
+							eso_skillmanager.GUI.skillbook.id = prio
+							eso_skillmanager.EditSkill(prio)
+							eso_skillmanager.GUI.editor.open = true
+						elseif (GUI:IsMouseClicked(1)) then
+							eso_skillmanager.GUI.skillbook.id = 0
+							eso_skillmanager.SkillProfile[prio] = nil
+							eso_skillmanager.SaveProfile()
+						end
 					end
 				end
 			end
-		end
 
-	
-		GUI:End()
-		GUI:PopStyleColor()
 		
-		if eso_skillmanager.GUI.skillbook.id ~= 0 then -- draw editor
-			eso_skillmanager.DrawSkillEditor(eso_skillmanager.GUI.skillbook.id)
+			GUI:End()
+			GUI:PopStyleColor()
+			
+			if eso_skillmanager.GUI.skillbook.id ~= 0 then -- draw editor
+				eso_skillmanager.DrawSkillEditor(eso_skillmanager.GUI.skillbook.id)
+			end
 		end
-
-	
 	end
 end
 
-function eso_skillmanager.DrawBattleEditor()
+function eso_skillmanager.DrawBattleEditor(skill)
 	
 	if (GUI:CollapsingHeader("Basic","battle-basic-header")) then
 		GUI:Columns(2,"#battle-basic-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Combat Status")); GUI:NextColumn(); SKM_Combo("##SKM_Combat","gSMBattleStatusIndex","SKM_Combat",gSMBattleStatuses); GUI:NextColumn();
-		--eso_skillmanager.DrawLineItem{control = "combobox", name = "Combat Status", variable = "SKM_Combat", indexvar = "gSMBattleStatusIndex", tablevar = gSMBattleStatuses, width = 200}
-		
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("skmCHARGE")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When selected, this skill will be considered a 'gap closer', like Shoulder Tackle or Plunge.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_CHARGE",SKM_CHARGE),"SKM_CHARGE"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("appliesBuff")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Check this box if the skill applies a Buff or Debuff.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_DOBUFF",SKM_DOBUFF),"SKM_DOBUFF"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("removesBuff")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Check this box if the skill removes a Buff.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_REMOVESBUFF",SKM_REMOVESBUFF),"SKM_REMOVESBUFF"); GUI:NextColumn();
-		
-		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "skmLevelMin", variable = "SKM_LevelMin", width = 50, tooltip = "Use this skill when the character is at or above a certain level (Set to 0 to ignore)."}
-		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "skmLevelMax", variable = "SKM_LevelMax", width = 50, tooltip = "Use this skill when the character is at or below a certain level (Set to 0 to ignore)."}
 		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "minRange", variable = "SKM_MinR", width = 50, tooltip = "Minimum range the skill can be used (For most skills, this will stay at 0)."}
 		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "maxRange", variable = "SKM_MaxR", width = 50, tooltip = "Maximum range the skill can be used."}
-		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("prevComboSkill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill is part of a combo, enter the ID of the skill that should be executed immediately before this one.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PCSkillID",SKM_PCSkillID),"SKM_PCSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("prevComboSkillNot")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill is part of a combo, enter the ID of the skill that should NOT be executed immediately before this one.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPCSkillID",SKM_NPCSkillID),"SKM_NPCSkillID"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous GCD Skill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should be used immediately after another skill on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PGSkillID",SKM_PGSkillID),"SKM_PGSkillID"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous GCD Skill NOT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should NOT be used immediately after another skill on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPGSkillID",SKM_NPGSkillID),"SKM_NPGSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PSkillID",SKM_PSkillID),"SKM_PSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill NOT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should NOT be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPSkillID",SKM_NPSkillID),"SKM_NPSkillID"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Current Action NOT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should NOT be used while the character is in a particular animation, put the ID of that animation here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NCURRENTACTION",SKM_NCURRENTACTION),"SKM_NCURRENTACTION"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("filter1")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Quick 'switches' used to adjust what skills can or can't be used.")) end GUI:NextColumn(); SKM_Combo("##SKM_FilterOne","gSMFilter1Index","SKM_FilterOne",gSMFilterStatuses); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("filter2")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Quick 'switches' used to adjust what skills can or can't be used.")) end GUI:NextColumn(); SKM_Combo("##SKM_FilterTwo","gSMFilter2Index","SKM_FilterTwo",gSMFilterStatuses); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("filter3")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Quick 'switches' used to adjust what skills can or can't be used.")) end GUI:NextColumn(); SKM_Combo("##SKM_FilterThree","gSMFilter3Index","SKM_FilterThree",gSMFilterStatuses); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("filter4")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Quick 'switches' used to adjust what skills can or can't be used.")) end GUI:NextColumn(); SKM_Combo("##SKM_FilterFour","gSMFilter4Index","SKM_FilterFour",gSMFilterStatuses); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("filter5")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Quick 'switches' used to adjust what skills can or can't be used.")) end GUI:NextColumn(); SKM_Combo("##SKM_FilterFive","gSMFilter5Index","SKM_FilterFive",gSMFilterStatuses); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("onlySolo")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, this skill will only be used when the character is solo or with only their chocobo.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_OnlySolo",SKM_OnlySolo),"SKM_OnlySolo"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("onlyParty")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, this skill will only be used when the character is in a Party.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_OnlyParty",SKM_OnlyParty),"SKM_OnlyParty"); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, this skill will only be used when the character is in a Party.")) end GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Party Size <=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, this skill will only be used when the character is in a Party of less than or equal to this number of characters (Set to 0 to ignore).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PartySizeLT",SKM_PartySizeLT,0,0),"SKM_PartySizeLT"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("secsSinceLastCast")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Set this to ensure that the skill is used at least this many seconds since the last time it was used on this mob.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputFloat("##SKM_SecsPassed",SKM_SecsPassed,0,0,3),"SKM_SecsPassed"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Secs Passed Unique")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Set this to ensure that the skill is used at least this many seconds since the last time it was used irrespective of mob.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputFloat("##SKM_SecsPassedUnique",SKM_SecsPassedUnique,0,0,3),"SKM_SecsPassedUnique"); GUI:NextColumn();
-		
 		GUI:Columns(1)
 	end
 	
-	if (GUI:CollapsingHeader("Chain","battle-chain-header")) then
-		GUI:Columns(2,"#battle-chain-main",false)
-		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Chain Name")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill is part of a custom chain, enter that name here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_CHAINNAME",SKM_CHAINNAME),"SKM_CHAINNAME"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Chain Start")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, this skill will be considered the first skill in the custom chain.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_CHAINSTART",SKM_CHAINSTART),"SKM_CHAINSTART"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Chain End")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, this skill will be considered the last skill in the custom chain.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_CHAINEND",SKM_CHAINEND),"SKM_CHAINEND"); GUI:NextColumn();
-		
-		GUI:Columns(1)
-	end
 	
-	if (GUI:CollapsingHeader("Other Skill Checks","battle-otherskills-header")) then
-		GUI:Columns(2,"#battle-otherskills-main",false)
-		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Is Ready")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("The ID of any skill that should be available for use before this skill is used.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_SKREADY",SKM_SKREADY),"SKM_SKREADY"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("CD Ready")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString(" The ID of any skill off the global cooldown that should be ready before this skill is used.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_SKOFFCD",SKM_SKOFFCD),"SKM_SKOFFCD"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Is Not Ready")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString(" The ID of any skill that should NOT be ready before this skill is used.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_SKNREADY",SKM_SKNREADY),"SKM_SKNREADY"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("CD Not Ready")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("The ID of any skill off the global cooldown that should NOT be ready before this skill is used.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_SKNOFFCD",SKM_SKNOFFCD),"SKM_SKNOFFCD"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("CD Time >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("This is in reference to 'CD Not Ready' - Use this and the following skill to set advanced usage instructions, such as 'Use this skill when Skill 'X' has between 2 and 6 seconds left on cooldown'.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputFloat("##SKM_SKNCDTIMEMIN",SKM_SKNCDTIMEMIN,0,0,3),"SKM_SKNCDTIMEMIN"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("CD Time <=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("This is in reference to 'CD Not Ready' - Use this and the preceeding skill to set advanced usage instructions, such as 'Use this skill when Skill 'X' has between 2 and 6 seconds left on cooldown'.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputFloat("##SKM_SKNCDTIMEMAX",SKM_SKNCDTIMEMAX,0,0,3),"SKM_SKNCDTIMEMAX"); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("What is this?")) end GUI:NextColumn();
-		
-		GUI:Columns(1)
-	end
-	
-	if (GUI:CollapsingHeader(GetString("playerHPMPTP"),"battle-playerhp-header")) then
+	--[[if (GUI:CollapsingHeader(GetString("playerHPMPTP"),"battle-playerhp-header")) then
 		GUI:Columns(2,"#battle-playerhp-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
@@ -2003,9 +2064,9 @@ function eso_skillmanager.DrawBattleEditor()
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("skmPTPB",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player TP is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTPB",SKM_PTPB,0,0),"SKM_PTPB"); GUI:NextColumn();
 		
 		GUI:Columns(1)
-	end
+	end]]
 	
-	if (GUI:CollapsingHeader(GetString("Party"),"battle-party-header")) then
+	--[[if (GUI:CollapsingHeader(GetString("Party"),"battle-party-header")) then
 		GUI:Columns(2,"#battle-party-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
@@ -2048,68 +2109,18 @@ function eso_skillmanager.DrawBattleEditor()
 		GUI:Text(GetString("skmTNCONTIDS")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must NOT have one of the listed contentids (comma-separated list).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNCONTIDS",SKM_TNCONTIDS),"SKM_TNCONTIDS"); GUI:NextColumn();
 
 		GUI:Columns(1)
-	end
-	
-	if (GUI:CollapsingHeader(GetString("Gauges"),"battle-gauges-header")) then
-		GUI:Columns(2,"#battle-gauges-main",false)
-		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		
-		for i = 1,8 do
-			GUI:Text(GetString("Gauge Indicator "..tostring(i))); GUI:NextColumn(); GUI:NextColumn();
-			GUI:Text(GetString("Value <=")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_GAUGE"..tostring(i).."LT",_G["SKM_GAUGE"..tostring(i).."LT"],0,0),"SKM_GAUGE"..tostring(i).."LT"); GUI:NextColumn();
-			GUI:Text(GetString("Value >=")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_GAUGE"..tostring(i).."GT",_G["SKM_GAUGE"..tostring(i).."GT"],0,0),"SKM_GAUGE"..tostring(i).."GT"); GUI:NextColumn();
-			GUI:Text(GetString("Value =")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_GAUGE"..tostring(i).."EQ",_G["SKM_GAUGE"..tostring(i).."EQ"],0,0),"SKM_GAUGE"..tostring(i).."EQ"); GUI:NextColumn();
-			GUI:Text(GetString("Value In")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_GAUGE"..tostring(i).."OR",_G["SKM_GAUGE"..tostring(i).."OR"]),"SKM_GAUGE"..tostring(i).."OR"); 
-			if (GUI:IsItemHovered()) then
-				GUI:SetTooltip(GetString("Ex: [0,16,32,48] if the value needs to be 0 or 16 or 32 or 48 (do not include brackets)."))
-			end
-			GUI:NextColumn();	
-		end
-			
-		GUI:Columns(1)
-	end
-	
-	if (GUI:CollapsingHeader(GetString("casting"),"battle-casting-header")) then
-		GUI:Columns(2,"#battle-casting-main",false)
-		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		GUI:Text(GetString("skmTCASTID")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must be channelling one of the listed spell IDs (comma-separated list).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TCASTID",SKM_TCASTID),"SKM_TCASTID"); GUI:NextColumn();
-		GUI:Text(GetString("skmTCASTTM")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must be casting the spell on me (self).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TCASTTM",SKM_TCASTTM),"SKM_TCASTTM"); GUI:NextColumn();
-		GUI:Text(GetString("skmTCASTTIME")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Cast time left on the current spell must be greater than or equal to (>=) this time in seconds.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TCASTTIME",SKM_TCASTTIME),"SKM_TCASTTIME"); GUI:NextColumn();		
-		GUI:Columns(1)
-	end
-	
-	if (GUI:CollapsingHeader(GetString("healPriority"),"battle-healPriority-header")) then
-		GUI:Columns(2,"#battle-healPriority-main",false)
-		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		
-		GUI:PushItemWidth(100)
-		GUI:Text(GetString("skmHPRIOHP")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("HP percentage (%) must be lesser or equal to (<=) this number for the spell to apply.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_HPRIOHP",SKM_HPRIOHP,0,0),"SKM_HPRIOHP"); GUI:NextColumn();		
-		GUI:Text(GetString("skmHPRIO1")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Heals will target the applicable groups in this priority order. Possible values: Self, Tank, Party, Any.")) end GUI:NextColumn(); SKM_Combo("##SKM_HPRIO1","gSMHealPriority1","SKM_HPRIO1",gSMHealPriorities); GUI:NextColumn();
-		GUI:Text(GetString("skmHPRIO2")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Heals will target the applicable groups in this priority order. Possible values: Self, Tank, Party, Any.")) end GUI:NextColumn(); SKM_Combo("##SKM_HPRIO2","gSMHealPriority2","SKM_HPRIO2",gSMHealPriorities); GUI:NextColumn();
-		GUI:Text(GetString("skmHPRIO3")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Heals will target the applicable groups in this priority order. Possible values: Self, Tank, Party, Any.")) end GUI:NextColumn(); SKM_Combo("##SKM_HPRIO3","gSMHealPriority3","SKM_HPRIO3",gSMHealPriorities); GUI:NextColumn();
-		GUI:Text(GetString("skmHPRIO4")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Heals will target the applicable groups in this priority order. Possible values: Self, Tank, Party, Any.")) end GUI:NextColumn(); SKM_Combo("##SKM_HPRIO4","gSMHealPriority4","SKM_HPRIO4",gSMHealPriorities); GUI:NextColumn();
-		GUI:PopItemWidth()
-		
-		GUI:Columns(1)
-	end
+	end]]
 	
 	if (GUI:CollapsingHeader(GetString("aoe"),"battle-aoe-header")) then
 		GUI:Columns(2,"#battle-aoe-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:PushItemWidth(100)
-		GUI:Text(GetString("enmityAOE")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select this option if the skill is an Area-of-Effect skill that generates enmity.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_EnmityAOE",SKM_EnmityAOE),"SKM_EnmityAOE"); GUI:NextColumn();
-		GUI:Text(GetString("frontalCone")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select this option if the skill has a frontal cone effect.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_FrontalConeAOE",SKM_FrontalConeAOE),"SKM_FrontalConeAOE"); GUI:NextColumn();
-		GUI:Text(GetString("tankedTargetsOnly")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select this option if the skill should only be used on enemies being tanked.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TankedOnly",SKM_TankedOnly),"SKM_TankedOnly"); GUI:NextColumn();
-		GUI:Text(GetString("Average HP %% >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the average HP of the enemies is greater than or equal to this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TEHPAvgGT",SKM_TEHPAvgGT,0,0),"SKM_TEHPAvgGT"); GUI:NextColumn();
 		GUI:Text(GetString("skmTECount")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount",SKM_TECount,0,0),"SKM_TECount"); GUI:NextColumn();
 		GUI:Text(GetString("skmTECount2")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is less than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount2",SKM_TECount2,0,0),"SKM_TECount2"); GUI:NextColumn();
 		GUI:Text(GetString("skmTERange")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when enemies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TERange",SKM_TERange,0,0),"SKM_TERange"); GUI:NextColumn();
-		GUI:Text(GetString("aoeCenter")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this dropdown to select where the AOE should be centered. Possible values: Target, Self.")) end GUI:NextColumn(); SKM_Combo("##SKM_TECenter","gSMAOECenter","SKM_TECenter",gSMAOECenters); GUI:NextColumn();
-		GUI:Text(GetString("skmTELevel")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when there is a level difference between you and the target. Possible values: 2, 4, 6.")) end GUI:NextColumn(); SKM_Combo("##SKM_TELevel","gSMAOELevel","SKM_TELevel",gSMAOELevels); GUI:NextColumn();
 		GUI:Text(GetString("skmTACount")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of allies near you is greater or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TACount",SKM_TACount,0,0),"SKM_TACount"); GUI:NextColumn();
 		GUI:Text(GetString("skmTARange")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when allies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TARange",SKM_TARange,0,0),"SKM_TARange"); GUI:NextColumn();
-		GUI:Text(GetString("alliesNearHPLT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of an ally is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TAHPL",SKM_TAHPL,0,0),"SKM_TAHPL"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)
@@ -2121,9 +2132,7 @@ function eso_skillmanager.DrawBattleEditor()
 		
 		GUI:PushItemWidth(100)
 		GUI:Text(GetString("skmHasBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PBuff",SKM_PBuff),"SKM_PBuff"); GUI:NextColumn();
-		GUI:Text(GetString("skmAndBuffDura")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the duration remaining of one of the buffs above is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PBuffDura",SKM_PBuffDura,0,0),"SKM_PBuffDura"); GUI:NextColumn();
 		GUI:Text(GetString("skmMissBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PNBuff",SKM_PNBuff),"SKM_PNBuff"); GUI:NextColumn();
-		GUI:Text(GetString("skmOrBuffDura")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the duration remaining of one of the buffs above is less than or equal to this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PNBuffDura",SKM_PNBuffDura,0,0),"SKM_PNBuffDura"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)
@@ -2134,40 +2143,8 @@ function eso_skillmanager.DrawBattleEditor()
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:PushItemWidth(100)
-		GUI:Text(GetString("skmTBuffOwner")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select the entity who will have the buff for this condition. Possible values: Player, Any.")) end GUI:NextColumn(); SKM_Combo("##SKM_TBuffOwner","gSMBuffOwner","SKM_TBuffOwner",gSMBuffOwners); GUI:NextColumn();
 		GUI:Text(GetString("skmHasBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TBuff",SKM_TBuff),"SKM_TBuff"); GUI:NextColumn();
-		GUI:Text(GetString("skmAndBuffDura")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the duration remaining of one of the buffs above is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TBuffDura",SKM_TBuffDura,0,0),"SKM_TBuffDura"); GUI:NextColumn();
-		GUI:Text(GetString("skmTBuffOwner")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select the entity who will be missing the buff for this condition. Possible values: Player, Any.")) end GUI:NextColumn(); SKM_Combo("##SKM_TNBuffOwner","gSMBuffOwnerN","SKM_TNBuffOwner",gSMBuffOwners); GUI:NextColumn();
 		GUI:Text(GetString("skmMissBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNBuff",SKM_TNBuff),"SKM_TNBuff"); GUI:NextColumn();
-		GUI:Text(GetString("skmOrBuffDura")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the duration remaining of one of the buffs above is less than or equal to this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TNBuffDura",SKM_TNBuffDura,0,0),"SKM_TNBuffDura"); GUI:NextColumn();	
-		GUI:PopItemWidth()
-		
-		GUI:Columns(1)
-	end
-	
-	if (GUI:CollapsingHeader(GetString("Pet Buffs"),"battle-petbuffs-header")) then
-		GUI:Columns(2,"#battle-petbuffs-main",false)
-		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		
-		GUI:PushItemWidth(100)
-		GUI:Text(GetString("skmHasBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when your pet is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PetBuff",SKM_PetBuff),"SKM_PetBuff"); GUI:NextColumn();
-		GUI:Text(GetString("skmAndBuffDura")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the duration remaining of one of the buffs above is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PetBuffDura",SKM_PetBuffDura,0,0),"SKM_PetBuffDura"); GUI:NextColumn();
-		GUI:Text(GetString("skmMissBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when your pet is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PetNBuff",SKM_PetNBuff),"SKM_PetNBuff"); GUI:NextColumn();
-		GUI:Text(GetString("skmOrBuffDura")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the duration remaining of one of the buffs above is less than or equal to this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PetNBuffDura",SKM_PetNBuffDura,0,0),"SKM_PetNBuffDura"); GUI:NextColumn();
-		GUI:PopItemWidth()
-		
-		GUI:Columns(1)
-	end
-	
-	if (GUI:CollapsingHeader(GetString("advancedSettings"),"battle-advanced-header")) then
-		GUI:Columns(2,"#battle-advanced-main",false)
-		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		
-		GUI:PushItemWidth(100)
-		GUI:Text(GetString("offGCDSkill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this dropdown to tell FFXIVMinion explicitly if the skill is off the global cooldown.")) end GUI:NextColumn(); SKM_Combo("##SKM_OffGCD","gSMOffGCDSetting","SKM_OffGCD",gSMOffGCDSettings); GUI:NextColumn();
-		GUI:Text(GetString("Off GCD Time >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Global cooldown time remaining must be greater or equal to this number in seconds.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputFloat("##SKM_OffGCDTime",SKM_OffGCDTime,0,0,2),"SKM_OffGCDTime"); GUI:NextColumn();	
-		GUI:Text(GetString("Off GCD Time <=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Global cooldown time remaining must be lesser or equal to this number in seconds.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputFloat("##SKM_OffGCDTimeLT",SKM_OffGCDTimeLT,0,0,2),"SKM_OffGCDTimeLT"); GUI:NextColumn();	
-		GUI:Text(GetString("Ignore Moving")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, the skill will be used whether or not the character is moving. ")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_IgnoreMoving",SKM_IgnoreMoving),"SKM_IgnoreMoving"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)

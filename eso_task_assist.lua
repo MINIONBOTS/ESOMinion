@@ -30,7 +30,7 @@ end
 function eso_task_assist:Process()
 	--d("AssistMode_Process->")
 	
-	if eso_skillmanager.lastskillidcheck ~= e("GetAbilityIdByIndex("..eso_skillmanager.lastskillindexcheck..")") or not table.valid(eso_skillmanager.skillsbyindex) then
+	if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") or not table.valid(eso_skillmanager.skillsbyindex) then
 		eso_skillmanager.BuildSkillsList()
 	end
 	
@@ -75,15 +75,15 @@ function eso_task_assist:Process()
 		--end
 	end
 	
-	--[[if (TableSize(self.process_elements) > 0) then
+	if (TableSize(self.process_elements) > 0) then
 		ml_cne_hub.clear_queue()
 		ml_cne_hub.eval_elements(self.process_elements)
-		--ml_cne_hub.queue_to_execute()
+		ml_cne_hub.queue_to_execute()
 		ml_cne_hub.execute()
 		return false
 	else
-		ml_debug("no elements in process table")
-	end]]
+		d("no elements in process table")
+	end
 end
 
 
