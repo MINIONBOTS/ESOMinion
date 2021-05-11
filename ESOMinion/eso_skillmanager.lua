@@ -385,33 +385,6 @@ function eso_skillmanager.SetPreferedList()
 	Settings.ESOMinion.gSkillManagerPrefered = gSkillManagerPrefered
 end
 
-function eso_skillmanager.GUIVarUpdate(Event, NewVals, OldVals)
-    for k,v in pairs(NewVals) do
-        if ( k == "gSMprofile" ) then
-            gSMactive = "1"					
-			
-            --GUI_WindowVisible(eso_skillmanager.editwindow.name,false)		
-            --GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
-            eso_skillmanager.UpdateCurrentProfileData()
-			Settings.ESOMinion["gSMlastprofileNew"] = v
-			eso_skillmanager.SetDefaultProfile()
-		end
-		
-		if (eso_skillmanager.Variables[tostring(k)] ~= nil and tonumber(SKM_Prio) ~= nil and SKM_Prio > 0) then	
-			if (v == "?") then
-				d("Question mark was typed.")
-			end
-			if (v == nil) then
-				eso_skillmanager.SkillProfile[SKM_Prio][eso_skillmanager.Variables[tostring(k)].profile] = eso_skillmanager.Variables[tostring(k)].default
-			elseif (eso_skillmanager.Variables[k].cast == "string") then
-				eso_skillmanager.SkillProfile[SKM_Prio][eso_skillmanager.Variables[tostring(k)].profile] = v
-			elseif (eso_skillmanager.Variables[k].cast == "number") then
-				eso_skillmanager.SkillProfile[SKM_Prio][eso_skillmanager.Variables[tostring(k)].profile] = tonumber(v)
-			end
-		end
-    end
-end
-
 function eso_skillmanager.OnUpdate( event, tickcount )
 	if ((tickcount - eso_skillmanager.lastTick) > 100) then
 		eso_skillmanager.lastTick = tickcount
@@ -587,87 +560,6 @@ function eso_skillmanager.UseProfile(strName)
 	Settings.ESOMinion.gSMlastprofileNew = strName
 end
 
-function eso_skillmanager.ButtonHandler(event, Button)
-    gSMRecactive = "0"
-	if (event == "GUI.Item" and (string.find(Button,"SKM") ~= nil or string.find(Button,"SM") ~= nil )) then
-	
-		if (string.find(Button,"SMDeleteEvent") ~= nil) then
-			-- Delete the currently selected Profile - file from the HDD
-			if (gSMprofile ~= nil and gSMprofile ~= "None" and gSMprofile ~= "") then
-				d("Deleting current Profile: "..gSMprofile)
-				os.remove(eso_skillmanager.profilepath ..gSMprofile..".lua")	
-				eso_skillmanager.UpdateProfiles()	
-			end
-		end
-		
-		if (string.find(Button,"SMRefreshSkillbookEvent") ~= nil) then
-			eso_skillmanager.SkillBook = {}
-			--GUI_DeleteGroup(eso_skillmanager.skillbook.name,"AvailableSkills")
-			--GUI_DeleteGroup(eso_skillmanager.skillbook.name,"MiscSkills")	
-			eso_skillmanager.RefreshSkillBook()		
-		end
-        
-		if (string.find(Button,"SMEDeleteEvent") ~= nil) then
-			if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
-				--GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
-				eso_skillmanager.SkillProfile = TableRemoveSort(eso_skillmanager.SkillProfile,tonumber(SKM_Prio))
-
-				eso_skillmanager.RefreshSkillList()	
-				--GUI_WindowVisible(eso_skillmanager.editwindow.name,false)
-			end
-		end
-
-		if (string.find(Button,"SMESkillUPEvent") ~= nil) then
-			if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
-				if ( SKM_Prio > 1) then
-					--GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
-					local tmp = eso_skillmanager.SkillProfile[SKM_Prio-1]
-					eso_skillmanager.SkillProfile[SKM_Prio-1] = eso_skillmanager.SkillProfile[SKM_Prio]
-					eso_skillmanager.SkillProfile[SKM_Prio-1].prio = eso_skillmanager.SkillProfile[SKM_Prio-1].prio - 1
-					eso_skillmanager.SkillProfile[SKM_Prio] = tmp
-					eso_skillmanager.SkillProfile[SKM_Prio].prio = eso_skillmanager.SkillProfile[SKM_Prio].prio + 1
-					SKM_Prio = SKM_Prio-1
-					eso_skillmanager.RefreshSkillList()				
-				end
-			end
-		end
-	
-		if (string.find(Button,"SMESkillDOWNEvent") ~= nil) then
-			if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then
-				if ( SKM_Prio < TableSize(eso_skillmanager.SkillProfile)) then
-					--GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")		
-					local tmp = eso_skillmanager.SkillProfile[SKM_Prio+1]
-					eso_skillmanager.SkillProfile[SKM_Prio+1] = eso_skillmanager.SkillProfile[SKM_Prio]
-					eso_skillmanager.SkillProfile[SKM_Prio+1].prio = eso_skillmanager.SkillProfile[SKM_Prio+1].prio + 1
-					eso_skillmanager.SkillProfile[SKM_Prio] = tmp
-					eso_skillmanager.SkillProfile[SKM_Prio].prio = eso_skillmanager.SkillProfile[SKM_Prio].prio - 1
-					SKM_Prio = SKM_Prio+1
-					eso_skillmanager.RefreshSkillList()						
-				end
-			end
-		end
-	
-		if (string.find(Button,"SKMEditSkill") ~= nil) then
-			local key = Button:gsub("SKMEditSkill", "")
-			eso_skillmanager.EditSkill(key)
-		end
-		if (string.find(Button,"SKMClearProfile") ~= nil) then
-			local key = Button:gsub("SKMClearProfile", "")
-			eso_skillmanager.ClearProfile(key)
-		end
-		if (string.find(Button,"SKMAddSkill") ~= nil) then
-			local key = Button:gsub("SKMAddSkill", "")
-			eso_skillmanager.AddSkillToProfile(key)
-		end
-		if (string.find(Button,"SKMCopySkill") ~= nil) then
-			eso_skillmanager.CopySkill()
-		end
-		if (string.find(Button,"SKMPasteSkill") ~= nil) then
-			eso_skillmanager.PasteSkill()
-		end
-	end
-end
-
 function eso_skillmanager.NewProfile()
     if ( gSMnewname and gSMnewname ~= "" ) then
 		gSMprofile_listitems = gSMprofile_listitems..","..gSMnewname
@@ -827,50 +719,22 @@ end
 function eso_skillmanager.BuildSkillsList()
 	d("build new skill list")
 	eso_skillmanager.lastskillidcheck = e("GetSlotBoundId(1)")
-	for i = 1,33 do
+	for i = 1,100 do
 		local skillid = e("GetAbilityIdByIndex("..i..")")
-		local skillName, skillTexture, skillRank, skillSlotType, skillpassive, skillVisable = e("GetAbilityInfoByIndex("..i..")")
-		local skillRangemin, skillRangemax = e("GetAbilityRange("..skillid..")")
-		local skillRange = skillRangemax / 100
-		local skillChanneled, skillCastTime, skillChannelTime = e("GetAbilityCastInfo("..skillid..")")
-		eso_skillmanager.skillsbyindex[i] = {id = skillid, index = i ,name = skillName, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillChannelTime, channeltime = skillChannelTime}
-		eso_skillmanager.skillsbyid[skillid] = {id = skillid, index = i ,name = skillName, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillChannelTime, channeltime = skillChannelTime}
-		eso_skillmanager.skillsbyname[skillName] = {id = skillid, index = i ,name = skillName, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillChannelTime, channeltime = skillChannelTime}
-		
-		ml_global_information.AttackRange = math.max(skillRange,ml_global_information.AttackRange)
+		if skillid ~= 0 then
+			local skillName, skillTexture, skillRank, skillSlotType, skillpassive, skillVisable = e("GetAbilityInfoByIndex("..i..")")
+			local skillRangemin, skillRangemax = e("GetAbilityRange("..skillid..")")
+			local skillRange = skillRangemax / 100
+			local skillChanneled, skillCastTime, skillChannelTime = e("GetAbilityCastInfo("..skillid..")")
+			local skillCost = e("GetAbilityCost("..skillid..")") 
+			eso_skillmanager.skillsbyindex[i] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
+			eso_skillmanager.skillsbyid[skillid] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
+			eso_skillmanager.skillsbyname[skillName] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
+			
+			ml_global_information.AttackRange = math.max(skillRange,ml_global_information.AttackRange)
+		end
 	end
 	return eso_skillmanager.skillsbyindex
-end
---+Rebuilds the UI Entries for the SkillbookList
-function eso_skillmanager.RefreshSkillBook()
-    local SkillList = nil
-	if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then 	
-		SkillList = eso_skillmanager.BuildSkillsList()
-	else
-		SkillList = eso_skillmanager.skillsbyindex
-	end
-	
-    if ( ValidTable( SkillList ) ) then
-		for i,skill in spairs(SkillList, function( skill,a,b ) return skill[a].name < skill[b].name end) do
-			eso_skillmanager.CreateNewSkillBookEntry(skill.id)
-		end
-    end
-
-    GUI_UnFoldGroup(eso_skillmanager.skillbook.name,"AvailableSkills")
-end
-
-function eso_skillmanager.CreateNewSkillBookEntry(id)
-	local action = eso_skillmanager.skillsbyid[id]
-	if (ValidTable(action)) then
-		local skName = action.name
-		local skID = tostring(action.id)	 
-		
-		GUI_NewButton(eso_skillmanager.skillbook.name, skName.." ["..skID.."]", "SKMAddSkill"..skID, "AvailableSkills")
-		
-		eso_skillmanager.SkillBook[action.id] = {["skillID"] = action.id, ["name"] = action.name}	
-	else
-		ml_error("Action ID:"..tostring(id).." is not valid and could not be retrieved.")
-	end
 end
 
 -- Button Handler for Skillbook-skill-buttons
@@ -880,7 +744,6 @@ function eso_skillmanager.AddSkillToProfile(event)
         eso_skillmanager.CreateNewSkillEntry(eso_skillmanager.skillsbyid[skillid])
     end
 end
-
 
 --+Rebuilds the UI Entries for the Profile-SkillList
 function eso_skillmanager.RefreshSkillList()
@@ -963,69 +826,6 @@ function eso_skillmanager.EditSkill(event)
 	end
 	
 	SKM_Prio = tonumber(event)
-end
-
-function eso_skillmanager.ToggleMenu()
-    if (eso_skillmanager.visible) then
-       -- GUI_WindowVisible(eso_skillmanager.mainwindow.name,false)	
-       -- GUI_WindowVisible(eso_skillmanager.skillbook.name,false)	
-      --  GUI_WindowVisible(eso_skillmanager.editwindow.name,false)	
-		--GUI_WindowVisible(eso_skillmanager.confirmwindow.name,false)
-        eso_skillmanager.visible = false
-    else
-		eso_skillmanager.RefreshSkillList()
-		----GUI_SizeWindow(eso_skillmanager.mainwindow.name,eso_skillmanager.mainwindow.w,eso_skillmanager.mainwindow.h)
-      --  GUI_WindowVisible(eso_skillmanager.skillbook.name,true)
-     --   GUI_WindowVisible(eso_skillmanager.mainwindow.name,true)	
-        eso_skillmanager.visible = true
-    end
-end
-
-function eso_skillmanager.GetAttackRange()
-	local maxrange = 5 -- 5 is the melee sword attack range
-	if ( Player ) then	
-		if ( gAttackRange == GetString("aRange")) then
-			maxrange = 28
-		elseif ( gAttackRange == GetString("aAutomatic")) then
-		
-			local lightAttack = e("GetSlotBoundId(1)")
-			--local heavyAttack = e("GetSlotBoundId(1)")
-			
-			if (lightAttack > 0) then
-				local ability = eso_skillmanager.skillsbyid[lightAttack]
-				if (ValidTable(ability)) then
-					if ability.range > 0 then
-						maxrange = ability.range
-					end
-				end
-			else
-				d("Could not find the ability ID for light attack.")
-			end
-			
-			--[[
-			-- Check if we have a target to check our skills against
-			target = Player:GetTarget()
-			if ( not target ) then
-				target = Player
-			end
-			
-			if ( TableSize(eso_skillmanager.SkillProfile) > 0 ) then				
-				for k,v in pairs(eso_skillmanager.SkillProfile) do					
-					-- Get Max Attack Range for global use
-					if (v.atkrng == "1" and v.trg == "Target") then
-						local skillid = eso_skillmanager.GetRealSkillID(v.skillID)
-						if (AbilityList:IsTargetInRange(skillid,target.id) and AbilityList:CanCast(skillid,target.id) == 10) then
-							if ( v.maxRange > maxrange) then
-								maxrange = v.maxRange
-							end	
-						end
-					end				
-				end
-			end
-			--]]
-		end
-	end
-	return maxrange
 end
 
 function eso_skillmanager.Cast( entity )
@@ -1140,6 +940,7 @@ function eso_skillmanager.Cast( entity )
 	if (ValidTable(eso_skillmanager.SkillProfile)) then
 		for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
 			local result = eso_skillmanager.CanCast(prio, entity)
+			
 			if (result ~= 0) then
 				local TID = result
 				--local realID = tonumber(skill.skillID)
@@ -1196,45 +997,6 @@ function eso_skillmanager.DebugOutput( prio, message )
 		end
 	end
 end
-
--- Need to return a table containing the target, the cast TID, and the buffs table for the target.
---[[
-function eso_skillmanager.GetSkillTarget(skill, entity, maxrange)
-	if (not skill or not entity) then
-		return nil
-	end
-	
-	local PID = Player.id
-	local pet = Player.pet
-	local target = entity
-	local TID = entity.id
-	local maxrange = tonumber(maxrange) or 0
-	
-	local targetTable = {}
-	
-	local skillid = tonumber(skill.id) or 0
-	if (skillid == 0) then
-		d("There is a problem with the skill ID for : "..tostring(skill.name))
-		return nil
-	end
-	
-	if (skill.trg == "Target") then
-		if (target.id == Player.id) then
-			return nil
-		end
-	elseif ( skill.trg == "Player" ) then
-		TID = PID
-	end
-	
-	if (ValidTable(target) and TID ~= 0) then
-		targetTable.target = target
-		targetTable.TID = TID
-		return targetTable
-	end
-	
-	return nil
-end
---]]
 
 function eso_skillmanager.GetRealSkillID(skillID)
 	local newid = tonumber(skillID) or 0
@@ -1328,8 +1090,8 @@ function eso_skillmanager.CanCast(prio, entity)
 		return 0
 	end
 	
-	local gameCameraActive = e("IsGameCameraActive()")
-	local interactionCameraActive = e("IsInteractionCameraActive()")
+	--local gameCameraActive = e("IsGameCameraActive()")
+	--local interactionCameraActive = e("IsInteractionCameraActive()")
 	
 	local prio = tonumber(prio) or 0
 	if (prio == 0) then
@@ -1477,6 +1239,7 @@ function eso_skillmanager.CaptureElement(newVal, varName)
 		local prio = eso_skillmanager.EditingSkill
 		if (eso_skillmanager.Variables[varName] ~= nil) then	
 			skillVar = eso_skillmanager.Variables[varName]
+			d("varName = "..tostring(varName))
 			eso_skillmanager.SkillProfile[prio][skillVar.profile] = newVal
 		end
 		eso_skillmanager.SaveProfile()
@@ -1601,11 +1364,10 @@ function eso_skillmanager.AddDefaultConditions()
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		
-		if ( not IsNullString(skill.previd)) then
+		if ( not IsNullString(skill.pskill)) then
 			if (not IsNullString(eso_skillmanager.prevSkillID)) then
-				for skillid in StringSplit(skill.previd,",") do
-					--local realID = tonumber(skillid)
-					local realID = eso_skillmanager.GetRealSkillID(skillid)
+				for skillid in StringSplit(skill.pskill,",") do
+					local realID = tonumber(skillid)
 					if (tonumber(eso_skillmanager.prevSkillID) == realID) then
 						return false
 					end
@@ -1621,11 +1383,10 @@ function eso_skillmanager.AddDefaultConditions()
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
-		if (not IsNullString(skill.nprevid)) then
+		if (not IsNullString(skill.npskill)) then
 			if (not IsNullString(eso_skillmanager.prevSkillID)) then
-				for skillid in StringSplit(skill.nprevid,",") do
-					--local realID = tonumber(skillid)
-					local realID = eso_skillmanager.GetRealSkillID(skillid)
+				for skillid in StringSplit(skill.npskill,",") do
+					local realID = tonumber(skillid)
 					if (tonumber(eso_skillmanager.prevSkillID) == realID) then
 						return true
 					end
@@ -1721,21 +1482,28 @@ function eso_skillmanager.AddDefaultConditions()
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local target = eso_skillmanager.CurrentTarget
-		
-		if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) > Player.health.percent)	or 
-			(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < Player.health.percent))
-		then
-			return true
+		if Player.health.percent > 0 then
+			if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) > Player.health.percent) or 
+				(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < Player.health.percent))
+			then
+				return true
+			end
 		end
 		
 		if (skill.powertype == "Magicka") then
-			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.magika.percent)	or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.magika.percent))
+			if Player.magicka.current < eso_skillmanager.skillsbyid[skill.skillID].cost then
+				return true
+			end
+			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.magicka.percent) or 
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.magicka.percent))
 			then 
 				return true
 			end
 		elseif (skill.powertype == "Stamina") then
-			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.stamina.percent)	or 
+			if Player.stamina.current < eso_skillmanager.skillsbyid[skill.skillID].cost then
+				return true
+			end
+			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.stamina.percent) or 
 				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.stamina.percent))
 			then 
 				return true
@@ -1847,7 +1615,7 @@ function eso_skillmanager.AddDefaultConditions()
 		
 		if thpadv > 0  then
 			if  target.health.max < Player.hp.max * thpadv then
-				return false
+				return true
 			end
 		end
 		if ((thpgt > 0 and thpgt > target.health.percent) or
@@ -1987,7 +1755,6 @@ function eso_skillmanager.Draw()
 		if ( eso_skillmanager.GUI.skillbook.open ) then 
 		
 			eso_skillmanager.DrawSkillBook()
-
 		
 			GUI:SetNextWindowSize(250,400,GUI.SetCond_Once) --set the next window size, only on first ever	
 			GUI:SetNextWindowCollapsed(false,GUI.SetCond_Once)
@@ -1995,11 +1762,16 @@ function eso_skillmanager.Draw()
 			local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
 			GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], (255/255))
 			
-			eso_skillmanager.GUI.profile.visible, eso_skillmanager.GUI.profile.open = GUI:Begin(eso_skillmanager.GUI.profile.name, eso_skillmanager.GUI.profile.open)
+			eso_skillmanager.GUI.profile.visible, eso_skillmanager.GUI.profile.open = GUI:Begin(eso_skillmanager.GUI.profile.name, true, GUI.WindowFlags_NoTitleBar)
 			
 			local contentwidth = GUI:GetContentRegionAvailWidth()
 			if table.valid(eso_skillmanager.SkillProfile) then
 			
+				local doDelete = 0
+				local doPriorityUp = 0
+				local doPriorityDown = 0
+				local doPriorityTop = 0
+				local doPriorityBottom = 0
 			
 				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
 				
@@ -2012,24 +1784,111 @@ function eso_skillmanager.Draw()
 				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
 				for prio,skillInfo in spairs(eso_skillmanager.SkillProfile) do
 				
-					if (GUI:Button(skillInfo.name,contentwidth,20)) then -- skill to edit
+					if (GUI:Button(skillInfo.name,contentwidth - 85,20)) then -- skill to edit
 					end
 						
 					if (GUI:IsItemHovered()) then
 						if (GUI:IsMouseClicked(0)) then
 							eso_skillmanager.GUI.skillbook.id = prio
+							eso_skillmanager.EditingSkill = prio
 							eso_skillmanager.EditSkill(prio)
 							eso_skillmanager.GUI.editor.open = true
-						elseif (GUI:IsMouseClicked(1)) then
-							eso_skillmanager.GUI.skillbook.id = 0
-							eso_skillmanager.SkillProfile[prio] = nil
-							eso_skillmanager.SaveProfile()
+						end
+					end					
+					GUI:SameLine(0,5)
+					if (GUI:ImageButton("##eso_skillmanager-manage-prioup-"..tostring(prio),ml_global_information.path.."\\GUI\\UI_Textures\\w_up.png", 16, 16)) then	
+						doPriorityUp = prio
+					end
+					if (GUI:IsItemHovered()) then
+						if (GUI:IsMouseClicked(1)) then
+							doPriorityTop = prio
+						end
+					end	
+					GUI:SameLine(0,5)
+					if (GUI:ImageButton("##eso_skillmanager-manage-priodown-"..tostring(prio),ml_global_information.path.."\\GUI\\UI_Textures\\w_down.png", 16, 16)) then
+						doPriorityDown = prio
+					end
+					if (GUI:IsItemHovered()) then
+						if (GUI:IsMouseClicked(1)) then
+							doPriorityBottom = prio
+						end
+					end	
+					GUI:SameLine(0,5)
+					if (GUI:ImageButton("##eso_skillmanager-manage-delete-"..tostring(prio),ml_global_information.path.."\\GUI\\UI_Textures\\bt_alwaysfail_fail.png", 16, 16)) then
+						doDelete = prio
+					end
+					
+					
+				end
+				if (doPriorityTop ~= 0 and doPriorityTop ~= 1) then
+					local currentPos = doPriorityTop
+					local newPos = doPriorityTop
+					
+					while currentPos > 1 do
+						local temp = eso_skillmanager.SkillProfile[newPos]
+						eso_skillmanager.SkillProfile[newPos] = eso_skillmanager.SkillProfile[currentPos]
+						eso_skillmanager.SkillProfile[currentPos] = temp	
+						currentPos = newPos
+						newPos = newPos - 1
+					end
+					
+					eso_skillmanager.GUI.skillbook.id = 0
+					eso_skillmanager.SaveProfile()
+				end
+				
+				if (doPriorityUp ~= 0 and doPriorityUp ~= 1) then
+					local currentPos = doPriorityUp
+					local newPos = doPriorityUp - 1
+					
+					local temp = eso_skillmanager.SkillProfile[newPos]
+					eso_skillmanager.SkillProfile[newPos] = eso_skillmanager.SkillProfile[currentPos]
+					eso_skillmanager.SkillProfile[currentPos] = temp	
+					
+					eso_skillmanager.GUI.skillbook.id = 0
+					eso_skillmanager.SaveProfile()
+				end
+				if (doPriorityDown ~= 0 and doPriorityDown < TableSize(eso_skillmanager.SkillProfile)) then
+					local currentPos = doPriorityDown
+					local newPos = doPriorityDown + 1
+					
+					local temp = eso_skillmanager.SkillProfile[newPos]
+					eso_skillmanager.SkillProfile[newPos] = eso_skillmanager.SkillProfile[currentPos]
+					eso_skillmanager.SkillProfile[currentPos] = temp
+					
+					eso_skillmanager.GUI.skillbook.id = 0
+					eso_skillmanager.SaveProfile()
+				end
+				
+				local profSize = TableSize(eso_skillmanager.SkillProfile)
+				if (doPriorityBottom ~= 0 and doPriorityBottom < profSize) then
+				
+					local currentPos = doPriorityBottom
+					local newPos = doPriorityBottom + 1
+					
+					while currentPos < profSize do
+						local temp = eso_skillmanager.SkillProfile[newPos]
+						eso_skillmanager.SkillProfile[newPos] = eso_skillmanager.SkillProfile[currentPos]
+						eso_skillmanager.SkillProfile[currentPos] = temp	
+						currentPos = newPos
+						newPos = newPos + 1
+					end
+					
+					eso_skillmanager.GUI.skillbook.id = 0
+					eso_skillmanager.SaveProfile()
+				end
+				
+				if (doDelete ~= 0) then
+					eso_skillmanager.SkillProfile = TableRemoveSort(eso_skillmanager.SkillProfile,doDelete)
+					for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
+						if (skill.prio ~= prio) then
+							eso_skillmanager.SkillProfile[prio].prio = prio
 						end
 					end
+					eso_skillmanager.GUI.skillbook.id = 0
+					eso_skillmanager.SaveProfile()
 				end
 			end
-
-		
+			
 			GUI:End()
 			GUI:PopStyleColor()
 			
@@ -2049,8 +1908,6 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Combat Status")); GUI:NextColumn(); SKM_Combo("##SKM_Combat","gSMBattleStatusIndex","SKM_Combat",gSMBattleStatuses); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "minRange", variable = "SKM_MinR", width = 50, tooltip = "Minimum range the skill can be used (For most skills, this will stay at 0)."}
 		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "maxRange", variable = "SKM_MaxR", width = 50, tooltip = "Maximum range the skill can be used."}
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("prevComboSkill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill is part of a combo, enter the ID of the skill that should be executed immediately before this one.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PCSkillID",SKM_PCSkillID),"SKM_PCSkillID"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("prevComboSkillNot")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill is part of a combo, enter the ID of the skill that should NOT be executed immediately before this one.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPCSkillID",SKM_NPCSkillID),"SKM_NPCSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PSkillID",SKM_PSkillID),"SKM_PSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill NOT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should NOT be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPSkillID",SKM_NPSkillID),"SKM_NPSkillID"); GUI:NextColumn();
 		GUI:Columns(1)
@@ -2151,7 +2008,4 @@ end
 
 RegisterEventHandler("Gameloop.Update",eso_skillmanager.OnUpdate,"ESO Update")
 RegisterEventHandler("Gameloop.Draw",eso_skillmanager.Draw,"ESOSKM  Draw")
-RegisterEventHandler("GUI.Item",eso_skillmanager.ButtonHandler,"ESO ButtonHandler")
-RegisterEventHandler("SkillManager.toggle", eso_skillmanager.ToggleMenu,"ESO ToggleMenu")
-RegisterEventHandler("GUI.Update",eso_skillmanager.GUIVarUpdate,"ESO GUIVarUpdate")
 RegisterEventHandler("Module.Initalize",eso_skillmanager.ModuleInit,"ESO ModuleInit")
