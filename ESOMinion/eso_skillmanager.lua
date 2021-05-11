@@ -830,7 +830,7 @@ function eso_skillmanager.EditSkill(event)
 	
 	SKM_Prio = tonumber(event)
 end
-
+eso_skillmanager.lightdelay = 0
 function eso_skillmanager.Cast( entity )
 	if (not entity) then
 		return false
@@ -839,9 +839,10 @@ function eso_skillmanager.Cast( entity )
 		return false
 	end
 	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
-	if gSKMWeaving then
+	if gSKMWeaving and Now() >= eso_skillmanager.lightdelay then
 		if AbilityList:Cast(defaultAttack.id,entity.id) then
 			d("Attempting to cast ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
+			eso_skillmanager.lightdelay = Now() + 300
 		end
 	end
 	
