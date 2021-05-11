@@ -210,6 +210,23 @@ function ml_global_information.DrawMainFull()
 							Settings.ESOMINION.gBotModes = Settings.ESOMINION.gBotModes
 						end
 					end
+					GUI:Text(GetString("Skill Profile")) 
+					GUI:SameLine(110)
+					GUI:PushItemWidth(contentwidth - 165)
+					
+					local newval,changed = GUI:Combo("##"..GetString("skillprofile"), gSkillProfileNewIndex, eso_skillmanager.SkillProfiles )
+					GUI:PopItemWidth()
+					--d(newval)
+					--d("gSkillProfileNewIndex = "..tostring(gSkillProfileNewIndex))
+					if (changed or newval ~= gSkillProfileNewIndex) then
+						gSkillProfileNewIndex = newval
+						Settings.ESOMinion.gSkillProfileNewIndex = newval
+						Settings.ESOMinion.gSMlastprofileNew = eso_skillmanager.SkillProfiles[newval]
+						
+						gSMprofile = eso_skillmanager.SkillProfiles[newval]
+						Settings.ESOMinion.gSMprofile = eso_skillmanager.SkillProfiles[newval]
+						eso_skillmanager.ReadFile(gSMprofile)
+					end
 					if (GUI:Button(GetString("Start / Stop"),contentwidth,20)) then
 						ml_global_information.ToggleRun()	
 					end
@@ -252,14 +269,14 @@ function ml_global_information.OnUpdate( event, tickcount )
 	end
 	
 	-- Switch according to the gamestate
-	if (gamestate == 3) then
+	if (gamestate == ESO.GAMESTATE.INGAME) then
 		--ml_global_information.ResetLoginVars()
 		ml_global_information.InGameOnUpdate( event, tickcount );
-	--[[elseif (gamestate == FFXIV.GAMESTATE.MAINMENUSCREEN) then
+	--[[elseif (gamestate == ESO.GAMESTATE.MAINMENUSCREEN) then
 		ml_global_information.MainMenuScreenOnUpdate( event, tickcount )
-	elseif (gamestate == FFXIV.GAMESTATE.CHARACTERSCREEN) then
+	elseif (gamestate == ESO.GAMESTATE.CHARACTERSCREEN) then
 		ml_global_information.CharacterSelectScreenOnUpdate( event, tickcount )
-	elseif (gamestate == FFXIV.GAMESTATE.ERROR) then
+	elseif (gamestate == ESO.GAMESTATE.ERROR) then
 		ml_global_information.ResetLoginVars()
 		ml_global_information.ErrorScreenOnUpdate( event, tickcount )]]
 	end
@@ -281,8 +298,6 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_global_information.autoStartQueued = false
 		ml_global_information:ToggleRun() -- convert
 	end
-		
-	
 	
 	local pulseTime = gPulseTime or 150
 	--[[if (TimeSince(ml_global_information.lastrun2) >= pulseTime) then
@@ -294,7 +309,12 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		
 		ml_global_information.nextRun = tickcount + pulseTime
 		ml_global_information.lastPulseShortened = false
-
+		local weaponID = e("GetSlotBoundId(1)")
+		if ml_global_information.lastWeaponCheck ~= weaponID then
+			ml_global_information.lastWeaponCheck = weaponID
+			eso_skillmanager.CheckPreferedList(weaponID)
+		end
+		
         if (ml_task_hub:CurrentTask() ~= nil) then
             FFXIV_Core_ActiveTaskName = ml_task_hub:CurrentTask().name
         end

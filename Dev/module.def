@@ -1,0 +1,6 @@
+[Module]
+Name=Dev
+Version=1
+Files=devmonitor.lua
+Dependencies=minionlib,ESOMinion
+Enabled=1
