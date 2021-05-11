@@ -417,6 +417,6 @@ function GUI_Capture(newVal,varName,onChange,forceSave)
 	return newVal
 end
 
-RegisterEventHandler("Module.Initalize",esominion.Init, "esominion.Init","ESO Run Init")
-RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate,"ml_global_information.OnUpdate","ESO Run OnUpdate")
-RegisterEventHandler("Gameloop.Draw", ml_global_information.Draw,"ml_global_information.Draw","ESO Run Draw")
+RegisterEventHandler("Module.Initalize",esominion.Init, "esominion.Init")
+RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate,"esominion OnUpdate")
+RegisterEventHandler("Gameloop.Draw", ml_global_information.Draw,"esominion Draw")

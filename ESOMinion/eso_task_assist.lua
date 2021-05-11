@@ -18,8 +18,6 @@ function eso_task_assist.Create()
 end
 
 function eso_task_assist:Init()
-	local ke_pickLocks = ml_element:create( "PickLocks", c_lockpick, e_lockpick, 25 )
-    self:add(ke_pickLocks, self.process_elements)
 	
 	local ke_usePotion = ml_element:create( "UsePotion", c_usepotion, e_usepotion, 15 )
     self:add(ke_usePotion, self.process_elements)
@@ -187,3 +185,45 @@ function eso_task_assist:Draw()
 	GUI:Columns()
 	GUI:Separator()
 end
+Lockpicker = {}
+Lockpicker.delay = 0
+Lockpicker.chamber = 0
+function Lockpicker.OnUpdate()
+	if (GetGameState() == ESO.GAMESTATE.INGAME) then
+		if (gBotMode == GetString("assistMode") and not gAssistDoLockpick) then
+			return false
+		end
+		if Now() > Lockpicker.delay then
+			local lockTime = e("GetLockpickingTimeLeft()")
+			if (lockTime and lockTime > 0) then
+				if Lockpicker.chamber == 0 then
+					for i = 1,5 do
+						local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
+						if (not isChamberSolved) then
+							d("Start setting Chamber "..tostring(i)..".")
+							e("StartSettingChamber(" .. i .. ")")
+							e("PlaySound(Lockpicking_Lockpicker_contact)")
+							e("PlaySound(Lockpicking_chamber_start)")
+							Lockpicker.chamber = i
+							ml_global_information.Await(500)
+							return true
+						end
+					end
+				else
+					local chamberStress = e("GetSettingChamberStress()")
+					if (chamberStress >= 0.2) then
+						e("PlaySound(Lockpicking_chamber_stress)")
+						e("StopSettingChamber()")
+						d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
+						Lockpicker.chamber = 0
+						ml_global_information.Await(1000)
+						return true
+					end
+				end
+			end
+			Lockpicker.delay = Now() + 500
+		end
+	end
+	return false
+end
+RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
