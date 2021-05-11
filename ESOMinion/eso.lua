@@ -81,6 +81,14 @@ function esominion.Init()
 		FFXIV_Common_BotRunning = false
 	end
 	
+	-- set settings on startup
+	gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
+	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
+	
+	
+	
+	
+	
 	ml_gui.ui_mgr:AddComponent(esomainmenu)
 	if(BehaviorManager:IsOpen()) then BehaviorManager:ToggleMenu() end
 end
@@ -233,6 +241,12 @@ function ml_global_information.DrawMainFull()
 					if (GUI:Button(GetString("Skill Manager"),contentwidth,20)) then
 						eso_skillmanager.GUI.skillbook.open = not eso_skillmanager.GUI.skillbook.open
 					end
+					local mainTask = ml_global_information.mainTask
+					if (mainTask) then
+						if (mainTask.Draw) then
+							mainTask:Draw()
+						end
+					end
 				end
 				GUI:End()
 				GUI:PopStyleColor()
@@ -383,6 +397,25 @@ function esominion.SetMode(mode)
     end
 end
 
+function GUI_Capture(newVal,varName,onChange,forceSave)
+	local forceSave = IsNull(forceSave,false)
+	local needsSave = false
+	
+	local currentVal = _G[varName]
+	if (forceSave or currentVal ~= newVal or (type(newVal) == "table" and not deepcompare(currentVal,newVal))) then
+		_G[varName] = newVal
+		needsSave = true
+		if (onChange and type(onChange) == "function") then
+			onChange()
+		end
+	end
+		
+	if (needsSave) then
+		Settings.ESOMINION[varName] = newVal
+	end
+
+	return newVal
+end
 
 RegisterEventHandler("Module.Initalize",esominion.Init, "esominion.Init","ESO Run Init")
 RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate,"ml_global_information.OnUpdate","ESO Run OnUpdate")

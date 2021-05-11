@@ -132,49 +132,17 @@ function eso_task_assist.GetTarget()
 end
 
 function eso_task_assist:UIInit()
-	if (Settings.ESOMinion.gAssistTargetMode == nil) then
-		Settings.ESOMinion.gAssistTargetMode = "None"
-	end
-	if (Settings.ESOMinion.gAssistTargetType == nil) then
-		Settings.ESOMinion.gAssistTargetType = "Everything"
-	end
-	if (Settings.ESOMinion.gAssistInitCombat == nil) then
-		Settings.ESOMinion.gAssistInitCombat = "0"
-	end
-	if (Settings.ESOMinion.gAssistDoInterrupt == nil) then
-		Settings.ESOMinion.gAssistDoInterrupt = "1"
-	end
-	if (Settings.ESOMinion.gAssistDoExploit == nil) then
-		Settings.ESOMinion.gAssistDoExploit = "1"
-	end
-	if (Settings.ESOMinion.gAssistDoAvoid == nil) then
-		Settings.ESOMinion.gAssistDoAvoid = "1"
-	end
-	if (Settings.ESOMinion.gAssistDoBlock == nil) then
-		Settings.ESOMinion.gAssistDoBlock = "1"
-	end
-	if (Settings.ESOMinion.gAssistDoBreak == nil) then
-		Settings.ESOMinion.gAssistDoBreak = "1"
-	end
-	if (Settings.ESOMinion.gAssistDoLockpick == nil) then
-		Settings.ESOMinion.gAssistDoLockpick = "1"
-	end
-	if (Settings.ESOMinion.gAssistUsePotions == nil) then
-		Settings.ESOMinion.gAssistUsePotions = "1"
-	end
 	
 	
 	--[=[GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMtargetmode"),"gAssistTargetMode",GetString("assistMode"),"None,LowestHealth,Closest,Biggest Crowd");
 	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMmode"),"gAssistTargetType",GetString("assistMode"),"Everything,Players Only")
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("startCombat"),"gAssistInitCombat",GetString("assistMode"))
 	
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Use Potions","gAssistUsePotions",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Interrupts","gAssistDoInterrupt",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Exploits","gAssistDoExploit",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Dodges","gAssistDoAvoid",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Blocks","gAssistDoBlock",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform CC Breaks","gAssistDoBreak",GetString("assistMode"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Lockpicks","gAssistDoLockpick",GetString("assistMode"))
 	
 	gAssistTargetMode = Settings.ESOMinion.gAssistTargetMode
 	gAssistTargetType = Settings.ESOMinion.gAssistTargetType
@@ -185,7 +153,7 @@ function eso_task_assist:UIInit()
 	
 	gAssistDoBlock = Settings.ESOMinion.gAssistDoBlock
 	gAssistDoBreak = Settings.ESOMinion.gAssistDoBreak
-	gAssistDoLockpick = Settings.ESOMinion.gAssistDoLockpick]=]
+	]=]
 end
 
 -- Adding it to our botmodes
@@ -193,24 +161,29 @@ if ( ml_global_information.BotModes ) then
 	ml_global_information.BotModes[GetString("assistMode")] = eso_task_assist
 end 
 
-function eso_task_assist.GUIVarUpdate(Event, NewVals, OldVals)
-	for k,v in pairs(NewVals) do
-		if (k == "gAssistTargetMode" or
-			k == "gAssistTargetType" or
-			k == "gAssistInitCombat" or 
-			k == "gAssistDoInterrupt" or 
-			k == "gAssistDoExploit" or 
-			k == "gAssistDoAvoid" or 
-			k == "gAssistDoBlock" or 
-			k == "gAssistDoBreak" or
-			k == "gAssistDoLockpick" or
-			k == "gAssistUsePotions"
-		)						
-		then
-			Settings.ESOMinion[tostring(k)] = v
-		end
-	end
-	GUI_RefreshWindow(ml_global_information.MainWindow.Name)
+function eso_task_assist:Draw()
+	local mainWidth = (GUI:GetContentRegionAvail() - 10)
+	local fontSize = GUI:GetWindowFontSize()
+	local windowPaddingY = GUI:GetStyle().windowpadding.y
+	local framePaddingY = GUI:GetStyle().framepadding.y
+	local itemSpacingY = GUI:GetStyle().itemspacing.y
+	
+	--GUI:BeginChild("##header-status",0,GUI_GetFrameHeight(10),true)
+	--GUI:PushItemWidth(120)
+	
+	GUI:Separator()
+	GUI:Columns(2)
+	GUI:AlignFirstTextHeightToWidgets() 
+	GUI:Text(GetString("Do Lock Picking"))
+	--GUI:Text(GetString("Use Potions"))
+	GUI:NextColumn()
+	local columnWidth = GUI:GetContentRegionAvail() - 10
+	GUI:PushItemWidth(columnWidth)
+	
+	GUI_Capture(GUI:Checkbox("##"..GetString("Do Lock Picking"),gAssistDoLockpick),"gAssistDoLockpick")
+	--GUI_Capture(GUI:Checkbox("##"..GetString("Use Potions"),gAssistUsePotions),"gAssistUsePotions")
+	
+	GUI:PopItemWidth()
+	GUI:Columns()
+	GUI:Separator()
 end
-
-RegisterEventHandler("GUI.Update",eso_task_assist.GUIVarUpdate,"ESO GUIVarUpdate")

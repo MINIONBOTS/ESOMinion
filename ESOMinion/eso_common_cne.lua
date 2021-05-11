@@ -145,7 +145,7 @@ c_lockpick = inheritsFrom(ml_cause)
 e_lockpick = inheritsFrom(ml_effect)
 c_lockpick.chamber = 0
 function c_lockpick:evaluate()
-	if (gBotMode == GetString("assistMode") and gAssistDoLockpick == "0") then
+	if (gBotMode == GetString("assistMode") and not gAssistDoLockpick) then
 		return false
 	end
 	local isInteracting = e("IsPlayerInteractingWithObject()")
