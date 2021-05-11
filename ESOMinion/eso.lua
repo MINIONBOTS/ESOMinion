@@ -84,6 +84,7 @@ function esominion.Init()
 	-- set settings on startup
 	gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
 	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
+	gPreventAttackingInnocents = esominion.GetSetting("gPreventAttackingInnocents",true)
 	
 	
 	

@@ -198,36 +198,40 @@ eso_skillmanager.HeavyAttacks = {
 }
 
 eso_skillmanager.Variables = {
+	-- basic
 	SKM_NAME = { default = "", cast = "string", profile = "name", section = "main"},
 	SKM_ALIAS = { default = "", cast = "string", profile = "alias", section = "main"},
-	SKM_ID = { default = false, cast = "number", profile = "skillID", section = "main"},
+	SKM_ID = { default = 0, cast = "number", profile = "skillID", section = "main"},
 	SKM_SKILLTYPE = { default = GetString("smsktypedmg"), cast = "string", profile = "skilltype", section = "main"},
-	SKM_Prio = { default = false, cast = "number", profile = "prio", section = "main"},
+	SKM_Prio = { default = 0, cast = "number", profile = "prio", section = "main"},
 	SKM_ATKRNG = { default = "0", cast = "string", profile = "atkrng", section = "main"},
 	SKM_ENABLED = { default = "0", cast = "string", profile = "enabled", section = "main"},	
 	
 	SKM_Combat = { default = "In Combat", cast = "string", profile = "ooc", section = "fighting"  },
-	SKM_CASTTIME = { default = false, cast = "number", profile = "casttime", section = "fighting"   },
-	SKM_MinR = { default = false, cast = "number", profile = "minRange", section = "fighting"   },
+	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"   },
+	SKM_MinR = { default = 0, cast = "number", profile = "minRange", section = "fighting"   },
 	SKM_MaxR = { default = 30, cast = "number", profile = "maxRange", section = "fighting"   },
 	
-	SKM_THROTTLE = { default = false, cast = "number", profile = "throttle", section = "fighting" },  
-	
-	SKM_PHPGT = { default = false, cast = "number", profile = "phpgt", section = "fighting"   },
-	SKM_PHPLT = { default = false, cast = "number", profile = "phplt", section = "fighting"   },
+	SKM_THROTTLE = { default = 0, cast = "number", profile = "throttle", section = "fighting" },  
+	-- player
+	SKM_PHPGT = { default = 0, cast = "number", profile = "phpgt", section = "fighting"   },
+	SKM_PHPLT = { default = 0, cast = "number", profile = "phplt", section = "fighting"   },
 	SKM_POWERTYPE = { default = "Magicka", cast = "string", profile = "powertype", section = "fighting"},
-	SKM_PPowGT = { default = false, cast = "number", profile = "ppowgt", section = "fighting"   },
-	SKM_PPowLT = { default = false, cast = "number", profile = "ppowlt", section = "fighting"   },
+	SKM_PPowGT = { default = 0, cast = "number", profile = "ppowgt", section = "fighting"   },
+	SKM_PPowLT = { default = 0, cast = "number", profile = "ppowlt", section = "fighting"   },
 	
+	-- target
 	SKM_TRG = { default = "Target", cast = "string", profile = "trg", section = "fighting"  },
-	SKM_THPGT = { default = false, cast = "number", profile = "thpgt", section = "fighting"  },
-	SKM_THPLT = { default = false, cast = "number", profile = "thplt", section = "fighting"  },
+	SKM_THPGT = { default = 0, cast = "number", profile = "thpgt", section = "fighting"  },
+	SKM_THPLT = { default = 0, cast = "number", profile = "thplt", section = "fighting"  },
+	SKM_THPCGT = { default = 0, cast = "number", profile = "thpcgt", section = "fighting"  },
+	SKM_THPCLT = { default = 0, cast = "number", profile = "thpclt", section = "fighting"  },
+	SKM_THPADV = { default = 0, cast = "number", profile = "thpadv", section = "fighting"  },
 	
-	SKM_TECount = { default = false, cast = "number", profile = "tecount", section = "fighting"  },
-	SKM_TECount2 = { default = false, cast = "number", profile = "tecount2", section = "fighting" },
-	SKM_TERange = { default = false, cast = "number", profile = "terange", section = "fighting"  },
-	SKM_TACount = { default = false, cast = "number", profile = "tacount", section = "fighting"  },
-	SKM_TARange = { default = false, cast = "number", profile = "tarange", section = "fighting"  },
+	-- aoe count
+	SKM_TECount = { default = 0, cast = "number", profile = "tecount", section = "fighting"  },
+	SKM_TECount2 = { default = 0, cast = "number", profile = "tecount2", section = "fighting" },
+	SKM_TERange = { default = 0, cast = "number", profile = "terange", section = "fighting"  },
 	
 	 -------Skill Chains
 	SKM_PSkillID = { default = "", cast = "string", profile = "pskill", section = "fighting"  },
@@ -237,14 +241,14 @@ eso_skillmanager.Variables = {
 	SKM_NSkillID = { default = "", cast = "string", profile = "nskill", section = "fighting"  },
 	SKM_NSkillPrio = { default = "", cast = "string", profile = "nskillprio", section = "fighting"  },
 	
-	SKM_PHPL = { default = false, cast = "number", profile = "phpl", section = "fighting"   },
-	SKM_PHPB = { default = false, cast = "number", profile = "phpb", section = "fighting"   },
+	SKM_PHPL = { default = 0, cast = "number", profile = "phpl", section = "fighting"   },
+	SKM_PHPB = { default = 0, cast = "number", profile = "phpb", section = "fighting"   },
 	SKM_PUnderAttack = { default = false, cast = "boolean", profile = "punderattack", section = "fighting"  },
 	SKM_PUnderAttackMelee = { default = false, cast = "boolean", profile = "punderattackmelee", section = "fighting"  },
-	SKM_PPowL = { default = false, cast = "number", profile = "ppowl", section = "fighting"   },
-	SKM_PPowB = { default = false, cast = "number", profile = "ppowb", section = "fighting"   },
-	SKM_PMPPL = { default = false, cast = "number", profile = "pmppl", section = "fighting"   },
-	SKM_PMPPB = { default = false, cast = "number", profile = "pmppb", section = "fighting"   },
+	SKM_PPowL = { default = 0, cast = "number", profile = "ppowl", section = "fighting"   },
+	SKM_PPowB = { default = 0, cast = "number", profile = "ppowb", section = "fighting"   },
+	SKM_PMPPL = { default = 0, cast = "number", profile = "pmppl", section = "fighting"   },
+	SKM_PMPPB = { default = 0, cast = "number", profile = "pmppb", section = "fighting"   },
 	
 
 	--SKM_OnlySolo = { default = "0", cast = "string", profile = "onlysolo", section = "fighting"  },
@@ -256,14 +260,6 @@ eso_skillmanager.Variables = {
 	SKM_FilterThree = { default = "Ignore", cast = "string", profile = "filterthree", section = "fighting"  },
 	SKM_FilterFour = { default = "Ignore", cast = "string", profile = "filterfour", section = "fighting"  },
 	SKM_FilterFive = { default = "Ignore", cast = "string", profile = "filterfive", section = "fighting"  },
-	--]]
-	
-	--[[ -------Target Info
-	SKM_TRGTYPE = { default = "Any", cast = "string", profile = "trgtype", section = "fighting"  },
-	SKM_NPC = { default = "0", cast = "string", profile = "npc", section = "fighting"  },
-	SKM_PTRG = { default = "Any", cast = "string", profile = "ptrg", section = "fighting" },
-	SKM_PGTRG = { default = "Direct", cast = "string", profile = "pgtrg", section = "fighting"  },
-	SKM_THPADV = { default = false, cast = "number", profile = "thpadv", section = "fighting"  },
 	--]]
 	
 	--[[ -------Party
@@ -344,6 +340,10 @@ function eso_skillmanager.ModuleInit()
 		Settings.ESOMinion.SMDefaultProfiles[6] = "Templar"
 	end
 	
+	gSMBattleStatuses = { GetString("In Combat"), GetString("Out of Combat"), GetString("Any") }
+	gSMBattleStatusIndex = 1
+	gSMBattlePowerTypes = {"Magicka","Stamina","Ultimate"}
+	gSMBattlePowerTypeIndex = 1
 	
 	eso_skillmanager.UpdateProfiles()
 	eso_skillmanager.UseDefaultProfile()
@@ -1035,6 +1035,13 @@ function eso_skillmanager.Cast( entity )
 	if (Now() < eso_skillmanager.latencyTimer) then
 		return false
 	end
+	--local pBuffCount = e(GetNumBuffs("player"))
+	local pBuffs = {}
+	--[[if pBuffCount > 0 then
+		for i = 1 , pBuffCount do
+			table.insert(pBuffs,e(GetUnitBuffInfo("player"),i))
+		end
+	end]]
 	
 	--Check for blocks/interrupts.
 	--[=[if (Player:GetNumActiveCombatTips() > 0) then
@@ -1709,41 +1716,41 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)
 	
-	--[[conditional = { name = "Player HP/Power Checks"	
+	conditional = { name = "Player HP/Power Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local target = eso_skillmanager.CurrentTarget
 		
-		if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) > ml_global_information.Player_Health.percent)	or 
-			(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < ml_global_information.Player_Health.percent))
+		if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) > Player.health.percent)	or 
+			(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < Player.health.percent))
 		then
 			return true
 		end
 		
 		if (skill.powertype == "Magicka") then
-			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > ml_global_information.Player_Magicka.percent)	or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < ml_global_information.Player_Magicka.percent))
+			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.magika.percent)	or 
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.magika.percent))
 			then 
 				return true
 			end
 		elseif (skill.powertype == "Stamina") then
-			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > ml_global_information.Player_Stamina.percent)	or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < ml_global_information.Player_Stamina.percent))
+			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.stamina.percent)	or 
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.stamina.percent))
 			then 
 				return true
 			end
-		elseif (skill.powertype == "Ultimate") then
+		--[[elseif (skill.powertype == "Ultimate") then
 			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > ml_global_information.Player_Ultimate.percent)	or 
 				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < ml_global_information.Player_Ultimate.percent))
 			then 
 				return true
-			end
+			end]]
 		end				
 		return false
 	end
 	}
-	eso_skillmanager.AddConditional(conditional)]]
+	eso_skillmanager.AddConditional(conditional)
 	
 	--[[conditional = { name = "Player Single Buff Check"	
 	, eval = function()	
@@ -1828,7 +1835,7 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)]]
 	
-	--[[conditional = { name = "Target HP Checks"	
+	conditional = { name = "Target HP Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
@@ -1836,19 +1843,24 @@ function eso_skillmanager.AddDefaultConditions()
 		
 		local thpgt = tonumber(skill.thpgt) or 0
 		local thplt = tonumber(skill.thplt) or 0
+		local thpadv = tonumber(skill.thpadv) or 0
 		
-		if ((thpgt > 0 and thpgt > target.hp.percent) or
-			(thplt > 0 and thplt < target.hp.percent))
-		then 
+		if thpadv > 0  then
+			if  target.health.max < Player.hp.max * thpadv then
+				return false
+			end
+		end
+		if ((thpgt > 0 and thpgt > target.health.percent) or
+			(thplt > 0 and thplt < target.health.percent)) then 
 			return true 
 		end
 		
 		return false
 	end
 	}
-	eso_skillmanager.AddConditional(conditional)]]
+	eso_skillmanager.AddConditional(conditional)
 	
-	conditional = { name = "Target Casting Checks"	
+	--[[conditional = { name = "Target Casting Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local target = eso_skillmanager.CurrentTarget
@@ -1860,7 +1872,7 @@ function eso_skillmanager.AddDefaultConditions()
 		return false
 	end
 	}
-	eso_skillmanager.AddConditional(conditional)
+	eso_skillmanager.AddConditional(conditional)]]
 	
 	conditional = { name = "Target AOE Checks"	
 	, eval = function()	
@@ -1874,7 +1886,7 @@ function eso_skillmanager.AddDefaultConditions()
 		local tlistAE = nil
 		if (tecount > 0 or tecount2 > 0) then
 			local elstring = "alive,attackable,nocritter,maxdistance="..tostring(skill.terange)..",distanceto="..tostring(target.id)
-			if (gPreventAttackingInnocents == "1") then
+			if (gPreventAttackingInnocents) then
 				elstring = elstring..",hostile"
 			end
 			
@@ -1894,7 +1906,7 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)
 	
-	conditional = { name = "Ally AOE Checks"	
+	--[[conditional = { name = "Ally AOE Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local target = eso_skillmanager.CurrentTarget
@@ -1912,7 +1924,7 @@ function eso_skillmanager.AddDefaultConditions()
 		return false
 	end
 	}
-	eso_skillmanager.AddConditional(conditional)
+	eso_skillmanager.AddConditional(conditional)]]
 end
 
 function eso_skillmanager.DrawSkillBook()
@@ -2045,27 +2057,36 @@ function eso_skillmanager.DrawBattleEditor(skill)
 	end
 	
 	
-	--[[if (GUI:CollapsingHeader(GetString("playerHPMPTP"),"battle-playerhp-header")) then
+	if (GUI:CollapsingHeader(GetString("Player Stats"),"battle-playerhp-header")) then
 		GUI:Columns(2,"#battle-playerhp-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("playerHPGT",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player HP is greater than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHPL",SKM_PHPL,0,0),"SKM_PHPL"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("playerHPLT",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player HP is less than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHPB",SKM_PHPB,0,0),"SKM_PHPB"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("underAttack")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player is under attack from Ranged or Melee targets.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PUnderAttack",SKM_PUnderAttack),"SKM_PUnderAttack"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("underAttackMelee")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player is under attack from Melee targets only.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PUnderAttackMelee",SKM_PUnderAttackMelee),"SKM_PUnderAttackMelee"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("playerPowerGT",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player MP is more than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PPowL",SKM_PPowL,0,0),"SKM_PPowL"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("playerPowerLT",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player MP is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PPowB",SKM_PPowB,0,0),"SKM_PPowB"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("skmPMPPL",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player MP is greater than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PMPPL",SKM_PMPPL,0,0),"SKM_PMPPL"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("skmPMPPB",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("TUse this skill when Player MP is less than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PMPPB",SKM_PMPPB,0,0),"SKM_PMPPB"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Result MP >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player MP after casting the skill will be more than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PMPRGT",SKM_PMPRGT,0,0),"SKM_PMPRGT"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Result MP %% >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player MP after casting the skill will be more than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PMPPRGT",SKM_PMPPRGT,0,0),"SKM_PMPPRGT"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Result MP >= Cost of [ID]")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player MP after casting the skill will be greater than or equal to the MP required to cast the spell whose ID is in this field.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PMPRSGT",SKM_PMPRSGT),"SKM_PMPRSGT"); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("The ID of any skill that should be available for use before this skill is used.")) end GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("skmPTPL",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player TP is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTPL",SKM_PTPL,0,0),"SKM_PTPL"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("skmPTPB",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player TP is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTPB",SKM_PTPB,0,0),"SKM_PTPB"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Player HP %% >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player HP is greater than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHPGT",SKM_PHPGT,0,0),"SKM_PHPGT"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Player HP %% <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player HP is less than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHPLT",SKM_PHPLT,0,0),"SKM_PHPLT"); GUI:NextColumn();
+		
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power Type")); GUI:NextColumn(); SKM_Combo("##SKM_POWERTYPE","gSMBattlePowerTypeIndex","SKM_POWERTYPE",gSMBattlePowerTypes); GUI:NextColumn();
+		
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power %% >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player Power is more than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PPowGT",SKM_PPowGT,0,0),"SKM_PPowGT"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power %% <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player Power is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PPowLT",SKM_PPowLT,0,0),"SKM_PPowLT"); GUI:NextColumn();
 		
 		GUI:Columns(1)
-	end]]
+	end
 	
+	if (GUI:CollapsingHeader(GetString("Target Stats"),"battle-target-header")) then
+		GUI:Columns(2,"#battle-target-main",false)
+		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
+		
+		GUI:PushItemWidth(100)
+		
+		GUI:Text(GetString("Target HP %% >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of the Target is greater than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THPGT",SKM_THPGT,0,0),"SKM_THPGT"); GUI:NextColumn();
+		GUI:Text(GetString("Target HP %% <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of the Target is less than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THPLT",SKM_THPLT,0,0),"SKM_THPLT"); GUI:NextColumn();
+		GUI:Text(GetString("Target HP Current >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of the Target is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THPCGT",SKM_THPCGT,0,0),"SKM_THPCGT"); GUI:NextColumn();
+		GUI:Text(GetString("Target HP Current <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of the Target is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THPCLT",SKM_THPCLT,0,0),"SKM_THPCLT"); GUI:NextColumn();
+		GUI:Text(GetString("HP Advantage")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the difference of Max HP between you and an enemy is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputFloat("##SKM_THPADV",SKM_THPADV,0,0,2),"SKM_THPADV"); GUI:NextColumn();
+		
+		GUI:PopItemWidth()
+		GUI:Columns(1)
+	end
 	--[[if (GUI:CollapsingHeader(GetString("Party"),"battle-party-header")) then
 		GUI:Columns(2,"#battle-party-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
@@ -2081,46 +2102,19 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:Text(GetString("skmHasBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill if a party member is being affected by buffs with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PTBuff",SKM_PTBuff),"SKM_PTBuff"); GUI:NextColumn();
 		GUI:Text(GetString("Known Debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When selected, use this skill when being affected by a Minion-maintained list of debuffs (helpful for Esuna skills).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PTKBuff",SKM_PTKBuff),"SKM_PTKBuff"); GUI:NextColumn();
 		GUI:Text(GetString("skmMissBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill if a party member is missing a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PTNBuff",SKM_PTNBuff),"SKM_PTNBuff"); GUI:NextColumn();
-		GUI:Columns(1)
-	end
-	
-	if (GUI:CollapsingHeader(GetString("Target"),"battle-target-header")) then
-		GUI:Columns(2,"#battle-target-main",false)
-		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		
-		GUI:PushItemWidth(100)
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("skmTRG")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select the target of the skill, including Ground Target, Tankable Enemy, etc.")) end GUI:NextColumn(); SKM_Combo("##SKM_TRG","gSMTarget","SKM_TRG",gSMTargets); GUI:NextColumn();
-		GUI:Text(GetString("skmTRGTYPE")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select the role of the character that this spell should be used on.")) end GUI:NextColumn(); SKM_Combo("##SKM_TRGTYPE","gSMTargetType","SKM_TRGTYPE",gSMTargetTypes); GUI:NextColumn();
-		GUI:Text(GetString("Include Self")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, the skill will be used on yourself if you meet the conditions.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TRGSELF",SKM_TRGSELF),"SKM_TRGSELF"); GUI:NextColumn();
-		GUI:Text(GetString("skmNPC")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When checked, the skill will be used on NPCs who meet the conditions.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_NPC",SKM_NPC),"SKM_NPC"); GUI:NextColumn();
-		GUI:Text(GetString("skmPTRG")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select the Target of the Player casting the spell- Enemy or Player.")) end GUI:NextColumn(); SKM_Combo("##SKM_PTRG","gSMPlayerTarget","SKM_PTRG",gSMPlayerTargets); GUI:NextColumn();
-		GUI:Text(GetString("skmPGTRG")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select how 'accurate' the Ground Target effect should be- directly on the target, behind it, or near it.")) end GUI:NextColumn(); SKM_Combo("##SKM_PGTRG","gSMPlayerGroundTargetPosition","SKM_PGTRG",gSMPlayerGroundTargetPositions); GUI:NextColumn();
-		GUI:Text(GetString("skmPPos")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If the skill has a positional, select it here.")) end GUI:NextColumn(); SKM_Combo("##SKM_PPos","gSMPlayerPosition","SKM_PPos",gSMPlayerPositions); GUI:NextColumn();
-		
-		GUI:Text(GetString("targetHPGT",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of the Target is greater than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THPL",SKM_THPL,0,0),"SKM_THPL"); GUI:NextColumn();
-		GUI:Text(GetString("targetHPLT",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of the Target is less than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THPB",SKM_THPB,0,0),"SKM_THPB"); GUI:NextColumn();
-		GUI:Text(GetString("skmTHPCL",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of the Target is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THPCL",SKM_THPCL,0,0),"SKM_THPCL"); GUI:NextColumn();
-		GUI:Text(GetString("skmTHPCB",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the HP of the Target is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THPCB",SKM_THPCB,0,0),"SKM_THPCB"); GUI:NextColumn();
-		
-		GUI:Text(GetString("hpAdvantage")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the difference of Max HP between you and an enemy is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputFloat("##SKM_THPADV",SKM_THPADV,0,0,2),"SKM_THPADV"); GUI:NextColumn();
-		GUI:Text(GetString("targetTPLE",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the TP of the Target is less than this amount.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TTPL",SKM_TTPL,0,0),"SKM_TTPL"); GUI:NextColumn();
-		GUI:Text(GetString("targetMPLE",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the TP of the Target is more than this amount.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TMPL",SKM_TMPL,0,0),"SKM_TMPL"); GUI:NextColumn();
-		GUI:Text(GetString("skmTCONTIDS")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must have one of the listed contentids (comma-separated list).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TCONTIDS",SKM_TCONTIDS),"SKM_TCONTIDS"); GUI:NextColumn();
-		GUI:Text(GetString("skmTNCONTIDS")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must NOT have one of the listed contentids (comma-separated list).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNCONTIDS",SKM_TNCONTIDS),"SKM_TNCONTIDS"); GUI:NextColumn();
-
+		GUI:PopItemWidth()
 		GUI:Columns(1)
 	end]]
+	
 	
 	if (GUI:CollapsingHeader(GetString("aoe"),"battle-aoe-header")) then
 		GUI:Columns(2,"#battle-aoe-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:PushItemWidth(100)
-		GUI:Text(GetString("skmTECount")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount",SKM_TECount,0,0),"SKM_TECount"); GUI:NextColumn();
-		GUI:Text(GetString("skmTECount2")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is less than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount2",SKM_TECount2,0,0),"SKM_TECount2"); GUI:NextColumn();
-		GUI:Text(GetString("skmTERange")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when enemies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TERange",SKM_TERange,0,0),"SKM_TERange"); GUI:NextColumn();
-		GUI:Text(GetString("skmTACount")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of allies near you is greater or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TACount",SKM_TACount,0,0),"SKM_TACount"); GUI:NextColumn();
-		GUI:Text(GetString("skmTARange")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when allies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TARange",SKM_TARange,0,0),"SKM_TARange"); GUI:NextColumn();
+		GUI:Text(GetString("Enemy Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount",SKM_TECount,0,0),"SKM_TECount"); GUI:NextColumn();
+		GUI:Text(GetString("Enemy Count <=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is less than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount2",SKM_TECount2,0,0),"SKM_TECount2"); GUI:NextColumn();
+		GUI:Text(GetString("Radius")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when enemies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TERange",SKM_TERange,0,0),"SKM_TERange"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)
