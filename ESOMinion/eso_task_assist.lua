@@ -174,12 +174,14 @@ function eso_task_assist:Draw()
 	GUI:AlignFirstTextHeightToWidgets() 
 	GUI:Text(GetString("Do Lock Picking"))
 	--GUI:Text(GetString("Use Potions"))
+	GUI:Text(GetString("SKM Weaving (TEST)"))
 	GUI:NextColumn()
 	local columnWidth = GUI:GetContentRegionAvail() - 10
 	GUI:PushItemWidth(columnWidth)
 	
 	GUI_Capture(GUI:Checkbox("##"..GetString("Do Lock Picking"),gAssistDoLockpick),"gAssistDoLockpick")
 	--GUI_Capture(GUI:Checkbox("##"..GetString("Use Potions"),gAssistUsePotions),"gAssistUsePotions")
+	GUI_Capture(GUI:Checkbox("##"..GetString("SKM Weaving (TEST)"),gSKMWeaving),"gSKMWeaving")
 	
 	GUI:PopItemWidth()
 	GUI:Columns()

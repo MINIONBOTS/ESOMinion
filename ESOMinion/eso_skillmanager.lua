@@ -731,6 +731,9 @@ function eso_skillmanager.BuildSkillsList()
 			eso_skillmanager.skillsbyid[skillid] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
 			eso_skillmanager.skillsbyname[skillName] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
 			
+			if string.contains(skillName,"Light Attack") then
+				eso_skillmanager.skillsbyname["Default"] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
+			end
 			ml_global_information.AttackRange = math.max(skillRange,ml_global_information.AttackRange)
 		end
 	end
@@ -835,6 +838,13 @@ function eso_skillmanager.Cast( entity )
 	if (Now() < eso_skillmanager.latencyTimer) then
 		return false
 	end
+	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
+	if gSKMWeaving then
+		if AbilityList:Cast(defaultAttack.id,entity.id) then
+			d("Attempting to cast ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
+		end
+	end
+	
 	--local pBuffCount = e(GetNumBuffs("player"))
 	local pBuffs = {}
 	--[[if pBuffCount > 0 then
@@ -858,7 +868,7 @@ function eso_skillmanager.Cast( entity )
 				return true
 			end
 		end
-		
+		 --GetActiveCombatTipInfo(number activeCombatTipId) 
 		--[[local exploitable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_EXPLOIT)
 		if (ValidTable(exploitable)) then
 			if (not isAssistMode or (isAssistMode and gAssistDoExploit == "1")) then
@@ -946,7 +956,7 @@ function eso_skillmanager.Cast( entity )
 				--local realID = tonumber(skill.skillID)
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				--local action = AbilityList:Get(realID)
-				d("Attempting to cast ability ID : "..tostring(realID))
+				d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
 				if (AbilityList:Cast(realID,TID)) then
 					skill.timelastused = Now() + 2000
 					eso_skillmanager.prevSkillID = realID
@@ -1087,6 +1097,7 @@ end
 
 function eso_skillmanager.CanCast(prio, entity)
 	if (not entity) then
+
 		return 0
 	end
 	
@@ -1103,6 +1114,9 @@ function eso_skillmanager.CanCast(prio, entity)
 		return 0
 	elseif (skill and skill.used == "0") then
 		return 0
+	end
+	if string.contains(skill.name,"Light Attack") then
+		skill.skillID = eso_skillmanager.skillsbyname["Default"].id
 	end
 	--local realID = tonumber(skill.skillID)
 	local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
@@ -1470,6 +1484,7 @@ function eso_skillmanager.AddDefaultConditions()
 		
 		local throttle = tonumber(skill.throttle) or 0
 		if ( throttle > 0 and skill.timelastused and TimeSince(skill.timelastused) < throttle) then 
+				d("return true 0")
 			return true
 		end
 		return false
