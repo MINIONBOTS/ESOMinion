@@ -210,75 +210,56 @@ function Dev.DrawCall(event, ticks )
 			--End Active Controls
 			
 			-- cbk: Player
-			--[=[if ( GUI:TreeNode("Player") ) then
+			if ( GUI:TreeNode("Player") ) then
 				if( gamestate == 3 ) then 
 					local c = Player
-					if ( c ) then Dev.DrawGameObjectDetails(c,true) else	GUI:Text("No Player found.") end
-                    local mapX, mapY, mapZ = WorldToMapCoords(c.localmapid, c.pos.x, c.pos.y, c.pos.z)
 					
-					GUI:BulletText("Map ID") GUI:SameLine(200) GUI:InputText("##Devuf2",tostring(c.localmapid))
-					GUI:BulletText("Map Name") GUI:SameLine(200) GUI:InputText("##Devuf3",GetMapName(c.localmapid))
-					GUI:BulletText("Map X") GUI:SameLine(200) GUI:InputText("##Devuf4",tostring(mapX))
-					GUI:BulletText("Map Y") GUI:SameLine(200) GUI:InputText("##Devuf5",tostring(mapY))
-					GUI:BulletText("Map Z") GUI:SameLine(200) GUI:InputText("##Devuf6",tostring(mapZ))
-					GUI:BulletText("Pulse Duration") GUI:SameLine(200) GUI:InputText("##Devuf7",tostring(GetBotPerformance()))
 					
-					if ( GUI:TreeNode("Gauge Data") ) then
-						local g = Player.gauge
-						if ( table.valid(g)) then
-							for i,k in pairs (g) do
-								GUI:BulletText(tostring(i)..": ") GUI:SameLine(200) GUI:InputText("##Devegg"..tostring(i),tostring(k))	
-							end							
-						end
-						GUI:TreePop()
-					end
-					
-					if ( GUI:TreeNode("Job Levels")) then
-						local lev = Player.levels
-						if (table.valid(lev)) then
-							for key, value in pairs(lev) do
-								GUI:BulletText("Job: "..tostring(key).." - Level: "..tostring(value))							
-							end
-						end
-						GUI:TreePop()
-					end
-					
-					if ( GUI:TreeNode("Stats & Char Attributes")) then
-						local stat = Player.stats
+					GUI:BulletText("interacting: "..tostring(c.interacting))	
+					if ( GUI:TreeNode("Stats")) then
+						GUI:Text("Health")
+						local stat = Player.health
 						if (table.valid(stat)) then
 							for key, value in pairs(stat) do
-								GUI:BulletText(tostring(key).." - Value: "..tostring(value))							
+								GUI:BulletText(tostring(key).." - "..tostring(value))							
+							end
+						end
+						GUI:Text("Magicka")
+						local stat = Player.magicka
+						if (table.valid(stat)) then
+							for key, value in pairs(stat) do
+								GUI:BulletText(tostring(key).." - "..tostring(value))							
+							end
+						end
+						GUI:Text("Stamina")
+						local stat = Player.stamina
+						if (table.valid(stat)) then
+							for key, value in pairs(stat) do
+								GUI:BulletText(tostring(key).." - "..tostring(value))							
 							end
 						end
 						
-						for i = 0, 100 do
-							local s = Player:GetStats(i)
-							if(s)then
-								GUI:BulletText("Index: "..tostring(i).." - Value: "..tostring(s))
-							end
-						end
 						GUI:TreePop()
 					end
 					
-					if ( GUI:TreeNode("Game Settings")) then
-                        local settings = Player.settings
-						GUI:BulletText("AutoFace: "..tostring(settings.autoface))
-                        GUI:SameLine()
-                        if GUI:Button("Enable##enable_autoface") then Player:SetAutoFace(true) end
-                        GUI:SameLine()
-                        if GUI:Button("Disable##disable_autoface") then Player:SetAutoFace(false) end
-						GUI:BulletText("MoveMode: "..tostring(settings.movemode))
-                        GUI:SameLine()
-                        if GUI:Button("Set Standard") then Player:SetMoveMode(0) end
-                        GUI:SameLine()
-                        if GUI:Button("Set Legacy") then Player:SetMoveMode(1) end
-						GUI:TreePop()
-					end
+					
+					--if ( c ) then Dev.DrawGameObjectDetails(c,true) else	GUI:Text("No Player found.") end
+                    --local mapX, mapY, mapZ = WorldToMapCoords(c.localmapid, c.pos.x, c.pos.y, c.pos.z)
+					
+					--GUI:BulletText("Map ID") GUI:SameLine(200) GUI:InputText("##Devuf2",tostring(c.localmapid))
+					--GUI:BulletText("Map Name") GUI:SameLine(200) GUI:InputText("##Devuf3",GetMapName(c.localmapid))
+					--GUI:BulletText("Map X") GUI:SameLine(200) GUI:InputText("##Devuf4",tostring(mapX))
+					--GUI:BulletText("Map Y") GUI:SameLine(200) GUI:InputText("##Devuf5",tostring(mapY))
+					--GUI:BulletText("Map Z") GUI:SameLine(200) GUI:InputText("##Devuf6",tostring(mapZ))
+					--GUI:BulletText("Pulse Duration") GUI:SameLine(200) GUI:InputText("##Devuf7",tostring(GetBotPerformance()))
+					
+					
+					
 				else
 					GUI:Text("Not Ingame...")
 				end
 				GUI:TreePop()
-			end]=]
+			end
 -- END PLAYER INFO
 			
 			-- cbk: Target

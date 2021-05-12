@@ -368,12 +368,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		
 		ml_global_information.nextRun = tickcount + pulseTime
 		ml_global_information.lastPulseShortened = false
-		local weaponID = e("GetSlotBoundId(1)")
-		if ml_global_information.lastWeaponCheck ~= weaponID then
-			ml_global_information.lastWeaponCheck = weaponID
-			eso_skillmanager.CheckPreferedList(weaponID)
-		end
-		
+				
         if (ml_task_hub:CurrentTask() ~= nil) then
             FFXIV_Core_ActiveTaskName = ml_task_hub:CurrentTask().name
         end

@@ -838,6 +838,7 @@ function eso_skillmanager.Cast( entity )
 	if (Now() < eso_skillmanager.latencyTimer) then
 		return false
 	end
+		
 	--[[local defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	if gSKMWeaving and Now() >= eso_skillmanager.lightdelay then
 		if AbilityList:Cast(defaultAttack.id,entity.id) then
@@ -965,9 +966,10 @@ function eso_skillmanager.Cast( entity )
 					
 					local casttime = 0
 					if ( casttime > 0 ) then							
-						eso_skillmanager.latencyTimer = Now() + casttime
+						local minvalue = casttime
+						eso_skillmanager.latencyTimer = Now() + math.random(minvalue,minvalue + 100)
 					else
-						eso_skillmanager.latencyTimer = Now() + 300
+						eso_skillmanager.latencyTimer = Now() + math.random(300,400)
 					end
 					return true
 				end

@@ -37,7 +37,7 @@ function eso_task_assist:Process()
 				needsUpdate = true
 			end
 		end
-		eso_task_assist.lastidcheck = Now() + 10000
+		eso_task_assist.lastidcheck = Now() + math.random(8000,12000)
 	end
 	if not table.valid(eso_skillmanager.skillsbyindex) then
 		needsUpdate = true
@@ -205,6 +205,13 @@ Lockpicker = {}
 Lockpicker.delay = 0
 Lockpicker.chamber = 0
 Lockpicker.timer = 0
+function Lockpicker.timeRemaining()
+
+	if Lockpicker.timer > 0  then
+		return Now() - Lockpicker.timer
+	end
+	return 0
+end
 function Lockpicker.OnUpdate()
 
 	if not ESO_Common_BotRunning then
@@ -215,11 +222,11 @@ function Lockpicker.OnUpdate()
 			return false
 		end
 		if Now() > Lockpicker.delay then
-			if e("IsPlayerInteractingWithObject()") then
+			if Player.interacting then
 				if Lockpicker.timer == 0 then
-					Lockpicker.timer = e("GetLockpickingTimeLeft()")
+					Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
 				end
-				if (Lockpicker.timer > 0) then
+				if (Lockpicker.timeRemaining() > 0) then
 					d("lockTime = "..tostring(Lockpicker.timer))
 					if Lockpicker.chamber == 0 then
 						for i = 1,5 do
