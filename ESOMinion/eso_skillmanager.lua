@@ -77,6 +77,7 @@ eso_skillmanager.copiedSkill = {}
 eso_skillmanager.bestAOE = 0
 eso_skillmanager.latencyTimer = 0
 eso_skillmanager.resetTimer = 0
+eso_skillmanager.doLoad = true
 
 eso_skillmanager.lastAvoid = 0
 eso_skillmanager.lastBreak = 0
@@ -321,23 +322,23 @@ function eso_skillmanager.ModuleInit()
 	
 	local uuid = GetUUID()
 	
-	if (Settings.ESOMinion.SMDefaultProfiles == nil) then
-		Settings.ESOMinion.SMDefaultProfiles = {}
+	if (Settings.ESOMINION.SMDefaultProfiles == nil) then
+		Settings.ESOMINION.SMDefaultProfiles = {}
 	end	
-	if (Settings.ESOMinion.SMDefaultProfiles[1] == nil) then
-		Settings.ESOMinion.SMDefaultProfiles[1] = "DragonKnight"
+	if (Settings.ESOMINION.SMDefaultProfiles[1] == nil) then
+		Settings.ESOMINION.SMDefaultProfiles[1] = "DragonKnight"
 	end
-	if (Settings.ESOMinion.SMDefaultProfiles[2] == nil) then
-		Settings.ESOMinion.SMDefaultProfiles[2] = "Sorcerer"
+	if (Settings.ESOMINION.SMDefaultProfiles[2] == nil) then
+		Settings.ESOMINION.SMDefaultProfiles[2] = "Sorcerer"
 	end
-	if (Settings.ESOMinion.SMDefaultProfiles[3] == nil) then
-		Settings.ESOMinion.SMDefaultProfiles[3] = "Nightblade"
+	if (Settings.ESOMINION.SMDefaultProfiles[3] == nil) then
+		Settings.ESOMINION.SMDefaultProfiles[3] = "Nightblade"
 	end
-	if (Settings.ESOMinion.SMDefaultProfiles[4] == nil) then
-		Settings.ESOMinion.SMDefaultProfiles[4] = "DragonKnight"
+	if (Settings.ESOMINION.SMDefaultProfiles[4] == nil) then
+		Settings.ESOMINION.SMDefaultProfiles[4] = "DragonKnight"
 	end
-	if (Settings.ESOMinion.SMDefaultProfiles[6] == nil) then
-		Settings.ESOMinion.SMDefaultProfiles[6] = "Templar"
+	if (Settings.ESOMINION.SMDefaultProfiles[6] == nil) then
+		Settings.ESOMINION.SMDefaultProfiles[6] = "Templar"
 	end
 	
 	gSMBattleStatuses = { GetString("In Combat"), GetString("Out of Combat"), GetString("Any") }
@@ -348,12 +349,6 @@ function eso_skillmanager.ModuleInit()
 	eso_skillmanager.UpdateProfiles()
 	eso_skillmanager.UseDefaultProfile()
 	eso_skillmanager.AddDefaultConditions()
-	gSkillProfileNewIndex = 1
-	gSMlastprofileNew = esominion.GetSetting("gSMlastprofileNew","None")
-	gSMprofile = esominion.GetSetting("gSMprofile","None")
-	gSkillProfileNewIndex = GetKeyByValue(gSMlastprofileNew,eso_skillmanager.SkillProfiles)
-	
-	gSkillManagerPrefered = esominion.GetSetting("gSkillManagerPrefered",{})
 	
 end
 
@@ -366,26 +361,35 @@ function eso_skillmanager.CheckPreferedList(weaponID)
 				local newval = GetKeyByValue(checkProfile,eso_skillmanager.SkillProfiles)
 				if newval then
 					gSkillProfileNewIndex = newval
-					Settings.ESOMinion.gSkillProfileNewIndex = newval
-					Settings.ESOMinion.gSMlastprofileNew = checkProfile
+					Settings.ESOMINION.gSkillProfileNewIndex = newval
+					Settings.ESOMINION.gSMlastprofileNew = checkProfile
 					
 					gSMprofile = checkProfile
-					Settings.ESOMinion.gSMprofile = checkProfile
+					Settings.ESOMINION.gSMprofile = checkProfile
 					eso_skillmanager.ReadFile(checkProfile)
 				end
 			end
 		end
 	end
 end
+--[[
 function eso_skillmanager.SetPreferedList()
 	d("Set prefered skillProfiles")
 	local weaponID = e("GetSlotBoundId(1)")
 	d("Weapon ["..tostring(weaponID).."] set to prefered ["..tostring(gSMprofile).."]")
 	gSkillManagerPrefered[weaponID] = gSMprofile
-	Settings.ESOMinion.gSkillManagerPrefered = gSkillManagerPrefered
-end
+	Settings.ESOMINION.gSkillManagerPrefered = gSkillManagerPrefered
+end]]
 
 function eso_skillmanager.OnUpdate( event, tickcount )
+	
+	
+	--[[if (eso_skillmanager.doLoad == true) then
+		eso_skillmanager.LoadInit()
+		eso_skillmanager.UpdateCurrentProfileData()
+		eso_skillmanager.doLoad = false
+	end]]
+	
 	if ((tickcount - eso_skillmanager.lastTick) > 100) then
 		eso_skillmanager.lastTick = tickcount
 		
@@ -398,6 +402,7 @@ end
 
 --This is the only function that should actually read from the file.
 function eso_skillmanager.ReadFile(strFile)
+	d("read skill profile")
 	assert(type(strFile) == "string" and strFile ~= "", "[eso_skillmanager.ReadFile]: File target is not valid")
 	local filename = eso_skillmanager.profilepath..strFile..".lua"
 	--Attempt to read old files and convert them.
@@ -472,6 +477,7 @@ function eso_skillmanager.ReadFile(strFile)
 		end
 	end	
 	--Load the file, which should only be the new type.
+	d("load skill profile " ..tostring(filename))
 	local profile, e = persistence.load(filename)
 	if (ValidTable(profile)) then
 		eso_skillmanager.SkillProfile = profile.skills
@@ -508,6 +514,7 @@ function eso_skillmanager.SetGUIVar(strName, value)
 end
 
 function eso_skillmanager.CheckProfileValidity()
+d("check valid")
 	local profile = eso_skillmanager.SkillProfile
 	
 	local requiredUpdate = false
@@ -543,6 +550,7 @@ function eso_skillmanager.CheckProfileValidity()
 	end
 	
 	if (not deepcompare(eso_skillmanager.SkillProfile,profile,true)) then
+		d("2 load skill profile " ..tostring(filename))
 		eso_skillmanager.SkillProfile = profile
 	end
 	
@@ -557,7 +565,7 @@ function eso_skillmanager.UseProfile(strName)
 	--GUI_WindowVisible(eso_skillmanager.editwindow.name,false)		
 	--GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
 	eso_skillmanager.UpdateCurrentProfileData()
-	Settings.ESOMinion.gSMlastprofileNew = strName
+	Settings.ESOMINION.gSMlastprofileNew = strName
 end
 
 function eso_skillmanager.NewProfile()
@@ -600,7 +608,7 @@ function eso_skillmanager.SaveProfile()
 
 		gSMprofile_listitems = gSMprofile_listitems..","..filename
 		gSMprofile = filename
-		Settings.ESOMinion.gSMlastprofileNew = filename
+		Settings.ESOMINION.gSMlastprofileNew = filename
 		
 		eso_skillmanager.WriteToFile(filename)
     elseif (gSMprofile ~= nil and gSMprofile ~= "None" and gSMprofile ~= "") then
@@ -614,12 +622,12 @@ end
 function eso_skillmanager.SetDefaultProfile(strName)
 	local profile = strName or gSMprofile
 	local classid = e("GetUnitClassId(player)")
-	Settings.ESOMinion.SMDefaultProfiles[classid] = profile
-	Settings.ESOMinion.SMDefaultProfiles = Settings.ESOMinion.SMDefaultProfiles
+	Settings.ESOMINION.SMDefaultProfiles[classid] = profile
+	Settings.ESOMINION.SMDefaultProfiles = Settings.ESOMINION.SMDefaultProfiles
 end
 
 function eso_skillmanager.UseDefaultProfile()
-	local defaultTable = Settings.ESOMinion.SMDefaultProfiles
+	local defaultTable = Settings.ESOMINION.SMDefaultProfiles
 	local default = nil
 	local profile = nil
 	local profileFound = false
@@ -649,6 +657,7 @@ function eso_skillmanager.UseDefaultProfile()
 	end
 	
 	gSMprofile = profileFound and default or "None"
+
 	--GUI_WindowVisible(eso_skillmanager.editwindow.name,false)	
 	--GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
 	eso_skillmanager.UpdateCurrentProfileData()
@@ -667,7 +676,7 @@ function eso_skillmanager.UpdateProfiles()
         while i and profile do				
             profile = string.gsub(profile, ".lua", "")
             profiles = profiles..","..profile
-            if ( Settings.ESOMinion.gSMlastprofileNew ~= nil and Settings.ESOMinion.gSMlastprofileNew == profile ) then
+            if ( Settings.ESOMINION.gSMlastprofileNew ~= nil and Settings.ESOMINION.gSMlastprofileNew == profile ) then
                 found = profile
             end
 			table.insert(eso_skillmanager.SkillProfiles,profile)
@@ -708,12 +717,10 @@ end
 function eso_skillmanager.UpdateCurrentProfileData()
 	local profile = gSMprofile
 	if (profile and profile ~= "") then
-		--GUI_DeleteGroup(eso_skillmanager.mainwindow.name,"ProfileSkills")
 		eso_skillmanager.SkillProfile = {}
 		eso_skillmanager.ReadFile(profile)
 		eso_skillmanager.RefreshSkillList()
-		----GUI_SizeWindow(eso_skillmanager.mainwindow.name,eso_skillmanager.mainwindow.w,eso_skillmanager.mainwindow.h)
-		--GUI_RefreshWindow(eso_skillmanager.mainwindow.name)
+		gSkillProfileNewIndex = GetKeyByValue(gSMprofile,eso_skillmanager.SkillProfiles)
 	end
 end
 function eso_skillmanager.BuildSkillsList()
@@ -1794,15 +1801,15 @@ function eso_skillmanager.Draw()
 				local doPriorityTop = 0
 				local doPriorityBottom = 0
 			
-				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
+				--GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
 				
-				if (GUI:Button("Set Weapon Prefered Profile",contentwidth,20)) then -- skill to edit
+				--[[if (GUI:Button("Set Weapon Prefered Profile",contentwidth,20)) then -- skill to edit
 					eso_skillmanager.SetPreferedList()
-				end
+				end]]
 				
-				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
+				--[[GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
 				GUI:Separator()
-				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()
+				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()]]
 				for prio,skillInfo in spairs(eso_skillmanager.SkillProfile) do
 				
 					if (GUI:Button(skillInfo.name,contentwidth - 85,20)) then -- skill to edit

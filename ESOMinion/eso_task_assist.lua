@@ -155,15 +155,15 @@ function eso_task_assist:UIInit()
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Blocks","gAssistDoBlock",GetString("assistMode"))
 	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform CC Breaks","gAssistDoBreak",GetString("assistMode"))
 	
-	gAssistTargetMode = Settings.ESOMinion.gAssistTargetMode
-	gAssistTargetType = Settings.ESOMinion.gAssistTargetType
-	gAssistInitCombat = Settings.ESOMinion.gAssistInitCombat
-	gAssistDoInterrupt = Settings.ESOMinion.gAssistDoInterrupt
-	gAssistDoExploit = Settings.ESOMinion.gAssistDoExploit
-	gAssistDoAvoid = Settings.ESOMinion.gAssistDoAvoid
+	gAssistTargetMode = Settings.ESOMINION.gAssistTargetMode
+	gAssistTargetType = Settings.ESOMINION.gAssistTargetType
+	gAssistInitCombat = Settings.ESOMINION.gAssistInitCombat
+	gAssistDoInterrupt = Settings.ESOMINION.gAssistDoInterrupt
+	gAssistDoExploit = Settings.ESOMINION.gAssistDoExploit
+	gAssistDoAvoid = Settings.ESOMINION.gAssistDoAvoid
 	
-	gAssistDoBlock = Settings.ESOMinion.gAssistDoBlock
-	gAssistDoBreak = Settings.ESOMinion.gAssistDoBreak
+	gAssistDoBlock = Settings.ESOMINION.gAssistDoBlock
+	gAssistDoBreak = Settings.ESOMINION.gAssistDoBreak
 	]=]
 end
 
@@ -208,16 +208,15 @@ Lockpicker.timer = 0
 function Lockpicker.timeRemaining()
 
 	if Lockpicker.timer > 0  then
-		return Now() - Lockpicker.timer
+		return  Lockpicker.timer - Now() 
 	end
 	return 0
 end
 function Lockpicker.OnUpdate()
-
-	if not ESO_Common_BotRunning then
-		return false
-	end
 	if (GetGameState() == ESO.GAMESTATE.INGAME) then
+		if not ESO_Common_BotRunning then
+			return false
+		end
 		if (gBotMode == GetString("assistMode") and not gAssistDoLockpick) then
 			return false
 		end
@@ -226,8 +225,8 @@ function Lockpicker.OnUpdate()
 				if Lockpicker.timer == 0 then
 					Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
 				end
-				if (Lockpicker.timeRemaining() > 0) then
-					d("lockTime = "..tostring(Lockpicker.timer))
+				local timeRemaining = Lockpicker.timeRemaining()
+				if (timeRemaining > 0) then
 					if Lockpicker.chamber == 0 then
 						for i = 1,5 do
 							local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
@@ -237,7 +236,7 @@ function Lockpicker.OnUpdate()
 								e("PlaySound(Lockpicking_Lockpicker_contact)")
 								e("PlaySound(Lockpicking_chamber_start)")
 								Lockpicker.chamber = i
-								ml_global_information.Await(500)
+								ml_global_information.Await(math.random(250,500))
 								return true
 							end
 						end
@@ -248,13 +247,13 @@ function Lockpicker.OnUpdate()
 							e("StopSettingChamber()")
 							d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
 							Lockpicker.chamber = 0
-							ml_global_information.Await(1000)
+							ml_global_information.Await(math.random(500,1000))
 							return true
 						end
 					end
 				end
 			end
-			Lockpicker.delay = Now() + 500
+			Lockpicker.delay = Now() + math.random(250,500)
 			Lockpicker.timer = 0
 		end
 	end

@@ -15,6 +15,12 @@ function esominion.SetMainVars()
 	gBotModeIndex = 1
 	gBotMode = esominion.GetSetting("gBotMode",GetString("assistMode"))
 	gBotModeList = {GetString("none")}
+	
+	gSkillProfileNewIndex = 1
+	gSMlastprofileNew = esominion.GetSetting("gSMlastprofileNew","None")
+	gSMprofile = GetString("none")
+	
+	
 	ESO_Common_BotRunning = false
 end
 
@@ -229,12 +235,11 @@ function ml_global_information.DrawMainFull()
 					--d("gSkillProfileNewIndex = "..tostring(gSkillProfileNewIndex))
 					if (changed or newval ~= gSkillProfileNewIndex) then
 						gSkillProfileNewIndex = newval
-						Settings.ESOMinion.gSkillProfileNewIndex = newval
-						Settings.ESOMinion.gSMlastprofileNew = eso_skillmanager.SkillProfiles[newval]
+						Settings.ESOMINION.gSkillProfileNewIndex = newval
+						Settings.ESOMINION.gSMlastprofileNew = eso_skillmanager.SkillProfiles[newval]
 						
-						gSMprofile = eso_skillmanager.SkillProfiles[newval]
-						Settings.ESOMinion.gSMprofile = eso_skillmanager.SkillProfiles[newval]
-						eso_skillmanager.ReadFile(gSMprofile)
+						eso_skillmanager.UseProfile(eso_skillmanager.SkillProfiles[newval])
+						eso_skillmanager.SetDefaultProfile(eso_skillmanager.SkillProfiles[newval])
 					end
 					if (GUI:Button(GetString("Start / Stop"),contentwidth,20)) then
 						ml_global_information.ToggleRun()	
@@ -267,11 +272,12 @@ function ml_global_information.DrawSmall()
 				GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .35)
 				
 				local flags = (GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoCollapse)
-				GUI:Begin("FFXIVMINION_MAIN_WINDOW_MINIMIZED", true, flags)
+				GUI:Begin("ESO_MAIN_WINDOW_MINIMIZED", true, flags)
 				local x, y = GUI:GetWindowPos()
 				local width, height = GUI:GetWindowSize()
 				local contentwidth = GUI:GetContentRegionAvailWidth()
-				local child_color = (FFXIV_Common_BotRunning == true and { r = 0, g = .10, b = 0, a = .75 }) or { r = .10, g = 0, b = 0, a = .75 }
+				
+				local child_color = (ESO_Common_BotRunning == true and { r = 0, g = .10, b = 0, a = .75 }) or { r = .10, g = 0, b = 0, a = .75 }
 				GUI:PushStyleVar(GUI.StyleVar_ChildWindowRounding,10)
 				GUI:PushStyleColor(GUI.Col_ChildWindowBg, child_color.r, child_color.g, child_color.b, child_color.a)
 				
@@ -281,7 +287,6 @@ function ml_global_information.DrawSmall()
 				GUI:EndChild()
 				if (GUI:IsItemHovered()) then
 					if (GUI:IsMouseClicked(0)) then
-						ffxivminion.DutyCurrentData = {}
 						ml_global_information.ToggleRun()
 					end
 				end	
