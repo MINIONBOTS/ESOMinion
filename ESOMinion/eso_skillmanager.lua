@@ -1644,7 +1644,7 @@ function eso_skillmanager.AddDefaultConditions()
 		local thpadv = tonumber(skill.thpadv) or 0
 		
 		if thpadv > 0  then
-			if  target.health.max < Player.hp.max * thpadv then
+			if  target.health.max < Player.health.max * thpadv then
 				return true
 			end
 		end
