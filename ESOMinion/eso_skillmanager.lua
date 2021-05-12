@@ -838,13 +838,13 @@ function eso_skillmanager.Cast( entity )
 	if (Now() < eso_skillmanager.latencyTimer) then
 		return false
 	end
-	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
+	--[[local defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	if gSKMWeaving and Now() >= eso_skillmanager.lightdelay then
 		if AbilityList:Cast(defaultAttack.id,entity.id) then
 			d("Attempting to cast ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
 			eso_skillmanager.lightdelay = Now() + 300
 		end
-	end
+	end]]
 	
 	--local pBuffCount = e(GetNumBuffs("player"))
 	local pBuffs = {}
@@ -1127,6 +1127,10 @@ function eso_skillmanager.CanCast(prio, entity)
 	local realskilldata = eso_skillmanager.skillsbyid[realID]
 	if (not realskilldata) then
 		eso_skillmanager.DebugOutput( prio, "Ability failed safeness check for "..skill.name.."["..tostring(prio).."]" )
+		if string.contains(skill.name,"Light Attack") then
+			eso_skillmanager.BuildSkillsList()
+			d("rebuild skills list fallback")
+		end
 		return 0
 	end
 
@@ -1254,7 +1258,6 @@ function eso_skillmanager.CaptureElement(newVal, varName)
 		local prio = eso_skillmanager.EditingSkill
 		if (eso_skillmanager.Variables[varName] ~= nil) then	
 			skillVar = eso_skillmanager.Variables[varName]
-			d("varName = "..tostring(varName))
 			eso_skillmanager.SkillProfile[prio][skillVar.profile] = newVal
 		end
 		eso_skillmanager.SaveProfile()

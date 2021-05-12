@@ -92,7 +92,6 @@ function esominion.Init()
 	
 	
 	ml_gui.ui_mgr:AddComponent(esomainmenu)
-	if(BehaviorManager:IsOpen()) then BehaviorManager:ToggleMenu() end
 end
 
 esominion.GUI = {
@@ -262,6 +261,50 @@ function ml_global_information.DrawSmall()
 	if (gamestate == 3) then
 		if (esominion.GUI.main.open) then		
 			if (ml_global_information.drawMode ~= 1) then
+			
+				GUI:SetNextWindowSize(190,50,GUI.SetCond_Always)
+				local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+				GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .35)
+				
+				local flags = (GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoCollapse)
+				GUI:Begin("FFXIVMINION_MAIN_WINDOW_MINIMIZED", true, flags)
+				local x, y = GUI:GetWindowPos()
+				local width, height = GUI:GetWindowSize()
+				local contentwidth = GUI:GetContentRegionAvailWidth()
+				local child_color = (FFXIV_Common_BotRunning == true and { r = 0, g = .10, b = 0, a = .75 }) or { r = .10, g = 0, b = 0, a = .75 }
+				GUI:PushStyleVar(GUI.StyleVar_ChildWindowRounding,10)
+				GUI:PushStyleColor(GUI.Col_ChildWindowBg, child_color.r, child_color.g, child_color.b, child_color.a)
+				
+				GUI:BeginChild("##label-"..gBotMode,120,35,true)
+				GUI:AlignFirstTextHeightToWidgets()
+				GUI:Text(gBotMode)
+				GUI:EndChild()
+				if (GUI:IsItemHovered()) then
+					if (GUI:IsMouseClicked(0)) then
+						ffxivminion.DutyCurrentData = {}
+						ml_global_information.ToggleRun()
+					end
+				end	
+				GUI:SameLine(contentwidth-35);
+				
+				GUI:PopStyleColor()
+				GUI:PopStyleVar()
+				
+				GUI:BeginChild("##style-switch",35,35,false)
+				GUI:Text("");
+				GUI:Image(ml_global_information.GetMainIcon(),14,14)
+				if (GUI:IsItemHovered()) then
+					if (GUI:IsMouseClicked(0)) then
+						if (ml_global_information.drawMode == 1) then
+							ml_global_information.drawMode = 0
+						else
+							ml_global_information.drawMode = 1
+						end
+					end
+				end
+				GUI:EndChild()		
+				GUI:End()
+				GUI:PopStyleColor()
 			end
 		end
 	end

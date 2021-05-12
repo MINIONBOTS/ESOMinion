@@ -24,14 +24,27 @@ function eso_task_assist:Init()
 	
 	self:AddTaskCheckCEs()
 end
-
+eso_task_assist.lastidcheck = 0
 function eso_task_assist:Process()
 	--d("AssistMode_Process->")
 	
-	if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") or not table.valid(eso_skillmanager.skillsbyindex) then
+	local needsUpdate = false
+	if Now() > eso_task_assist.lastidcheck then
+		local aggroList = EntityList("attackable,targetable,alive,aggro,maxdistance=35")
+		if not table.valid(aggroList) then
+			d("lets check main hand attack id")
+			if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
+				needsUpdate = true
+			end
+		end
+		eso_task_assist.lastidcheck = Now() + 10000
+	end
+	if not table.valid(eso_skillmanager.skillsbyindex) then
+		needsUpdate = true
+	end
+	if needsUpdate then
 		eso_skillmanager.BuildSkillsList()
 	end
-	
 	if (Player.health.current > 0) then
 		-- the client does not clear the target offsets since the 1.6 patch
 		-- this is a workaround so that players can attack manually while the bot is running
@@ -187,43 +200,55 @@ function eso_task_assist:Draw()
 	GUI:Columns()
 	GUI:Separator()
 end
+
 Lockpicker = {}
 Lockpicker.delay = 0
 Lockpicker.chamber = 0
+Lockpicker.timer = 0
 function Lockpicker.OnUpdate()
+
+	if not ESO_Common_BotRunning then
+		return false
+	end
 	if (GetGameState() == ESO.GAMESTATE.INGAME) then
 		if (gBotMode == GetString("assistMode") and not gAssistDoLockpick) then
 			return false
 		end
 		if Now() > Lockpicker.delay then
-			local lockTime = e("GetLockpickingTimeLeft()")
-			if (lockTime and lockTime > 0) then
-				if Lockpicker.chamber == 0 then
-					for i = 1,5 do
-						local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
-						if (not isChamberSolved) then
-							d("Start setting Chamber "..tostring(i)..".")
-							e("StartSettingChamber(" .. i .. ")")
-							e("PlaySound(Lockpicking_Lockpicker_contact)")
-							e("PlaySound(Lockpicking_chamber_start)")
-							Lockpicker.chamber = i
-							ml_global_information.Await(500)
+			if e("IsPlayerInteractingWithObject()") then
+				if Lockpicker.timer == 0 then
+					Lockpicker.timer = e("GetLockpickingTimeLeft()")
+				end
+				if (Lockpicker.timer > 0) then
+					d("lockTime = "..tostring(Lockpicker.timer))
+					if Lockpicker.chamber == 0 then
+						for i = 1,5 do
+							local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
+							if (not isChamberSolved) then
+								d("Start setting Chamber "..tostring(i)..".")
+								e("StartSettingChamber(" .. i .. ")")
+								e("PlaySound(Lockpicking_Lockpicker_contact)")
+								e("PlaySound(Lockpicking_chamber_start)")
+								Lockpicker.chamber = i
+								ml_global_information.Await(500)
+								return true
+							end
+						end
+					else
+						local chamberStress = e("GetSettingChamberStress()")
+						if (chamberStress >= 0.2) then
+							e("PlaySound(Lockpicking_chamber_stress)")
+							e("StopSettingChamber()")
+							d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
+							Lockpicker.chamber = 0
+							ml_global_information.Await(1000)
 							return true
 						end
-					end
-				else
-					local chamberStress = e("GetSettingChamberStress()")
-					if (chamberStress >= 0.2) then
-						e("PlaySound(Lockpicking_chamber_stress)")
-						e("StopSettingChamber()")
-						d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
-						Lockpicker.chamber = 0
-						ml_global_information.Await(1000)
-						return true
 					end
 				end
 			end
 			Lockpicker.delay = Now() + 500
+			Lockpicker.timer = 0
 		end
 	end
 	return false
