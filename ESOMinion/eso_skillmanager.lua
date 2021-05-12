@@ -384,11 +384,13 @@ end]]
 function eso_skillmanager.OnUpdate( event, tickcount )
 	
 	
-	--[[if (eso_skillmanager.doLoad == true) then
-		eso_skillmanager.LoadInit()
-		eso_skillmanager.UpdateCurrentProfileData()
-		eso_skillmanager.doLoad = false
-	end]]
+	if (GetGameState() == ESO.GAMESTATE.INGAME) then
+		if (eso_skillmanager.doLoad == true) then
+			eso_skillmanager.ModuleInit() 
+			eso_skillmanager.UpdateCurrentProfileData()
+			eso_skillmanager.doLoad = false
+		end
+	end
 	
 	if ((tickcount - eso_skillmanager.lastTick) > 100) then
 		eso_skillmanager.lastTick = tickcount
@@ -402,7 +404,6 @@ end
 
 --This is the only function that should actually read from the file.
 function eso_skillmanager.ReadFile(strFile)
-	d("read skill profile")
 	assert(type(strFile) == "string" and strFile ~= "", "[eso_skillmanager.ReadFile]: File target is not valid")
 	local filename = eso_skillmanager.profilepath..strFile..".lua"
 	--Attempt to read old files and convert them.
@@ -477,7 +478,6 @@ function eso_skillmanager.ReadFile(strFile)
 		end
 	end	
 	--Load the file, which should only be the new type.
-	d("load skill profile " ..tostring(filename))
 	local profile, e = persistence.load(filename)
 	if (ValidTable(profile)) then
 		eso_skillmanager.SkillProfile = profile.skills
@@ -514,7 +514,6 @@ function eso_skillmanager.SetGUIVar(strName, value)
 end
 
 function eso_skillmanager.CheckProfileValidity()
-d("check valid")
 	local profile = eso_skillmanager.SkillProfile
 	
 	local requiredUpdate = false
@@ -550,7 +549,6 @@ d("check valid")
 	end
 	
 	if (not deepcompare(eso_skillmanager.SkillProfile,profile,true)) then
-		d("2 load skill profile " ..tostring(filename))
 		eso_skillmanager.SkillProfile = profile
 	end
 	
@@ -848,9 +846,11 @@ function eso_skillmanager.Cast( entity )
 		
 	--[[local defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	if gSKMWeaving and Now() >= eso_skillmanager.lightdelay then
-		if AbilityList:Cast(defaultAttack.id,entity.id) then
-			d("Attempting to cast ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
-			eso_skillmanager.lightdelay = Now() + 300
+		if AbilityList:CanCast(defaultAttack.id,entity.id) == 10 then
+			if AbilityList:Cast(defaultAttack.id,entity.id) then
+				d("Attempting to cast ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
+				eso_skillmanager.lightdelay = Now() + 300
+			end
 		end
 	end]]
 	
@@ -965,20 +965,22 @@ function eso_skillmanager.Cast( entity )
 				--local realID = tonumber(skill.skillID)
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				--local action = AbilityList:Get(realID)
-				d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
-				if (AbilityList:Cast(realID,TID)) then
-					skill.timelastused = Now() + 2000
-					eso_skillmanager.prevSkillID = realID
-					eso_skillmanager.resetTimer = Now() + 4000
-					
-					local casttime = 0
-					if ( casttime > 0 ) then							
-						local minvalue = casttime
-						eso_skillmanager.latencyTimer = Now() + math.random(minvalue,minvalue + 100)
-					else
-						eso_skillmanager.latencyTimer = Now() + math.random(300,400)
+				if AbilityList:CanCast(realID,TID) == 10 then
+					d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
+					if (AbilityList:Cast(realID,TID)) then
+						skill.timelastused = Now() + 2000
+						eso_skillmanager.prevSkillID = realID
+						eso_skillmanager.resetTimer = Now() + 4000
+						
+						local casttime = 0
+						if ( casttime > 0 ) then							
+							local minvalue = casttime
+							eso_skillmanager.latencyTimer = Now() + math.random(minvalue,minvalue + 100)
+						else
+							eso_skillmanager.latencyTimer = Now() + math.random(300,400)
+						end
+						return true
 					end
-					return true
 				end
 			end
 		end
