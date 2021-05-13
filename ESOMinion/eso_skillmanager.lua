@@ -167,7 +167,7 @@ eso_skillmanager.StartingProfiles = {
 	[1] = "DragonKnight",
 	[2] = "Sorcerer",
 	[3] = "Nightblade",
-	[4] = "DragonKnight",
+	[4] = "Warden",
 	[6] = "Templar",
 }
 
@@ -335,7 +335,7 @@ function eso_skillmanager.ModuleInit()
 		Settings.ESOMINION.SMDefaultProfiles[3] = "Nightblade"
 	end
 	if (Settings.ESOMINION.SMDefaultProfiles[4] == nil) then
-		Settings.ESOMINION.SMDefaultProfiles[4] = "DragonKnight"
+		Settings.ESOMINION.SMDefaultProfiles[4] = "Warden"
 	end
 	if (Settings.ESOMINION.SMDefaultProfiles[6] == nil) then
 		Settings.ESOMINION.SMDefaultProfiles[6] = "Templar"
@@ -835,6 +835,21 @@ function eso_skillmanager.EditSkill(event)
 	
 	SKM_Prio = tonumber(event)
 end
+
+function eso_skillmanager.CastCheck( realID,TID )
+	if gSKMAltCast then
+	d("try cast 2")
+		if (AbilityList:Cast2(realID,TID)) then
+			return true
+		end
+	else
+	d("try cast 1")
+		if (AbilityList:Cast(realID,TID)) then
+			return true
+		end
+	end
+	return false
+end
 eso_skillmanager.lightdelay = 0
 function eso_skillmanager.Cast( entity )
 	if (not entity) then
@@ -967,7 +982,7 @@ function eso_skillmanager.Cast( entity )
 				--local action = AbilityList:Get(realID)
 				if AbilityList:CanCast(realID,TID) == 10 then
 					d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
-					if (AbilityList:Cast(realID,TID)) then
+					if (eso_skillmanager.CastCheck(realID,TID)) then
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000

@@ -17,7 +17,7 @@ function esominion.SetMainVars()
 	gBotModeList = {GetString("none")}
 	
 	gSkillProfileNewIndex = 1
-	gSMlastprofileNew = esominion.GetSetting("gSMlastprofileNew","None")
+	gSMlastprofileNew = esominion.GetSetting("gSMlastprofileNew",GetString("none"))
 	gSMprofile = GetString("none")
 	
 	
@@ -92,6 +92,7 @@ function esominion.Init()
 	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
 	gPreventAttackingInnocents = esominion.GetSetting("gPreventAttackingInnocents",true)
 	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)
+	gSKMAltCast = esominion.GetSetting("gSKMAltCast",false)
 	
 	
 	
@@ -348,10 +349,10 @@ end
 
 ml_global_information.throttleTick = 0
 function ml_global_information.InGameOnUpdate( event, tickcount )	
-	if ((ml_global_information.throttleTick > 0 and (tickcount - ml_global_information.throttleTick) < 35) or not Player) then
+	if (ml_global_information.throttleTick > tickcount) or not Player then
 		return false
 	end
-	ml_global_information.throttleTick = tickcount
+	ml_global_information.throttleTick = tickcount + math.random(125,225)
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
@@ -394,7 +395,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 end
 
 function ml_global_information.UpdateMode()
-	if (gBotMode == "None") then	
+	if (gBotMode == GetString("none")) then	
 		ml_task_hub:ClearQueues()
 	else	
 		local task = ml_global_information.BotModes[gBotMode]
@@ -425,7 +426,7 @@ function ml_global_information.ToggleRun()
 	--ml_marker_mgr.currentMarker = nil
 end
 function ml_global_information.UpdateMode()
-	if (gBotMode == "None") then	
+	if (gBotMode == GetString("none")) then	
 		ml_task_hub:ClearQueues()
 	else	
 		local task = esominion.modes[gBotMode]
