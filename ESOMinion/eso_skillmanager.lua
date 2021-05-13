@@ -836,20 +836,6 @@ function eso_skillmanager.EditSkill(event)
 	SKM_Prio = tonumber(event)
 end
 
-function eso_skillmanager.CastCheck( realID,TID )
-	if gSKMAltCast then
-	d("try cast 2")
-		if (AbilityList:Cast2(realID,TID)) then
-			return true
-		end
-	else
-	d("try cast 1")
-		if (AbilityList:Cast(realID,TID)) then
-			return true
-		end
-	end
-	return false
-end
 eso_skillmanager.lightdelay = 0
 function eso_skillmanager.Cast( entity )
 	if (not entity) then
@@ -982,7 +968,7 @@ function eso_skillmanager.Cast( entity )
 				--local action = AbilityList:Get(realID)
 				if AbilityList:CanCast(realID,TID) == 10 then
 					d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
-					if (eso_skillmanager.CastCheck(realID,TID)) then
+					if (AbilityList:Cast(realID,TID)) then
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000

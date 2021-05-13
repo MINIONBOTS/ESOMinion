@@ -92,7 +92,6 @@ function esominion.Init()
 	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
 	gPreventAttackingInnocents = esominion.GetSetting("gPreventAttackingInnocents",true)
 	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)
-	gSKMAltCast = esominion.GetSetting("gSKMAltCast",false)
 	
 	
 	
