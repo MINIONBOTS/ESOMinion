@@ -351,7 +351,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	if (ml_global_information.throttleTick > tickcount) or not Player then
 		return false
 	end
-	ml_global_information.throttleTick = tickcount + math.random(125,225)
+	ml_global_information.throttleTick = tickcount + math.random(125,250)
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
@@ -363,15 +363,15 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_global_information:ToggleRun() -- convert
 	end
 	
-	local pulseTime = gPulseTime or 150
+	--local pulseTime = gPulseTime or 150
 	--[[if (TimeSince(ml_global_information.lastrun2) >= pulseTime) then
 		ml_global_information.lastrun2 = tickcount
 		SkillMgr.OnUpdate()
 	end]]
 	
-	if (Now() >= ml_global_information.nextRun) then
+	--if (Now() >= ml_global_information.nextRun) then
 		
-		ml_global_information.nextRun = tickcount + pulseTime
+		--ml_global_information.nextRun = tickcount + pulseTime
 		ml_global_information.lastPulseShortened = false
 				
         if (ml_task_hub:CurrentTask() ~= nil) then
@@ -390,7 +390,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 				d("No task queued, please select a valid bot mode in the Settings drop-down menu")
 			end
 		end
-    end
+    --end
 end
 
 function ml_global_information.UpdateMode()

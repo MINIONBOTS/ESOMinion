@@ -25,18 +25,20 @@ function eso_task_assist:Init()
 	self:AddTaskCheckCEs()
 end
 eso_task_assist.lastidcheck = 0
+eso_task_assist.lastprocess = 0
 function eso_task_assist:Process()
 	--d("AssistMode_Process->")
-	
+	--d("timesince last = "..tostring(TimeSince(eso_task_assist.lastprocess)))
+	--eso_task_assist.lastprocess = Now()
 	local needsUpdate = false
-	if Now() > eso_task_assist.lastidcheck then
-		local aggroList = EntityList("attackable,targetable,alive,aggro,maxdistance=35")
-		if not table.valid(aggroList) then
+	if Now() > eso_task_assist.lastidcheck and not Player.interacting then
+		--local aggroList = EntityList("attackable,targetable,alive,aggro,maxdistance=35")
+		--if not table.valid(aggroList) then
 			d("lets check main hand attack id")
 			if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
 				needsUpdate = true
 			end
-		end
+		--end
 		eso_task_assist.lastidcheck = Now() + math.random(8000,12000)
 	end
 	if not table.valid(eso_skillmanager.skillsbyindex) then
