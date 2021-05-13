@@ -31,16 +31,16 @@ function eso_task_assist:Process()
 	--d("timesince last = "..tostring(TimeSince(eso_task_assist.lastprocess)))
 	--eso_task_assist.lastprocess = Now()
 	local needsUpdate = false
-	if Now() > eso_task_assist.lastidcheck and not Player.interacting then
+	--if Now() > eso_task_assist.lastidcheck and not Player.interacting then
 		--local aggroList = EntityList("attackable,targetable,alive,aggro,maxdistance=35")
 		--if not table.valid(aggroList) then
-			d("lets check main hand attack id")
-			if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
-				needsUpdate = true
-			end
+			--d("lets check main hand attack id")
+			--if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
+			--	needsUpdate = true
+			--end
 		--end
-		eso_task_assist.lastidcheck = Now() + math.random(8000,12000)
-	end
+		--eso_task_assist.lastidcheck = Now() + math.random(8000,12000)
+	--end
 	if not table.valid(eso_skillmanager.skillsbyindex) then
 		needsUpdate = true
 	end
@@ -63,13 +63,13 @@ function eso_task_assist:Process()
 			--if ( target and target.attackable and target.health > 0 and not target.iscritter) then
 			if ( target and target.hostile and target.health.current > 0) then
 			
-				local skillData = eso_skillmanager.skillsbyname["Light Attack"]
-				if e("ArePlayerWeaponsSheathed()") then
+				--local skillData = eso_skillmanager.skillsbyname["Light Attack"]
+				--[[if e("ArePlayerWeaponsSheathed()") then
 					AbilityList:Cast(skillData.id)
 					d("unsheathe weapon 1st")
 					ml_global_information.Await(500,1000, function () return not e("ArePlayerWeaponsSheathed()") end)
 					return false
-				end
+				end]]
 				--if (gPreventAttackingInnocents == "0" or target.hostile) then
 					--d(TimeSince(eso_task_assist.lastcast))
 					--if Now() >= eso_task_assist.lastcast then
