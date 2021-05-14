@@ -847,16 +847,15 @@ function eso_skillmanager.Cast( entity )
 	end
 	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	if gSKMWeaving and Now() >= eso_skillmanager.lightdelay then
-		if AbilityList:CanCast(defaultAttack.id,entity.id) == 10 then
+		if AbilityList:CanCast(defaultAttack.id,entity.id) == 10 and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
 			if AbilityList:Cast(defaultAttack.id,entity.id) then
-				d("Attempting to cast ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
-				eso_skillmanager.lightdelay = Now() + 300
+				d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
+				eso_skillmanager.lightdelay = Now() + math.random(300,500)
 				--eso_skillmanager.lastcast = Now()
 				--return true
 			end
 		end
 	end
-	
 	--local pBuffCount = e(GetNumBuffs("player"))
 	local pBuffs = {}
 	--[[if pBuffCount > 0 then

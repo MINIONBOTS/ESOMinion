@@ -55,7 +55,7 @@ function eso_task_assist:Process()
 	if (Player.health.current > 0) then
 		-- the client does not clear the target offsets since the 1.6 patch
 		-- this is a workaround so that players can attack manually while the bot is running
-		local target = Player:GetSoftTarget()
+		local target = esominion.getRealTarget()
 		--[[if ( gAssistTargetMode ~= "None" ) then
 			local newTarget = eso_task_assist.GetTarget()
 			if ( newTarget ~= nil and (not target or newTarget.id ~= target.id)) then

@@ -354,7 +354,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	if (ml_global_information.throttleTick > tickcount) or not Player then
 		return false
 	end
-	ml_global_information.throttleTick = tickcount + math.random(250,400)
+	ml_global_information.throttleTick = tickcount + math.random(125,250)
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
@@ -464,7 +464,19 @@ function GUI_Capture(newVal,varName,onChange,forceSave)
 
 	return newVal
 end
-
+esominion.recenttarget = {}
+esominion.recenttargetpulse = 0
+function esominion.getRealTarget()
+	if Now() < esominion.recenttargetpulse then
+		--d("old target data used")
+		return esominion.recenttarget
+	else
+		esominion.recenttarget = Player:GetSoftTarget()
+		--d("new target data pulled")
+		esominion.recenttargetpulse = Now() + math.random(150,250)
+		return esominion.recenttarget
+	end
+end
 RegisterEventHandler("Module.Initalize",esominion.Init, "esominion.Init")
 RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate,"esominion OnUpdate")
 RegisterEventHandler("Gameloop.Draw", ml_global_information.Draw,"esominion Draw")
