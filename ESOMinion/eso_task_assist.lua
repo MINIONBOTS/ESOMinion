@@ -1,4 +1,9 @@
 -- GrindMode Behavior
+Lockpicker = {}
+Lockpicker.delay = 0
+Lockpicker.chamber = 0
+Lockpicker.timer = 0
+Lockpicker.interactType = 0
 eso_task_assist = inheritsFrom(ml_task)
 eso_task_assist.name = "AssistMode"
 eso_task_assist.lastcast = 0
@@ -202,11 +207,7 @@ function eso_task_assist:Draw()
 	GUI:Columns()
 	GUI:Separator()
 end
-
---[[Lockpicker = {}
-Lockpicker.delay = 0
-Lockpicker.chamber = 0
-Lockpicker.timer = 0
+--[[
 function Lockpicker.timeRemaining()
 
 	if Lockpicker.timer > 0  then
@@ -216,6 +217,7 @@ function Lockpicker.timeRemaining()
 end
 function Lockpicker.OnUpdate()
 	if (GetGameState() == ESO.GAMESTATE.INGAME) then
+	
 		if not ESO_Common_BotRunning then
 			return false
 		end
@@ -224,41 +226,50 @@ function Lockpicker.OnUpdate()
 		end
 		if Now() > Lockpicker.delay then
 			if Player.interacting then
-				if Lockpicker.timer == 0 then
-					Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
+				if Lockpicker.interactType == 0 then
+					Lockpicker.interactType =  e("GetInteractionType()")
+					d(Lockpicker.interactType)
 				end
-				local timeRemaining = Lockpicker.timeRemaining()
-				if (timeRemaining > 0) then
-					if Lockpicker.chamber == 0 then
-						for i = 1,5 do
-							local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
-							if (not isChamberSolved) then
-								d("Start setting Chamber "..tostring(i)..".")
-								e("StartSettingChamber(" .. i .. ")")
-								e("PlaySound(Lockpicking_Lockpicker_contact)")
-								e("PlaySound(Lockpicking_chamber_start)")
-								Lockpicker.chamber = i
-								ml_global_information.Await(math.random(250,500))
+				if Lockpicker.interactType == 20 then
+					if Lockpicker.timer == 0 then
+						Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
+					end
+					local timeRemaining = Lockpicker.timeRemaining()
+					if (timeRemaining > 0) then
+						if Lockpicker.chamber == 0 then
+							for i = 1,5 do
+								local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
+								if (not isChamberSolved) then
+									d("Start setting Chamber "..tostring(i)..".")
+									e("StartSettingChamber(" .. i .. ")")
+									e("PlaySound(Lockpicking_Lockpicker_contact)")
+									e("PlaySound(Lockpicking_chamber_start)")
+									Lockpicker.chamber = i
+									ml_global_information.Await(math.random(250,500))
+									return true
+								end
+							end
+						else
+							local chamberStress = e("GetSettingChamberStress()")
+							if (chamberStress >= 0.2) then
+								e("PlaySound(Lockpicking_chamber_stress)")
+								e("StopSettingChamber()")
+								d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
+								Lockpicker.chamber = 0
+								ml_global_information.Await(math.random(500,1000))
 								return true
 							end
 						end
-					else
-						local chamberStress = e("GetSettingChamberStress()")
-						if (chamberStress >= 0.2) then
-							e("PlaySound(Lockpicking_chamber_stress)")
-							e("StopSettingChamber()")
-							d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
-							Lockpicker.chamber = 0
-							ml_global_information.Await(math.random(500,1000))
-							return true
-						end
 					end
 				end
+			else
+				Lockpicker.interactType = 0
+				Lockpicker.timer = 0
+				d(Lockpicker.interactType)
 			end
 			Lockpicker.delay = Now() + math.random(250,500)
-			Lockpicker.timer = 0
 		end
 	end
 	return false
-end
-RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")]]
+end]]
+--RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
