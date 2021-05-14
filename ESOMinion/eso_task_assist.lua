@@ -203,7 +203,7 @@ function eso_task_assist:Draw()
 	GUI:Separator()
 end
 
-Lockpicker = {}
+--[[Lockpicker = {}
 Lockpicker.delay = 0
 Lockpicker.chamber = 0
 Lockpicker.timer = 0
@@ -261,4 +261,4 @@ function Lockpicker.OnUpdate()
 	end
 	return false
 end
-RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
+RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")]]

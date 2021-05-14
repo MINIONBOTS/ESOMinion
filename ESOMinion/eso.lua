@@ -88,12 +88,15 @@ function esominion.Init()
 	end
 	
 	-- set settings on startup
-	gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
+	--[[gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
 	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
 	gPreventAttackingInnocents = esominion.GetSetting("gPreventAttackingInnocents",true)
-	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)
+	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)]]
 	
-	
+	gAssistDoLockpick = false
+	gAssistUsePotions = false
+	gPreventAttackingInnocents = false
+	gSKMWeaving = false
 	
 	
 	
@@ -351,7 +354,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	if (ml_global_information.throttleTick > tickcount) or not Player then
 		return false
 	end
-	ml_global_information.throttleTick = tickcount + math.random(125,250)
+	ml_global_information.throttleTick = tickcount + math.random(250,400)
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
