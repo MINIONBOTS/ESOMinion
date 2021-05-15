@@ -93,16 +93,6 @@ function eso_task_assist:Process()
 			end		
 		--end
 	end
-	
-	if (TableSize(self.process_elements) > 0) then
-		ml_cne_hub.clear_queue()
-		ml_cne_hub.eval_elements(self.process_elements)
-		ml_cne_hub.queue_to_execute()
-		ml_cne_hub.execute()
-		return false
-	else
-		d("no elements in process table")
-	end
 end
 
 

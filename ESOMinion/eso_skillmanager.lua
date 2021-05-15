@@ -838,6 +838,8 @@ end
 
 eso_skillmanager.lightdelay = 0
 eso_skillmanager.lastcast = 0
+eso_skillmanager.playerbuffs = {}
+eso_skillmanager.targetbuffs = {}
 function eso_skillmanager.Cast( entity )
 	if (not entity) then
 		return false
@@ -850,18 +852,35 @@ function eso_skillmanager.Cast( entity )
 		if AbilityList:CanCast(defaultAttack.id,entity.id) == 10 and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
 			if AbilityList:Cast(defaultAttack.id,entity.id) then
 				d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
-				eso_skillmanager.lightdelay = Now() + math.random(300,500)
+				eso_skillmanager.lightdelay = Now() + math.random(800,1000)
 			end
 		end
 	end
 	--local pBuffCount = e(GetNumBuffs("player"))
-	local pBuffs = {}
-	--[[if pBuffCount > 0 then
-		for i = 1 , pBuffCount do
-			table.insert(pBuffs,e(GetUnitBuffInfo("player"),i))
+	--[=[local pBuffs = {}
+	local tBuffs = {}
+	if pBuffCount > 0 then
+		for buff = 1 , pBuffCount do
+			local name = e("GetUnitBuffInfo(player, "..buff..")")
+			eso_skillmanager.targetbuffs[name] = true
 		end
-	end]]
+	else
+		eso_skillmanager.playerbuffs = {}
+	end
 	
+	local tBuffCount = e("GetNumBuffs(reticleover)")
+	if tBuffCount then
+		d("target buff count  = "..tostring(tBuffCount))
+		for buff = 1, tBuffCount do
+			local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
+			d("buff name = "..tostring(name))
+			eso_skillmanager.targetbuffs[name] = true
+		end
+	else
+		eso_skillmanager.targetbuffs = {}
+	end]=]
+
+
 	--Check for blocks/interrupts.
 	--[=[if (Player:GetNumActiveCombatTips() > 0) then
 		
@@ -965,7 +984,8 @@ function eso_skillmanager.Cast( entity )
 				--local realID = tonumber(skill.skillID)
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				--local action = AbilityList:Get(realID)
-				if AbilityList:CanCast(realID,TID) == 10 then
+				local canCast = AbilityList:CanCast(realID,TID)
+				if canCast == 10 then
 					if (AbilityList:Cast(realID,TID)) then
 						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")					
 						--d("time since delay was "..tostring(TimeSince(eso_skillmanager.latencyTimer)))
@@ -974,17 +994,17 @@ function eso_skillmanager.Cast( entity )
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000
-						if realID ~= defaultAttack.id then
-							local casttime = 0
-							if ( casttime > 0 ) then							
-								local minvalue = math.max(500,casttime)
-								eso_skillmanager.latencyTimer = Now() + math.random(minvalue,minvalue + 200)
-							else
-								eso_skillmanager.latencyTimer = Now() + math.random(500,700)
-							end
+						local casttime = 0
+						if ( casttime > 0 ) then							
+							local minvalue = math.max(800,casttime)
+							eso_skillmanager.latencyTimer = Now() + math.random(minvalue,minvalue + 200)
+						else
+							eso_skillmanager.latencyTimer = Now() + math.random(800,1000)
 						end
 						return true
 					end
+				elseif (Now() - eso_skillmanager.lastcast > 1500) then
+					d("cant cast result for [ "..tostring(skill.name).."] was ["..tostring(canCast).."]")
 				end
 			end
 		end
