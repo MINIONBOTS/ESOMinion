@@ -262,4 +262,4 @@ function Lockpicker.OnUpdate()
 	end
 	return false
 end
-RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
+--RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")

@@ -344,11 +344,13 @@ function ml_global_information.OnUpdate( event, tickcount )
 end
 
 ml_global_information.throttleTick = 0
+ml_global_information.lastPulse = 0
 function ml_global_information.InGameOnUpdate( event, tickcount )	
 	if (ml_global_information.throttleTick > tickcount) or not Player then
 		return false
 	end
-	ml_global_information.throttleTick = tickcount + math.random(125,250)
+	ml_global_information.lastPulse = math.random(350,550)
+	ml_global_information.throttleTick = tickcount + ml_global_information.lastPulse
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
@@ -467,7 +469,7 @@ function esominion.getRealTarget(force)
 	else
 		esominion.recenttarget = Player:GetSoftTarget()
 		--d("new target data pulled")
-		esominion.recenttargetpulse = Now() + math.random(250,350)
+		esominion.recenttargetpulse = Now() + ml_global_information.lastPulse
 		return esominion.recenttarget
 	end
 end
