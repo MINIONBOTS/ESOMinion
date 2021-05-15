@@ -8,7 +8,6 @@ Dev.GUI = {
 }
 
 function Dev.ModuleInit()
-	gDevScannerString = ""
 
 
 	ml_gui.ui_mgr:AddMember({ id = "ESOMINION##MENU_ACR", name = "Dev", onClick = function() Dev.GUI.open = not Dev.GUI.open end, tooltip = "Open the Dev addon."},"ESOMINION##MENU_HEADER")
@@ -273,28 +272,162 @@ function Dev.DrawCall(event, ticks )
 				end
 				GUI:TreePop()
 			end
-						
-			-- cbk: Scanner
-			if ( GUI:TreeNode("Scanner") ) then
-				if( gamestate == 3 ) then 
+
+			if ( GUI:TreeNode("Entities") ) then -- haha tities
+				if( gamestate == 3 ) then
+					GUI:NewLine()
+					GUI:Separator()
 					GUI:Separator()
 					GUI:Text("EntityList")
-					GUI:PushItemWidth(500)
-					gDevScannerString = GUI:InputText("##scanner-string",gDevScannerString);
-					GUI:PopItemWidth()
 					GUI:Separator()
-					local el = EntityList(gDevScannerString)
-					if (table.valid(el)) then
-						
-						GUI:Text("Identity");
-GUI:SameLine(200)
-						GUI:Text("Current Target");
-						
-						for i, entity in pairs(el) do
-							GUI:Text(entity.name.." ["..tostring(i).."]["..tostring(entity.contentid).."]");
-							
+					GUI:Separator()
+					if (GUI:CollapsingHeader(GetString("Filters"))) then
+						GUI:Indent()
+						GUI:PushStyleVar(GUI.StyleVar_ScrollbarSize,20)
+						GUI:BeginChild("##DevEntityListFilterScrollArea",0,152,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
+							GUI:BulletText("aggro")
+							GUI:BulletText("alive")
+							GUI:BulletText("attackable")
+							GUI:BulletText("clustered=###")
+							GUI:BulletText("contentid=###")
+							GUI:BulletText("dead")
+							GUI:BulletText("distanceto=###")
+							GUI:BulletText("exclude_contentid=###")
+							GUI:BulletText("friendly")
+							GUI:BulletText("gatherable")
+							GUI:BulletText("highesthealth")
+							GUI:BulletText("hostile")
+							GUI:BulletText("incombat")
+							GUI:BulletText("interacttype=###")
+							GUI:BulletText("isvendor")
+							GUI:BulletText("lootable")
+							GUI:BulletText("los")
+							GUI:BulletText("lowesthealth")
+							GUI:BulletText("maxdistance=###")
+							GUI:BulletText("maxhealth")
+							GUI:BulletText("maxlevel")
+							GUI:BulletText("maxpathdistance=###")
+							GUI:BulletText("mindistance=###")
+							GUI:BulletText("minhealth")
+							GUI:BulletText("minlevel")
+							GUI:BulletText("nearest")
+							GUI:BulletText("nocritter")
+							GUI:BulletText("noplayersaround=###")
+							GUI:BulletText("notincombat")
+							GUI:BulletText("notnpc")
+							GUI:BulletText("npc")
+							GUI:BulletText("onmesh")
+							GUI:BulletText("player")
+							GUI:BulletText("questinteraction")
+							GUI:BulletText("shortestpath")
+							GUI:BulletText("targetable")
+							GUI:BulletText("targeting=###")
+							GUI:BulletText("targetingme")
+							GUI:PopStyleVar()
+						GUI:EndChild()
+						GUI:Unindent()
+					end
+					GUI:Separator()
+					if (GUI:CollapsingHeader(GetString("Entities"))) then -- haha tities
+						GUI:PushStyleVar(GUI.StyleVar_ScrollbarSize,20)
+						GUI:BeginChild("##DevEntityListScrollArea",0,330,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
+						GUI:PushItemWidth(200)
+						local el = EntityList("")
+						if (table.valid(el)) then
+							for index,entity in spairs(el) do
+								if not entity.name or entity.name == "" then
+									entity.name = GetString("No Name")
+								end
+								if GUI:TreeNode(index .. " - " .. entity.name) then
+									-- .health (table)
+									GUI:BulletText(".id = "..tostring(entity.id))
+									GUI:BulletText(".name = "..tostring(entity.name))
+									GUI:BulletText(".index = "..tostring(entity.index))
+									GUI:BulletText(".contentid = "..tostring(entity.contentid))
+									GUI:BulletText(".ismoving = "..tostring(entity.ismoving))
+									GUI:BulletText(".isswimming = "..tostring(entity.isswimming))
+									GUI:BulletText(".ischanneling = "..tostring(entity.ischanneling))
+									GUI:BulletText(".targetid = "..tostring(entity.targetid))
+									GUI:BulletText(".friendly = "..tostring(entity.friendly))
+									GUI:BulletText(".hostile = "..tostring(entity.hostile))
+									GUI:BulletText(".type = "..tostring(entity.type))
+									GUI:BulletText(".los = "..tostring(entity.los))
+									GUI:BulletText(".mapid = "..tostring(entity.mapid))
+									GUI:BulletText(".distance = "..tostring(entity.distance))
+									GUI:BulletText(".distance2d = "..tostring(entity.distance2d))
+									GUI:BulletText(".pathdistance = "..tostring(entity.pathdistance))
+									GUI:BulletText(".isreachable = "..tostring(entity.isreachable))
+									if ValidTable(entity.health) then
+										if GUI:TreeNode(".health") then
+											GUI:BulletText(".percent = "..tostring(entity.health.percent))
+											GUI:BulletText(".current = "..tostring(entity.health.current))
+											GUI:BulletText(".max = "..tostring(entity.health.max))
+											GUI:TreePop()
+										end
+									end
+									if ValidTable(entity.magika) then
+										if GUI:TreeNode(".magika") then
+											GUI:BulletText(".percent = "..tostring(entity.magika.percent))
+											GUI:BulletText(".current = "..tostring(entity.magika.current))
+											GUI:BulletText(".max = "..tostring(entity.magika.max))
+											GUI:TreePop()
+										end
+									end
+									if ValidTable(entity.stamina) then
+										if GUI:TreeNode(".stamina") then
+											GUI:BulletText(".percent = "..tostring(entity.stamina.percent))
+											GUI:BulletText(".current = "..tostring(entity.stamina.current))
+											GUI:BulletText(".max = "..tostring(entity.stamina.max))
+											GUI:TreePop()
+										end
+									end
+									if ValidTable(entity.pos) then
+										if GUI:TreeNode(".pos - Mesh Space Position") then
+											GUI:BulletText(".x = "..tostring(entity.pos.x))
+											GUI:BulletText(".y = "..tostring(entity.pos.y))
+											GUI:BulletText(".z = "..tostring(entity.pos.z))
+											GUI:BulletText(".height = "..tostring(entity.pos.height))
+											GUI:TreePop()
+										end
+									end
+									if ValidTable(entity.worldpos) then
+										if GUI:TreeNode(".worldpos - Game World Position") then
+											GUI:BulletText(".x = "..tostring(entity.worldpos.x))
+											GUI:BulletText(".y = "..tostring(entity.worldpos.y))
+											GUI:BulletText(".z = "..tostring(entity.worldpos.z))
+											GUI:BulletText(".h = "..tostring(entity.worldpos.h))
+											GUI:BulletText(".height = "..tostring(entity.worldpos.height))
+											GUI:TreePop()
+										end
+									end
+									if ValidTable(entity.renderpos) then
+										if GUI:TreeNode(".renderpos - Game's Render Position") then
+											GUI:BulletText(".x = "..tostring(entity.renderpos.x))
+											GUI:BulletText(".y = "..tostring(entity.renderpos.y))
+											GUI:BulletText(".z = "..tostring(entity.renderpos.z))
+											GUI:BulletText(".h = "..tostring(entity.renderpos.h))
+											GUI:BulletText(".height = "..tostring(entity.renderpos.height))
+											GUI:TreePop()
+										end
+									end
+									if ValidTable(entity.meshpos) then
+										if GUI:TreeNode(".meshpos") then
+											GUI:BulletText(".x = "..tostring(entity.meshpos.x))
+											GUI:BulletText(".y = "..tostring(entity.meshpos.y))
+											GUI:BulletText(".z = "..tostring(entity.meshpos.z))
+											GUI:BulletText(".distance = "..tostring(entity.meshpos.distance))
+											GUI:BulletText(".meshdistance = "..tostring(entity.meshpos.meshdistance))
+											GUI:TreePop()
+										end
+									end
+									GUI:TreePop()
+								end
+							end
 						end
-						
+						GUI:PopItemWidth()
+						GUI:PopStyleVar()
+						GUI:EndChild()
+						GUI:Separator()
 					end
 				else
 					GUI:Text("Not Ingame...")
@@ -315,19 +448,19 @@ GUI:SameLine(200)
 					GUI:Indent()
 					GUI:TextWrapped(GetString("No Target Skills"))
 					GUI:Indent()
-					GUI:InputText("##DevCastNote1","AbilityList:Cast('Ability ID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
-					GUI:InputText("##DevCastNote2","AbilityList:Cast2('Ability ID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:InputText("##DevCastNote1","AbilityList:Cast('AbilityID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:InputText("##DevCastNote2","AbilityList:Cast2('AbilityID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
 					GUI:Unindent()
 					GUI:NewLine()
 					GUI:TextWrapped(GetString("Single Target Skills"))
 					GUI:Indent()
-					GUI:InputText("##DevCastNote3","AbilityList:Cast('Ability ID, Target ID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
-					GUI:InputText("##DevCastNote4","AbilityList:Cast2('Ability ID, Target ID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:InputText("##DevCastNote3","AbilityList:Cast('AbilityID, TargetID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:InputText("##DevCastNote4","AbilityList:Cast2('AbilityID, TargetID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
 					GUI:Unindent()
 					GUI:NewLine()
 					GUI:TextWrapped(GetString("Ground Target Skills"))
 					GUI:Indent()
-					GUI:InputText("##DevCastNote5","AbilityList:Cast('Ability ID, X, Y, Z')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:InputText("##DevCastNote5","AbilityList:Cast('AbilityID, X, Y, Z')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
 					GUI:Unindent()
 					GUI:Unindent()
 					GUI:NewLine()
@@ -338,7 +471,7 @@ GUI:SameLine(200)
 					GUI:Separator()
 					GUI:Separator()
 					GUI:BeginChild("##DevAbilityScrollArea",0,165,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
-					if not table.valid(eso_skillmanager.skillsbyindex) then
+					if eso_skillmanager.lastskillidcheck ~= e("GetAbilityIdByIndex(1)") or not table.valid(eso_skillmanager.skillsbyindex) then
 						eso_skillmanager.BuildSkillsList()
 					end
 					
@@ -373,15 +506,18 @@ GUI:SameLine(200)
 			end
 -- END ACTIONLIST
 
-			
-
-			-- cbk: Utility
 			if ( GUI:TreeNode("Utility Functions")) then
 				if( gamestate == 3 ) then
 					GUI:PushItemWidth(200)
 					GUI:BulletText("GetGameState") GUI:SameLine(200) GUI:InputText("##DevUT0",tostring(GetGameState()))
-
 					GUI:PopItemWidth()
+					GUI:Indent()
+					GUI:BulletText("1: " .. GetString("Character Select"))
+					GUI:BulletText("2: " .. GetString("Main Menu"))
+					GUI:BulletText("3: " .. GetString("In Game"))
+					GUI:BulletText("4: " .. GetString("Error"))
+					GUI:BulletText("5: " .. GetString("Loading"))
+					GUI:Unindent()
 				end
 				GUI:TreePop()
 			end
