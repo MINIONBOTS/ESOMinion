@@ -347,16 +347,48 @@ function Dev.DrawCall(event, ticks )
 				GUI:TreePop()
 			end
 						
-			-- cbk: ActionList
-			if ( GUI:TreeNode("ActionList")) then
+			-- cbk: AbilityList
+			if ( GUI:TreeNode("AbilityList")) then
 				if( gamestate == 3 ) then 
+					GUI:NewLine()
+					GUI:Separator()
+					GUI:Separator()
+					GUI:Text(GetString("Cast Functons"))
+					GUI:Separator()
+					GUI:Separator()
+					GUI:NewLine()
+					GUI:Indent()
+					GUI:TextWrapped(GetString("No Target Skills"))
+					GUI:Indent()
+					GUI:InputText("##DevCastNote1","AbilityList:Cast('Ability ID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:InputText("##DevCastNote2","AbilityList:Cast2('Ability ID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:Unindent()
+					GUI:NewLine()
+					GUI:TextWrapped(GetString("Single Target Skills"))
+					GUI:Indent()
+					GUI:InputText("##DevCastNote3","AbilityList:Cast('Ability ID, Target ID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:InputText("##DevCastNote4","AbilityList:Cast2('Ability ID, Target ID')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:Unindent()
+					GUI:NewLine()
+					GUI:TextWrapped(GetString("Ground Target Skills"))
+					GUI:Indent()
+					GUI:InputText("##DevCastNote5","AbilityList:Cast('Ability ID, X, Y, Z')",GUI.InputTextFlags_ReadOnly+GUI.InputTextFlags_AutoSelectAll)
+					GUI:Unindent()
+					GUI:Unindent()
+					GUI:NewLine()
+					GUI:Separator( )
 					
+					GUI:Separator( )
+					GUI:TextWrapped(GetString("Ability List"))
+					GUI:Separator()
+					GUI:Separator()
+					GUI:BeginChild("##DevAbilityScrollArea",0,165,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
 					if eso_skillmanager.lastskillidcheck ~= e("GetAbilityIdByIndex(1)") or not table.valid(eso_skillmanager.skillsbyindex) then
 						eso_skillmanager.BuildSkillsList()
 					end
 					
 					GUI:PushItemWidth(200)
-					if (table.valid(eso_skillmanager.skillsbyindex)) then
+					if (table.valid(eso_skillmanager.skillsbyid)) then
 						local softTarget = Player:GetSoftTarget()
 						
 						for index,skillInfo in spairs(eso_skillmanager.skillsbyindex) do
@@ -377,6 +409,8 @@ function Dev.DrawCall(event, ticks )
 						end
 					end
 					GUI:PopItemWidth()
+					GUI:EndChild()
+					GUI:NewLine()
 				else
 					GUI:Text("Not Ingame...")
 				end
