@@ -24,8 +24,8 @@ end
 
 function eso_task_assist:Init()
 	
-	local ke_usePotion = ml_element:create( "UsePotion", c_usepotion, e_usepotion, 15 )
-    self:add(ke_usePotion, self.process_elements)
+	--local ke_usePotion = ml_element:create( "UsePotion", c_usepotion, e_usepotion, 15 )
+    --self:add(ke_usePotion, self.process_elements)
 	
 	self:AddTaskCheckCEs()
 end
@@ -56,6 +56,7 @@ function eso_task_assist:Process()
 		-- the client does not clear the target offsets since the 1.6 patch
 		-- this is a workaround so that players can attack manually while the bot is running
 		local target = esominion.getRealTarget()
+
 		--[[if ( gAssistTargetMode ~= "None" ) then
 			local newTarget = eso_task_assist.GetTarget()
 			if ( newTarget ~= nil and (not target or newTarget.id ~= target.id)) then
@@ -207,7 +208,7 @@ function eso_task_assist:Draw()
 	GUI:Columns()
 	GUI:Separator()
 end
---[[
+
 function Lockpicker.timeRemaining()
 
 	if Lockpicker.timer > 0  then
@@ -265,11 +266,10 @@ function Lockpicker.OnUpdate()
 			else
 				Lockpicker.interactType = 0
 				Lockpicker.timer = 0
-				d(Lockpicker.interactType)
 			end
 			Lockpicker.delay = Now() + math.random(250,500)
 		end
 	end
 	return false
-end]]
---RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
+end
+RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")

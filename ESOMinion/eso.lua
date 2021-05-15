@@ -88,17 +88,11 @@ function esominion.Init()
 	end
 	
 	-- set settings on startup
-	--[[gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
+	gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
 	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
 	gPreventAttackingInnocents = esominion.GetSetting("gPreventAttackingInnocents",true)
-	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)]]
-	
-	gAssistDoLockpick = false
-	gAssistUsePotions = false
-	gPreventAttackingInnocents = false
-	gSKMWeaving = false
-	
-	
+	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)
+		
 	
 	ml_gui.ui_mgr:AddComponent(esomainmenu)
 end
@@ -466,14 +460,14 @@ function GUI_Capture(newVal,varName,onChange,forceSave)
 end
 esominion.recenttarget = {}
 esominion.recenttargetpulse = 0
-function esominion.getRealTarget()
-	if Now() < esominion.recenttargetpulse then
+function esominion.getRealTarget(force)
+	if Now() < esominion.recenttargetpulse and table.valid(esominion.recenttargetpulse) and not force then
 		--d("old target data used")
 		return esominion.recenttarget
 	else
 		esominion.recenttarget = Player:GetSoftTarget()
 		--d("new target data pulled")
-		esominion.recenttargetpulse = Now() + math.random(150,250)
+		esominion.recenttargetpulse = Now() + math.random(250,350)
 		return esominion.recenttarget
 	end
 end

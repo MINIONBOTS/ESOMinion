@@ -851,8 +851,6 @@ function eso_skillmanager.Cast( entity )
 			if AbilityList:Cast(defaultAttack.id,entity.id) then
 				d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
 				eso_skillmanager.lightdelay = Now() + math.random(300,500)
-				--eso_skillmanager.lastcast = Now()
-				--return true
 			end
 		end
 	end
@@ -969,20 +967,21 @@ function eso_skillmanager.Cast( entity )
 				--local action = AbilityList:Get(realID)
 				if AbilityList:CanCast(realID,TID) == 10 then
 					if (AbilityList:Cast(realID,TID)) then
-					d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")					
-					d("time since delay was "..tostring(TimeSince(eso_skillmanager.latencyTimer)))
-					d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
+						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")					
+						--d("time since delay was "..tostring(TimeSince(eso_skillmanager.latencyTimer)))
+						d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
 						eso_skillmanager.lastcast = Now()
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000
-						
-						local casttime = 0
-						if ( casttime > 0 ) then							
-							local minvalue = math.max(500,casttime)
-							eso_skillmanager.latencyTimer = Now() + math.random(minvalue,minvalue + 200)
-						else
-							eso_skillmanager.latencyTimer = Now() + math.random(500,700)
+						if realID ~= defaultAttack.id then
+							local casttime = 0
+							if ( casttime > 0 ) then							
+								local minvalue = math.max(500,casttime)
+								eso_skillmanager.latencyTimer = Now() + math.random(minvalue,minvalue + 200)
+							else
+								eso_skillmanager.latencyTimer = Now() + math.random(500,700)
+							end
 						end
 						return true
 					end
@@ -1504,7 +1503,6 @@ function eso_skillmanager.AddDefaultConditions()
 		
 		local throttle = tonumber(skill.throttle) or 0
 		if ( throttle > 0 and skill.timelastused and TimeSince(skill.timelastused) < throttle) then 
-				d("return true 0")
 			return true
 		end
 		return false
@@ -1945,6 +1943,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "maxRange", variable = "SKM_MaxR", width = 50, tooltip = "Maximum range the skill can be used."}
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PSkillID",SKM_PSkillID),"SKM_PSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill NOT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should NOT be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPSkillID",SKM_NPSkillID),"SKM_NPSkillID"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Throttle Skill",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Delay reuse of skill.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THROTTLE",SKM_THROTTLE,0,0),"SKM_THROTTLE"); GUI:NextColumn();
 		GUI:Columns(1)
 	end
 	
