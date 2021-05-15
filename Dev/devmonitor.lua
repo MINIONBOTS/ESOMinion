@@ -471,7 +471,7 @@ function Dev.DrawCall(event, ticks )
 					GUI:Separator()
 					GUI:Separator()
 					GUI:BeginChild("##DevAbilityScrollArea",0,165,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
-					if eso_skillmanager.lastskillidcheck ~= e("GetAbilityIdByIndex(1)") or not table.valid(eso_skillmanager.skillsbyindex) then
+					if not table.valid(eso_skillmanager.skillsbyindex) then
 						eso_skillmanager.BuildSkillsList()
 					end
 					
