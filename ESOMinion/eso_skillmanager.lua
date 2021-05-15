@@ -1501,7 +1501,7 @@ function eso_skillmanager.AddDefaultConditions()
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local target = eso_skillmanager.CurrentTarget
 		
-		local throttle = tonumber(skill.throttle) or 0
+		local throttle = tonumber(skill.throttle) * 1000 or 0
 		if ( throttle > 0 and skill.timelastused and TimeSince(skill.timelastused) < throttle) then 
 			return true
 		end
