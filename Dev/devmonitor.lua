@@ -2,6 +2,45 @@ Dev = { }
 Dev.lastticks = 0
 Dev.running = false
 Dev.curTask = nil
+
+Dev.aggro = false
+Dev.alive = false
+Dev.attackable = false
+Dev.clustered = ""
+Dev.contentid = ""
+Dev.dead = false
+Dev.distanceto = ""
+Dev.exclude_contentid = ""
+Dev.friendly = false
+Dev.gatherable = false
+Dev.highesthealth = false
+Dev.hostile = false
+Dev.incombat = false
+Dev.interacttype = ""
+Dev.isvendor = false
+Dev.lootable = false
+Dev.los = false
+Dev.lowesthealth = false
+Dev.maxdistance = ""
+Dev.maxhealth = ""
+Dev.maxlevel = ""
+Dev.maxpathdistance = ""
+Dev.mindistance = ""
+Dev.minhealth = ""
+Dev.nearest = false
+Dev.nocritter = false
+Dev.noplayersaround = false
+Dev.notincombat = false
+Dev.notnpc= false
+Dev.npc = false
+Dev.onmesh = false
+Dev.player= false
+Dev.questinteraction = false
+Dev.shortestpath = false
+Dev.targetable = false
+Dev.targeting = ""
+Dev.targetingme = false
+
 Dev.GUI = {
 	open = false,
 	visible = true,
@@ -303,44 +342,46 @@ function Dev.DrawCall(event, ticks )
 							GUI:Indent()
 							GUI:PushStyleVar(GUI.StyleVar_ScrollbarSize,20)
 							GUI:BeginChild("##DevEntityListFilterScrollArea",0,152,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
-								GUI:BulletText("aggro")
-								GUI:BulletText("alive")
-								GUI:BulletText("attackable")
-								GUI:BulletText("clustered=###")
-								GUI:BulletText("contentid=###")
-								GUI:BulletText("dead")
-								GUI:BulletText("distanceto=###")
-								GUI:BulletText("exclude_contentid=###")
-								GUI:BulletText("friendly")
-								GUI:BulletText("gatherable")
-								GUI:BulletText("highesthealth")
-								GUI:BulletText("hostile")
-								GUI:BulletText("incombat")
-								GUI:BulletText("interacttype=###")
-								GUI:BulletText("isvendor")
-								GUI:BulletText("lootable")
-								GUI:BulletText("los")
-								GUI:BulletText("lowesthealth")
-								GUI:BulletText("maxdistance=###")
-								GUI:BulletText("maxhealth")
-								GUI:BulletText("maxlevel")
-								GUI:BulletText("maxpathdistance=###")
-								GUI:BulletText("mindistance=###")
-								GUI:BulletText("minhealth")
-								GUI:BulletText("minlevel")
-								GUI:BulletText("nearest")
-								GUI:BulletText("nocritter")
-								GUI:BulletText("noplayersaround=###")
-								GUI:BulletText("notincombat")
-								GUI:BulletText("notnpc")
-								GUI:BulletText("npc")
-								GUI:BulletText("onmesh")
-								GUI:BulletText("player")
-								GUI:BulletText("questinteraction")
-								GUI:BulletText("shortestpath")
-								GUI:BulletText("targetable")
-								GUI:BulletText("targeting=###")
-								GUI:BulletText("targetingme")
+
+
+								Dev.aggro = GUI:Checkbox(".aggro", Dev.aggro)
+								Dev.alive = GUI:Checkbox(".alive", Dev.alive)
+								Dev.attackable = GUI:Checkbox(".attackable", Dev.attackable)
+								GUI:PushItemWidth(100); Dev.clustered = GUI:InputText("clustered",Dev.clustered); GUI:PopItemWidth();
+								GUI:PushItemWidth(100); Dev.contentid = GUI:InputText("contentid",Dev.contentid); GUI:PopItemWidth();
+								Dev.dead = GUI:Checkbox(".dead", Dev.dead)
+								GUI:PushItemWidth(100); Dev.distanceto = GUI:InputText("distanceto",Dev.distanceto); GUI:PopItemWidth();
+								GUI:PushItemWidth(100); Dev.exclude_contentid = GUI:InputText("exclude_contentid",Dev.exclude_contentid); GUI:PopItemWidth();
+								Dev.friendly = GUI:Checkbox(".friendly", Dev.friendly)
+								Dev.gatherable = GUI:Checkbox(".gatherable", Dev.gatherable)
+								Dev.highesthealth = GUI:Checkbox(".highesthealth", Dev.highesthealth)
+								Dev.hostile = GUI:Checkbox(".hostile", Dev.hostile)
+								Dev.incombat = GUI:Checkbox(".incombat", Dev.incombat)
+								GUI:PushItemWidth(100); Dev.interacttype = GUI:InputText("interacttype",Dev.interacttype); GUI:PopItemWidth();
+								Dev.isvendor = GUI:Checkbox(".isvendor", Dev.isvendor)
+								Dev.lootable = GUI:Checkbox(".lootable", Dev.lootable)
+								Dev.los = GUI:Checkbox(".los", Dev.los)
+								Dev.lowesthealth = GUI:Checkbox(".lowesthealth", Dev.lowesthealth)
+								GUI:PushItemWidth(100); Dev.maxdistance = GUI:InputText("maxdistance",Dev.maxdistance); GUI:PopItemWidth();
+								GUI:PushItemWidth(100); Dev.maxhealth = GUI:InputText("maxhealth",Dev.maxhealth); GUI:PopItemWidth();
+								GUI:PushItemWidth(100); Dev.maxlevel = GUI:InputText("maxlevel",Dev.maxlevel); GUI:PopItemWidth();
+								GUI:PushItemWidth(100); Dev.maxpathdistance = GUI:InputText("maxpathdistance",Dev.maxpathdistance); GUI:PopItemWidth();
+								GUI:PushItemWidth(100); Dev.mindistance = GUI:InputText("mindistance",Dev.mindistance); GUI:PopItemWidth();
+								GUI:PushItemWidth(100); Dev.minhealth = GUI:InputText("minhealth",Dev.minhealth); GUI:PopItemWidth();
+								Dev.nearest = GUI:Checkbox(".nearest", Dev.nearest)
+								Dev.nocritter = GUI:Checkbox(".nocritter", Dev.nocritter)
+								Dev.noplayersaround = GUI:Checkbox(".noplayersaround", Dev.noplayersaround)
+								Dev.notincombat = GUI:Checkbox(".notincombat", Dev.notincombat)
+								Dev.notnpc = GUI:Checkbox(".notnpc", Dev.notnpc)
+								Dev.npc = GUI:Checkbox(".npc", Dev.npc)
+								Dev.onmesh = GUI:Checkbox(".onmesh", Dev.onmesh)
+								Dev.player = GUI:Checkbox(".player", Dev.player)
+								Dev.questinteraction = GUI:Checkbox(".questinteraction", Dev.questinteraction)
+								Dev.shortestpath = GUI:Checkbox(".shortestpath", Dev.shortestpath)
+								Dev.targetable = GUI:Checkbox(".targetable", Dev.targetable)
+								GUI:PushItemWidth(100); Dev.targeting = GUI:InputText("targeting",Dev.targeting); GUI:PopItemWidth();
+								Dev.targetingme = GUI:Checkbox(".targetingme", Dev.targetingme)
+
 								GUI:PopStyleVar()
 							GUI:EndChild()
 							GUI:Unindent()
@@ -350,13 +391,165 @@ function Dev.DrawCall(event, ticks )
 							GUI:PushStyleVar(GUI.StyleVar_ScrollbarSize,20)
 							GUI:BeginChild("##DevEntityListScrollArea",0,330,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
 							GUI:PushItemWidth(200)
-							local el = EntityList("")
+							gDevScannerString = ""
+							if Dev.aggro then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("aggro")
+							end
+							if Dev.alive then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("alive")
+							end
+							if Dev.attackable then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("attackable")
+							end
+							if Dev.clustered ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("clustered="..tostring(Dev.clustered))
+							end
+							if Dev.contentid ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("contentid="..tostring(Dev.contentid))
+							end
+							if Dev.dead then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("dead")
+							end
+							if Dev.distanceto ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("distanceto="..tostring(Dev.distanceto))
+							end
+							if Dev.exclude_contentid ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("exclude_contentid="..tostring(Dev.exclude_contentid))
+							end
+							if Dev.friendly then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("friendly")
+							end
+							if Dev.gatherable then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("gatherable")
+							end
+							if Dev.highesthealth then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("highesthealth")
+							end
+							if Dev.hostile then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("hostile")
+							end
+							if Dev.incombat then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("incombat")
+							end
+							if Dev.interacttype ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("interacttype="..tostring(Dev.interacttype))
+							end
+							if Dev.isvendor then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("isvendor")
+							end
+							if Dev.lootable then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("lootable")
+							end
+							if Dev.los then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("los")
+							end
+							if Dev.lowesthealth then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("lowesthealth")
+							end
+							if Dev.maxdistance ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("maxdistance="..tostring(Dev.maxdistance))
+							end
+							if Dev.maxhealth ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("maxhealth="..tostring(Dev.maxhealth))
+							end
+							if Dev.maxlevel ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("maxlevel="..tostring(Dev.maxlevel))
+							end
+							if Dev.maxpathdistance ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("maxpathdistance="..tostring(Dev.maxpathdistance))
+							end
+							if Dev.mindistance ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("mindistance="..tostring(Dev.mindistance))
+							end
+							if Dev.minhealth ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("minhealth="..tostring(Dev.minhealth))
+							end
+							if Dev.nearest then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("nearest")
+							end
+							if Dev.nocritter then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("nocritter")
+							end
+							if Dev.noplayersaround then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("noplayersaround")
+							end
+							if Dev.notincombat then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("notincombat")
+							end
+							if Dev.notnpc then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("notnpc")
+							end
+							if Dev.npc then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("npc")
+							end
+							if Dev.onmesh then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("onmesh")
+							end
+							if Dev.player then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("player")
+							end
+							if Dev.questinteraction then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("questinteraction")
+							end
+							if Dev.shortestpath then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("shortestpath")
+							end
+							if Dev.targetable then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("targetable")
+							end
+							if Dev.targeting ~= "" then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("targeting="..tostring(Dev.targeting))
+							end
+							if Dev.targetingme then
+								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
+								gDevScannerString = gDevScannerString..tostring("targetingme")
+							end
+
+							d(gDevScannerString)
+
+							local el = EntityList(gDevScannerString)
 							if (table.valid(el)) then
 								for index,entity in spairs(el) do
 									if not entity.name or entity.name == "" then
 										entity.name = GetString("No Name")
 									end
-									if GUI:TreeNode(index .. " - " .. entity.name) then
+									if GUI:TreeNode(entity.contentid .. " - " .. entity.name) then
 										-- .health (table)
 										GUI:BulletText(".id = "..tostring(entity.id))
 										GUI:BulletText(".name = "..tostring(entity.name))
@@ -538,7 +731,7 @@ function Dev.DrawCall(event, ticks )
 					GUI:BulletText("2: " .. GetString("Main Menu"))
 					GUI:BulletText("3: " .. GetString("In Game"))
 					GUI:BulletText("4: " .. GetString("Error"))
-					GUI:BulletText("6: " .. GetString("Loading"))
+					GUI:BulletText("5: " .. GetString("Loading"))
 					GUI:Unindent()
 				end
 				GUI:TreePop()

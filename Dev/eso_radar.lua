@@ -407,7 +407,12 @@ end
 function eso_radar.Radar() -- Table
 	--if Now() > lastupdate + 25 then
 	--lastupdate = Now()
-		local EntityTable = EntityList("")
+		local scanString = ""
+		if (eso_radar.Options[1][2].Enabled or eso_radar.Options[1][1].Enabled) then
+			if scanString ~= "" then scanString = scanString..tostring(",") end
+			scanString = scanString..tostring("gatherable")
+		end
+		local EntityTable = EntityList(scanString)
 		if ValidTable(EntityTable) then
 			-- Update/Clean table.
 			if ValidTable(RadarTable) then
@@ -438,6 +443,10 @@ function eso_radar.Radar() -- Table
 				if RadarTable[ID] == nil then
 					local Colour = ""
 					local Draw = false
+					if (eso_radar.Options[1][2].Enabled or eso_radar.Options[1][1].Enabled) then
+						Colour = eso_radar.Options[1][1].ColourU32
+						Draw = true
+					end
 					local CustomName = false
 					local econtentid = e.contentid
 					local eattackable = e.attackable
@@ -450,93 +459,8 @@ function eso_radar.Radar() -- Table
 							if eso_radar.CustomList[econtentid].Name ~= "" then d("Updating Name") ename = eso_radar.CustomList[econtentid].Name end -- Custom name overwite.
 							Draw = true
 							CustomName = true
-						-- Hunts.
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][3].Enabled) and eso_radar.HuntFilters.ARR.S[econtentid] == true) then -- ARR S Rank.
-							Colour = eso_radar.Options[2][3].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][2].Enabled) and eso_radar.HuntFilters.ARR.A[econtentid] == true) then -- ARR A Rank.
-							Colour = eso_radar.Options[2][2].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][1].Enabled) and eso_radar.HuntFilters.ARR.B[econtentid] == true) then -- ARR B Rank.
-							Colour = eso_radar.Options[2][1].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][6].Enabled) and eso_radar.HuntFilters.HW.S[econtentid] == true) then -- HW S Rank.
-							Colour = eso_radar.Options[2][6].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][5].Enabled) and eso_radar.HuntFilters.HW.A[econtentid] == true) then -- HW A Rank.
-							Colour = eso_radar.Options[2][5].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][4].Enabled) and eso_radar.HuntFilters.HW.B[econtentid] == true) then -- HW B Rank.
-							Colour = eso_radar.Options[2][4].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][9].Enabled) and eso_radar.HuntFilters.StB.S[econtentid] == true) then -- StB S Rank.
-							Colour = eso_radar.Options[2][9].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][8].Enabled) and eso_radar.HuntFilters.StB.A[econtentid] == true) then -- StB A Rank.
-							Colour = eso_radar.Options[2][8].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][7].Enabled) and eso_radar.HuntFilters.StB.B[econtentid] == true) then -- StB B Rank.
-							Colour = eso_radar.Options[2][7].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][12].Enabled) and eso_radar.HuntFilters.ShB.S[econtentid] == true) then -- ShB S/SS Rank.
-							Colour = eso_radar.Options[2][12].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][11].Enabled) and eso_radar.HuntFilters.ShB.A[econtentid] == true) then -- ShB A Rank.
-							Colour = eso_radar.Options[2][11].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][1].Enabled or eso_radar.Options[2][10].Enabled) and eso_radar.HuntFilters.ShB.B[econtentid] == true) then -- ShB B Rank.
-							Colour = eso_radar.Options[2][10].ColourU32
-							Draw = true
-						-- End of hunts.
-						-- Start Of Deep Dungeon
-						elseif (eso_radar.Options[3][1].Enabled and eso_radar.DeepDungeonFilters.Passage[econtentid] == true) then -- Passage
-							Colour = eso_radar.Options[3][1].ColourU32
-							Draw = true
-						elseif (eso_radar.Options[3][2].Enabled and eso_radar.DeepDungeonFilters.Return[econtentid] == true) then -- Return
-							Colour = eso_radar.Options[3][2].ColourU32
-							Draw = true
-						elseif (eso_radar.Options[3][3].Enabled and eso_radar.DeepDungeonFilters.SilverChest[econtentid] == true) then -- Silver Chest
-							Colour = eso_radar.Options[3][3].ColourU32
-							Draw = true
-						elseif (eso_radar.Options[3][4].Enabled and eso_radar.DeepDungeonFilters.GoldChest[econtentid] == true) then -- Gold Chest
-							Colour = eso_radar.Options[3][4].ColourU32
-							Draw = true
-						elseif (eso_radar.Options[3][5].Enabled and eso_radar.DeepDungeonFilters.BronzeChest[econtentid] == true) then -- Bronze Chest
-							Colour = eso_radar.Options[3][5].ColourU32
-							Draw = true
-						elseif (eso_radar.Options[3][6].Enabled and eso_radar.DeepDungeonFilters.BandedCoffer[econtentid] == true) then -- Banded Coffer
-							Colour = eso_radar.Options[3][6].ColourU32
-							Draw = true
-						elseif (eso_radar.Options[3][7].Enabled and eso_radar.DeepDungeonFilters.Hoard[econtentid] == true) then -- Hoard
-							Colour = eso_radar.Options[3][7].ColourU32
-							Draw = true
-						elseif (eso_radar.Options[3][8].Enabled and eso_radar.DeepDungeonFilters.Traps[econtentid] == true) then -- Traps
-							Colour = eso_radar.Options[3][8].ColourU32
-							Draw = true
-						-- End Of Deep Dungeon
-						elseif ((eso_radar.Options[1][8].Enabled or eso_radar.Options[1][2].Enabled) and eattackable and e.fateid ~= 0) then -- Attackable Fates.
+						elseif eso_radar.Options[1][2].Enabled then -- All remaining entities.
 							Colour = eso_radar.Options[1][2].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][8].Enabled or eso_radar.Options[1][1].Enabled) and eattackable) then -- Attackable.
-							Colour = eso_radar.Options[1][1].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][8].Enabled or eso_radar.Options[1][3].Enabled) and e.cangather) then -- Gatherable.
-							Colour = eso_radar.Options[1][3].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][8].Enabled or eso_radar.Options[1][4].Enabled) and efriendly and etype == 1) then -- Players.
-							Colour = eso_radar.Options[1][4].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][8].Enabled or eso_radar.Options[1][5].Enabled) and efriendly and etype == 3) then -- NPCs.
-							Colour = eso_radar.Options[1][5].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][8].Enabled or eso_radar.Options[1][7].Enabled) and ((econtentid >= 2007965 and econtentid <= 2008024) or (econtentid >= 2006186 and econtentid <= 2006234) or (econtentid >= 2006186 and econtentid <= 2006234))) then -- Event objects.
-							Colour = eso_radar.Options[1][7].ColourU32
-							Draw = true
-						elseif ((eso_radar.Options[1][8].Enabled or eso_radar.Options[1][6].Enabled) and (etype == 0 or etype == 5 or etype == 7)) then -- Event objects.
-							Colour = eso_radar.Options[1][6].ColourU32
-							Draw = true
-						elseif eso_radar.Options[1][8].Enabled then -- All remaining entities.
-							Colour = eso_radar.Options[1][8].ColourU32
 							Draw = true
 						end
 						if Draw then -- Write to table.
@@ -553,12 +477,21 @@ end
 
 function eso_radar.AddPreset()
 	local PresetData = {
+		[62] = { ["Name"] = "Culumbine", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[478] = { ["Name"] = "Nirn Root", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[514] = { ["Name"] = "Blue Entolomap", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[515] = { ["Name"] = "Emetic Russula", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[517] = { ["Name"] = "Namira's Rot", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[518] = { ["Name"] = "White Cap", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[520] = { ["Name"] = "Imp Stool", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[521] = { ["Name"] = "Blessed Thistle", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[522] = { ["Name"] = "Lady's Smock", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[523] = { ["Name"] = "Wormwood", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[524] = { ["Name"] = "Corn Flower", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[525] = { ["Name"] = "Dragonthorn", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[526] = { ["Name"] = "Mountain Flower", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[527] = { ["Name"] = "Water Hyacinth", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[913] = { ["Name"] = "Flax", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[1858] = { ["Name"] = "Jute", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[1860] = { ["Name"] = "Maple Log", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[1862] = { ["Name"] = "Iron Ore", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
@@ -567,6 +500,9 @@ function eso_radar.AddPreset()
 		[2067] = { ["Name"] = "High Iron Ore", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2085] = { ["Name"] = "Pewter Seam", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2100] = { ["Name"] = "Pure Water", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[2101] = { ["Name"] = "Water Skin", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[20089] = { ["Name"] = "Thieves Trove", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[22637] = { ["Name"] = "Skyshard", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 	}
 	for i,e in pairs(PresetData) do
 		if eso_radar.CustomList[i] == nil then eso_radar.CustomList[i] = e end
@@ -690,46 +626,14 @@ function eso_radar.Settings()
 	eso_radar.CustomStringEnabled = Settings.eso_radar.CustomStringEnabled or false
 	eso_radar.CustomString = Settings.eso_radar.CustomString or "Name,Distance"
 	-- General Filter Toggles.
-	eso_radar.Attackables = Settings.eso_radar.Attackables or false
-	eso_radar.Fates = Settings.eso_radar.Fates or false
 	eso_radar.Gatherables = Settings.eso_radar.Gatherables or false
-	eso_radar.Players = Settings.eso_radar.Players or false
-	eso_radar.NPCs = Settings.eso_radar.NPCs or false
-	eso_radar.EventObjects = Settings.eso_radar.EventObjects or false
-	eso_radar.AetherCurrents = Settings.eso_radar.AetherCurrents or false
 	eso_radar.All = Settings.eso_radar.All or false
 	-- Radar Togglea.
 	eso_radar.Enable3D = Settings.eso_radar.Enable3D or false
 	eso_radar.Enable2D = Settings.eso_radar.Enable2D or false
 	-- General Filter Colour Values.
-	eso_radar.AttackablesColour = Settings.eso_radar.AttackablesColour or Colours.Solid.red
-	eso_radar.FatesColour = Settings.eso_radar.FatesColour or Colours.Solid.pink
 	eso_radar.GatherablesColour = Settings.eso_radar.GatherablesColour or Colours.Solid.green 
-	eso_radar.PlayersColour = Settings.eso_radar.PlayersColour or Colours.Solid.blue
-	eso_radar.NPCsColour = Settings.eso_radar.NPCsColour or Colours.Solid.yellow
-	eso_radar.EventObjectsColour = Settings.eso_radar.EventObjectsColour or Colours.Solid.cyan
-	eso_radar.AetherCurrentsColour = Settings.eso_radar.AetherCurrentsColour or Colours.Solid.white
 	eso_radar.AllColour = Settings.eso_radar.AllColour or Colours.Solid.gray
-	-- Hunt Filter Toggles.
-	eso_radar.HuntBRankARR = Settings.eso_radar.HuntBRankARR or false
-	eso_radar.HuntARankARR = Settings.eso_radar.HuntARankARR or false
-	eso_radar.HuntSRankARR = Settings.eso_radar.HuntSRankARR or false
-	eso_radar.HuntBRankHW = Settings.eso_radar.HuntBRankHW or false
-	eso_radar.HuntARankHW = Settings.eso_radar.HuntARankHW or false
-	eso_radar.HuntSRankHW = Settings.eso_radar.HuntSRankHW or false
-	eso_radar.HuntBRankSB = Settings.eso_radar.HuntBRankSB or false
-	eso_radar.HuntARankSB = Settings.eso_radar.HuntARankSB or false
-	eso_radar.HuntSRankSB = Settings.eso_radar.HuntSRankSB or false
-	-- Hunt Filter Colour Values.
-	eso_radar.HuntBRankARRColour = Settings.eso_radar.HuntBRankARRColour or Colours.Solid.orange
-	eso_radar.HuntARankARRColour = Settings.eso_radar.HuntARankARRColour or Colours.Solid.magenta
-	eso_radar.HuntSRankARRColour = Settings.eso_radar.HuntSRankARRColour or Colours.Solid.white
-	eso_radar.HuntBRankHWColour = Settings.eso_radar.HuntBRankHWColour or Colours.Solid.orange
-	eso_radar.HuntARankHWColour = Settings.eso_radar.HuntARankHWColour or Colours.Solid.magenta
-	eso_radar.HuntSRankHWColour = Settings.eso_radar.HuntSRankHWColour or Colours.Solid.white
-	eso_radar.HuntBRankSBColour = Settings.eso_radar.HuntBRankSBColour or Colours.Solid.orange
-	eso_radar.HuntARankSBColour = Settings.eso_radar.HuntARankSBColour or Colours.Solid.magenta
-	eso_radar.HuntSRankSBColour = Settings.eso_radar.HuntSRankSBColour or Colours.Solid.white
 end
 
 function eso_radar.SetData()
@@ -737,12 +641,21 @@ function eso_radar.SetData()
 	eso_radar.contentid = ""
 	eso_radar.CustomName = ""
 	eso_radar.CustomList = {
+		[62] = { ["Name"] = "Culumbine", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[478] = { ["Name"] = "Nornroot", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[514] = { ["Name"] = "Blue Entolomap", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[515] = { ["Name"] = "Emetic Russula", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[517] = { ["Name"] = "Namira's Rot", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[518] = { ["Name"] = "White Cap", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[520] = { ["Name"] = "Imp Stool", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[521] = { ["Name"] = "Blessed Thistle", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[522] = { ["Name"] = "Lady's Smock", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[523] = { ["Name"] = "Wormwood", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[524] = { ["Name"] = "Corn Flower", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[525] = { ["Name"] = "Dragonthorn", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[526] = { ["Name"] = "Mountain Flower", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[527] = { ["Name"] = "Water Hyacinth", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[913] = { ["Name"] = "Flax", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[1858] = { ["Name"] = "Jute", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[1860] = { ["Name"] = "Maple Log", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[1862] = { ["Name"] = "Iron Ore", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
@@ -751,16 +664,16 @@ function eso_radar.SetData()
 		[2067] = { ["Name"] = "High Iron Ore", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2085] = { ["Name"] = "Pewter Seam", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2100] = { ["Name"] = "Pure Water", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[2101] = { ["Name"] = "Water Skin", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[20089] = { ["Name"] = "Thieves Trove", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[22637] = { ["Name"] = "Skyshard", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 	}
 	-- New Options List
 	eso_radar.Options = {
 		[1] = {
 			["CategoryName"] = "General",
-			[1] = { ["Name"] = "Attackables", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
-			[3] = { ["Name"] = "Gatherables", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
-			[4] = { ["Name"] = "Players", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
-			[6] = { ["Name"] = "Event Objects", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
-			[8] = { ["Name"] = "All", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 }
+			[1] = { ["Name"] = "Gatherables", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+			[2] = { ["Name"] = "All", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 }
 		},
 	}
 	if Settings.eso_radar.Options == nil then 
