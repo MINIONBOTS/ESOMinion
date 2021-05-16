@@ -844,45 +844,11 @@ function eso_skillmanager.Cast( entity )
 	if (not entity) then
 		return false
 	end
-	if (Now() < eso_skillmanager.latencyTimer) then
-		return false
-	end
-	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
-	if gSKMWeaving and Now() >= (eso_skillmanager.lightdelay + ml_global_information.lastPulse * 2) then
-		if AbilityList:CanCast(defaultAttack.id,entity.id) == 10 and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
-			if AbilityList:Cast(defaultAttack.id,entity.id) then
-				d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
-						d("last skill weave was "..tostring(Now() - eso_skillmanager.lightdelay))
-						d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
-						eso_skillmanager.lightdelay = Now()
-				return true
-			end
+	if TimeSince(eso_skillmanager.lastcast) < 1000 then
+		if (Now() < eso_skillmanager.latencyTimer) then
+			return false
 		end
 	end
-	--local pBuffCount = e(GetNumBuffs("player"))
-	--[=[local pBuffs = {}
-	local tBuffs = {}
-	if pBuffCount > 0 then
-		for buff = 1 , pBuffCount do
-			local name = e("GetUnitBuffInfo(player, "..buff..")")
-			eso_skillmanager.targetbuffs[name] = true
-		end
-	else
-		eso_skillmanager.playerbuffs = {}
-	end
-	
-	local tBuffCount = e("GetNumBuffs(reticleover)")
-	if tBuffCount then
-		d("target buff count  = "..tostring(tBuffCount))
-		for buff = 1, tBuffCount do
-			local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
-			d("buff name = "..tostring(name))
-			eso_skillmanager.targetbuffs[name] = true
-		end
-	else
-		eso_skillmanager.targetbuffs = {}
-	end]=]
-
 
 	--Check for blocks/interrupts.
 	--[=[if (Player:GetNumActiveCombatTips() > 0) then
@@ -978,6 +944,42 @@ function eso_skillmanager.Cast( entity )
 		end
 	end]=]
 	
+	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
+	if gSKMWeaving and eso_skillmanager.prevSkillID ~= defaultAttack.id then
+		if AbilityList:CanCast(defaultAttack.id,entity.id) == 10 and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
+			if AbilityList:Cast(defaultAttack.id,entity.id) then
+				d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
+				d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
+				d("last LIGHT cast was "..tostring(Now() - eso_skillmanager.lightdelay))
+				eso_skillmanager.lightdelay = Now()
+				return true
+			end
+		end
+	end
+	--local pBuffCount = e(GetNumBuffs("player"))
+	--[=[local pBuffs = {}
+	local tBuffs = {}
+	if pBuffCount > 0 then
+		for buff = 1 , pBuffCount do
+			local name = e("GetUnitBuffInfo(player, "..buff..")")
+			eso_skillmanager.targetbuffs[name] = true
+		end
+	else
+		eso_skillmanager.playerbuffs = {}
+	end
+	
+	local tBuffCount = e("GetNumBuffs(reticleover)")
+	if tBuffCount then
+		d("target buff count  = "..tostring(tBuffCount))
+		for buff = 1, tBuffCount do
+			local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
+			d("buff name = "..tostring(name))
+			eso_skillmanager.targetbuffs[name] = true
+		end
+	else
+		eso_skillmanager.targetbuffs = {}
+	end]=]
+
 	if (ValidTable(eso_skillmanager.SkillProfile)) then
 		for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
 			local result = eso_skillmanager.CanCast(prio, entity)
