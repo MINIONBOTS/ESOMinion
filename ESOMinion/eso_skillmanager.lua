@@ -840,7 +840,6 @@ end
 eso_skillmanager.lightdelay = 0
 eso_skillmanager.lastcast = 0
 eso_skillmanager.rebuild = 0
-eso_skillmanager.attempts = 0
 eso_skillmanager.playerbuffs = {}
 eso_skillmanager.targetbuffs = {}
 function eso_skillmanager.Cast( entity )
@@ -857,17 +856,18 @@ function eso_skillmanager.Cast( entity )
 		local GCDRemain,GCDDuration = e("GetSlotCooldownInfo(1)")
 		if GCDRemain > 0 then
 			eso_skillmanager.latencyTimer = Now() + GCDRemain
-			ml_global_information.lastrun2 = Now() + GCDRemain + math.random(50,100)
+			ml_global_information.lastrun2 = Now() + GCDRemain + math.random(0,50)
+			d("add delay")
+			d(GCDRemain)
 			return false
 		end
 	end
+
 	if TimeSince(eso_skillmanager.lastcast) > 2000 then
 		if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
 			eso_skillmanager.BuildSkillsList()
 		end
 	end
-
-eso_skillmanager.attempts = eso_skillmanager.attempts + 1
 
 	--Check for blocks/interrupts.
 	--[=[if (Player:GetNumActiveCombatTips() > 0) then
@@ -1023,7 +1023,6 @@ eso_skillmanager.attempts = eso_skillmanager.attempts + 1
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000
 						eso_skillmanager.latencyTimer = 0
-						eso_skillmanager.attempts = 0
 						return true
 					end
 				elseif (Now() - eso_skillmanager.lastcast > 1500) then
