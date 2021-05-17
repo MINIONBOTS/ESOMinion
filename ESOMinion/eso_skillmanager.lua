@@ -742,6 +742,7 @@ function eso_skillmanager.BuildSkillsList()
 			ml_global_information.AttackRange = math.max(skillRange,ml_global_information.AttackRange)
 		end
 	end
+	eso_skillmanager.rebuild = Now()
 	return eso_skillmanager.skillsbyindex
 end
 
@@ -838,6 +839,8 @@ end
 
 eso_skillmanager.lightdelay = 0
 eso_skillmanager.lastcast = 0
+eso_skillmanager.rebuild = 0
+eso_skillmanager.attempts = 0
 eso_skillmanager.playerbuffs = {}
 eso_skillmanager.targetbuffs = {}
 function eso_skillmanager.Cast( entity )
@@ -849,6 +852,22 @@ function eso_skillmanager.Cast( entity )
 			return false
 		end
 	end
+
+	if eso_skillmanager.latencyTimer == 0 then
+		local GCDRemain,GCDDuration = e("GetSlotCooldownInfo(1)")
+		if GCDRemain > 0 then
+			eso_skillmanager.latencyTimer = Now() + GCDRemain
+			ml_global_information.lastrun2 = Now() + GCDRemain + math.random(50,100)
+			return false
+		end
+	end
+	if TimeSince(eso_skillmanager.lastcast) > 2000 then
+		if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
+			eso_skillmanager.BuildSkillsList()
+		end
+	end
+
+eso_skillmanager.attempts = eso_skillmanager.attempts + 1
 
 	--Check for blocks/interrupts.
 	--[=[if (Player:GetNumActiveCombatTips() > 0) then
@@ -945,14 +964,17 @@ function eso_skillmanager.Cast( entity )
 	end]=]
 	
 	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
-	if gSKMWeaving and eso_skillmanager.prevSkillID ~= defaultAttack.id then
-		if AbilityList:CanCast(defaultAttack.id,entity.id) == 10 and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
-			if AbilityList:Cast(defaultAttack.id,entity.id) then
-				d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
-				d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
-				d("last LIGHT cast was "..tostring(Now() - eso_skillmanager.lightdelay))
-				eso_skillmanager.lightdelay = Now()
-				return true
+	if gSKMWeaving then
+		if eso_skillmanager.prevSkillID ~= defaultAttack.id then
+			local result = AbilityList:CanCast(defaultAttack.id,entity.id)
+			if result == 10 and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
+				if AbilityList:Cast(defaultAttack.id,entity.id) then
+					d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
+					--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
+					--d("last LIGHT cast was "..tostring(Now() - eso_skillmanager.lightdelay))
+					eso_skillmanager.lightdelay = Now()
+					return true
+				end
 			end
 		end
 	end
@@ -992,7 +1014,7 @@ function eso_skillmanager.Cast( entity )
 				local canCast = AbilityList:CanCast(realID,TID)
 				if canCast == 10 then
 					if (AbilityList:Cast(realID,TID)) then
-						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")					
+						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")	
 						--d("time since delay was "..tostring(TimeSince(eso_skillmanager.latencyTimer)))
 						d("last skill weave was "..tostring(Now() - eso_skillmanager.lightdelay))
 						d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
@@ -1000,13 +1022,8 @@ function eso_skillmanager.Cast( entity )
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000
-						local casttime = 0
-						if ( casttime > 0 ) then							
-							local minvalue = math.max(500,casttime)
-							eso_skillmanager.latencyTimer = Now() + math.random(minvalue,minvalue + 200)
-						else
-							eso_skillmanager.latencyTimer = Now() + math.random(500,700)
-						end
+						eso_skillmanager.latencyTimer = 0
+						eso_skillmanager.attempts = 0
 						return true
 					end
 				elseif (Now() - eso_skillmanager.lastcast > 1500) then
@@ -1016,6 +1033,7 @@ function eso_skillmanager.Cast( entity )
 		end
 	end
 end
+
 
 --[[
 function eso_skillmanager.Use( actionid, targetid, actiontype )
