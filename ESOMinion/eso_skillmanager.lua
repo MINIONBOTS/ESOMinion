@@ -724,6 +724,7 @@ end
 function eso_skillmanager.BuildSkillsList()
 	d("build new skill list")
 	eso_skillmanager.lastskillidcheck = e("GetSlotBoundId(1)")
+	
 	for i = 1,100 do
 		local skillid = e("GetAbilityIdByIndex("..i..")")
 		if skillid ~= 0 then
@@ -846,19 +847,18 @@ function eso_skillmanager.Cast( entity )
 	if (not entity) then
 		return false
 	end
-	if TimeSince(eso_skillmanager.lastcast) < 1000 then
-		if (Now() < eso_skillmanager.latencyTimer) then
-			return false
-		end
+		
+	if (Now() < eso_skillmanager.latencyTimer) then
+		return false
 	end
 
 	if eso_skillmanager.latencyTimer == 0 then
-		local GCDRemain,GCDDuration = e("GetSlotCooldownInfo(1)")
+		local GCDRemain,GCDDuration = e("GetSlotCooldownInfo(3)")
 		if GCDRemain > 0 then
-			eso_skillmanager.latencyTimer = Now() + GCDRemain
-			ml_global_information.lastrun2 = Now() + GCDRemain + math.random(0,50)
+			local randomValue = math.random(50,120)
+			eso_skillmanager.latencyTimer = Now() + GCDRemain - randomValue
 			d("add delay")
-			d(GCDRemain)
+			d(GCDRemain - randomValue)
 			return false
 		end
 	end
@@ -966,8 +966,11 @@ function eso_skillmanager.Cast( entity )
 	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	if gSKMWeaving then
 		if eso_skillmanager.prevSkillID ~= defaultAttack.id then
-			local result = AbilityList:CanCast(defaultAttack.id,entity.id)
-			if result == 10 and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
+			local canCast = AbilityList:CanCast(defaultAttack.id,entity.id)
+			if canCast == -127 then
+d("check status now")
+			end
+			if (canCast == 10  or canCast == -127) and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
 				if AbilityList:Cast(defaultAttack.id,entity.id) then
 					d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
 					--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
@@ -975,6 +978,9 @@ function eso_skillmanager.Cast( entity )
 					eso_skillmanager.lightdelay = Now()
 					return true
 				end
+			elseif canCast == -110 then
+				--eso_skillmanager.latencyTimer = Now() + 300
+				return false
 			end
 		end
 	end
@@ -1012,8 +1018,12 @@ function eso_skillmanager.Cast( entity )
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				--local action = AbilityList:Get(realID)
 				local canCast = AbilityList:CanCast(realID,TID)
-				if canCast == 10 then
+			if canCast == -127 then
+d("check status now")
+			end
+				if canCast == 10 or canCast == -127 then
 					if (AbilityList:Cast(realID,TID)) then
+						d("eso_skillmanager.attempts = " ..tostring(eso_skillmanager.attempts))
 						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")	
 						--d("time since delay was "..tostring(TimeSince(eso_skillmanager.latencyTimer)))
 						d("last skill weave was "..tostring(Now() - eso_skillmanager.lightdelay))
@@ -1025,8 +1035,9 @@ function eso_skillmanager.Cast( entity )
 						eso_skillmanager.latencyTimer = 0
 						return true
 					end
-				elseif (Now() - eso_skillmanager.lastcast > 1500) then
-					d("cant cast result for [ "..tostring(skill.name).."] was ["..tostring(canCast).."]")
+				elseif canCast == -110 then
+					--eso_skillmanager.latencyTimer = Now() + 300
+					return false
 				end
 			end
 		end
