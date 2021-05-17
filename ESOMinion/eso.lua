@@ -467,7 +467,7 @@ function esominion.getRealTarget(force)
 		--d("old target data used")
 		return esominion.recenttarget
 	else
-		esominion.recenttarget = Player:GetSoftTarget()
+		esominion.recenttarget = Player:GetPeferedTarget()
 		--d("new target data pulled")
 		esominion.recenttargetpulse = Now() + ml_global_information.lastPulse
 		return esominion.recenttarget
