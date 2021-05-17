@@ -852,7 +852,7 @@ function eso_skillmanager.Cast( entity )
 		return false
 	end
 
-	if eso_skillmanager.latencyTimer == 0 then
+	--[[if eso_skillmanager.latencyTimer == 0 then
 		local GCDRemain,GCDDuration = e("GetSlotCooldownInfo(3)")
 		if GCDRemain > 0 then
 			local randomValue = math.random(50,120)
@@ -862,13 +862,13 @@ function eso_skillmanager.Cast( entity )
 			d(GCDRemain - randomValue)
 			return false
 		end
-	end
+	end]]
 
-	if TimeSince(eso_skillmanager.lastcast) > 2000 then
+	--[[if TimeSince(eso_skillmanager.lastcast) > 2000 then
 		if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
 			eso_skillmanager.BuildSkillsList()
 		end
-	end
+	end]]
 
 	--Check for blocks/interrupts.
 	--[=[if (Player:GetNumActiveCombatTips() > 0) then
