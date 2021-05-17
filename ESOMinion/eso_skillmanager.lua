@@ -857,6 +857,7 @@ function eso_skillmanager.Cast( entity )
 		if GCDRemain > 0 then
 			local randomValue = math.random(50,120)
 			eso_skillmanager.latencyTimer = Now() + GCDRemain - randomValue
+			ml_global_information.throttleTick = Now() + GCDRemain - randomValue
 			d("add delay")
 			d(GCDRemain - randomValue)
 			return false
@@ -967,10 +968,7 @@ function eso_skillmanager.Cast( entity )
 	if gSKMWeaving then
 		if eso_skillmanager.prevSkillID ~= defaultAttack.id then
 			local canCast = AbilityList:CanCast(defaultAttack.id,entity.id)
-			if canCast == -127 then
-d("check status now")
-			end
-			if (canCast == 10  or canCast == -127) and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
+			if (canCast == 10) and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
 				if AbilityList:Cast(defaultAttack.id,entity.id) then
 					d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
 					--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
@@ -1018,10 +1016,7 @@ d("check status now")
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				--local action = AbilityList:Get(realID)
 				local canCast = AbilityList:CanCast(realID,TID)
-			if canCast == -127 then
-d("check status now")
-			end
-				if canCast == 10 or canCast == -127 then
+				if canCast == 10 then
 					if (AbilityList:Cast(realID,TID)) then
 						d("eso_skillmanager.attempts = " ..tostring(eso_skillmanager.attempts))
 						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")	
