@@ -19,6 +19,7 @@ function esominion.SetMainVars()
 	gSkillProfileNewIndex = 1
 	gSMlastprofileNew = esominion.GetSetting("gSMlastprofileNew",GetString("none"))
 	gSMprofile = GetString("none")
+	gSMnewname = ""
 	
 	
 	ESO_Common_BotRunning = false
@@ -84,7 +85,7 @@ function esominion.Init()
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
-		FFXIV_Common_BotRunning = false
+		ESO_Common_BotRunning = false
 	end
 	
 	-- set settings on startup
@@ -222,7 +223,7 @@ function ml_global_information.DrawMainFull()
 							Settings.ESOMINION.gBotModes = Settings.ESOMINION.gBotModes
 						end
 					end
-					GUI:Text(GetString("Skill Profile")) 
+					GUI:Text(GetString("Skill Profile"))
 					GUI:SameLine(110)
 					GUI:PushItemWidth(contentwidth - 165)
 					
@@ -238,6 +239,16 @@ function ml_global_information.DrawMainFull()
 						eso_skillmanager.UseProfile(eso_skillmanager.SkillProfiles[newval])
 						eso_skillmanager.SetDefaultProfile(eso_skillmanager.SkillProfiles[newval])
 					end
+					GUI:SameLine()
+					
+					local contentwidth = GUI:GetContentRegionAvailWidth()
+					GUI:PushItemWidth(contentwidth)
+					if ( GUI:Button("Create")) then
+						eso_skillmanager.AddProfilePrompt()
+					end
+					GUI:PopItemWidth()
+					
+					local contentwidth = GUI:GetContentRegionAvailWidth()
 					if (GUI:Button(GetString("Start / Stop"),contentwidth,20)) then
 						ml_global_information.ToggleRun()	
 					end
@@ -349,12 +360,11 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	if (ml_global_information.throttleTick > tickcount) or not Player then
 		return false
 	end
-	ml_global_information.lastPulse = math.random(125,250)
-	ml_global_information.throttleTick = tickcount + ml_global_information.lastPulse
+	ml_global_information.throttleTick = tickcount + 35
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
-		FFXIV_Common_BotRunning = false
+		ESO_Common_BotRunning = false
 	end
 	
 	if (ml_global_information.autoStartQueued) then
@@ -362,34 +372,26 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_global_information:ToggleRun() -- convert
 	end
 	
-	--local pulseTime = gPulseTime or 150
-	--[[if (TimeSince(ml_global_information.lastrun2) >= pulseTime) then
-		ml_global_information.lastrun2 = tickcount
-		SkillMgr.OnUpdate()
-	end]]
-	
-	--if (Now() >= ml_global_information.nextRun) then
+	if (Now() >= ml_global_information.nextRun) then
 		
+		ml_global_information.lastPulse = math.random(250,400)
 		ml_global_information.nextRun = tickcount + ml_global_information.lastPulse
-		ml_global_information.lastPulseShortened = false
+		--ml_global_information.lastPulseShortened = false
 				
-        if (ml_task_hub:CurrentTask() ~= nil) then
+       --[[ if (ml_task_hub:CurrentTask() ~= nil) then
             FFXIV_Core_ActiveTaskName = ml_task_hub:CurrentTask().name
-        end
+        end]]
 		
-		--update idle pulse count
-		if (ml_global_information.idlePulseCount ~= 0) then
-			FFXIV_Core_IdlePulseCount = tostring(ml_global_information.idlePulseCount)
-		elseif(FFXIV_Core_IdlePulseCount ~= "") then
-			FFXIV_Core_IdlePulseCount = ""
-		end
-			
+		--[[if Lockpicker.OnUpdate() then
+			return true
+		end]]
+		
 		if (ml_task_hub.shouldRun) then
 			if (not ml_task_hub:Update()) then
 				d("No task queued, please select a valid bot mode in the Settings drop-down menu")
 			end
 		end
-   -- end
+	end
 end
 
 function ml_global_information.UpdateMode()
@@ -460,6 +462,157 @@ function GUI_Capture(newVal,varName,onChange,forceSave)
 
 	return newVal
 end
+
+function SaveToFileX(path, ...)
+
+
+local write, writeIndent, writers, refCount;
+
+	
+-- write thing (dispatcher)
+write = function (file, item, level, objRefNames)
+	writers[type(item)](file, item, level, objRefNames);
+end;
+
+-- write indent
+writeIndent = function (file, level)
+	for i = 1, level do
+		file:write("\t");
+	end;
+end;
+
+-- recursively count references
+refCount = function (objRefCount, item)
+	-- only count reference types (tables)
+	if type(item) == "table" then
+		-- Increase ref count
+		if objRefCount[item] then
+			objRefCount[item] = objRefCount[item] + 1;
+		else
+			objRefCount[item] = 1;
+			-- If first encounter, traverse
+			for k, v in pairs(item) do
+				refCount(objRefCount, k);
+				refCount(objRefCount, v);
+			end;
+		end;
+	end;
+end;
+
+-- Format items for the purpose of restoring
+writers = {
+	["nil"] = function (file, item)
+			file:write("nil");
+		end;
+	["number"] = function (file, item)
+			file:write(tostring(item));
+		end;
+	["string"] = function (file, item)
+			file:write(string.format("%q", item));
+		end;
+	["boolean"] = function (file, item)
+			if item then
+				file:write("true");
+			else
+				file:write("false");
+			end
+		end;
+	["table"] = function (file, item, level, objRefNames)
+			local refIdx = objRefNames[item];
+			if refIdx then
+				-- Table with multiple references
+				file:write("multiRefObjects["..refIdx.."]");
+			else
+				-- Single use table
+				file:write("{\n");
+				for k, v in table.pairsbykeys(item) do
+					writeIndent(file, level+1);
+					file:write("[");
+					write(file, k, level+1, objRefNames);
+					file:write("] = ");
+					write(file, v, level+1, objRefNames);
+					file:write(";\n");
+				end
+				writeIndent(file, level);
+				file:write("}");
+			end;
+		end;
+	["function"] = function (file, item)
+			file:write("nil --[[function]]\n");			
+		end;
+	["thread"] = function (file, item)
+			file:write("nil --[[thread]]\n");
+		end;
+	["userdata"] = function (file, item)
+			file:write("nil --[[userdata]]\n");
+		end;
+}
+
+	--function (path, ...)
+		local file, e;
+		if type(path) == "string" then
+			-- Path, open a file
+			file, e = io.open(path, "w");
+			if not file then
+				return error(e);
+			end
+		else
+			-- Just treat it as file
+			file = path;
+		end
+		local n = select("#", ...);
+		-- Count references
+		local objRefCount = {}; -- Stores reference that will be exported
+		for i = 1, n do
+			refCount(objRefCount, (select(i,...)));
+		end;
+		
+		-- Export Objects with more than one ref and assign name
+		-- First, create empty tables for each
+		local objRefNames = {};
+		local objRefIdx = 0;
+		--[=[
+		file:write("-- Persistent Data\n");
+		file:write("local multiRefObjects = {\n");
+		for obj, count in pairs(objRefCount) do
+			if count > 99999999999999999 then
+				objRefIdx = objRefIdx + 1;
+				objRefNames[obj] = objRefIdx;
+				file:write("{};"); -- table objRefIdx
+			end;
+		end;
+		file:write("\n} -- multiRefObjects\n");
+		-- Then fill them (this requires all empty multiRefObjects to exist)
+		for obj, idx in pairs(objRefNames) do
+			for k, v in pairs(obj) do
+				file:write("multiRefObjects["..idx.."][");
+				write(file, k, 0, objRefNames);
+				file:write("] = ");
+				write(file, v, 0, objRefNames);
+				file:write(";\n");
+			end;
+		end;
+		--]=]
+		-- Create the remaining objects
+		for i = 1, n do
+			file:write("local ".."obj"..i.." = ");
+			write(file, (select(i,...)), 0, objRefNames);
+			file:write("\n");
+		end
+		-- Return them
+		if n > 0 then
+			file:write("return obj1");
+			for i = 2, n do
+				file:write(" ,obj"..i);
+			end;
+			file:write("\n");
+		else
+			file:write("return\n");
+		end;
+		file:close();
+	--end;
+end
+
 esominion.recenttarget = {}
 esominion.recenttargetpulse = 0
 function esominion.getRealTarget(force)
@@ -479,6 +632,7 @@ function esominion.getRealTarget(force)
 		return esominion.recenttarget
 	end
 end
+
 RegisterEventHandler("Module.Initalize",esominion.Init, "esominion.Init")
 RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate,"esominion OnUpdate")
 RegisterEventHandler("Gameloop.Draw", ml_global_information.Draw,"esominion Draw")

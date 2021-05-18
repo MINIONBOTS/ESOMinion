@@ -2,5 +2,5 @@
 Name=ESOMinion
 Dependencies=minionlib
 Version=1
-Files=eso.lua,eso_init.lua,eso_task_assist.lua,eso_skillmanager.lua
+Files=eso.lua,eso_init.lua,eso_task_assist.lua,eso_skillmanager.lua,eso_helpers_gui.lua
 Enabled=1

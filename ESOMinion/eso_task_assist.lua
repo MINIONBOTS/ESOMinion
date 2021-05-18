@@ -35,7 +35,6 @@ function eso_task_assist:Process()
 	--d("AssistMode_Process->")
 	--d("timesince last = "..tostring(TimeSince(eso_task_assist.lastprocess)))
 	--eso_task_assist.lastprocess = Now()
-	local needsUpdate = false
 	--if Now() > eso_task_assist.lastidcheck and not Player.interacting then
 		--local aggroList = EntityList("attackable,targetable,alive,aggro,maxdistance=35")
 		--if not table.valid(aggroList) then
@@ -46,12 +45,6 @@ function eso_task_assist:Process()
 		--end
 		--eso_task_assist.lastidcheck = Now() + math.random(8000,12000)
 	--end
-	if not table.valid(eso_skillmanager.skillsbyindex) then
-		needsUpdate = true
-	end
-	if needsUpdate then
-		eso_skillmanager.BuildSkillsList()
-	end
 	if (Player.health.current > 0) then
 		-- the client does not clear the target offsets since the 1.6 patch
 		-- this is a workaround so that players can attack manually while the bot is running
@@ -236,7 +229,7 @@ function Lockpicker.OnUpdate()
 									e("PlaySound(Lockpicking_Lockpicker_contact)")
 									e("PlaySound(Lockpicking_chamber_start)")
 									Lockpicker.chamber = i
-									ml_global_information.Await(math.random(250,500))
+									ml_global_information.Await(math.random(400,600))
 									return true
 								end
 							end
@@ -247,7 +240,7 @@ function Lockpicker.OnUpdate()
 								e("StopSettingChamber()")
 								d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
 								Lockpicker.chamber = 0
-								ml_global_information.Await(math.random(500,1000))
+								ml_global_information.Await(math.random(800,1000))
 								return true
 							end
 						end
@@ -257,7 +250,7 @@ function Lockpicker.OnUpdate()
 				Lockpicker.interactType = 0
 				Lockpicker.timer = 0
 			end
-			Lockpicker.delay = Now() + math.random(250,500)
+			Lockpicker.delay = Now() + math.random(400,600)
 		end
 	end
 	return false

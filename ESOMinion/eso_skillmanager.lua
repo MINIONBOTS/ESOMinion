@@ -558,6 +558,7 @@ function eso_skillmanager.CheckProfileValidity()
 end
 
 function eso_skillmanager.UseProfile(strName)
+d("use Profile")
 	gSMprofile = strName
     gSMactive = "1"					
 	--GUI_WindowVisible(eso_skillmanager.editwindow.name,false)		
@@ -580,6 +581,55 @@ function eso_skillmanager.NewProfile()
     end
 end
 
+function eso_skillmanager.AddProfilePrompt()
+	local vars = {
+		height = 200,
+		width = 450,
+		{
+			["type"] = "string",
+			["var"] = "gSMnewname",
+			["display"] = "##new-profile",
+			["width"] = 300,
+		},
+		{
+			["type"] = "spacing",
+			["amount"] = 3,
+		},
+		{
+			["type"] = "button",
+			["display"] = "OK",
+			["isdefault"] = true,
+			["sameline"] = true,
+			["amount"] = 50,
+			["width"] = 100,
+			["onclick"] = function ()
+				if gSMnewname ~= "" then
+				d("gSMnewname")
+				d(gSMnewname)
+					Settings.ESOMINION.gSMlastprofileNew = gSMnewname
+					eso_skillmanager.NewProfile()
+					GUI:CloseCurrentPopup()
+					eso_skillmanager.UpdateProfiles()
+					d("gSMprofile")
+					d(gSMprofile)
+					eso_skillmanager.UseProfile(gSMprofile)
+					eso_skillmanager.SetDefaultProfile(gSMprofile)
+				else
+					eso_dialog_manager.IssueNotice("Profile Name##SKM", "Please pick a name for the new profile.")
+				end
+			end,
+		},
+		{
+			["type"] = "button",
+			["display"] = "Cancel",
+			["width"] = 100,
+			["onclick"] = function ()
+				GUI:CloseCurrentPopup()
+			end,
+		},
+	}
+	eso_dialog_manager.IssueNotice("New List##SKM", "Please pick a name for the new profile.", "none", vars)
+end
 function eso_skillmanager.ClearProfilePrompt()
 	local wnd = GUI_GetWindowInfo(eso_skillmanager.mainwindow.name)
 	--GUI_MoveWindow(eso_skillmanager.confirmwindow.name, wnd.x,wnd.y+wnd.height) 
@@ -618,6 +668,8 @@ function eso_skillmanager.SaveProfile()
 end
 
 function eso_skillmanager.SetDefaultProfile(strName)
+d("set default")
+d(strName)
 	local profile = strName or gSMprofile
 	local classid = e("GetUnitClassId(player)")
 	Settings.ESOMINION.SMDefaultProfiles[classid] = profile
@@ -643,9 +695,10 @@ function eso_skillmanager.UseDefaultProfile()
 	
 	if (not profileFound) then
 		local starterDefault = eso_skillmanager.StartingProfiles[classid]
+		d(starterDefault)
 		if ( starterDefault ) then
-			local starterDefault = eso_skillmanager.profilepath..starterDefault..".lua"
-			if (FileExists(starterDefault)) then
+			local starterDefaultFile = eso_skillmanager.profilepath..starterDefault..".lua"
+			if (FileExists(starterDefaultFile)) then
 				d("No default profile set, using start default ["..tostring(starterDefault).."]")
 				eso_skillmanager.SetDefaultProfile(starterDefault)
 				default = starterDefault
@@ -668,13 +721,15 @@ function eso_skillmanager.UpdateProfiles()
     
     local profiles = "None"
     local found = "None"	
+	eso_skillmanager.SkillProfiles = {"None"}
     local profilelist = dirlist(eso_skillmanager.profilepath,".*lua")
     if ( TableSize(profilelist) > 0) then			
         local i,profile = next ( profilelist)
         while i and profile do				
+			d(profile)
             profile = string.gsub(profile, ".lua", "")
             profiles = profiles..","..profile
-            if ( Settings.ESOMINION.gSMlastprofileNew ~= nil and Settings.ESOMINION.gSMlastprofileNew == profile ) then
+            if ( Settings.ESOMINION.gSMlastprofileNew ~= nil and Settings.ESOMINION.gSMlastprofileNew == profile and Settings.ESOMINION.gSMlastprofileNew ~= "") then
                 found = profile
             end
 			table.insert(eso_skillmanager.SkillProfiles,profile)
@@ -721,32 +776,81 @@ function eso_skillmanager.UpdateCurrentProfileData()
 		gSkillProfileNewIndex = GetKeyByValue(gSMprofile,eso_skillmanager.SkillProfiles)
 	end
 end
-function eso_skillmanager.BuildSkillsList()
-	d("build new skill list")
+function eso_skillmanager.BuildSkillsBook()
+	d("build new skill book")
 	eso_skillmanager.lastskillidcheck = e("GetSlotBoundId(1)")
 	
-	for i = 1,100 do
+	for i = 1,60 do
 		local skillid = e("GetAbilityIdByIndex("..i..")")
 		if skillid ~= 0 then
-			local skillName, skillTexture, skillRank, skillSlotType, skillpassive, skillVisable = e("GetAbilityInfoByIndex("..i..")")
+			local skillData = ESOLib.API.Action.GetSkillData(skillid)
+			if skillData then
+				eso_skillmanager.skillsbyindex[i] = skillData
+				eso_skillmanager.skillsbyid[skillid] = skillData
+				eso_skillmanager.skillsbyname[skillData.name] = skillData
+			
+				if string.contains(skillData.name,"Light Attack") then
+					eso_skillmanager.skillsbyname["Default"] = skillData
+				end
+				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
+			end
+		end
+	end
+	return eso_skillmanager.skillsbyindex
+end
+function eso_skillmanager.BuildSkillsList()
+	d("build new skill list")
+	eso_skillmanager.lastskillidcheck = AbilityList:GetSlotInfo(1) 
+	
+	for i = 1,7 do
+		local skillid = AbilityList:GetSlotInfo(i) 
+		if skillid ~= 0 then
+			local skillData = ESOLib.API.Action.GetSkillData(skillid)
+			if skillData then
+		
+				eso_skillmanager.skillsbyid[skillid] = skillData
+				eso_skillmanager.skillsbyname[skillData.name] = skillData
+			
+				if string.contains(skillData.name,"Light Attack") then
+					eso_skillmanager.skillsbyname["Default"] = skillData
+				end
+				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
+			end
+		end
+	end
+end
+
+function eso_skillmanager.BuildAllSkills()
+	local list = {
+		--["byid"] = {},
+		--["byname"] = {},
+	}
+	local byname = list.byname
+	local byid = list.byid
+	
+	for i = 1,100000 do
+		local skillid = i
+		local skillName = e("GetAbilityName("..skillid..")")
+		if skillName ~= "" and skillName ~= nil then      
 			local skillRangemin, skillRangemax = e("GetAbilityRange("..skillid..")")
 			local skillRange = skillRangemax / 100
 			local skillChanneled, skillCastTime, skillChannelTime = e("GetAbilityCastInfo("..skillid..")")
 			local skillCost = e("GetAbilityCost("..skillid..")") 
-			eso_skillmanager.skillsbyindex[i] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
-			eso_skillmanager.skillsbyid[skillid] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
-			eso_skillmanager.skillsbyname[skillName] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
+			local buffType = e("GetAbilityBuffType("..skillid..")")
+			local skillPermanant = e("IsAbilityPermanent("..skillid..")")
+			--GetSpecificSkillAbilityKeysByAbilityId(number abilityId)
+			-- IsAbilityPermanent(number abilityId) 
+			--CanAbilityBeUsedFromHotbar(number abilityId, number HotBarCategory hotbarCategory)
 			
-			if string.contains(skillName,"Light Attack") then
-				eso_skillmanager.skillsbyname["Default"] = {id = skillid, index = i ,name = skillName, cost = skillCost, rank = skillRank, type = skillSlotType, passive = skillpassive, visable = skillVisable, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
-			end
-			ml_global_information.AttackRange = math.max(skillRange,ml_global_information.AttackRange)
+			list[skillid] = {id = skillid, name = skillName, cost = skillCost, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime, bufftype = buffType, permanant = skillPermanant }
+			--byname[skillName] = {id = skillid, name = skillName, cost = skillCost, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
+			
 		end
 	end
-	eso_skillmanager.rebuild = Now()
-	return eso_skillmanager.skillsbyindex
+	if table.valid(list) then
+		SaveToFileX(GetStartupPath()..[[\LuaMods\ESOMinion\skill_data_output.lua]],list)
+	end
 end
-
 -- Button Handler for Skillbook-skill-buttons
 function eso_skillmanager.AddSkillToProfile(event)
 	local skillid = tonumber(event)
@@ -838,7 +942,6 @@ function eso_skillmanager.EditSkill(event)
 	SKM_Prio = tonumber(event)
 end
 
-eso_skillmanager.lightdelay = 0
 eso_skillmanager.lastcast = 0
 eso_skillmanager.rebuild = 0
 eso_skillmanager.playerbuffs = {}
@@ -852,23 +955,26 @@ function eso_skillmanager.Cast( entity )
 		return false
 	end
 
-	--[[if eso_skillmanager.latencyTimer == 0 then
-		local GCDRemain,GCDDuration = e("GetSlotCooldownInfo(3)")
+	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
+	if not defaultAttack then
+		eso_skillmanager.BuildSkillsList()
+		defaultAttack = eso_skillmanager.skillsbyname["Default"]
+	end
+	if AbilityList:GetSlotInfo(1) ~= defaultAttack.id then
+		d("update list check test")
+		return false
+	end
+	--local currentList = AbilityList:Get()
+	if eso_skillmanager.latencyTimer == 0 then
+		local GCDRemain,GCDDuration = AbilityList:GetSlotCooldownInfo(3)
 		if GCDRemain > 0 then
-			local randomValue = math.random(50,120)
-			eso_skillmanager.latencyTimer = Now() + GCDRemain - randomValue
-			ml_global_information.throttleTick = Now() + GCDRemain - randomValue
+			eso_skillmanager.latencyTimer = Now() + GCDRemain
+			ml_global_information.nextRun = Now() + GCDRemain
 			d("add delay")
-			d(GCDRemain - randomValue)
+			d(GCDRemain)
 			return false
 		end
-	end]]
-
-	--[[if TimeSince(eso_skillmanager.lastcast) > 2000 then
-		if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
-			eso_skillmanager.BuildSkillsList()
-		end
-	end]]
+	end
 
 	--Check for blocks/interrupts.
 	--[=[if (Player:GetNumActiveCombatTips() > 0) then
@@ -964,7 +1070,6 @@ function eso_skillmanager.Cast( entity )
 		end
 	end]=]
 	
-	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	if gSKMWeaving then
 		if eso_skillmanager.prevSkillID ~= defaultAttack.id then
 			local canCast = AbilityList:CanCast(defaultAttack.id,entity.id)
@@ -972,12 +1077,10 @@ function eso_skillmanager.Cast( entity )
 				if AbilityList:Cast(defaultAttack.id,entity.id) then
 					d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
 					--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
-					--d("last LIGHT cast was "..tostring(Now() - eso_skillmanager.lightdelay))
-					eso_skillmanager.lightdelay = Now()
+					eso_skillmanager.prevSkillID = defaultAttack.id
 					return true
 				end
-			elseif canCast == -110 then
-				--eso_skillmanager.latencyTimer = Now() + 300
+			elseif canCast == -110 then -- stunned
 				return false
 			end
 		end
@@ -1018,20 +1121,21 @@ function eso_skillmanager.Cast( entity )
 				local canCast = AbilityList:CanCast(realID,TID)
 				if canCast == 10 then
 					if (AbilityList:Cast(realID,TID)) then
-						d("eso_skillmanager.attempts = " ..tostring(eso_skillmanager.attempts))
-						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")	
-						--d("time since delay was "..tostring(TimeSince(eso_skillmanager.latencyTimer)))
-						d("last skill weave was "..tostring(Now() - eso_skillmanager.lightdelay))
+						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
 						d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
 						eso_skillmanager.lastcast = Now()
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000
-						eso_skillmanager.latencyTimer = 0
+						if gSKMWeaving then
+							eso_skillmanager.latencyTimer = 0
+							ml_global_information.nextRun = Now() + math.random(35,150)
+						else
+							eso_skillmanager.latencyTimer = Now() + math.random(500,700)
+						end
 						return true
 					end
-				elseif canCast == -110 then
-					--eso_skillmanager.latencyTimer = Now() + 300
+				elseif canCast == -110 then -- stunned
 					return false
 				end
 			end
@@ -1191,10 +1295,10 @@ function eso_skillmanager.CanCast(prio, entity)
 	local realskilldata = eso_skillmanager.skillsbyid[realID]
 	if (not realskilldata) then
 		eso_skillmanager.DebugOutput( prio, "Ability failed safeness check for "..skill.name.."["..tostring(prio).."]" )
-		if string.contains(skill.name,"Light Attack") then
-			eso_skillmanager.BuildSkillsList()
+		--[[if string.contains(skill.name,"Light Attack") then
+			eso_skillmanager.BuildSkillsBook()
 			d("rebuild skills list fallback")
-		end
+		end]]
 		return 0
 	end
 
@@ -1799,7 +1903,7 @@ function eso_skillmanager.DrawSkillBook()
 				end
 			end
 		else
-			eso_skillmanager.SkillBook = eso_skillmanager.BuildSkillsList()
+			eso_skillmanager.SkillBook = eso_skillmanager.BuildSkillsBook()
 		end
 	end
 	GUI:End()
