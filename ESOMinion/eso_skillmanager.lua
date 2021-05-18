@@ -964,9 +964,13 @@ function eso_skillmanager.Cast( entity )
 		eso_skillmanager.BuildSkillsList()
 	end
 	if eso_skillmanager.latencyTimer == 0 then
-		local GCDRemain,GCDDuration = AbilityList:GetSlotCooldownInfo(3)
+		local GCDRemain3,GCDDuration3 = AbilityList:GetSlotCooldownInfo(3)
+		local GCDRemain4,GCDDuration4 = AbilityList:GetSlotCooldownInfo(4)
+		local GCDRemain5,GCDDuration5 = AbilityList:GetSlotCooldownInfo(5)
+		local GCDRemain = GetHighestValue(GCDRemain3,GCDRemain4,GCDRemain5)
+		
 		if GCDRemain > 0 then
-		local addRandom = GCDRemain + math.random(100,250)
+			local addRandom = GCDRemain + math.random(100,250)
 			eso_skillmanager.latencyTimer = Now() + addRandom
 			d("add delay")
 			d(addRandom)

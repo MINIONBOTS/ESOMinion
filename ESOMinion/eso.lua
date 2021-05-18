@@ -613,6 +613,34 @@ writers = {
 	--end;
 end
 
+function GetLowestValue(...)
+	local lowestValue = math.huge
+	
+	local vals = {...}
+	if (table.valid(vals)) then
+		for k,value in pairs(vals) do
+			if (value < lowestValue) then
+				lowestValue = value
+			end
+		end
+	end
+	
+	return lowestValue
+end
+function GetHighestValue(...)
+	local highestValue = 0
+	
+	local vals = {...}
+	if (table.valid(vals)) then
+		for k,value in pairs(vals) do
+			if (value > highestValue) then
+				highestValue = value
+			end
+		end
+	end
+	
+	return highestValue
+end
 RegisterEventHandler("Module.Initalize",esominion.Init, "esominion.Init")
 RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate,"esominion OnUpdate")
 RegisterEventHandler("Gameloop.Draw", ml_global_information.Draw,"esominion Draw")
