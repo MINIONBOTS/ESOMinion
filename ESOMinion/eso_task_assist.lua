@@ -35,20 +35,20 @@ function eso_task_assist:Process()
 	--d("AssistMode_Process->")
 	--d("timesince last = "..tostring(TimeSince(eso_task_assist.lastprocess)))
 	--eso_task_assist.lastprocess = Now()
-	--if Now() > eso_task_assist.lastidcheck and not Player.interacting then
-		--local aggroList = EntityList("attackable,targetable,alive,aggro,maxdistance=35")
-		--if not table.valid(aggroList) then
-			--d("lets check main hand attack id")
-			--if eso_skillmanager.lastskillidcheck ~= e("GetSlotBoundId(1)") then
-			--	needsUpdate = true
-			--end
-		--end
-		--eso_task_assist.lastidcheck = Now() + math.random(8000,12000)
-	--end
+	
+	
 	if (Player.health.current > 0) then
 		-- the client does not clear the target offsets since the 1.6 patch
 		-- this is a workaround so that players can attack manually while the bot is running
-		local target = esominion.getRealTarget()
+		
+		local prefered = Player:GetPeferedTarget()
+		local highlighted = Player:GetHilightedTarget()
+		local target = nil
+		if highlighted then
+			target = highlighted
+		elseif prefered then
+			target = prefered
+		end
 
 		--[[if ( gAssistTargetMode ~= "None" ) then
 			local newTarget = eso_task_assist.GetTarget()

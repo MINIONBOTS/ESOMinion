@@ -613,26 +613,6 @@ writers = {
 	--end;
 end
 
-esominion.recenttarget = {}
-esominion.recenttargetpulse = 0
-function esominion.getRealTarget(force)
-	if Now() < esominion.recenttargetpulse and table.valid(esominion.recenttargetpulse) and not force then
-		--d("old target data used")
-		return esominion.recenttarget
-	else
-		local prefered = Player:GetPeferedTarget()
-		local highlighted = Player:GetHilightedTarget()
-		if highlighted then
-			esominion.recenttarget = highlighted
-		elseif prefered then
-			esominion.recenttarget = prefered
-		end
-		--d("new target data pulled")
-		esominion.recenttargetpulse = Now() + ml_global_information.lastPulse
-		return esominion.recenttarget
-	end
-end
-
 RegisterEventHandler("Module.Initalize",esominion.Init, "esominion.Init")
 RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate,"esominion OnUpdate")
 RegisterEventHandler("Gameloop.Draw", ml_global_information.Draw,"esominion Draw")

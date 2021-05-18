@@ -726,7 +726,6 @@ function eso_skillmanager.UpdateProfiles()
     if ( TableSize(profilelist) > 0) then			
         local i,profile = next ( profilelist)
         while i and profile do				
-			d(profile)
             profile = string.gsub(profile, ".lua", "")
             profiles = profiles..","..profile
             if ( Settings.ESOMINION.gSMlastprofileNew ~= nil and Settings.ESOMINION.gSMlastprofileNew == profile and Settings.ESOMINION.gSMlastprofileNew ~= "") then
@@ -778,7 +777,6 @@ function eso_skillmanager.UpdateCurrentProfileData()
 end
 function eso_skillmanager.BuildSkillsBook()
 	d("build new skill book")
-	eso_skillmanager.lastskillidcheck = e("GetSlotBoundId(1)")
 	
 	for i = 1,60 do
 		local skillid = e("GetAbilityIdByIndex("..i..")")
@@ -800,7 +798,6 @@ function eso_skillmanager.BuildSkillsBook()
 end
 function eso_skillmanager.BuildSkillsList()
 	d("build new skill list")
-	eso_skillmanager.lastskillidcheck = AbilityList:GetSlotInfo(1) 
 	
 	for i = 1,7 do
 		local skillid = AbilityList:GetSlotInfo(i) 
@@ -961,21 +958,20 @@ function eso_skillmanager.Cast( entity )
 		defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	end
 	if AbilityList:GetSlotInfo(1) ~= defaultAttack.id then
-		d("update list check test")
-		return false
+		eso_skillmanager.BuildSkillsList()
 	end
-	--local currentList = AbilityList:Get()
 	if eso_skillmanager.latencyTimer == 0 then
 		local GCDRemain,GCDDuration = AbilityList:GetSlotCooldownInfo(3)
 		if GCDRemain > 0 then
-			eso_skillmanager.latencyTimer = Now() + GCDRemain
-			ml_global_information.nextRun = Now() + GCDRemain
+		local addRandom = GCDRemain + math.random(50,150)
+			eso_skillmanager.latencyTimer = Now() + addRandom
+			ml_global_information.nextRun = Now() + addRandom
+			d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
 			d("add delay")
-			d(GCDRemain)
+			d(addRandom)
 			return false
 		end
 	end
-
 	--Check for blocks/interrupts.
 	--[=[if (Player:GetNumActiveCombatTips() > 0) then
 		
@@ -1129,7 +1125,7 @@ function eso_skillmanager.Cast( entity )
 						eso_skillmanager.resetTimer = Now() + 4000
 						if gSKMWeaving then
 							eso_skillmanager.latencyTimer = 0
-							ml_global_information.nextRun = Now() + math.random(35,150)
+							ml_global_information.nextRun = Now() + math.random(50,150)
 						else
 							eso_skillmanager.latencyTimer = Now() + math.random(500,700)
 						end
