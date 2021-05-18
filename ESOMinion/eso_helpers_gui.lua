@@ -17,7 +17,7 @@ function eso_dialog_manager.IssueStopNotice(title, message, buttonset, guivars)
 	local buttonset = IsNull(buttonset,"okonly")
 	eso_dialog_manager.popup = { ["type"] = buttonset, lines = message, title = title, gui = guivars, popped = false }
 	
-	if (FFXIV_Common_BotRunning) then
+	if (ESO_Common_BotRunning) then
 		ml_global_information.ToggleRun()
 	end
 end

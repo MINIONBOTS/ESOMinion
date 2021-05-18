@@ -940,6 +940,7 @@ function eso_skillmanager.EditSkill(event)
 end
 
 eso_skillmanager.lastcast = 0
+eso_skillmanager.lastdefault = 0
 eso_skillmanager.rebuild = 0
 eso_skillmanager.playerbuffs = {}
 eso_skillmanager.targetbuffs = {}
@@ -947,10 +948,11 @@ function eso_skillmanager.Cast( entity )
 	if (not entity) then
 		return false
 	end
-		
-	if (Now() < eso_skillmanager.latencyTimer) then
-		return false
-	end
+	--if TimeSince(eso_skillmanager.lastdefault) < 1100 or not gSKMWeaving then	
+		if (Now() < eso_skillmanager.latencyTimer) then
+			return false
+		end
+	--end
 
 	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	if not defaultAttack then
@@ -963,10 +965,8 @@ function eso_skillmanager.Cast( entity )
 	if eso_skillmanager.latencyTimer == 0 then
 		local GCDRemain,GCDDuration = AbilityList:GetSlotCooldownInfo(3)
 		if GCDRemain > 0 then
-		local addRandom = GCDRemain + math.random(50,150)
+		local addRandom = GCDRemain + math.random(100,250)
 			eso_skillmanager.latencyTimer = Now() + addRandom
-			ml_global_information.nextRun = Now() + addRandom
-			d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
 			d("add delay")
 			d(addRandom)
 			return false
@@ -1074,6 +1074,7 @@ function eso_skillmanager.Cast( entity )
 					d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
 					--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
 					eso_skillmanager.prevSkillID = defaultAttack.id
+					eso_skillmanager.lastdefault = Now()
 					return true
 				end
 			elseif canCast == -110 then -- stunned
@@ -1125,7 +1126,6 @@ function eso_skillmanager.Cast( entity )
 						eso_skillmanager.resetTimer = Now() + 4000
 						if gSKMWeaving then
 							eso_skillmanager.latencyTimer = 0
-							ml_global_information.nextRun = Now() + math.random(50,150)
 						else
 							eso_skillmanager.latencyTimer = Now() + math.random(500,700)
 						end
