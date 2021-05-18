@@ -72,6 +72,7 @@ eso_skillmanager.SkillBook = {}
 eso_skillmanager.SkillProfile = {}
 eso_skillmanager.SkillProfiles = {"None"}
 eso_skillmanager.prevSkillID = ""
+eso_skillmanager.ComboSkillID = ""
 eso_skillmanager.prevSkillList = {}
 eso_skillmanager.copiedSkill = {}
 eso_skillmanager.bestAOE = 0
@@ -396,7 +397,7 @@ function eso_skillmanager.OnUpdate( event, tickcount )
 		eso_skillmanager.lastTick = tickcount
 		
 		if (eso_skillmanager.resetTimer ~= 0 and Now() > eso_skillmanager.resetTimer) then
-			eso_skillmanager.prevSkillID = ""
+			eso_skillmanager.ComboSkillID = ""
 			eso_skillmanager.resetTimer = 0
 		end
 	end
@@ -1123,6 +1124,7 @@ function eso_skillmanager.Cast( entity )
 						eso_skillmanager.lastcast = Now()
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
+						eso_skillmanager.ComboSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000
 						if gSKMWeaving then
 							eso_skillmanager.latencyTimer = 0
@@ -1547,10 +1549,10 @@ function eso_skillmanager.AddDefaultConditions()
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		
 		if ( not IsNullString(skill.pskill)) then
-			if (not IsNullString(eso_skillmanager.prevSkillID)) then
+			if (not IsNullString(eso_skillmanager.ComboSkillID)) then
 				for skillid in StringSplit(skill.pskill,",") do
 					local realID = tonumber(skillid)
-					if (tonumber(eso_skillmanager.prevSkillID) == realID) then
+					if (tonumber(eso_skillmanager.ComboSkillID) == realID) then
 						return false
 					end
 				end
@@ -1566,10 +1568,10 @@ function eso_skillmanager.AddDefaultConditions()
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		if (not IsNullString(skill.npskill)) then
-			if (not IsNullString(eso_skillmanager.prevSkillID)) then
+			if (not IsNullString(eso_skillmanager.ComboSkillID)) then
 				for skillid in StringSplit(skill.npskill,",") do
 					local realID = tonumber(skillid)
-					if (tonumber(eso_skillmanager.prevSkillID) == realID) then
+					if (tonumber(eso_skillmanager.ComboSkillID) == realID) then
 						return true
 					end
 				end
