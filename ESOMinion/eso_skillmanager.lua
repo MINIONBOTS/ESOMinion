@@ -1124,17 +1124,18 @@ function eso_skillmanager.Cast( entity )
 				if canCast == 10 then
 					if (AbilityList:Cast(realID,TID)) then
 						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
-						d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
-						eso_skillmanager.lastcast = Now()
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.ComboSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000
 						if gSKMWeaving then
 							eso_skillmanager.latencyTimer = 0
+							d("last skill weave was "..tostring(Now() - eso_skillmanager.lastdefault))
 						else
 							eso_skillmanager.latencyTimer = Now() + math.random(500,700)
 						end
+						d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
+						eso_skillmanager.lastcast = Now()
 						return true
 					end
 				elseif canCast == -110 then -- stunned
