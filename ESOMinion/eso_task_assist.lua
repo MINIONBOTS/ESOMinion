@@ -41,13 +41,12 @@ function eso_task_assist:Process()
 		-- the client does not clear the target offsets since the 1.6 patch
 		-- this is a workaround so that players can attack manually while the bot is running
 		
-		local prefered = Player:GetPeferedTarget()
 		local highlighted = Player:GetHilightedTarget()
 		local target = nil
 		if highlighted then
 			target = highlighted
-		elseif prefered then
-			target = prefered
+		else 
+			target = Player:GetPeferedTarget()
 		end
 
 		--[[if ( gAssistTargetMode ~= "None" ) then
@@ -210,11 +209,7 @@ function Lockpicker.OnUpdate()
 		end
 		if Now() > Lockpicker.delay then
 			if Player.interacting then
-				if Lockpicker.interactType == 0 then
-					Lockpicker.interactType =  e("GetInteractionType()")
-					d(Lockpicker.interactType)
-				end
-				if Lockpicker.interactType == 20 then
+				if Player.interacttype == 20 then
 					if Lockpicker.timer == 0 then
 						Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
 					end
@@ -247,7 +242,6 @@ function Lockpicker.OnUpdate()
 					end
 				end
 			else
-				Lockpicker.interactType = 0
 				Lockpicker.timer = 0
 			end
 			Lockpicker.delay = Now() + math.random(400,600)
@@ -255,4 +249,4 @@ function Lockpicker.OnUpdate()
 	end
 	return false
 end
---RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
+RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")

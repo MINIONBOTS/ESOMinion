@@ -374,7 +374,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	
 	if (Now() >= ml_global_information.nextRun) then
 		
-		ml_global_information.lastPulse = math.random(250,400)
+		ml_global_information.lastPulse = math.random(300,400)
 		ml_global_information.nextRun = tickcount + ml_global_information.lastPulse
 		--ml_global_information.lastPulseShortened = false
 				
