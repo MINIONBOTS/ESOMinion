@@ -36,6 +36,18 @@ function eso_radar.Init()
 	eso_radar.SetColours()
 	eso_radar.Settings()
 	eso_radar.UpdateColours()
+	
+	gRadarSettingsRadio = 1	
+	gRadarGatherable = esominion.GetSetting("gRadarGatherable",false)
+	gRadarGatherableColor = esominion.GetSetting("gRadarGatherableColor",{r = 0.0, g = 0.5, b = 0.0, a = 1.0, color = 4294967295})
+	gRadarHostile = esominion.GetSetting("gRadarHostile",false)
+	gRadarHostileColor = esominion.GetSetting("gRadarHostileColor",{r = 1.0, g = 0.0, b = 0.0, a = 1.0, color = 4294967295})
+	gRadarAll = esominion.GetSetting("gRadarAll",false)
+	gRadarAllColor = esominion.GetSetting("gRadarAllColor",{r = 1, g = 1, b = 1, a = 1, color = 4294967295})
+	gRadarSkyshards = esominion.GetSetting("gRadarSkyshards",false)
+	gRadarSkyshardsColor = esominion.GetSetting("gRadarSkyshardsColor",{r = 0.0, g = 1.0, b = 1.0, a = 1.0, color = 4294967040})
+	gRadarTroves = esominion.GetSetting("gRadarTroves",false)
+	gRadarTrovesColor = esominion.GetSetting("gRadarTrovesColor",{r = 1.0, g = 0.8, b = 0.0, a = 1.0, color = 4278242559})
 end
 
 function ConvertHeading(heading)
@@ -50,12 +62,12 @@ function eso_radar.DrawCall(event, ticks )
 		local gamestate = GetGameState()
 		if ( gamestate == ESO.GAMESTATE.INGAME ) then 
 			if ( eso_radar.GUI.open  ) then 
-				GUI:SetNextWindowSize(580,340,GUI.SetCond_FirstUseEver) --SetCond_FirstUseEver
+				GUI:SetNextWindowSize(500,340,GUI.SetCond_FirstUseEver) --SetCond_FirstUseEver
 				eso_radar.GUI.visible, eso_radar.GUI.open = GUI:Begin("ESO Radar", eso_radar.GUI.open)
 				if ( eso_radar.GUI.visible ) then
 					MainWindowPosx, MainWindowPosy = GUI:GetWindowPos()
 					MainWindowSizex, MainWindowSizey = GUI:GetWindowSize()
-					-- GUI Start.
+					
 					GUI:Columns(2,"Main Tab") GUI:SetColumnOffset(1, MainWindowSizex/2)
 					GUI:AlignFirstTextHeightToWidgets() GUI:Text("Show 3D Radar:") if ( GUI:IsItemHovered() ) then GUI:SetTooltip( "Show 3D radar." ) end
 					GUI:SameLine()
@@ -66,53 +78,121 @@ function eso_radar.DrawCall(event, ticks )
 					eso_radar.Enable2D, changed  = GUI:Checkbox("##Enable2D", eso_radar.Enable2D) if (changed) then Settings.eso_radar.Enable2D = eso_radar.Enable2D end if ( GUI:IsItemHovered() ) then GUI:SetTooltip( "Show 2D radar." ) end
 					GUI:Columns()
 					GUI:Separator()
-					-- Tabs.
-					local Tabs = eso_radar.Tabs
-					if table.valid(Tabs) then
-						local TotalTabCount = table.size(Tabs.TabData)
-						for i,e in pairs(Tabs.TabData) do
-							if i == Tabs.CurrentSelected then 
-								GUI:TextColored(Tabs.SelectedColour.r,Tabs.SelectedColour.g,Tabs.SelectedColour.b,Tabs.SelectedColour.a,e)
-							elseif i == Tabs.CurrentHovered then 
-								GUI:TextColored(Tabs.HoveredColour.r,Tabs.HoveredColour.g,Tabs.HoveredColour.b,Tabs.HoveredColour.a,e)
-								if (GUI:IsItemHovered()) then 
-									Tabs.CurrentHovered = i
-									if (GUI:IsMouseClicked(0)) then Tabs.CurrentSelected = i end
-								else
-									Tabs.CurrentHovered = 0
-								end
-							else
-								GUI:TextColored(Tabs.StandardColour.r,Tabs.StandardColour.g,Tabs.StandardColour.b,Tabs.StandardColour.a,e)
-								if (GUI:IsItemHovered()) then 
-									Tabs.CurrentHovered = i
-									if (GUI:IsMouseClicked(0)) then Tabs.CurrentSelected = i end
-								end
-							end
-							if i < TotalTabCount then GUI:SameLine() GUI:Text("|") GUI:SameLine() end
+					
+					GUI:RadioButton(GetString("General"),gRadarSettingsRadio,1)
+					if (GUI:IsItemHovered()) then
+						if (GUI:IsMouseClicked(0)) then
+							gRadarSettingsRadio = 1
 						end
-						GUI:Separator()	
+					end
+					GUI:SameLine()GUI:Text("|") GUI:SameLine()
+					GUI:RadioButton(GetString("Custom"),gRadarSettingsRadio,2)
+					if (GUI:IsItemHovered()) then
+						if (GUI:IsMouseClicked(0)) then
+							gRadarSettingsRadio = 2
+						end
+					end
+					GUI:SameLine()GUI:Text("|") GUI:SameLine()
+					GUI:RadioButton(GetString("Settings"),gRadarSettingsRadio,3)
+					if (GUI:IsItemHovered()) then
+						if (GUI:IsMouseClicked(0)) then
+							gRadarSettingsRadio = 3
+						end
+					end
+					GUI:Spacing()
+					GUI:Separator();
+					
 						-- Tab Contents.
-						if Tabs.CurrentSelected == 1 then -- Filters Tab
-							for i,e in ipairs(eso_radar.Options) do
-								if GUI:TreeNode(e.CategoryName.."##RadarFilter") then
-									GUI:Separator()
-									GUI:Columns(3)
-									for k,v in ipairs(e) do
-										v.Enabled, changed = GUI:Checkbox("##Enabled_"..v.Name,v.Enabled) if (changed) then Settings.eso_radar.Options = eso_radar.Options RadarTable = {} end
-										GUI:SameLine()
-										GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
-										v.Colour.r,v.Colour.g,v.Colour.b,v.Colour.a,changed = GUI:ColorEdit4("##Colour_"..v.Name,v.Colour.r,v.Colour.g,v.Colour.b,v.Colour.a) 
-										if (changed) then v.ColourU32 = GUI:ColorConvertFloat4ToU32(v.Colour.r,v.Colour.g,v.Colour.b,v.Colour.a) Settings.eso_radar.Options = eso_radar.Options RadarTable = {} end
-										GUI:SameLine()
-										GUI:AlignFirstTextHeightToWidgets() GUI:Text(v.Name)
-										GUI:NextColumn()
-									end
-									GUI:Columns()
-									GUI:TreePop()
-								end
-								GUI:Separator()
-							end
-						elseif Tabs.CurrentSelected == 2 then -- Custom List Tab.
+					if gRadarSettingsRadio == 1 then
+						
+						gRadarGatherable, changed = GUI:Checkbox("Gatherable##gRadarGatherable", gRadarGatherable) 
+						if (changed) then
+							Settings.ESOMINION["gRadarGatherable"] = gRadarGatherable
+							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
+						end 
+						GUI:SameLine(125)
+						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarGatherable",gRadarGatherableColor.r,gRadarGatherableColor.g,gRadarGatherableColor.b,gRadarGatherableColor.a) 
+						if (changed) then 
+							gRadarGatherableColor.r = eso_radar.AddColour.Colour.r
+							gRadarGatherableColor.g = eso_radar.AddColour.Colour.g
+							gRadarGatherableColor.b = eso_radar.AddColour.Colour.b
+							gRadarGatherableColor.a = eso_radar.AddColour.Colour.a
+							gRadarGatherableColor.color = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
+							Settings.ESOMINION["gRadarGatherableColor"] = gRadarGatherableColor
+						end
+						
+						GUI:SameLine(150) GUI:Text("|") GUI:SameLine()
+						gRadarHostile, changed = GUI:Checkbox("Hostile##gRadarHostile", gRadarHostile) 
+						if (changed) then
+							Settings.ESOMINION["gRadarHostile"] = gRadarHostile
+							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
+						end 
+						GUI:SameLine(275)
+						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarHostile",gRadarHostileColor.r,gRadarHostileColor.g,gRadarHostileColor.b,gRadarHostileColor.a) 
+						if (changed) then 
+							gRadarHostileColor.r = eso_radar.AddColour.Colour.r
+							gRadarHostileColor.g = eso_radar.AddColour.Colour.g
+							gRadarHostileColor.b = eso_radar.AddColour.Colour.b
+							gRadarHostileColor.a = eso_radar.AddColour.Colour.a
+							gRadarHostileColor.color = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
+							Settings.ESOMINION["gRadarHostileColor"] = gRadarHostileColor
+						end
+						GUI:SameLine(300)GUI:Text("|") GUI:SameLine()
+						gRadarSkyshards, changed = GUI:Checkbox("Skyshards##gRadarSkyshards", gRadarSkyshards) 
+						if (changed) then
+							Settings.ESOMINION["gRadarSkyshards"] = gRadarSkyshards
+							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
+						end
+						GUI:SameLine(425)
+						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarSkyshards",gRadarSkyshardsColor.r,gRadarSkyshardsColor.g,gRadarSkyshardsColor.b,gRadarSkyshardsColor.a) 
+						if (changed) then 
+							gRadarSkyshardsColor.r = eso_radar.AddColour.Colour.r
+							gRadarSkyshardsColor.g = eso_radar.AddColour.Colour.g
+							gRadarSkyshardsColor.b = eso_radar.AddColour.Colour.b
+							gRadarSkyshardsColor.a = eso_radar.AddColour.Colour.a
+							gRadarSkyshardsColor.color = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
+							Settings.ESOMINION["gRadarSkyshardsColor"] = gRadarSkyshardsColor
+						end
+						
+						--GUI:SameLine()GUI:Text("|") GUI:SameLine()
+						gRadarTroves, changed = GUI:Checkbox("Troves##gRadarTroves", gRadarTroves) 
+						if (changed) then
+							Settings.ESOMINION["gRadarTroves"] = gRadarTroves
+							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
+						end
+						GUI:SameLine(125)
+						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarTroves",gRadarTrovesColor.r,gRadarTrovesColor.g,gRadarTrovesColor.b,gRadarTrovesColor.a) 
+						if (changed) then 
+							gRadarTrovesColor.r = eso_radar.AddColour.Colour.r
+							gRadarTrovesColor.g = eso_radar.AddColour.Colour.g
+							gRadarTrovesColor.b = eso_radar.AddColour.Colour.b
+							gRadarTrovesColor.a = eso_radar.AddColour.Colour.a
+							gRadarTrovesColor.color = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
+							Settings.ESOMINION["gRadarTrovesColor"] = gRadarTrovesColor
+						end
+						GUI:SameLine(150)GUI:Text("|") GUI:SameLine()
+						gRadarAll, changed = GUI:Checkbox("All##gRadarAll", gRadarAll) 
+						if (changed) then
+							Settings.ESOMINION["gRadarAll"] = gRadarAll
+							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
+						end
+						GUI:SameLine(275)
+						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarAll",gRadarAllColor.r,gRadarAllColor.g,gRadarAllColor.b,gRadarAllColor.a) 
+						if (changed) then 
+							gRadarAllColor.r = eso_radar.AddColour.Colour.r
+							gRadarAllColor.g = eso_radar.AddColour.Colour.g
+							gRadarAllColor.b = eso_radar.AddColour.Colour.b
+							gRadarAllColor.a = eso_radar.AddColour.Colour.a
+							gRadarAllColor.color = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
+							Settings.ESOMINION["gRadarAllColor"] = gRadarAllColor
+						end
+						
+					elseif gRadarSettingsRadio == 2 then -- Custom List Tab.
 							-- Add to custom list.
 							-- Column names.
 							GUI:Columns(5) GUI:SetColumnOffset(1, 100) GUI:SetColumnOffset(2, 160) GUI:SetColumnOffset(3, MainWindowSizex-185) GUI:SetColumnOffset(4, MainWindowSizex-100) 	GUI:Text("contentid") GUI:NextColumn() GUI:Text("Colour") GUI:NextColumn() GUI:Text("Custom Name") GUI:NextColumn() GUI:Text("Get Target") GUI:NextColumn() GUI:Text("Add")
@@ -124,12 +204,6 @@ function eso_radar.DrawCall(event, ticks )
 							GUI:NextColumn()
 							local Size = GUI:GetContentRegionAvail()
 							GUI:PushItemWidth(Size) eso_radar.CustomName = GUI:InputText("##CustomName", eso_radar.CustomName) GUI:PopItemWidth() GUI:NextColumn()
-							--[[if GUI:Button("Get", 40, 20) then 
-								if Player:GetTarget() ~= nil then
-									local contentid = Player:GetTarget().contentid
-									eso_radar.contentid = Player:GetTarget().contentid
-								end
-							end]]
 							GUI:NextColumn()
 							if GUI:Button("Add", 70, 20) then 
 								if eso_radar.contentid ~= "" then
@@ -164,7 +238,7 @@ function eso_radar.DrawCall(event, ticks )
 							end
 							GUI:Columns()
 							GUI:TreePop()
-						elseif Tabs.CurrentSelected == 3 then -- Settings Tab
+						elseif gRadarSettingsRadio == 3 then -- Settings Tab
 							GUI:Columns(2) GUI:SetColumnOffset(1, 250) -- Column names.
 							GUI:AlignFirstTextHeightToWidgets() GUI:Text("3D - Show HP Bars:") if ( GUI:IsItemHovered() ) then GUI:SetTooltip( "Show HP bars on the 3D radar." ) end
 							GUI:AlignFirstTextHeightToWidgets() GUI:Text("3D - Black Behind Names:") if ( GUI:IsItemHovered() ) then GUI:SetTooltip( "Puts a Transparent black bar behind the names for easy reading." ) end
@@ -201,14 +275,13 @@ function eso_radar.DrawCall(event, ticks )
 							if GUI:Button("Add Preset Data",Size,20) then eso_radar.AddPreset() end
 							GUI:Columns()
 						end
-					end
 				end 
 				GUI:End()
 			end -- End of main GUI.
 			
 			-- Check radar toggles and form list.
 			-- Overlay/Radar GUI.
-if eso_radar.Enable3D or eso_radar.Enable2D then
+			if eso_radar.Enable3D or eso_radar.Enable2D then
 				eso_radar.Radar() -- Check table
 			
 				if eso_radar.Enable3D == true then -- 3D Overlay.
@@ -407,12 +480,7 @@ end
 function eso_radar.Radar() -- Table
 	--if Now() > lastupdate + 25 then
 	--lastupdate = Now()
-		local scanString = ""
-		if (eso_radar.Options[1][2].Enabled or eso_radar.Options[1][1].Enabled) then
-			if scanString ~= "" then scanString = scanString..tostring(",") end
-			scanString = scanString..tostring("gatherable")
-		end
-		local EntityTable = EntityList(scanString)
+		local EntityTable = EntityList("")
 		if ValidTable(EntityTable) then
 			-- Update/Clean table.
 			if ValidTable(RadarTable) then
@@ -443,32 +511,44 @@ function eso_radar.Radar() -- Table
 				if RadarTable[ID] == nil then
 					local Colour = ""
 					local Draw = false
-					if (eso_radar.Options[1][2].Enabled or eso_radar.Options[1][1].Enabled) then
-						Colour = eso_radar.Options[1][1].ColourU32
+					if (gRadarGatherable) and e.interacttype == 3 then
+						Colour = gRadarGatherableColor.color
 						Draw = true
 					end
+					if (gRadarHostile) and e.hostile then
+						Colour = gRadarHostileColor.color
+						Draw = true
+					end
+					if (gRadarSkyshards) and e.contentid == 22637 then
+						Colour = gRadarSkyshardsColor.color
+						Draw = true
+					end
+					if (gRadarTroves) and e.contentid == 20089 then
+						Colour = gRadarTrovesColor.color
+						Draw = true
+					end
+					
 					local CustomName = false
 					local econtentid = e.contentid
-					local eattackable = e.attackable
+					local gatherable = e.interacttype == 3
+					local eattackable = e.hostile
 					local efriendly = e.friendly
 					local etype = e.type
 					local ename
-					--if eso_radar.InvalidNames and ename ~= "?" and ename ~= "" or not eso_radar.InvalidNames then
-						if eso_radar.CustomList[econtentid] ~= nil and eso_radar.CustomList[econtentid].Enabled then -- Custom List
-							Colour = eso_radar.CustomList[econtentid].ColourU32
-							if eso_radar.CustomList[econtentid].Name ~= "" then d("Updating Name") ename = eso_radar.CustomList[econtentid].Name end -- Custom name overwite.
-							Draw = true
-							CustomName = true
-						elseif eso_radar.Options[1][2].Enabled then -- All remaining entities.
-							Colour = eso_radar.Options[1][2].ColourU32
-							Draw = true
-						end
-						if Draw then -- Write to table.
-							ename = ename or e.name
-							local dataset = { CustomName = CustomName, id = ID, attackable = eattackable, contentid = econtentid, name = ename, pos = e.pos, distance2d = e.distance2d, distance = e.distance, alive = e.alive, hp = e.hp, ["type"] = etype, Colour = Colour, targetable = e.targetable, friendly = e.friendly, cangather = e.cangather }
-							RadarTable[ID] = dataset
-						end
-					--end
+					if eso_radar.CustomList[econtentid] ~= nil and eso_radar.CustomList[econtentid].Enabled then -- Custom List
+						Colour = eso_radar.CustomList[econtentid].ColourU32
+						if eso_radar.CustomList[econtentid].Name ~= "" then d("Updating Name") ename = eso_radar.CustomList[econtentid].Name end -- Custom name overwite.
+						Draw = true
+						CustomName = true
+					elseif gRadarAll and not Draw then -- All remaining entities.
+						Colour = gRadarAllColor.color
+						Draw = true
+					end
+					if Draw then -- Write to table.
+						ename = ename or e.name
+						local dataset = { CustomName = CustomName, id = ID, attackable = eattackable, contentid = econtentid, name = ename, pos = e.pos, worldpos = e.worldpos, distance2d = e.distance2d, distance = e.distance, alive = e.alive, hp = e.hp, ["type"] = etype, Colour = Colour, targetable = e.targetable, friendly = e.friendly, cangather = gatherable }
+						RadarTable[ID] = dataset
+					end
 				end 
 			end
 		end
@@ -478,6 +558,7 @@ end
 function eso_radar.AddPreset()
 	local PresetData = {
 		[62] = { ["Name"] = "Culumbine", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[97] = { ["Name"] = "Bugloss", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[478] = { ["Name"] = "Nirn Root", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[514] = { ["Name"] = "Blue Entolomap", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[515] = { ["Name"] = "Emetic Russula", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
@@ -642,6 +723,7 @@ function eso_radar.SetData()
 	eso_radar.CustomName = ""
 	eso_radar.CustomList = {
 		[62] = { ["Name"] = "Culumbine", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[97] = { ["Name"] = "Bugloss", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[478] = { ["Name"] = "Nornroot", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[514] = { ["Name"] = "Blue Entolomap", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[515] = { ["Name"] = "Emetic Russula", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
