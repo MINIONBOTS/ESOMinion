@@ -555,6 +555,7 @@ function Dev.DrawCall(event, ticks )
 										GUI:BulletText(".name = "..tostring(entity.name))
 										GUI:BulletText(".index = "..tostring(entity.index))
 										GUI:BulletText(".contentid = "..tostring(entity.contentid))
+										GUI:BulletText(".interacttype = "..tostring(entity.interacttype))
 										GUI:BulletText(".ismoving = "..tostring(entity.ismoving))
 										GUI:BulletText(".isswimming = "..tostring(entity.isswimming))
 										GUI:BulletText(".ischanneling = "..tostring(entity.ischanneling))
@@ -684,9 +685,9 @@ function Dev.DrawCall(event, ticks )
 					GUI:Separator()
 					GUI:Separator()
 					GUI:BeginChild("##DevAbilityScrollArea",0,165,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
-					if eso_skillmanager.lastskillidcheck ~= e("GetAbilityIdByIndex(1)") or not table.valid(eso_skillmanager.skillsbyindex) then
+					if not table.valid(eso_skillmanager.skillsbyindex) then
 						if not table.valid(eso_skillmanager.skillsbyindex) then
-							eso_skillmanager.BuildSkillsList()
+							eso_skillmanager.BuildSkillsBook()
 						end
 					end
 					
