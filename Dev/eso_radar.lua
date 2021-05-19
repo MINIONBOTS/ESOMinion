@@ -519,7 +519,7 @@ function eso_radar.Radar() -- Table
 						Colour = gRadarHostileColor.color
 						Draw = true
 					end
-					if (gRadarSkyshards) and e.contentid == 22637 then
+					if (gRadarSkyshards) and (e.contentid == 22637 or e.contentid == 22643) then
 						Colour = gRadarSkyshardsColor.color
 						Draw = true
 					end
@@ -537,10 +537,12 @@ function eso_radar.Radar() -- Table
 					local ename
 					if eso_radar.CustomList[econtentid] ~= nil and eso_radar.CustomList[econtentid].Enabled then -- Custom List
 						Colour = eso_radar.CustomList[econtentid].ColourU32
-						if eso_radar.CustomList[econtentid].Name ~= "" then d("Updating Name") ename = eso_radar.CustomList[econtentid].Name end -- Custom name overwite.
+						if eso_radar.CustomList[econtentid].Name ~= "" then 
+							ename = eso_radar.CustomList[econtentid].Name 
+						end
 						Draw = true
 						CustomName = true
-					elseif gRadarAll and not Draw then -- All remaining entities.
+					elseif gRadarAll and not Draw then
 						Colour = gRadarAllColor.color
 						Draw = true
 					end
