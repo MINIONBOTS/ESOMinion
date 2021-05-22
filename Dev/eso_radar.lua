@@ -48,6 +48,8 @@ function eso_radar.Init()
 	gRadarSkyshardsColor = esominion.GetSetting("gRadarSkyshardsColor",{r = 0.0, g = 1.0, b = 1.0, a = 1.0, color = 4294967040})
 	gRadarTroves = esominion.GetSetting("gRadarTroves",false)
 	gRadarTrovesColor = esominion.GetSetting("gRadarTrovesColor",{r = 1.0, g = 0.8, b = 0.0, a = 1.0, color = 4278242559})
+	gRadarFish = esominion.GetSetting("gRadarFish",false)
+	gRadarFishColor = esominion.GetSetting("gRadarFishColor",{r = 0.8, g = 0.8, b = 0.8, a = 1.0, color = 4291611852})
 end
 
 function ConvertHeading(heading)
@@ -175,12 +177,29 @@ function eso_radar.DrawCall(event, ticks )
 							Settings.ESOMINION["gRadarTrovesColor"] = gRadarTrovesColor
 						end
 						GUI:SameLine(150)GUI:Text("|") GUI:SameLine()
+						gRadarFish, changed = GUI:Checkbox("Fishing##gRadarFish", gRadarFish) 
+						if (changed) then
+							Settings.ESOMINION["gRadarFish"] = gRadarFish
+							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
+						end
+						GUI:SameLine(275)
+						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarFish",gRadarFishColor.r,gRadarFishColor.g,gRadarFishColor.b,gRadarFishColor.a) 
+						if (changed) then 
+							gRadarFishColor.r = eso_radar.AddColour.Colour.r
+							gRadarFishColor.g = eso_radar.AddColour.Colour.g
+							gRadarFishColor.b = eso_radar.AddColour.Colour.b
+							gRadarFishColor.a = eso_radar.AddColour.Colour.a
+							gRadarFishColor.color = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
+							Settings.ESOMINION["gRadarFishColor"] = gRadarFishColor
+						end
+						GUI:SameLine(300)GUI:Text("|") GUI:SameLine()
 						gRadarAll, changed = GUI:Checkbox("All##gRadarAll", gRadarAll) 
 						if (changed) then
 							Settings.ESOMINION["gRadarAll"] = gRadarAll
 							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
 						end
-						GUI:SameLine(275)
+						GUI:SameLine(425)
 						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
 						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarAll",gRadarAllColor.r,gRadarAllColor.g,gRadarAllColor.b,gRadarAllColor.a) 
 						if (changed) then 
@@ -519,10 +538,15 @@ function eso_radar.Radar() -- Table
 						Colour = gRadarHostileColor.color
 						Draw = true
 					end
-					if (gRadarSkyshards) and (e.contentid == 22637 or e.contentid == 22643) then
+					if (gRadarSkyshards) and In(e.contentid,22637,22638,22639,22640,22641,22642,22643) then
 						Colour = gRadarSkyshardsColor.color
 						Draw = true
 					end
+					if (gRadarFish) and (e.contentid == 909) then
+						Colour = gRadarFishColor.color
+						Draw = true
+					end
+					
 					if (gRadarTroves) and e.contentid == 20089 then
 						Colour = gRadarTrovesColor.color
 						Draw = true
