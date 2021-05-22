@@ -31,10 +31,23 @@ function eso_task_assist:Init()
 end
 eso_task_assist.lastidcheck = 0
 eso_task_assist.lastprocess = 0
+eso_task_assist.lootattempt = false
 function eso_task_assist:Process()
 	--d("AssistMode_Process->")
 	--d("timesince last = "..tostring(TimeSince(eso_task_assist.lastprocess)))
 	--eso_task_assist.lastprocess = Now()
+	
+	
+	if gAssistLoot then
+	local looting = e("IsLooting()")
+		if looting and not eso_task_assist.lootattempt then
+			e("LootAll(true)")
+			eso_task_assist.lootattempt = true
+		elseif looting then
+			e("EndLooting()")
+		end
+	end	
+	eso_task_assist.lootattempt = false
 	
 	
 	if (Player.health.current > 0) then
@@ -176,15 +189,24 @@ function eso_task_assist:Draw()
 	GUI:Columns(2)
 	GUI:AlignFirstTextHeightToWidgets() 
 	GUI:Text(GetString("Do Lock Picking"))
+	GUI:AlignFirstTextHeightToWidgets() 
 	--GUI:Text(GetString("Use Potions"))
-	GUI:Text(GetString("SKM Weaving (TEST)"))
+	GUI:AlignFirstTextHeightToWidgets() 
+	GUI:Text(GetString("SKM Weaving"))
+	GUI:AlignFirstTextHeightToWidgets() 
+	GUI:Text(GetString("Loot Assist"))
 	GUI:NextColumn()
 	local columnWidth = GUI:GetContentRegionAvail() - 10
 	GUI:PushItemWidth(columnWidth)
 	
+	GUI:AlignFirstTextHeightToWidgets() 
 	GUI_Capture(GUI:Checkbox("##"..GetString("Do Lock Picking"),gAssistDoLockpick),"gAssistDoLockpick")
+	GUI:AlignFirstTextHeightToWidgets() 
 	--GUI_Capture(GUI:Checkbox("##"..GetString("Use Potions"),gAssistUsePotions),"gAssistUsePotions")
+	GUI:AlignFirstTextHeightToWidgets() 
 	GUI_Capture(GUI:Checkbox("##"..GetString("SKM Weaving (TEST)"),gSKMWeaving),"gSKMWeaving")
+	GUI:AlignFirstTextHeightToWidgets() 
+	GUI_Capture(GUI:Checkbox("##"..GetString("Loot"),gAssistLoot),"gAssistLoot")
 	
 	GUI:PopItemWidth()
 	GUI:Columns()
