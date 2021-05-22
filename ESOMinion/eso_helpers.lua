@@ -1,24 +1,3 @@
-
-function GUI_Capture(newVal,varName,onChange,forceSave)
-	local forceSave = IsNull(forceSave,false)
-	local needsSave = false
-	
-	local currentVal = _G[varName]
-	if (forceSave or currentVal ~= newVal or (type(newVal) == "table" and not deepcompare(currentVal,newVal))) then
-		_G[varName] = newVal
-		needsSave = true
-		if (onChange and type(onChange) == "function") then
-			onChange()
-		end
-	end
-		
-	if (needsSave) then
-		Settings.ESOMINION[varName] = newVal
-	end
-
-	return newVal
-end
-
 function SaveToFileX(path, ...)
 
 
