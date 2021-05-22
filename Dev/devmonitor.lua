@@ -253,7 +253,8 @@ function Dev.DrawCall(event, ticks )
 					local c = Player
 					
 					
-					GUI:BulletText("interacting: "..tostring(c.interacting))	
+					GUI:BulletText("interacting: "..tostring(c.interacting))
+					GUI:BulletText("interacttype: "..tostring(c.interacttype))
 					if ( GUI:TreeNode("Stats")) then
 						GUI:Text("Health")
 						local stat = Player.health
@@ -541,8 +542,6 @@ function Dev.DrawCall(event, ticks )
 								gDevScannerString = gDevScannerString..tostring("targetingme")
 							end
 
-							d(gDevScannerString)
-
 							local el = EntityList(gDevScannerString)
 							if (table.valid(el)) then
 								for index,entity in spairs(el) do
@@ -550,16 +549,12 @@ function Dev.DrawCall(event, ticks )
 										entity.name = GetString("No Name")
 									end
 									if GUI:TreeNode(entity.contentid .. " - " .. entity.name) then
-										-- .health (table)
 										GUI:BulletText(".id = "..tostring(entity.id))
 										GUI:BulletText(".name = "..tostring(entity.name))
 										GUI:BulletText(".index = "..tostring(entity.index))
 										GUI:BulletText(".contentid = "..tostring(entity.contentid))
 										GUI:BulletText(".interacttype = "..tostring(entity.interacttype))
 										GUI:BulletText(".ismoving = "..tostring(entity.ismoving))
-										GUI:BulletText(".isswimming = "..tostring(entity.isswimming))
-										GUI:BulletText(".ischanneling = "..tostring(entity.ischanneling))
-										GUI:BulletText(".targetid = "..tostring(entity.targetid))
 										GUI:BulletText(".friendly = "..tostring(entity.friendly))
 										GUI:BulletText(".hostile = "..tostring(entity.hostile))
 										GUI:BulletText(".type = "..tostring(entity.type))
