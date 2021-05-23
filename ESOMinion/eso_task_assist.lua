@@ -37,9 +37,21 @@ function eso_task_assist:Process()
 	--d("timesince last = "..tostring(TimeSince(eso_task_assist.lastprocess)))
 	--eso_task_assist.lastprocess = Now()
 	
+	--[[
+	local eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange = e("EVENT_INVENTORY_SINGLE_SLOT_UPDATE")
+	local eventCode2 = e("EVENT_ACTION_LAYER_POPPED")
+	
+	if eventCode then
+		d("eventCode = "..tostring(eventCode))
+		d("itemSoundCategory = "..tostring(itemSoundCategory))
+	end
+	if eventCode2 then
+		d("eventCode2 = "..tostring(eventCode2))
+	end]]
+	     
 	
 	if gAssistLoot then
-	local looting = e("IsLooting()")
+		local looting = e("IsLooting()")
 		if looting and not eso_task_assist.lootattempt then
 			e("LootAll(true)")
 			eso_task_assist.lootattempt = true
@@ -48,7 +60,6 @@ function eso_task_assist:Process()
 		end
 	end	
 	eso_task_assist.lootattempt = false
-	
 	
 	if (Player.health.current > 0) then
 		-- the client does not clear the target offsets since the 1.6 patch
@@ -272,3 +283,33 @@ function Lockpicker.OnUpdate()
 	return false
 end
 RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
+--[[
+function handle_fish_advanced(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
+    d("handle_fish_advanced")
+    d("eventCode: "..eventCode)
+    d("bagId: "..bagId)
+    d("slotId: "..slotId)
+    d("isNewItem: "..isNewItem)
+    d("itemSoundCategory: "..tostring(itemSoundCategory))
+    d("inventoryUpdateReason: "..tostring(inventoryUpdateReason))
+    d("stackCountChange: "..tostring(stackCountChange))
+	
+	d("type = "..tostring(type(inventoryUpdateReason)))
+	if inventoryUpdateReason == "39" then
+		local mytarget
+		local TargetList = EntityList("maxdistance=20,contentid=909;910;911")
+		if TargetList then
+			id,mytarget = next (TargetList)
+			d("elist found")
+		end
+		d("attempt reel in")
+		e("GameCameraInteractStart()")
+		-- GameCameraInteractStart() 
+	--	e("SetInteractionUsingInteractCamera(true)")
+		-- SetInteractionUsingInteractCamera(boolean enabled) 
+		-- SetPendingInteractionConfirmed(boolean isConfirmed) 
+	end
+end
+RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
+RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", handle_fish_advanced, "fishCheck")]]
+
