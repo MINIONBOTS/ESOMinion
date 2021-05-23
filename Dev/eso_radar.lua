@@ -542,7 +542,7 @@ function eso_radar.Radar() -- Table
 						Colour = gRadarSkyshardsColor.color
 						Draw = true
 					end
-					if (gRadarFish) and (e.contentid == 909) then
+					if (gRadarFish) and In(e.contentid,909,910,911) then
 						Colour = gRadarFishColor.color
 						Draw = true
 					end
