@@ -3,58 +3,6 @@
 -- CanAbilityBeUsedFromHotbar(number abilityId, number HotBarCategory hotbarCategory)
    -- Returns: boolean canBeUsed 
    
---[[ fix ui list
-
-trg
-skill
-	.used
-	.name
-	.id
-	.prio
-	.minrange
-	.maxrange
-	.previd
-	.nprevid
-	.ptrg
-	.combat
-	.throttle
-	.timelastused
-	
-	health
-	.phpgt
-	.phplt
-	
-	.powertype
-	.ppowgt
-	.ppowlt
-	
-	.pbuffthis
-	.pnbuffthis
-	.tbuffthis
-	.tnbuffthis
-	
-	.pbuff
-	.pnbuff
-	.tbuff
-	.tnbuff
-	
-	target hp
-	.thpgt
-	.thplt
-	
-	casting
-	.iscasting
-	
-	aoe
-	.tecount
-	.tecount2
-	.terange
-	
-	ally aoe
-	.tacount
-	.tarange
-	
-]]
 eso_skillmanager = {}
 eso_skillmanager.version = "2.0";
 eso_skillmanager.lastTick = 0
@@ -80,6 +28,8 @@ eso_skillmanager.latencyTimer = 0
 eso_skillmanager.resetTimer = 0
 eso_skillmanager.doLoad = true
 
+eso_skillmanager.incombat = false
+eso_skillmanager.activeTip = 0
 eso_skillmanager.lastAvoid = 0
 eso_skillmanager.lastBreak = 0
 eso_skillmanager.lastInterrupt = 0
@@ -812,6 +762,9 @@ function eso_skillmanager.BuildSkillsList()
 				if string.contains(skillData.name,"Light Attack") then
 					eso_skillmanager.skillsbyname["Default"] = skillData
 				end
+				if string.contains(skillData.name,"Heavy Attack") then
+					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+				end
 				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
 			end
 		end
@@ -972,72 +925,89 @@ function eso_skillmanager.Cast( entity )
 		if GCDRemain > 0 then
 			local addRandom = GCDRemain + math.random(100,250)
 			eso_skillmanager.latencyTimer = Now() + addRandom
-			d("add delay")
-			d(addRandom)
+			--d("add delay")
+			--d(addRandom)
 			return false
 		end
 	end
+	if eso_skillmanager.activeTip ~= 0 then
+		d(eso_skillmanager.activeTip)
+	end
 	--Check for blocks/interrupts.
-	--[=[if (Player:GetNumActiveCombatTips() > 0) then
-		
-		local isAssistMode = (gBotMode == GetString("assistMode"))
-		
-		local blockable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_BLOCK)
-		if (ValidTable(blockable)) then
-			if (not isAssistMode or (isAssistMode and gAssistDoBlock == "1")) then
-				d("Attempting block.")
-				e("StartBlock()")
-				local newTask = eso_task_block.Create()
-				ml_task_hub:CurrentTask():AddSubTask(newTask)
+	local isAssistMode = (gBotMode == GetString("assistMode"))
+	
+	local blockable = eso_skillmanager.activeTip == eso_skillmanager.TIP_BLOCK
+	if (blockable) then
+		--if (not isAssistMode or (isAssistMode and gAssistDoBlock == "1")) then
+			d("Attempting block.")
+			e("StartBlock()")
+			local newTask = eso_task_block.Create()
+			ml_task_hub:CurrentTask():AddSubTask(newTask)
+			return true
+		--end
+	end
+	 --GetActiveCombatTipInfo(number activeCombatTipId) 
+	local exploitable = eso_skillmanager.activeTip == eso_skillmanager.TIP_EXPLOIT
+	if (exploitable) then
+		--if (not isAssistMode or (isAssistMode and gAssistDoExploit == "1")) then
+			local heavyAttack = eso_skillmanager.skillsbyname["DefaultHeavy"]
+			if ((entity.distance and heavyAttack.range) and entity.distance < heavyAttack.range) and (AbilityList:CanCast(heavyAttack.id,entity.id) == 10) then
+				AbilityList:Cast(heavyAttack.id,entity.id)
+				eso_skillmanager.latencyTimer = Now() + 600
+				d("Attempting to exploit enemy with skill ID :"..tostring(entity.id))
 				return true
 			end
-		end
-		 --GetActiveCombatTipInfo(number activeCombatTipId) 
-		--[[local exploitable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_EXPLOIT)
-		if (ValidTable(exploitable)) then
-			if (not isAssistMode or (isAssistMode and gAssistDoExploit == "1")) then
-				local heavyAttacks = eso_skillmanager.HeavyAttacks
-				for name,id in pairs(heavyAttacks) do
-					if (AbilityList:IsTargetInRange(id,exploitable.id) and AbilityList:CanCast(id,exploitable.id) == 10) then
-						AbilityList:Cast(id,exploitable.id)
-						eso_skillmanager.latencyTimer = Now() + 600
-						d("Attempting to exploit enemy with skill ID :"..tostring(id))
-						return true
-					end
-				end
+		--end
+	end
+	
+	local interruptable = eso_skillmanager.activeTip == eso_skillmanager.TIP_INTERRUPT
+	if (interruptable) then
+		--if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
+			if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
+				e("PerformInterrupt()")
+				eso_skillmanager.latencyTimer = Now() + 300
+				eso_skillmanager.lastBreak = Now()
+				d("Attempting to interrupt enemy.")
+				return true
 			end
-		end]]
-		
-		local interruptable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_INTERRUPT)
-		if (ValidTable(interruptable)) then
-			if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
-				if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
-					e("PerformInterrupt()")
+		--end
+	end
+	
+	local interruptable = eso_skillmanager.activeTip == eso_skillmanager.TIP_INTERRUPT2
+	if (interruptable) then
+		--if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
+			if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
+				e("PerformInterrupt()")
+				eso_skillmanager.latencyTimer = Now() + 300
+				eso_skillmanager.lastBreak = Now()
+				d("Attempting to interrupt enemy attack.")
+				return true
+			end
+		--end
+	end
+	--[[
+	local breakable = eso_skillmanager.activeTip == eso_skillmanager.TIP_BREAK
+	if (breakable) then
+		--if (not isAssistMode or (isAssistMode and gAssistDoBreak == "1")) then
+			if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
+				local validRolls = GetValidRollDirections()
+				if (validRolls) then
+					local direction = GetRandomEntry(validRolls)
+					Player:RollDodge(direction)
 					eso_skillmanager.latencyTimer = Now() + 300
 					eso_skillmanager.lastBreak = Now()
-					d("Attempting to interrupt enemy.")
+					d("Attempting to break CC.")
 					return true
 				end
 			end
-		end
-		
-		local interruptable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_INTERRUPT2)
-		if (ValidTable(interruptable)) then
-			if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
-				if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
-					e("PerformInterrupt()")
-					eso_skillmanager.latencyTimer = Now() + 300
-					eso_skillmanager.lastBreak = Now()
-					d("Attempting to interrupt enemy attack.")
-					return true
-				end
-			end
-		end
-		
-		local breakable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_BREAK)
-		if (ValidTable(breakable)) then
-			if (not isAssistMode or (isAssistMode and gAssistDoBreak == "1")) then
-				if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
+		--end
+	end
+	
+	local avoidable = eso_skillmanager.activeTip == eso_skillmanager.TIP_AVOID
+	if (avoidable) then
+		--if (not isAssistMode or (isAssistMode and gAssistDoAvoid == "1")) then
+			if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
+				if (ml_global_information.Player_Stamina.percent > 50) then
 					local validRolls = GetValidRollDirections()
 					if (validRolls) then
 						local direction = GetRandomEntry(validRolls)
@@ -1049,34 +1019,20 @@ function eso_skillmanager.Cast( entity )
 					end
 				end
 			end
+		--end
+	end]]
+		
+		
+	if gSKMWeaving then
+		if TimeSince(eso_skillmanager.lastcast) > 2000 then
+			eso_skillmanager.prevSkillID = 0
 		end
 		
-		local avoidable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_AVOID)
-		if (ValidTable(avoidable)) then
-			if (not isAssistMode or (isAssistMode and gAssistDoAvoid == "1")) then
-				if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
-					if (ml_global_information.Player_Stamina.percent > 50) then
-						local validRolls = GetValidRollDirections()
-						if (validRolls) then
-							local direction = GetRandomEntry(validRolls)
-							Player:RollDodge(direction)
-							eso_skillmanager.latencyTimer = Now() + 300
-							eso_skillmanager.lastBreak = Now()
-							d("Attempting to break CC.")
-							return true
-						end
-					end
-				end
-			end
-		end
-	end]=]
-	
-	if gSKMWeaving then
 		if eso_skillmanager.prevSkillID ~= defaultAttack.id then
 			local canCast = AbilityList:CanCast(defaultAttack.id,entity.id)
 			if (canCast == 10) and ((entity.distance and defaultAttack.range) and entity.distance < defaultAttack.range) then
 				if AbilityList:Cast(defaultAttack.id,entity.id) then
-					d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
+					--d("Attempting to cast weaving ability ID : "..tostring(defaultAttack.id).." ["..tostring(defaultAttack.name).."]")
 					--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
 					eso_skillmanager.prevSkillID = defaultAttack.id
 					eso_skillmanager.lastdefault = Now()
@@ -1087,29 +1043,6 @@ function eso_skillmanager.Cast( entity )
 			end
 		end
 	end
-	--local pBuffCount = e(GetNumBuffs("player"))
-	--[=[local pBuffs = {}
-	local tBuffs = {}
-	if pBuffCount > 0 then
-		for buff = 1 , pBuffCount do
-			local name = e("GetUnitBuffInfo(player, "..buff..")")
-			eso_skillmanager.targetbuffs[name] = true
-		end
-	else
-		eso_skillmanager.playerbuffs = {}
-	end
-	
-	local tBuffCount = e("GetNumBuffs(reticleover)")
-	if tBuffCount then
-		d("target buff count  = "..tostring(tBuffCount))
-		for buff = 1, tBuffCount do
-			local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
-			d("buff name = "..tostring(name))
-			eso_skillmanager.targetbuffs[name] = true
-		end
-	else
-		eso_skillmanager.targetbuffs = {}
-	end]=]
 
 	if (ValidTable(eso_skillmanager.SkillProfile)) then
 		for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
@@ -1123,18 +1056,18 @@ function eso_skillmanager.Cast( entity )
 				local canCast = AbilityList:CanCast(realID,TID)
 				if canCast == 10 then
 					if (AbilityList:Cast(realID,TID)) then
-						d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
+						--d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.ComboSkillID = realID
 						eso_skillmanager.resetTimer = Now() + 4000
 						if gSKMWeaving then
 							eso_skillmanager.latencyTimer = 0
-							d("last skill weave was "..tostring(Now() - eso_skillmanager.lastdefault))
+							--d("last skill weave was "..tostring(Now() - eso_skillmanager.lastdefault))
 						else
 							eso_skillmanager.latencyTimer = Now() + math.random(500,700)
 						end
-						d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
+						--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
 						eso_skillmanager.lastcast = Now()
 						return true
 					end
@@ -2199,3 +2132,54 @@ end
 RegisterEventHandler("Gameloop.Update",eso_skillmanager.OnUpdate,"ESO Update")
 RegisterEventHandler("Gameloop.Draw",eso_skillmanager.Draw,"ESOSKM  Draw")
 RegisterEventHandler("Module.Initalize",eso_skillmanager.ModuleInit,"ESO ModuleInit")
+function BuildBuffs(eventName, eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+	if In(changeType,"1","2") then
+		eso_skillmanager.playerbuffs = {}
+		if In(unitTag,"player") then
+			local pBuffCount = e("GetNumBuffs(player)")
+			if pBuffCount > 0 then
+				for buff = 1 , pBuffCount do
+					local name = e("GetUnitBuffInfo(player, "..buff..")")
+					eso_skillmanager.playerbuffs[name] = true
+				end
+			end
+		end
+		
+		if In(unitTag,"reticleover") then
+			eso_skillmanager.targetbuffs = {}
+			local tBuffCount = e("GetNumBuffs(reticleover)")
+			if tBuffCount > 0 then
+				for buff = 1, tBuffCount do
+					local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
+					eso_skillmanager.targetbuffs[name] = true
+				end
+			end
+		end
+	end
+end
+RegisterForEvent("EVENT_EFFECT_CHANGED", true)
+RegisterEventHandler("GAME_EVENT_EFFECT_CHANGED", BuildBuffs, "BuffChecks")
+function changeCombatState(eventName, eventCode, inCombat)
+	Player.incombat = toboolean(inCombat)
+	eso_skillmanager.incombat = toboolean(inCombat)
+end
+RegisterForEvent("EVENT_PLAYER_COMBAT_STATE", true)
+RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE", changeCombatState, "CombatState")
+
+function addCombatTip(eventName, eventCode, activeCombatTipId)
+d(eventName)
+d(eventCode)
+d(activeCombatTipId)
+	eso_skillmanager.activeTip = tonumber(activeCombatTipId)
+end
+function removeCombatTip(eventName, eventCode, activeCombatTipId)
+d(eventName)
+d(eventCode)
+d(activeCombatTipId)
+	eso_skillmanager.activeTip = 0
+end
+
+RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
+RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP", addCombatTip, "CombatTipActive")
+RegisterForEvent("EVENT_REMOVE_ACTIVE_COMBAT_TIP", true)
+RegisterEventHandler("GAME_EVENT_REMOVE_ACTIVE_COMBAT_TIP", removeCombatTip, "CombatTipRemove")

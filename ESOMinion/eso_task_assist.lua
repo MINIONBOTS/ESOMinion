@@ -284,7 +284,7 @@ function Lockpicker.OnUpdate()
 end
 RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
 --[[
-function handle_fish_advanced(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
+function handle_fish_advanced(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
     d("handle_fish_advanced")
     d("eventCode: "..eventCode)
     d("bagId: "..bagId)
@@ -295,7 +295,7 @@ function handle_fish_advanced(eventCode, bagId, slotId, isNewItem, itemSoundCate
     d("stackCountChange: "..tostring(stackCountChange))
 	
 	d("type = "..tostring(type(inventoryUpdateReason)))
-	if inventoryUpdateReason == "39" then
+	if itemSoundCategory == "39" then
 		local mytarget
 		local TargetList = EntityList("maxdistance=20,contentid=909;910;911")
 		if TargetList then
