@@ -28,7 +28,6 @@ eso_skillmanager.latencyTimer = 0
 eso_skillmanager.resetTimer = 0
 eso_skillmanager.doLoad = true
 
-eso_skillmanager.incombat = false
 eso_skillmanager.activeTip = 0
 eso_skillmanager.lastAvoid = 0
 eso_skillmanager.lastBreak = 0
@@ -898,6 +897,7 @@ eso_skillmanager.lastdefault = 0
 eso_skillmanager.rebuild = 0
 eso_skillmanager.playerbuffs = {}
 eso_skillmanager.targetbuffs = {}
+eso_skillmanager.roll = false
 function eso_skillmanager.Cast( entity )
 	if (not entity) then
 		return false
@@ -930,9 +930,7 @@ function eso_skillmanager.Cast( entity )
 			return false
 		end
 	end
-	if eso_skillmanager.activeTip ~= 0 then
-		d(eso_skillmanager.activeTip)
-	end
+	
 	--Check for blocks/interrupts.
 	local isAssistMode = (gBotMode == GetString("assistMode"))
 	
@@ -985,20 +983,17 @@ function eso_skillmanager.Cast( entity )
 			end
 		--end
 	end
-	--[[
-	local breakable = eso_skillmanager.activeTip == eso_skillmanager.TIP_BREAK
+	
+	--[[local breakable = eso_skillmanager.activeTip == eso_skillmanager.TIP_BREAK
 	if (breakable) then
 		--if (not isAssistMode or (isAssistMode and gAssistDoBreak == "1")) then
 			if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
-				local validRolls = GetValidRollDirections()
-				if (validRolls) then
-					local direction = GetRandomEntry(validRolls)
-					Player:RollDodge(direction)
-					eso_skillmanager.latencyTimer = Now() + 300
-					eso_skillmanager.lastBreak = Now()
-					d("Attempting to break CC.")
-					return true
-				end
+				e("RollDodgeStart()")
+				eso_skillmanager.roll = false
+				eso_skillmanager.latencyTimer = Now() + 300
+				eso_skillmanager.lastBreak = Now()
+				d("Attempting to break CC.")
+				return true
 			end
 		--end
 	end
@@ -1007,16 +1002,13 @@ function eso_skillmanager.Cast( entity )
 	if (avoidable) then
 		--if (not isAssistMode or (isAssistMode and gAssistDoAvoid == "1")) then
 			if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
-				if (ml_global_information.Player_Stamina.percent > 50) then
-					local validRolls = GetValidRollDirections()
-					if (validRolls) then
-						local direction = GetRandomEntry(validRolls)
-						Player:RollDodge(direction)
-						eso_skillmanager.latencyTimer = Now() + 300
-						eso_skillmanager.lastBreak = Now()
-						d("Attempting to break CC.")
-						return true
-					end
+				if (Player.stamina.percent > 50) then
+					e("RollDodgeStart()")
+					eso_skillmanager.roll = false
+					eso_skillmanager.latencyTimer = Now() + 300
+					eso_skillmanager.lastBreak = Now()
+					d("Attempting to avoid.")
+					return true
 				end
 			end
 		--end
@@ -1546,10 +1538,10 @@ function eso_skillmanager.AddDefaultConditions()
 		local target = eso_skillmanager.CurrentTarget
 		local preCombat = eso_skillmanager.preCombat
 		
-		if (((skill.combat == "Out of Combat") and (preCombat == false or Player.incombat)) or
+		if (((skill.combat == "Out of Combat") and (preCombat == false or esominion.incombat)) or
 			((skill.combat == "In Combat") and (preCombat == true)) or
-			((skill.combat == "In Combat") and not Player.incombat and skill.trg ~= "Target") or
-			((skill.combat == "In Combat") and not Player.incombat and not target.attackable))
+			((skill.combat == "In Combat") and not esominion.incombat and skill.trg ~= "Target") or
+			((skill.combat == "In Combat") and not esominion.incombat and not target.attackable))
 		then 
 			return true
 		end
@@ -2132,54 +2124,3 @@ end
 RegisterEventHandler("Gameloop.Update",eso_skillmanager.OnUpdate,"ESO Update")
 RegisterEventHandler("Gameloop.Draw",eso_skillmanager.Draw,"ESOSKM  Draw")
 RegisterEventHandler("Module.Initalize",eso_skillmanager.ModuleInit,"ESO ModuleInit")
-function BuildBuffs(eventName, eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
-	if In(changeType,"1","2") then
-		eso_skillmanager.playerbuffs = {}
-		if In(unitTag,"player") then
-			local pBuffCount = e("GetNumBuffs(player)")
-			if pBuffCount > 0 then
-				for buff = 1 , pBuffCount do
-					local name = e("GetUnitBuffInfo(player, "..buff..")")
-					eso_skillmanager.playerbuffs[name] = true
-				end
-			end
-		end
-		
-		if In(unitTag,"reticleover") then
-			eso_skillmanager.targetbuffs = {}
-			local tBuffCount = e("GetNumBuffs(reticleover)")
-			if tBuffCount > 0 then
-				for buff = 1, tBuffCount do
-					local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
-					eso_skillmanager.targetbuffs[name] = true
-				end
-			end
-		end
-	end
-end
-RegisterForEvent("EVENT_EFFECT_CHANGED", true)
-RegisterEventHandler("GAME_EVENT_EFFECT_CHANGED", BuildBuffs, "BuffChecks")
-function changeCombatState(eventName, eventCode, inCombat)
-	Player.incombat = toboolean(inCombat)
-	eso_skillmanager.incombat = toboolean(inCombat)
-end
-RegisterForEvent("EVENT_PLAYER_COMBAT_STATE", true)
-RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE", changeCombatState, "CombatState")
-
-function addCombatTip(eventName, eventCode, activeCombatTipId)
-d(eventName)
-d(eventCode)
-d(activeCombatTipId)
-	eso_skillmanager.activeTip = tonumber(activeCombatTipId)
-end
-function removeCombatTip(eventName, eventCode, activeCombatTipId)
-d(eventName)
-d(eventCode)
-d(activeCombatTipId)
-	eso_skillmanager.activeTip = 0
-end
-
-RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
-RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP", addCombatTip, "CombatTipActive")
-RegisterForEvent("EVENT_REMOVE_ACTIVE_COMBAT_TIP", true)
-RegisterEventHandler("GAME_EVENT_REMOVE_ACTIVE_COMBAT_TIP", removeCombatTip, "CombatTipRemove")

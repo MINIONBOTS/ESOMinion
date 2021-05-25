@@ -1,7 +1,10 @@
 esominion = {}
 esominion.modes = {}
 esominion.modesToLoad = {}
-
+esominion.lootOpen = false
+esominion.lootTime = 0
+esominion.playerdead = false
+esominion.incombat = false
 function esominion.GetSetting(strSetting,default)
 	if (Settings.ESOMINION[strSetting] == nil) then
 		Settings.ESOMINION[strSetting] = default
@@ -82,6 +85,7 @@ function esominion.Init()
 	} 
 	esominion.SetMainVars()
 	esominion.AddMode(GetString("assistMode"), eso_task_assist)
+	esominion.AddMode(GetString("fishMode"), eso_task_fish)
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
@@ -95,7 +99,7 @@ function esominion.Init()
 	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)
 	gAssistLoot = esominion.GetSetting("gAssistLoot",false)
 		
-	
+	gEnableLog = false
 	ml_gui.ui_mgr:AddComponent(esomainmenu)
 end
 
@@ -213,7 +217,7 @@ function ml_global_information.DrawMainFull()
 					GUI:Text(GetString("botMode")) 
 					GUI:SameLine(110)
 					GUI:PushItemWidth(contentwidth - 165)
-					local modeChanged = GUI:Combo("##"..GetString("botMode"), gBotModeIndex, gBotModeList )
+					local modeChanged = GUI_Combo("##"..GetString("botMode"), "gBotModeIndex", "gBotMode", gBotModeList)
 					GUI:PopItemWidth()
 					if (modeChanged) then
 						esominion.SwitchMode(gBotMode)
@@ -256,6 +260,10 @@ function ml_global_information.DrawMainFull()
 					if (GUI:Button(GetString("Skill Manager"),contentwidth,20)) then
 						eso_skillmanager.GUI.skillbook.open = not eso_skillmanager.GUI.skillbook.open
 					end
+					if (GUI:Button(GetString("Debug"),contentwidth,20)) then
+						gEnableLog = not gEnableLog
+					end
+					
 					local mainTask = ml_global_information.mainTask
 					if (mainTask) then
 						if (mainTask.Draw) then
@@ -387,6 +395,10 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			return true
 		end]]
 		
+		if eso_skillmanager.roll then
+			e("RollDodgeStop()")
+		end
+	
 		if (ml_task_hub.shouldRun) then
 			if (not ml_task_hub:Update()) then
 				d("No task queued, please select a valid bot mode in the Settings drop-down menu")

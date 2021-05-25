@@ -620,35 +620,11 @@ function eso_fish.ResetLastGather()
 	Settings.ESOMINION.gFishLockout = {}
 end
 
-function handle_fish_advanced(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-	
-	if inventoryUpdateReason == "39" then
+function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
+	d(inventoryUpdateReason)
+	if itemSoundCategory == "39" then
 		e_bite.hooked = true
-		d("set hooked")
 	end
 end
 RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
-RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", handle_fish_advanced, "fishCheck")
-c_loot = inheritsFrom( ml_cause )
-e_loot = inheritsFrom( ml_effect )
-c_loot.lootattempt = false
-c_loot.timesince = 0
-function c_loot:evaluate()
-	if TimeSince(c_loot.timesince) < 1000 then
-		return false
-	end
-	if c_loot.lootattempt then
-		return true
-	end
-	return e("IsLooting()")
-end
-function e_loot:execute()
-	if not c_loot.lootattempt then
-		e("LootAll(true)")
-		c_loot.lootattempt = true
-		return 
-	else
-		e("EndLooting()")
-	end
-	c_loot.lootattempt = false
-end
+RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")

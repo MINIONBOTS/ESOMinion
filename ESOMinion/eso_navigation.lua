@@ -2,7 +2,6 @@
 
 -- Since we have different "types" of movement, add all types and assign a value to them. Make sure to include one entry for each of the 4 kinds below per movement type!
 -- todo: modify stop distance along with movement speed
--- todo: Add MountUsage // Sprint // BreakFree(Stunk - Knockback) // Dodge(Immobilized)
 ml_navigation.NavPointReachedDistances = { ["Walk"] = 1, ["Diving"] = 1, ["Mounted"] = 1, ["Swimming"] = 1 }      -- Distance to the next node in the path at which the ml_navigation.pathindex is iterated
 ml_navigation.PathDeviationDistances = { ["Walk"] = 1, ["Diving"] = 1, ["Mounted"] = 1, ["Swimming"] = 1 }      -- The max. distance the playerposition can be away from the current path. (The Point-Line distance between player and the last & next pathnode)
 ml_navigation.GameStates = { [1] = "CHARACTERSCREEN", [2] = "MAINMENUSCREEN", [3] = "INGAME", [4] = "ERROR", [6] = "LOADING" }
@@ -627,164 +626,6 @@ function ml_navigation.Navigate(event, ticks)
                                 else
                                     d("[Navigation] - OMC BUT UNKNOWN TYPE !? WE SHOULD NOT BE HERE!!!")
                                 end
-
-                                --else
-
-                                --- Check for Obstacles in front of us, jump over it or dismount; if so do not allow to mount
-                                -- todo:I don't think we need this for ESO...
-                                --[[
-                                if not ml_navigation.navconnection and movementstate == "GroundMoving" and check_obstacle then
-                                    local hit1 = ml_navigation.ObstacleCheck(200, 6)
-                                    local hit2, gap = ml_navigation.ObstacleCheck(50, 6, true, 15)
-                                    if hit1 or hit2 then
-                                        if Player.ismounted then
-                                            if not ml_navigation.obstacles.dismount then
-                                                d("[Navigation]: Something is blocking our path. Dismounting.")
-                                            end
-                                            if hit2 then
-                                                Player:StopMovement()
-                                            end
-                                            ml_navigation.obstacles.dismount = true
-                                            allowMount = false
-                                            Player:Dismount()
-                                        elseif gap and gap > 7 and ml_navigation:DistanceToNextNavConnection() > 250 and Player:IsMoving() and
-                                                ml_navigation:GetRemainingPathLenght() >= 150 then
-                                            d("[Navigation]: Something is blocking our path, but we should be able to jump over it. Jumping.")
-                                            Player:Jump()
-                                            ml_navigation.PauseMountUsage(500)
-                                        end
-                                    end
-                                end
-                                if not Player.ismounted and ml_navigation.obstacles.dismount then
-                                    ml_navigation.PauseMountUsage(1250)
-                                    ml_navigation.obstacles = {
-                                        left = {},
-                                        right = {},
-                                    }
-                                end
-                                if not ml_navigation.navconnection and smooth_dismount and
-                                        (not next_mount or next_mount.distance > smooth_dismount.distance) and
-                                        smooth_dismount.distance < ml_navigation.smooth_dismounts[smooth_dismount.subtype] then
-                                    allowMount = false
-                                    ml_navigation.PauseMountUsage(2500)
-
-                                    if Player.ismounted then
-                                        d("[Navigation] - We have a non mount OMC next. To have a smoother handling for that we dismount already.")
-                                        Player:Dismount()
-                                    end
-                                end
-                                                                if allowMount and TimeSince(ml_navigation.lastMount) > ml_navigation.thresholds.mount and
-                                        Settings.ESOMINION[ml_navigation.characterid].use_mount and not ml_navigation.currentMountOMC then
-                                    local remainingPathLenght = ml_navigation:GetRemainingPathLenght()
-                                    --- Checks if one of the next 20 nodes is a mount OMC, if it is and its nearer then the 'premount distance' for that mount we switch over to that mount
-                                    if next_mount and next_mount.pre_mount then
-                                        can_switch_mount = false
-                                        if ml_navigation.current_Mount.skill and (next_mount.mount.ID ~= ml_navigation.current_Mount.skill.id) then
-                                            allowMount = false
-
-                                            if Player.ismounted and not ml_global_information.Player_InCombat then
-                                                local _, aggro_nearby = next(CharacterList("nearest,Hostile,aggro,maxdistance=900"))
-                                                local enemies_nearby = CharacterList("Hostile,maxdistance=750")
-                                                if not aggro_nearby and table.size(enemies_nearby) <= 1 then
-                                                    d("[Navigation] - We will need " .. tostring(next_mount.mount.NAME) .. " in " .. tostring(next_mount.distance) .. " units. Dismounting to swap to it already.")
-                                                    Player:Dismount()
-                                                    ml_navigation.PauseMountUsage(250)
-                                                end
-
-                                            elseif not Player.ismounted then
-                                                d("[Navigation] - We will need " .. tostring(next_mount.mount.NAME) .. " in " .. tostring(next_mount.distance) .. " units. Selecting mount already.")
-                                                Player:SelectMount(next_mount.mount.ID)
-                                                ml_navigation.PauseMountUsage(250)
-                                            elseif next_mount.distance < next_mount.mount.MOUNT_SWITCH_DISTANCE then
-                                                d("[Navigation] - Dismounting for a smoother start of the next " .. tostring(next_mount.mount.NAME) .. " OMC in " .. tostring(next_mount.distance) .. " units.")
-                                                Player:SelectMount(next_mount.mount.ID)
-                                                Player:Dismount()
-                                                ml_navigation.PauseMountUsage(250)
-                                            end
-                                        end
-                                    end
-
-                                    --- Checking for the correct mount if we don't use a specific one for the current or upcoming OMCs
-                                    if (not next_mount or (not next_mount.pre_mount and next_mount.distance > 1800)) then
-                                        if TimeSince(ml_navigation.ticks.favorite_mount) > ml_navigation.thresholds.favorite_mount then
-                                            ml_navigation.ticks.favorite_mount = ml_global_information.Now
-
-                                            if (not ml_navigation.currentMountOMC or not table.valid(ml_navigation.currentMountOMC)) and not ml_global_information.Player_InCombat then
-                                                local _, aggro_nearby = next(CharacterList("nearest,Hostile,aggro,maxdistance=900"))
-                                                local enemies_nearby = CharacterList("Hostile,maxdistance=750")
-
-                                                if Settings.GW2Minion[ml_navigation.acc_name].favorite_mount > 1 and not aggro_nearby and table.size(enemies_nearby) <= 1 then
-                                                    if ml_navigation.skills.favorite_mount then
-                                                        if Player.ismounted then
-                                                            local c = ml_navigation.current_Mount.skill
-                                                            if (not ml_navigation.skills[5] or (ml_navigation.skills[5].id ~= ml_navigation.gw2mount[mount].SKILLID and (not ml_navigation.gw2mount[mount].SKILLID_MASTERED or ml_navigation.skills[5].id ~= ml_navigation.gw2mount[mount].SKILLID_MASTERED))) and (not ml_navigation.skills[19] or (ml_navigation.skills[19].id ~= ml_navigation.gw2mount[mount].ID)) then
-                                                                if not ml_navigation.inWvW then
-                                                                    d("[Navigation] - We are currently mounted on " .. ((c and c.name and (c.name and (c.name ~= "" and ("our " .. c.name)) or ((c.name_fallback and "our " .. c.name_fallback) or " a wrong mount"))) or " a wrong mount") .. ". Swapping to our favorite mount: " .. (ml_navigation.skills.favorite_mount.name ~= "" and ml_navigation.skills.favorite_mount.name or mount))
-                                                                else
-                                                                    d("[Navigation] - We are currently mounted on " .. ((c and c.name and (c.name and (c.name ~= "" and ("our " .. c.name)) or ((c.name_fallback and "our " .. c.name_fallback) or " a wrong mount"))) or " a wrong mount") .. ". Swapping to : " .. (ml_navigation.skills.favorite_mount.name ~= "" and ml_navigation.skills.favorite_mount.name or mount))
-                                                                end
-                                                                Player:Dismount()
-                                                            end
-                                                        end
-
-                                                        if not Player.ismounted and (not ml_navigation.skills[19] or (ml_navigation.skills[19].id ~= ml_navigation.gw2mount[mount].ID)) then
-                                                            if not ml_navigation.inWvW then
-                                                                d("[Navigation] - Selecting our favorite mount: " .. (ml_navigation.skills.favorite_mount.name ~= "" and ml_navigation.skills.favorite_mount.name or mount))
-                                                            else
-                                                                d("[Navigation] - Selecting : " .. (ml_navigation.skills.favorite_mount.name ~= "" and ml_navigation.skills.favorite_mount.name or mount))
-                                                            end
-                                                            Player:SelectMount(ml_navigation.gw2mount[mount].ID)
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-
-                                    --- Check if we are close to the path end, if so we dismount earlier
-                                    if ml_navigation.current_Mount.info and remainingPathLenght <= ml_navigation.current_Mount.info.DISMOUNT_DISTANCE then
-                                        if (Player.ismounted and ml_navigation.staymounted == false) then
-                                            d("[Navigation] - Reaching the path end in " .. math.round(remainingPathLenght) .. " units. Dismounting already to smooth it and not overshoot.")
-                                            Player:Dismount()
-                                            allowMount = false
-                                            ml_navigation.PauseMountUsage(2500)
-                                        end
-                                    end
-
-                                    -- TODO: check if water surface node, dont try to mount if so.
-                                    if not Player.ismounted and Player.canmount then
-                                        if (remainingPathLenght ~= 0 and remainingPathLenght > ((ml_navigation.current_Mount.info and ml_navigation.current_Mount.info.DISMOUNT_DISTANCE * 2.5) or 1200)) then
-                                            local distanceToNextNode = math.distance3d(playerpos, { x = nextnode.x, y = nextnode.y, z = nextnode.z, })
-
-                                            if (lastnode and lastnode.navconnectionid ~= 0 and nextnode and nextnode.navconnectionid ~= 0) then
-                                                allowMount = false
-                                            end
-                                            if (not next_mount or not next_mount.pre_mount) and (ml_navigation:DistanceToNextNavConnection() < 1000) then
-                                                allowMount = false
-                                            end
-
-                                            if (allowMount) then
-                                                local anglediffPlayerNextNode = math.angle({ x = playerpos.hx, y = playerpos.hy, z = 0 }, { x = nextnode.x - playerpos.x, y = nextnode.y - playerpos.y, z = 0, })
-                                                local anglediffNextNodeNextNextNode = nextnextnode and math.angle({ x = nextnode.x - playerpos.x, y = nextnode.y - playerpos.y, z = 0 }, { x = nextnextnode.x - nextnode.x, y = nextnextnode.y - nextnode.y, z = 0, }) or 0
-
-                                                if (distanceToNextNode >= 500) then
-                                                    if (anglediffPlayerNextNode < 30) and not ml_navigation.navconnection then
-                                                        gw2_common_functions.NecroLeaveDeathshroud()
-
-                                                        Player:Mount()
-                                                    end
-
-                                                else
-                                                    if (anglediffPlayerNextNode < 30 and anglediffNextNodeNextNextNode < 45) and not ml_navigation.navconnection then
-                                                        gw2_common_functions.NecroLeaveDeathshroud()
-                                                        Player:Mount()
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                                ]]--
                             end
 
                             --- Move to next node in our path
@@ -1111,7 +952,9 @@ function ml_navigation:GetRaycast_Player_Node_Distance(ppos, node)
                     else
                         if (self.lastpathnodecloser > 1) then
                             -- start counting after we actually started moving closer, else turns or at start of moving fucks the logic
-                            self.lastpathnodefar = self.lastpathnodefar + 1
+							d("self.lastpathnodedist = "..tostring(self.lastpathnodedist))
+							d("current dist = "..tostring(dist2d))
+                            --self.lastpathnodefar = self.lastpathnodefar + 1
                         end
                     end
                 end

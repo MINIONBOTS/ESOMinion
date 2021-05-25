@@ -283,33 +283,3 @@ function Lockpicker.OnUpdate()
 	return false
 end
 RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
---[[
-function handle_fish_advanced(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-    d("handle_fish_advanced")
-    d("eventCode: "..eventCode)
-    d("bagId: "..bagId)
-    d("slotId: "..slotId)
-    d("isNewItem: "..isNewItem)
-    d("itemSoundCategory: "..tostring(itemSoundCategory))
-    d("inventoryUpdateReason: "..tostring(inventoryUpdateReason))
-    d("stackCountChange: "..tostring(stackCountChange))
-	
-	d("type = "..tostring(type(inventoryUpdateReason)))
-	if itemSoundCategory == "39" then
-		local mytarget
-		local TargetList = EntityList("maxdistance=20,contentid=909;910;911")
-		if TargetList then
-			id,mytarget = next (TargetList)
-			d("elist found")
-		end
-		d("attempt reel in")
-		e("GameCameraInteractStart()")
-		-- GameCameraInteractStart() 
-	--	e("SetInteractionUsingInteractCamera(true)")
-		-- SetInteractionUsingInteractCamera(boolean enabled) 
-		-- SetPendingInteractionConfirmed(boolean isConfirmed) 
-	end
-end
-RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
-RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", handle_fish_advanced, "fishCheck")]]
-

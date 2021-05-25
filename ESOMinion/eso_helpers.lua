@@ -189,3 +189,86 @@ function In(var,...)
 	
 	return false
 end
+
+function IsLootOpen()
+
+	return esominion.lootOpen
+end
+function IsDead()
+
+	return esominion.playerdead
+end
+function InCombat()
+
+	return esominion.incombat
+end
+
+
+function loot_update(eventName, eventCode, receivedBy, itemName, quantity, soundCategory, lootType, self, isPickpocketLoot, questItemIcon, itemId, isStolen) 
+	esominion.lootOpen = true
+	esominion.lootTime = Now()
+end
+RegisterForEvent("EVENT_LOOT_RECEIVED", true)
+RegisterEventHandler("GAME_EVENT_LOOT_RECEIVED", loot_update, "Loot Open")
+function loot_close(eventName, eventCode) 
+	esominion.lootOpen = false
+end
+RegisterForEvent("EVENT_LOOT_CLOSED", true)
+RegisterEventHandler("GAME_EVENT_LOOT_CLOSED", loot_close, "Loot Closed")
+
+function death_update_alive(eventName, eventCode) 
+	esominion.playerdead = false
+end
+RegisterForEvent("EVENT_PLAYER_ALIVE", true)
+RegisterEventHandler("GAME_EVENT_PLAYER_ALIVE", death_update_alive, "Death Update Alive")
+function death_update_dead(eventName, eventCode) 
+	esominion.playerdead = true
+end
+RegisterForEvent("EVENT_PLAYER_DEAD", true)
+RegisterEventHandler("GAME_EVENT_PLAYER_DEAD", death_update_dead, "Death Update Dead")
+
+function BuildBuffs(eventName, eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+	if In(changeType,"1","2") then
+		if In(unitTag,"player") then
+			eso_skillmanager.playerbuffs = {}
+			local pBuffCount = e("GetNumBuffs(player)")
+			if pBuffCount > 0 then
+				for buff = 1 , pBuffCount do
+					local name = e("GetUnitBuffInfo(player, "..buff..")")
+					eso_skillmanager.playerbuffs[name] = true
+				end
+			end
+		end
+		
+		if In(unitTag,"reticleover") then
+			eso_skillmanager.targetbuffs = {}
+			local tBuffCount = e("GetNumBuffs(reticleover)")
+			if tBuffCount > 0 then
+				for buff = 1, tBuffCount do
+					local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
+					eso_skillmanager.targetbuffs[name] = true
+				end
+			end
+		end
+	end
+end
+RegisterForEvent("EVENT_EFFECT_CHANGED", true)
+RegisterEventHandler("GAME_EVENT_EFFECT_CHANGED", BuildBuffs, "BuffChecks")
+function changeCombatState(eventName, eventCode, inCombat)
+	Player.incombat = toboolean(inCombat)
+	esominion.incombat = toboolean(inCombat)
+end
+RegisterForEvent("EVENT_PLAYER_COMBAT_STATE", true)
+RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE", changeCombatState, "CombatState")
+
+function addCombatTip(eventName, eventCode, activeCombatTipId)
+	eso_skillmanager.activeTip = tonumber(activeCombatTipId)
+end
+function removeCombatTip(eventName, eventCode, activeCombatTipId)
+	eso_skillmanager.activeTip = 0
+end
+
+RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
+RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP", addCombatTip, "CombatTipActive")
+RegisterForEvent("EVENT_REMOVE_ACTIVE_COMBAT_TIP", true)
+RegisterEventHandler("GAME_EVENT_REMOVE_ACTIVE_COMBAT_TIP", removeCombatTip, "CombatTipRemove")
