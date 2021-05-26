@@ -45,6 +45,7 @@ eso_skillmanager.skillsbyid = {}
 eso_skillmanager.skillsbyname = {}
 eso_skillmanager.lastskillidcheck = 0
 eso_skillmanager.lastskillindexcheck = 0
+eso_skillmanager.skillsearchstring = ""
 eso_skillmanager.GUI = {
 	skillbook = {
 		name = GetString("Skill Book"),
@@ -1755,12 +1756,27 @@ function eso_skillmanager.DrawSkillBook()
 			local sortfunc = function(skillBook,a,b) 
 				return (skillBook[a].name < skillBook[b].name)
 			end
-					
+			local function WindowFocusFlags()
+				if GUI:IsWindowFocused() == true or GUI:IsWindowHovered() == true then
+					return 0
+				else
+					return GUI.InputTextFlags_ReadOnly
+				end
+			end
+			GUI:Text(GetString("Search:"))
+			if GUI:IsItemHovered() then GUI:SetTooltip(GetString("Name or ID")) end
+			GUI:SameLine()
+			eso_skillmanager.skillsearchstring = GUI:InputText("##eso_skillmanagerskillsearchstring",eso_skillmanager.skillsearchstring,WindowFocusFlags())
+			if GUI:IsItemHovered() then GUI:SetTooltip(GetString("Name or ID")) end
 			for key, skillInfo in spairs(skillBook,sortfunc) do
-				if ( GUI:Button(skillInfo.name.." ["..tostring(skillInfo.id).."]",width,20)) then
-					eso_skillmanager.AddSkillToProfile(skillInfo.id)
-					eso_skillmanager.SaveProfile()
-				
+				if eso_skillmanager.skillsearchstring == "" or
+					string.find(string.lower(skillInfo.name),string.lower(eso_skillmanager.skillsearchstring)) or
+						string.find(tostring(skillInfo.id),eso_skillmanager.skillsearchstring) then
+					if ( GUI:Button(skillInfo.name.." ["..tostring(skillInfo.id).."]",width,20)) then
+						eso_skillmanager.AddSkillToProfile(skillInfo.id)
+						eso_skillmanager.SaveProfile()
+					
+					end
 				end
 			end
 		else
