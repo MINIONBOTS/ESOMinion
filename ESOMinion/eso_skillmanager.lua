@@ -1958,7 +1958,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "maxRange", variable = "SKM_MaxR", width = 50, tooltip = "Maximum range the skill can be used."}
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PSkillID",SKM_PSkillID),"SKM_PSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill NOT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should NOT be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPSkillID",SKM_NPSkillID),"SKM_NPSkillID"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Throttle Skill",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Delay reuse of skill.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THROTTLE",SKM_THROTTLE,0,0),"SKM_THROTTLE"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Throttle Skill",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Delay reuse of skill. (seconds)")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THROTTLE",SKM_THROTTLE,0,0),"SKM_THROTTLE"); GUI:NextColumn();
 		GUI:Columns(1)
 	end
 	
