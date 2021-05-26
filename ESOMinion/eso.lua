@@ -99,16 +99,6 @@ function esominion.Init()
 	end
 	
 	-- set settings on startup
-	gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
-	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
-	gPreventAttackingInnocents = esominion.GetSetting("gPreventAttackingInnocents",true)
-	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)
-	gAssistLoot = esominion.GetSetting("gAssistLoot",false)
-	gAssistDoBlock = esominion.GetSetting("gAssistDoBlock",true)
-	gAssistDoExploit = esominion.GetSetting("gAssistDoExploit",true)
-	gAssistDoInterrupt = esominion.GetSetting("gAssistDoInterrupt",true)
-	gAssistDoBreak = esominion.GetSetting("gAssistDoBreak",true)
-	gAssistDoAvoid = esominion.GetSetting("gAssistDoAvoid",true)
 		
 	gEnableLog = false
 	ml_gui.ui_mgr:AddComponent(esomainmenu)

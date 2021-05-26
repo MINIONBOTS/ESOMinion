@@ -36,53 +36,22 @@ function eso_task_assist:Process()
 	--d("AssistMode_Process->")
 	--d("timesince last = "..tostring(TimeSince(eso_task_assist.lastprocess)))
 	--eso_task_assist.lastprocess = Now()
-	
-	--[[
-	local eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange = e("EVENT_INVENTORY_SINGLE_SLOT_UPDATE")
-	local eventCode2 = e("EVENT_ACTION_LAYER_POPPED")
-	
-	if eventCode then
-		d("eventCode = "..tostring(eventCode))
-		d("itemSoundCategory = "..tostring(itemSoundCategory))
-	end
-	if eventCode2 then
-		d("eventCode2 = "..tostring(eventCode2))
-	end]]
-	     
-	
-	if gAssistLoot then
-		local looting = e("IsLooting()")
-		if looting and not eso_task_assist.lootattempt then
-			e("LootAll(true)")
-			eso_task_assist.lootattempt = true
-		elseif looting then
-			e("EndLooting()")
-		end
-	end	
-	eso_task_assist.lootattempt = false
-	
-	if (Player.health.current > 0) then
+	  
+		
+	if (not esominion.playerdead) then
 		-- the client does not clear the target offsets since the 1.6 patch
 		-- this is a workaround so that players can attack manually while the bot is running
 		
-		local highlighted = Player:GetHilightedTarget()
 		local target = nil
-		if highlighted then
-			target = highlighted
-		else 
+		if gAssistTargetModeSetting == "Highlighted" then
+			target = Player:GetHilightedTarget()
+		elseif gAssistTargetModeSetting == "Reticle" then
 			target = Player:GetPeferedTarget()
+		elseif gAssistTargetModeSetting == "Scanner" then
+			target = eso_task_assist.GetTarget()
 		end
-
-		--[[if ( gAssistTargetMode ~= "None" ) then
-			local newTarget = eso_task_assist.GetTarget()
-			if ( newTarget ~= nil and (not target or newTarget.id ~= target.id)) then
-				target = newTarget
-				Player:SetTarget(target.id)  
-			end
-		--end]]
 		
-		--if ( gAssistInitCombat == "1" or ml_global_information.Player_InCombat ) then
-			--if ( target and target.attackable and target.health > 0 and not target.iscritter) then
+		if ( gAssistInitCombat or esominion.incombat ) then
 			if ( target and target.hostile and target.health.current > 0) then
 			
 				--local skillData = eso_skillmanager.skillsbyname["Light Attack"]
@@ -107,32 +76,29 @@ function eso_task_assist:Process()
 					eso_skillmanager.Cast( target )
 				--end
 			end		
-		--end
+		end
 	end
 end
 
 
 function eso_task_assist.SelectTargetExtended(maxrange, los, aggro)
-	--local filterstring = "attackable,targetable,alive,nocritter,maxdistance="..tostring(maxrange)
-	--local filterstring = "attackable,targetable,maxdistance="..tostring(maxrange) -- attempt 1 no issues
-	--local filterstring = "attackable,targetable,nocritter,maxdistance="..tostring(maxrange) -- attempt 2 crashed after a few mins
-	local filterstring = "attackable,targetable,alive,maxdistance="..tostring(maxrange) -- attempt 3 
+	local filterstring = "hostile,targetable,alive,nocritter,maxdistance="..tostring(maxrange)
 	if (los) then filterstring = filterstring..",los" end
 	if (aggro) then filterstring = filterstring..",aggro" end
 	--if (gAssistTargetType == "Players Only") then filterstring = filterstring..",player" end
-	--if (gAssistTargetMode == "LowestHealth") then 
-	--	filterstring = filterstring..",lowesthealth"
-	--elseif (gAssistTargetMode == "Closest") then 
-	--	filterstring = filterstring..",nearest" 
-	--end
+	if (gAssistTargetMode == "LowestHealth") then 
+		filterstring = filterstring..",lowesthealth"
+	elseif (gAssistTargetMode == "Closest") then 
+		filterstring = filterstring..",nearest" 
+	end
 	
-	--if (gAssistTargetMode == "Biggest Crowd") then filterstring = filterstring..",clustered=6" end
+	if (gAssistTargetMode == "Biggest Crowd") then filterstring = filterstring..",clustered=6" end
 	--if (gPreventAttackingInnocents == "1") then filterstring = filterstring..",hostile" end
 	local TargetList = EntityList(filterstring)
 	if ( TargetList ) then
 		local id,entry = next(TargetList)
 		if (id and entry ) then
-			ml_log("Attacking "..tostring(entry.id) .. " name "..entry.name)
+			--d("Attacking "..tostring(entry.id) .. " name "..entry.name)
 			return entry
 		end
 	end	
@@ -141,7 +107,9 @@ end
 
 function eso_task_assist.GetTarget()
 	local target = nil
-	
+	if not eso_skillmanager.skillsbyname["Default"] then
+		eso_skillmanager.BuildSkillsList()
+	end
 	target = eso_task_assist.SelectTargetExtended(ml_global_information.AttackRange, true,true) -- check for aggro targets 1st
 	if ( not ValidTable(target) ) then 
 		target = eso_task_assist.SelectTargetExtended(ml_global_information.AttackRange, true) -- normal targets next
@@ -158,27 +126,23 @@ end
 
 function eso_task_assist:UIInit()
 	
+	gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
+	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
+	gPreventAttackingInnocents = esominion.GetSetting("gPreventAttackingInnocents",true)
+	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)
+	gAssistLoot = esominion.GetSetting("gAssistLoot",false)
+	gAssistDoBlock = esominion.GetSetting("gAssistDoBlock",true)
+	gAssistDoExploit = esominion.GetSetting("gAssistDoExploit",true)
+	gAssistDoInterrupt = esominion.GetSetting("gAssistDoInterrupt",true)
+	gAssistDoBreak = esominion.GetSetting("gAssistDoBreak",true)
+	gAssistDoAvoid = esominion.GetSetting("gAssistDoAvoid",true)
+	gAssistInitCombat = esominion.GetSetting("gAssistInitCombat",false)
 	
-	--[=[GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMtargetmode"),"gAssistTargetMode",GetString("assistMode"),"None,LowestHealth,Closest,Biggest Crowd");
-	GUI_NewComboBox(ml_global_information.MainWindow.Name,GetString("sMmode"),"gAssistTargetType",GetString("assistMode"),"Everything,Players Only")
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,GetString("startCombat"),"gAssistInitCombat",GetString("assistMode"))
+	gAssistTargetModeIndex = esominion.GetSetting("gAssistTargetModeIndex",1)
+	gAssistTargetModeSetting = esominion.GetSetting("gAssistTargetModeSetting","Reticle")
+	gAssistTargetTypeIndex = esominion.GetSetting("gAssistTargetTypeIndex",1)
+	gAssistTargetTypeSetting = esominion.GetSetting("gAssistTargetTypeSetting","None")
 	
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Interrupts","gAssistDoInterrupt",GetString("assistMode"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Exploits","gAssistDoExploit",GetString("assistMode"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Dodges","gAssistDoAvoid",GetString("assistMode"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform Blocks","gAssistDoBlock",GetString("assistMode"))
-	GUI_NewCheckbox(ml_global_information.MainWindow.Name,"Perform CC Breaks","gAssistDoBreak",GetString("assistMode"))
-	
-	gAssistTargetMode = Settings.ESOMINION.gAssistTargetMode
-	gAssistTargetType = Settings.ESOMINION.gAssistTargetType
-	gAssistInitCombat = Settings.ESOMINION.gAssistInitCombat
-	gAssistDoInterrupt = Settings.ESOMINION.gAssistDoInterrupt
-	gAssistDoExploit = Settings.ESOMINION.gAssistDoExploit
-	gAssistDoAvoid = Settings.ESOMINION.gAssistDoAvoid
-	
-	gAssistDoBlock = Settings.ESOMINION.gAssistDoBlock
-	gAssistDoBreak = Settings.ESOMINION.gAssistDoBreak
-	]=]
 end
 
 -- Adding it to our botmodes
@@ -199,8 +163,16 @@ function eso_task_assist:Draw()
 	GUI:Separator()
 	GUI:Columns(2)
 	GUI:AlignFirstTextHeightToWidgets() 
-	GUI:Text(GetString("Do Lock Picking"))
+	GUI:Text(GetString("Targeting Mode"))
+	if In(gAssistTargetModeIndex,3) then
+		GUI:AlignFirstTextHeightToWidgets() 
+		GUI:Text(GetString("Targeting Type"))
+	end
 	GUI:AlignFirstTextHeightToWidgets() 
+	GUI:Text(GetString("Start Combat"))
+	GUI:AlignFirstTextHeightToWidgets() 
+	GUI:Text(GetString("Do Lock Picking"))
+	--GUI:AlignFirstTextHeightToWidgets() 
 	--GUI:Text(GetString("Use Potions"))
 	GUI:AlignFirstTextHeightToWidgets() 
 	GUI:Text(GetString("SKM Weaving"))
@@ -211,8 +183,16 @@ function eso_task_assist:Draw()
 	GUI:PushItemWidth(columnWidth)
 	
 	GUI:AlignFirstTextHeightToWidgets() 
-	GUI_Capture(GUI:Checkbox("##"..GetString("Do Lock Picking"),gAssistDoLockpick),"gAssistDoLockpick")
+	GUI_Combo("##targetingMode","gAssistTargetModeIndex","gAssistTargetModeSetting",{"Reticle","Highlighted","Scanner"});
+	if In(gAssistTargetModeIndex,3) then
+		GUI:AlignFirstTextHeightToWidgets() 
+		GUI_Combo("##targetingassist","gAssistTargetTypeIndex","gAssistTargetTypeSetting",{"None","LowestHealth","Closest","Biggest Crowd"});
+	end
 	GUI:AlignFirstTextHeightToWidgets() 
+	GUI_Capture(GUI:Checkbox("##"..GetString("Start Combat"),gAssistInitCombat),"gAssistInitCombat")
+	GUI:AlignFirstTextHeightToWidgets() 
+	GUI_Capture(GUI:Checkbox("##"..GetString("Do Lock Picking"),gAssistDoLockpick),"gAssistDoLockpick")
+	--GUI:AlignFirstTextHeightToWidgets() 
 	--GUI_Capture(GUI:Checkbox("##"..GetString("Use Potions"),gAssistUsePotions),"gAssistUsePotions")
 	GUI:AlignFirstTextHeightToWidgets() 
 	GUI_Capture(GUI:Checkbox("##"..GetString("SKM Weaving (TEST)"),gSKMWeaving),"gSKMWeaving")

@@ -148,7 +148,19 @@ eso_skillmanager.HeavyAttacks = {
 	["Unarmed 2"] = 60772,
 }
 eso_skillmanager.SummonSkills = {
-	[85982] = "Warden",
+	[23634] = "Summon Storm Atronach",
+	[23636] = "Summon Storm Atronach",
+	[23639] = "Summon Storm Atronach",
+	[23662] = "Greater Storm Atronach",
+	[23663] = "Greater Storm Atronach",
+	[23666] = "Summon Charged Atronach",
+	[23668] = "Summon Charged Atronach",
+	[23669] = "Summon Charged Atronach",
+	[23641] = "Volatile Familiar",
+	[23644] = "Unstable Clannfear",
+	[85982] = "Feral Guardian",
+	[85986] = "Eternal Guardian",
+	[85990] = "Wild Guardian",
 
 }
 
@@ -296,6 +308,8 @@ function eso_skillmanager.ModuleInit()
 	gSMBattleStatusIndex = 1
 	gSMBattlePowerTypes = {"Magicka","Stamina","Ultimate"}
 	gSMBattlePowerTypeIndex = 1
+	
+	gSKMFilter = esominion.GetSetting("gSKMFilter",false)
 	
 	eso_skillmanager.UpdateProfiles()
 	eso_skillmanager.UseDefaultProfile()
@@ -725,31 +739,39 @@ function eso_skillmanager.UpdateCurrentProfileData()
 end
 function eso_skillmanager.BuildSkillsBook()
 	d("build new skill book")
-	
-	for i = 1,100 do
-		local skillid = e("GetAbilityIdByIndex("..i..")")
-		if skillid ~= 0 then
-			local skillData = ESOLib.API.Action.GetSkillData(skillid)
-			if skillData then
-				eso_skillmanager.skillsbyindex[i] = skillData
-				eso_skillmanager.skillsbyid[skillid] = skillData
-				eso_skillmanager.skillsbyname[skillData.name] = skillData
-			
-				if string.contains(skillData.name,"Light Attack") then
-					eso_skillmanager.skillsbyname["Default"] = skillData
+	eso_skillmanager.skillsbyindex = {}
+	eso_skillmanager.skillsbyid = {}
+	eso_skillmanager.skillsbyname = {}
+	if not gSKMFilter then
+		for i = 1,100 do
+			local skillid = e("GetAbilityIdByIndex("..i..")")
+			if skillid ~= 0 then
+				local skillData = ESOLib.API.Action.GetSkillData(skillid)
+				if skillData then
+					eso_skillmanager.skillsbyindex[i] = skillData
+					eso_skillmanager.skillsbyid[skillid] = skillData
+					eso_skillmanager.skillsbyname[skillData.name] = skillData
+				
+					if string.contains(skillData.name,"Light Attack") then
+						eso_skillmanager.skillsbyname["Default"] = skillData
+					end
+					if string.contains(skillData.name,"Heavy Attack") then
+						eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+					end
+					ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
 				end
-				if string.contains(skillData.name,"Heavy Attack") then
-					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
-				end
-				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
 			end
 		end
 	end
+	
 	for i = 1,7 do
 		local skillid = AbilityList:GetSlotInfo(i) 
 		if skillid ~= 0 then
 			local skillData = ESOLib.API.Action.GetSkillData(skillid)
 			if skillData then
+				if not eso_skillmanager.skillsbyid[skillid] then
+					table.insert(eso_skillmanager.skillsbyindex,skillData)
+				end
 		
 				eso_skillmanager.skillsbyid[skillid] = skillData
 				eso_skillmanager.skillsbyname[skillData.name] = skillData
@@ -760,19 +782,23 @@ function eso_skillmanager.BuildSkillsBook()
 				if string.contains(skillData.name,"Heavy Attack") then
 					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
 				end
-				table.insert(eso_skillmanager.skillsbyindex,skillData)
 				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
 			end
 		end
 	end
-	for id,skill in pairs (eso_skillmanager.SummonSkills) do
-		local skillid = id
-		if skillid ~= 0 then
-			local skillData = ESOLib.API.Action.GetSkillData(skillid)
-			if skillData then
-		
-				eso_skillmanager.skillsbyid[skillid] = skillData
-				eso_skillmanager.skillsbyname[skillData.name] = skillData
+	if not gSKMFilter then
+		for id,skill in pairs (eso_skillmanager.SummonSkills) do
+			local skillid = id
+			if skillid ~= 0 then
+				local skillData = ESOLib.API.Action.GetSkillData(skillid)
+				if skillData then
+					if not eso_skillmanager.skillsbyid[skillid] then
+						table.insert(eso_skillmanager.skillsbyindex,skillData)
+					end
+			
+					eso_skillmanager.skillsbyid[skillid] = skillData
+					eso_skillmanager.skillsbyname[skillData.name] = skillData
+				end
 			end
 		end
 	end
@@ -781,6 +807,8 @@ end
 function eso_skillmanager.BuildSkillsList()
 	d("build new skill list")
 	
+	eso_skillmanager.skillsbyid = {}
+	eso_skillmanager.skillsbyname = {}
 	for i = 1,7 do
 		local skillid = AbilityList:GetSlotInfo(i) 
 		if skillid ~= 0 then
@@ -1751,6 +1779,18 @@ function eso_skillmanager.DrawSkillBook()
 		local contentwidth = GUI:GetContentRegionAvailWidth()
 		
 		eso_skillmanager.GUI.skillbook.x = x; eso_skillmanager.GUI.skillbook.y = y; eso_skillmanager.GUI.skillbook.width = width; eso_skillmanager.GUI.skillbook.height = height;
+		
+				
+				
+		local val, changed = GUI:Checkbox(GetString("Display Active SKills Only"),gSKMFilter)
+		if (changed) then
+			gSKMFilter = val
+			Settings.ESOMINION.gSKMFilter = gSKMFilter
+			eso_skillmanager.SkillBook = {}
+		end				
+		
+		GUI:Separator()              
+		
 		local skillBook = eso_skillmanager.SkillBook
 		if (table.valid(skillBook)) then
 			local sortfunc = function(skillBook,a,b) 
@@ -1825,7 +1865,7 @@ function eso_skillmanager.Draw()
 			local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
 			GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], (255/255))
 			
-			eso_skillmanager.GUI.profile.visible, eso_skillmanager.GUI.profile.open = GUI:Begin(eso_skillmanager.GUI.profile.name, true, GUI.WindowFlags_NoTitleBar)
+			eso_skillmanager.GUI.profile.visible, eso_skillmanager.GUI.profile.open = GUI:Begin(eso_skillmanager.GUI.profile.name, true)
 			
 			local contentwidth = GUI:GetContentRegionAvailWidth()
 			if table.valid(eso_skillmanager.SkillProfile) then
