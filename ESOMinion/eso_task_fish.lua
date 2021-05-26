@@ -278,13 +278,10 @@ e_setbait.needbait = false
 e_setbait.baitid = 0
 e_setbait.baitname = ""
 function c_setbait:evaluate()
--- SetFishingLure(number lureIndex) 
---  GetFishingLure()
---  GetNumFishingLures() 
 	if not e_setbait.needbait then
 		return false
 	end
-	local currentBait = IsNull(e("GetFishingLure()"),0)
+	local currentBait = esominion.lureType
 	if (currentBait == 0) then
 		local baitNum = e("GetNumFishingLures()")
 		if baitNum > 0 then

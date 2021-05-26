@@ -28,7 +28,6 @@ eso_skillmanager.latencyTimer = 0
 eso_skillmanager.resetTimer = 0
 eso_skillmanager.doLoad = true
 
-eso_skillmanager.activeTip = 0
 eso_skillmanager.lastAvoid = 0
 eso_skillmanager.lastBreak = 0
 eso_skillmanager.lastInterrupt = 0
@@ -147,6 +146,10 @@ eso_skillmanager.HeavyAttacks = {
 	["Unarmed"] = 18429,
 	["Unarmed 2"] = 60772,
 }
+eso_skillmanager.SummonSkills = {
+	[85982] = "Warden",
+
+}
 
 eso_skillmanager.Variables = {
 	-- basic
@@ -159,6 +162,7 @@ eso_skillmanager.Variables = {
 	SKM_ENABLED = { default = "0", cast = "string", profile = "enabled", section = "main"},	
 	
 	SKM_Combat = { default = "In Combat", cast = "string", profile = "ooc", section = "fighting"  },
+	SKM_Summon = { default = false, cast = "boolean", profile = "summonskill", section = "fighting"  },
 	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"   },
 	SKM_MinR = { default = 0, cast = "number", profile = "minRange", section = "fighting"   },
 	SKM_MaxR = { default = 30, cast = "number", profile = "maxRange", section = "fighting"   },
@@ -239,14 +243,10 @@ eso_skillmanager.Variables = {
 	SKM_TCASTTIME = { default = "0.0", cast = "string", profile = "tcasttime", section = "fighting"  },
 	--]]
 	
-	SKM_PBuffThis = { default = "", cast = "string", profile = "pbuffthis", section = "fighting"  },
 	SKM_PBuff = { default = "", cast = "string", profile = "pbuff", section = "fighting"  },
-	SKM_PNBuffThis = { default = "", cast = "string", profile = "pnbuffthis", section = "fighting"  },
 	SKM_PNBuff = { default = "", cast = "string", profile = "pnbuff", section = "fighting"  },
 		
-	SKM_TBuffThis = { default = "", cast = "string", profile = "tbuffthis", section = "fighting"  },
 	SKM_TBuff = { default = "", cast = "string", profile = "tbuff", section = "fighting"  },
-	SKM_TNBuffThis = { default = "", cast = "string", profile = "tnbuffthis", section = "fighting"  },
 	SKM_TNBuff = { default = "", cast = "string", profile = "tnbuff", section = "fighting"  },
 	
 	
@@ -508,7 +508,6 @@ function eso_skillmanager.CheckProfileValidity()
 end
 
 function eso_skillmanager.UseProfile(strName)
-d("use Profile")
 	gSMprofile = strName
     gSMactive = "1"					
 	--GUI_WindowVisible(eso_skillmanager.editwindow.name,false)		
@@ -618,8 +617,6 @@ function eso_skillmanager.SaveProfile()
 end
 
 function eso_skillmanager.SetDefaultProfile(strName)
-d("set default")
-d(strName)
 	local profile = strName or gSMprofile
 	local classid = e("GetUnitClassId(player)")
 	Settings.ESOMINION.SMDefaultProfiles[classid] = profile
@@ -728,7 +725,7 @@ end
 function eso_skillmanager.BuildSkillsBook()
 	d("build new skill book")
 	
-	for i = 1,60 do
+	for i = 1,100 do
 		local skillid = e("GetAbilityIdByIndex("..i..")")
 		if skillid ~= 0 then
 			local skillData = ESOLib.API.Action.GetSkillData(skillid)
@@ -740,7 +737,41 @@ function eso_skillmanager.BuildSkillsBook()
 				if string.contains(skillData.name,"Light Attack") then
 					eso_skillmanager.skillsbyname["Default"] = skillData
 				end
+				if string.contains(skillData.name,"Heavy Attack") then
+					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+				end
 				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
+			end
+		end
+	end
+	for i = 1,7 do
+		local skillid = AbilityList:GetSlotInfo(i) 
+		if skillid ~= 0 then
+			local skillData = ESOLib.API.Action.GetSkillData(skillid)
+			if skillData then
+		
+				eso_skillmanager.skillsbyid[skillid] = skillData
+				eso_skillmanager.skillsbyname[skillData.name] = skillData
+			
+				if string.contains(skillData.name,"Light Attack") then
+					eso_skillmanager.skillsbyname["Default"] = skillData
+				end
+				if string.contains(skillData.name,"Heavy Attack") then
+					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+				end
+				table.insert(eso_skillmanager.skillsbyindex,skillData)
+				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
+			end
+		end
+	end
+	for id,skill in pairs (eso_skillmanager.SummonSkills) do
+		local skillid = id
+		if skillid ~= 0 then
+			local skillData = ESOLib.API.Action.GetSkillData(skillid)
+			if skillData then
+		
+				eso_skillmanager.skillsbyid[skillid] = skillData
+				eso_skillmanager.skillsbyname[skillData.name] = skillData
 			end
 		end
 	end
@@ -768,16 +799,22 @@ function eso_skillmanager.BuildSkillsList()
 			end
 		end
 	end
+	for id,skill in pairs (eso_skillmanager.SummonSkills) do
+		local skillid = id
+		if skillid ~= 0 then
+			local skillData = ESOLib.API.Action.GetSkillData(skillid)
+			if skillData then
+		
+				eso_skillmanager.skillsbyid[skillid] = skillData
+				eso_skillmanager.skillsbyname[skillData.name] = skillData
+			end
+		end
+	end
 end
 
 function eso_skillmanager.BuildAllSkills()
-	local list = {
-		--["byid"] = {},
-		--["byname"] = {},
-	}
-	local byname = list.byname
-	local byid = list.byid
-	
+	local list = {}
+		
 	for i = 1,100000 do
 		local skillid = i
 		local skillName = e("GetAbilityName("..skillid..")")
@@ -793,8 +830,6 @@ function eso_skillmanager.BuildAllSkills()
 			--CanAbilityBeUsedFromHotbar(number abilityId, number HotBarCategory hotbarCategory)
 			
 			list[skillid] = {id = skillid, name = skillName, cost = skillCost, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime, bufftype = buffType, permanant = skillPermanant }
-			--byname[skillName] = {id = skillid, name = skillName, cost = skillCost, range = skillRange, ischanneled = skillChanneled, casttime = skillCastTime, channeltime = skillChannelTime}
-			
 		end
 	end
 	if table.valid(list) then
@@ -895,8 +930,6 @@ end
 eso_skillmanager.lastcast = 0
 eso_skillmanager.lastdefault = 0
 eso_skillmanager.rebuild = 0
-eso_skillmanager.playerbuffs = {}
-eso_skillmanager.targetbuffs = {}
 eso_skillmanager.roll = false
 function eso_skillmanager.Cast( entity )
 	if (not entity) then
@@ -934,7 +967,7 @@ function eso_skillmanager.Cast( entity )
 	--Check for blocks/interrupts.
 	local isAssistMode = (gBotMode == GetString("assistMode"))
 	
-	local blockable = eso_skillmanager.activeTip == eso_skillmanager.TIP_BLOCK
+	local blockable = esominion.activeTip == eso_skillmanager.TIP_BLOCK
 	if (blockable) then
 		--if (not isAssistMode or (isAssistMode and gAssistDoBlock == "1")) then
 			d("Attempting block.")
@@ -945,51 +978,53 @@ function eso_skillmanager.Cast( entity )
 		--end
 	end
 	 --GetActiveCombatTipInfo(number activeCombatTipId) 
-	local exploitable = eso_skillmanager.activeTip == eso_skillmanager.TIP_EXPLOIT
+	local exploitable = esominion.activeTip == eso_skillmanager.TIP_EXPLOIT
 	if (exploitable) then
 		--if (not isAssistMode or (isAssistMode and gAssistDoExploit == "1")) then
 			local heavyAttack = eso_skillmanager.skillsbyname["DefaultHeavy"]
-			if ((entity.distance and heavyAttack.range) and entity.distance < heavyAttack.range) and (AbilityList:CanCast(heavyAttack.id,entity.id) == 10) then
-				AbilityList:Cast(heavyAttack.id,entity.id)
-				eso_skillmanager.latencyTimer = Now() + 600
-				d("Attempting to exploit enemy with skill ID :"..tostring(entity.id))
-				return true
+			if heavyAttack then
+				if ((entity.distance and heavyAttack.range) and entity.distance < heavyAttack.range) and (AbilityList:CanCast(heavyAttack.id,entity.id) == 10) then
+					AbilityList:Cast(heavyAttack.id,entity.id)
+					eso_skillmanager.latencyTimer = Now() + 600
+					d("Attempting to exploit enemy with skill ID :"..tostring(entity.id))
+					return true
+				end
 			end
 		--end
 	end
 	
-	local interruptable = eso_skillmanager.activeTip == eso_skillmanager.TIP_INTERRUPT
+	local interruptable = esominion.activeTip == eso_skillmanager.TIP_INTERRUPT
 	if (interruptable) then
 		--if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
 			if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
 				e("PerformInterrupt()")
 				eso_skillmanager.latencyTimer = Now() + 300
-				eso_skillmanager.lastBreak = Now()
+				eso_skillmanager.lastInterrupt = Now()
 				d("Attempting to interrupt enemy.")
 				return true
 			end
 		--end
 	end
 	
-	local interruptable = eso_skillmanager.activeTip == eso_skillmanager.TIP_INTERRUPT2
+	local interruptable = esominion.activeTip == eso_skillmanager.TIP_INTERRUPT2
 	if (interruptable) then
 		--if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
 			if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
 				e("PerformInterrupt()")
 				eso_skillmanager.latencyTimer = Now() + 300
-				eso_skillmanager.lastBreak = Now()
+				eso_skillmanager.lastInterrupt = Now()
 				d("Attempting to interrupt enemy attack.")
 				return true
 			end
 		--end
 	end
 	
-	--[[local breakable = eso_skillmanager.activeTip == eso_skillmanager.TIP_BREAK
+	local breakable = esominion.activeTip == eso_skillmanager.TIP_BREAK
 	if (breakable) then
 		--if (not isAssistMode or (isAssistMode and gAssistDoBreak == "1")) then
 			if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
 				e("RollDodgeStart()")
-				eso_skillmanager.roll = false
+				eso_skillmanager.roll = true
 				eso_skillmanager.latencyTimer = Now() + 300
 				eso_skillmanager.lastBreak = Now()
 				d("Attempting to break CC.")
@@ -998,21 +1033,21 @@ function eso_skillmanager.Cast( entity )
 		--end
 	end
 	
-	local avoidable = eso_skillmanager.activeTip == eso_skillmanager.TIP_AVOID
+	local avoidable = esominion.activeTip == eso_skillmanager.TIP_AVOID
 	if (avoidable) then
 		--if (not isAssistMode or (isAssistMode and gAssistDoAvoid == "1")) then
 			if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
 				if (Player.stamina.percent > 50) then
 					e("RollDodgeStart()")
-					eso_skillmanager.roll = false
+					eso_skillmanager.roll = true
 					eso_skillmanager.latencyTimer = Now() + 300
-					eso_skillmanager.lastBreak = Now()
+					eso_skillmanager.lastAvoid = Now()
 					d("Attempting to avoid.")
 					return true
 				end
 			end
 		--end
-	end]]
+	end
 		
 		
 	if gSKMWeaving then
@@ -1039,7 +1074,6 @@ function eso_skillmanager.Cast( entity )
 	if (ValidTable(eso_skillmanager.SkillProfile)) then
 		for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
 			local result = eso_skillmanager.CanCast(prio, entity)
-			
 			if (result ~= 0) then
 				local TID = result
 				--local realID = tonumber(skill.skillID)
@@ -1134,67 +1168,8 @@ function eso_skillmanager.GetAbilitySafe(skillid)
 	return ability
 end
 
-function eso_skillmanager.HasBuff(entity, buffID)
-	local haseffect = false
-	if (ValidTable(entity)) then
-		haseffect = AbilityList:HasEffect(tonumber(buffID),entity.id)
-	end
-	
-	return haseffect
-end
-
-function eso_skillmanager.MissingBuff(entity, buffID)
-	local missingeffect = false
-	if (ValidTable(entity)) then
-		missingeffect = not AbilityList:HasEffect(tonumber(buffID),entity.id)
-	end
-	
-	return missingeffect
-end
-
-
-function eso_skillmanager.HasBuffs(entity, buffIDs)
-	for _orids in StringSplit(buffIDs,",") do
-		local found = false
-		for _andid in StringSplit(_orids,"+") do
-			local realid = tonumber(eso_skillmanager.GetRealSkillID(tonumber(_andid)))
-			found = AbilityList:HasEffect(tonumber(_andid),entity.id) or AbilityList:HasEffect(realid,entity.id)
-			--found = AbilityList:HasEffect(tonumber(_andid),entity.id)
-			if (not found) then
-				break
-			end
-		end
-		if (found) then 
-			return true 
-		end
-	end
-	return false
-end
-
-function eso_skillmanager.MissingBuffs(entity, buffIDs)
-    local missing = true
-    for _orids in StringSplit(buffIDs,",") do
-    	missing = true
-		for _andid in StringSplit(_orids,"+") do
-			local realid = tonumber(eso_skillmanager.GetRealSkillID(tonumber(_andid)))
-			missing = not (AbilityList:HasEffect(tonumber(_andid),entity.id) or AbilityList:HasEffect(realid,entity.id))
-			--missing = not AbilityList:HasEffect(tonumber(_andid),entity.id)
-			
-			if (not missing) then 
-				break
-			end
-		end
-		if (missing) then 
-			return true
-		end
-    end
-    
-    return false
-end
-
 function eso_skillmanager.CanCast(prio, entity)
 	if (not entity) then
-
 		return 0
 	end
 	
@@ -1212,16 +1187,13 @@ function eso_skillmanager.CanCast(prio, entity)
 	elseif (skill and skill.used == "0") then
 		return 0
 	end
-	if string.contains(skill.name,"Light Attack") then
-		skill.skillID = eso_skillmanager.skillsbyname["Default"].id
-	end
 	--local realID = tonumber(skill.skillID)
 	local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 
 	--Pull the real skilldata, if we can't find it, consider it uncastable.	
 	--local realskilldata = eso_skillmanager.GetAbilitySafe(realID) 
 	local realskilldata = eso_skillmanager.skillsbyid[realID]
-	if (not realskilldata) then
+	if (not realskilldata and not skill.summonskill) then 
 		eso_skillmanager.DebugOutput( prio, "Ability failed safeness check for "..skill.name.."["..tostring(prio).."]" )
 		--[[if string.contains(skill.name,"Light Attack") then
 			eso_skillmanager.BuildSkillsBook()
@@ -1271,6 +1243,8 @@ function eso_skillmanager.CanCast(prio, entity)
 				end
 			end
 			if (not castable) then
+				--d("not cast")
+				--d(condition.name)
 				break
 			end
 		end
@@ -1316,12 +1290,9 @@ function eso_task_block:Init()
 end
 
 function eso_task_block:task_complete_eval()	
-	local activeTips = Player:GetNumActiveCombatTips()
-	if (activeTips > 0) then
-		local blockable = EntityList:GetFromCombatTip(eso_skillmanager.TIP_BLOCK)
-		if (not ValidTable(blockable)) then
-			return true
-		end
+	local activeTip = esominion.activeTip == eso_skillmanager.TIP_BLOCK
+	if (activeTip) then 
+		return false
 	else
 		return true
 	end
@@ -1399,7 +1370,6 @@ function eso_skillmanager.DrawLineItem(options)
     if (width ~= 0) then
         GUI:PushItemWidth(width)
     end
-
     if (control == "combobox") then
         SKM_Combo("##"..var,indexvar,var,tablevar)
     elseif (control == "float") then
@@ -1409,7 +1379,7 @@ function eso_skillmanager.DrawLineItem(options)
     elseif (control == "text") then
         eso_skillmanager.CaptureElement(GUI:InputText("##"..var,_G[var]),var)
     elseif (control == "checkbox") then
-        
+        eso_skillmanager.CaptureElement(GUI:Checkbox("##"..var,_G[var]),var)
     end
     
     if (width ~= 0) then
@@ -1439,6 +1409,21 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)
 	
+	conditional = { name = "Summon Skill Check"
+	, eval = function()	
+		local skill = eso_skillmanager.CurrentSkill
+		
+		if (skill.summonskill) then
+			skill.trg = "Self"
+			if hasPet() then
+				return true
+			end
+		end
+		
+		return false
+	end
+	}
+	eso_skillmanager.AddConditional(conditional)
 	--[[conditional = { name = "Client CanCast/Range Check"
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
@@ -1462,11 +1447,12 @@ function eso_skillmanager.AddDefaultConditions()
 		
 		local minRange = tonumber(skill.minRange)
 		local maxRange = tonumber(skill.maxRange)
-		
-		if ((minRange > 0 and target.distance < skill.minRange) or
-			(maxRange > 0 and target.distance > skill.maxRange))
-		then
-			return true
+		if not skill.summonskill then
+			if ((minRange > 0 and target.distance < skill.minRange) or
+				(maxRange > 0 and target.distance > skill.maxRange))
+			then
+				return true
+			end
 		end
 		return false
 	end
@@ -1530,7 +1516,7 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)
 
-	--[[ - No Combat Status Checks yet.
+	 -- No Combat Status Checks yet.
 	conditional = { name = "Combat Status Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
@@ -1549,7 +1535,7 @@ function eso_skillmanager.AddDefaultConditions()
 	end
 	}
 	eso_skillmanager.AddConditional(conditional)
-	--]]
+	
 	
 	--[[ - No Filter Checks yet.
 	conditional = { name = "Filter Checks"	
@@ -1634,89 +1620,46 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)
 	
-	--[[conditional = { name = "Player Single Buff Check"	
+	conditional = { name = "Player Buff Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		
-		if (skill.pbuffthis == "1") then
-			if not eso_skillmanager.HasBuff(Player, realskilldata.id) then 
+		if (skill.pbuff ~= "") then
+			if not HasBuffs(esominion.playerbuffs, skill.pbuff) then 
 				return true
 			end 
 		end
-		if (skill.pnbuffthis == "1") then
-			if not eso_skillmanager.MissingBuff(Player, realskilldata.id) then 
+		if (skill.pnbuff ~= "") then
+			if not MissingBuffs(esominion.playerbuffs, skill.pnbuff) then 
 				return true
 			end
 		end			
 		return false
 	end
 	}
-	eso_skillmanager.AddConditional(conditional)]]
-	
-	--[[conditional = { name = "Target Single Buff Check"	
-	, eval = function()	
-		local skill = eso_skillmanager.CurrentSkill
-		local realskilldata = eso_skillmanager.CurrentSkillData
-		local target = eso_skillmanager.CurrentTarget
-		
-		if (skill.tbuffthis == "1") then
-			if not eso_skillmanager.HasBuff(target, realskilldata.id) then 
-				return true
-			end 
-		end
-		if (skill.tnbuffthis == "1") then
-			if not eso_skillmanager.MissingBuff(target, realskilldata.id) then 
-				return true
-			end
-		end			
-		return false
-	end
-	}
-	eso_skillmanager.AddConditional(conditional)]]
-	
-	--[[conditional = { name = "Player Buff Checks"	
-	, eval = function()	
-		local skill = eso_skillmanager.CurrentSkill
-		local realskilldata = eso_skillmanager.CurrentSkillData
-		local target = eso_skillmanager.CurrentTarget
-		
-		if (not IsNullString(skill.pbuff)) then
-			if (not eso_skillmanager.HasBuffs(Player, skill.pbuff)) then 
-				return true
-			end 
-		end
-		if (not IsNullString(skill.pnbuff)) then
-			if (not eso_skillmanager.MissingBuffs(Player, skill.pnbuff)) then 
-				return true 
-			end 
-		end			
-		return false
-	end
-	}]]
-	--[[eso_skillmanager.AddConditional(conditional)
+	eso_skillmanager.AddConditional(conditional)
 	
 	conditional = { name = "Target Buff Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
-		local target = eso_skillmanager.CurrentTarget
 		
-		if (not IsNullString(skill.tbuff)) then
-			if (not eso_skillmanager.HasBuffs(target, skill.tbuff)) then 
-				return true 
+		if (skill.pbuff ~= "") then
+			if not HasBuffs(esominion.targetbuffs, skill.tbuff) then 
+				return true
 			end 
 		end
-		if (not IsNullString(skill.tnbuff)) then
-			if (not eso_skillmanager.MissingBuffs(target, skill.tnbuff)) then 
-				return true 
-			end 
-		end	
+		if (skill.pnbuff ~= "") then
+			if not MissingBuffs(esominion.targetbuffs, skill.tnbuff) then 
+				return true
+			end
+		end			
 		return false
 	end
 	}
-	eso_skillmanager.AddConditional(conditional)]]
-	
+	eso_skillmanager.AddConditional(conditional)
+		
 	conditional = { name = "Target HP Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
@@ -1741,21 +1684,7 @@ function eso_skillmanager.AddDefaultConditions()
 	end
 	}
 	eso_skillmanager.AddConditional(conditional)
-	
-	--[[conditional = { name = "Target Casting Checks"	
-	, eval = function()	
-		local skill = eso_skillmanager.CurrentSkill
-		local target = eso_skillmanager.CurrentTarget
 		
-		if ( skill.iscasting == "1" and not (target.iscasting) ) then 
-			return false 
-		end
-		
-		return false
-	end
-	}
-	eso_skillmanager.AddConditional(conditional)]]
-	
 	conditional = { name = "Target AOE Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
@@ -1821,9 +1750,13 @@ function eso_skillmanager.DrawSkillBook()
 		local contentwidth = GUI:GetContentRegionAvailWidth()
 		
 		eso_skillmanager.GUI.skillbook.x = x; eso_skillmanager.GUI.skillbook.y = y; eso_skillmanager.GUI.skillbook.width = width; eso_skillmanager.GUI.skillbook.height = height;
-				
-		if (table.valid(eso_skillmanager.SkillBook)) then
-			for key, skillInfo in spairs(eso_skillmanager.SkillBook) do
+		local skillBook = eso_skillmanager.SkillBook
+		if (table.valid(skillBook)) then
+			local sortfunc = function(skillBook,a,b) 
+				return (skillBook[a].name < skillBook[b].name)
+			end
+					
+			for key, skillInfo in spairs(skillBook,sortfunc) do
 				if ( GUI:Button(skillInfo.name.." ["..tostring(skillInfo.id).."]",width,20)) then
 					eso_skillmanager.AddSkillToProfile(skillInfo.id)
 					eso_skillmanager.SaveProfile()
@@ -2020,6 +1953,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Combat Status")); GUI:NextColumn(); SKM_Combo("##SKM_Combat","gSMBattleStatusIndex","SKM_Combat",gSMBattleStatuses); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Summon Skill")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Summon",SKM_Summon),"SKM_Summon"); GUI:NextColumn();		
 		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "minRange", variable = "SKM_MinR", width = 50, tooltip = "Minimum range the skill can be used (For most skills, this will stay at 0)."}
 		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "maxRange", variable = "SKM_MaxR", width = 50, tooltip = "Maximum range the skill can be used."}
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PSkillID",SKM_PSkillID),"SKM_PSkillID"); GUI:NextColumn();

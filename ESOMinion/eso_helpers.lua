@@ -190,6 +190,45 @@ function In(var,...)
 	return false
 end
 
+function HasBuff(list, buffName)
+	if list[_orids] then
+		return true
+	end
+	return false
+end
+
+function MissingBuff(list, buffNames)
+	if not list[_orids] then
+		return true
+	end
+	return false
+end
+
+function HasBuffs(list, buffNames)
+	for _orids in StringSplit(buffNames,",") do
+		if list[_orids] then
+			return true
+		end
+	end
+	return false
+end
+
+function MissingBuffs(list, buffNames)
+	for _orids in StringSplit(buffNames,",") do
+		if not list[_orids] then
+			return true
+		end
+	end
+	return false
+end
+function hasPet()
+	if esominion.petalive ~= nil then
+		return esominion.petalive
+	end
+	local petAlive = e("DoesUnitExist(playerpet1)")
+	esominion.petalive = petAlive
+	return petAlive
+end
 function IsLootOpen()
 
 	return esominion.lootOpen
@@ -202,7 +241,10 @@ function InCombat()
 
 	return esominion.incombat
 end
+function LureIsSet()
 
+	return esominion.lureType ~= 0
+end
 
 function loot_update(eventName, eventCode, receivedBy, itemName, quantity, soundCategory, lootType, self, isPickpocketLoot, questItemIcon, itemId, isStolen) 
 	esominion.lootOpen = true
@@ -230,23 +272,23 @@ RegisterEventHandler("GAME_EVENT_PLAYER_DEAD", death_update_dead, "Death Update 
 function BuildBuffs(eventName, eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
 	if In(changeType,"1","2") then
 		if In(unitTag,"player") then
-			eso_skillmanager.playerbuffs = {}
+			esominion.playerbuffs = {}
 			local pBuffCount = e("GetNumBuffs(player)")
 			if pBuffCount > 0 then
 				for buff = 1 , pBuffCount do
 					local name = e("GetUnitBuffInfo(player, "..buff..")")
-					eso_skillmanager.playerbuffs[name] = true
+					esominion.playerbuffs[name] = true
 				end
 			end
 		end
 		
 		if In(unitTag,"reticleover") then
-			eso_skillmanager.targetbuffs = {}
+			esominion.targetbuffs = {}
 			local tBuffCount = e("GetNumBuffs(reticleover)")
 			if tBuffCount > 0 then
 				for buff = 1, tBuffCount do
 					local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
-					eso_skillmanager.targetbuffs[name] = true
+					esominion.targetbuffs[name] = true
 				end
 			end
 		end
@@ -262,13 +304,24 @@ RegisterForEvent("EVENT_PLAYER_COMBAT_STATE", true)
 RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE", changeCombatState, "CombatState")
 
 function addCombatTip(eventName, eventCode, activeCombatTipId)
-	eso_skillmanager.activeTip = tonumber(activeCombatTipId)
+	esominion.activeTip = tonumber(activeCombatTipId)
 end
 function removeCombatTip(eventName, eventCode, activeCombatTipId)
-	eso_skillmanager.activeTip = 0
+	esominion.activeTip = 0
 end
 
 RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
 RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP", addCombatTip, "CombatTipActive")
 RegisterForEvent("EVENT_REMOVE_ACTIVE_COMBAT_TIP", true)
 RegisterEventHandler("GAME_EVENT_REMOVE_ACTIVE_COMBAT_TIP", removeCombatTip, "CombatTipRemove")
+
+function addLure(eventName, eventCode, fishingLure)
+	esominion.lureType = tonumber(fishingLure)
+end
+function clearLure(eventName, eventCode)
+	esominion.lureType = 0
+end
+RegisterForEvent("EVENT_FISHING_LURE_SET", true)
+RegisterEventHandler("GAME_EVENT_FISHING_LURE_SET", addLure, "Lure Set")
+RegisterForEvent("EVENT_FISHING_LURE_CLEARED", true)
+RegisterEventHandler("GAME_EVENT_FISHING_LURE_CLEARED", clearLure, "Lure Clear")

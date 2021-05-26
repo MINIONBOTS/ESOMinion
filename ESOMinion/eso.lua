@@ -5,6 +5,11 @@ esominion.lootOpen = false
 esominion.lootTime = 0
 esominion.playerdead = false
 esominion.incombat = false
+esominion.lureType = 0
+esominion.activeTip = 0
+esominion.petalive = nil
+esominion.playerbuffs = {}
+esominion.targetbuffs = {}
 function esominion.GetSetting(strSetting,default)
 	if (Settings.ESOMINION[strSetting] == nil) then
 		Settings.ESOMINION[strSetting] = default
