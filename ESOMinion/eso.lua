@@ -8,6 +8,7 @@ esominion.incombat = false
 esominion.lureType = 0
 esominion.activeTip = 0
 esominion.petalive = nil
+esominion.petalivecheck = 0
 esominion.playerbuffs = {}
 esominion.targetbuffs = {}
 function esominion.GetSetting(strSetting,default)
