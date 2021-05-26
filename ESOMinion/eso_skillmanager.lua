@@ -764,7 +764,7 @@ function eso_skillmanager.BuildSkillsBook()
 		end
 	end
 	
-	for i = 1,7 do
+	for i = 1,8 do
 		local skillid = AbilityList:GetSlotInfo(i) 
 		if skillid ~= 0 then
 			local skillData = ESOLib.API.Action.GetSkillData(skillid)
@@ -809,7 +809,7 @@ function eso_skillmanager.BuildSkillsList()
 	
 	eso_skillmanager.skillsbyid = {}
 	eso_skillmanager.skillsbyname = {}
-	for i = 1,7 do
+	for i = 1,8 do
 		local skillid = AbilityList:GetSlotInfo(i) 
 		if skillid ~= 0 then
 			local skillData = ESOLib.API.Action.GetSkillData(skillid)
