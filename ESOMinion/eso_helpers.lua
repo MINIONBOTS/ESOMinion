@@ -222,11 +222,12 @@ function MissingBuffs(list, buffNames)
 	return false
 end
 function hasPet()
-	if esominion.petalive ~= nil then
+	if esominion.petalive ~= nil and TimeSince(esominion.petalivecheck) < 10000 then
 		return esominion.petalive
 	end
 	local petAlive = e("DoesUnitExist(playerpet1)")
 	esominion.petalive = petAlive
+	esominion.petalivecheck = Now()
 	return petAlive
 end
 function IsLootOpen()
