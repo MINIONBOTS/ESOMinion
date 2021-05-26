@@ -969,18 +969,18 @@ function eso_skillmanager.Cast( entity )
 	
 	local blockable = esominion.activeTip == eso_skillmanager.TIP_BLOCK
 	if (blockable) then
-		--if (not isAssistMode or (isAssistMode and gAssistDoBlock == "1")) then
+		if (not isAssistMode or (isAssistMode and gAssistDoBlock)) then
 			d("Attempting block.")
 			e("StartBlock()")
 			local newTask = eso_task_block.Create()
 			ml_task_hub:CurrentTask():AddSubTask(newTask)
 			return true
-		--end
+		end
 	end
-	 --GetActiveCombatTipInfo(number activeCombatTipId) 
+	
 	local exploitable = esominion.activeTip == eso_skillmanager.TIP_EXPLOIT
 	if (exploitable) then
-		--if (not isAssistMode or (isAssistMode and gAssistDoExploit == "1")) then
+		if (not isAssistMode or (isAssistMode and gAssistDoExploit)) then
 			local heavyAttack = eso_skillmanager.skillsbyname["DefaultHeavy"]
 			if heavyAttack then
 				if ((entity.distance and heavyAttack.range) and entity.distance < heavyAttack.range) and (AbilityList:CanCast(heavyAttack.id,entity.id) == 10) then
@@ -990,12 +990,12 @@ function eso_skillmanager.Cast( entity )
 					return true
 				end
 			end
-		--end
+		end
 	end
 	
 	local interruptable = esominion.activeTip == eso_skillmanager.TIP_INTERRUPT
 	if (interruptable) then
-		--if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
+		if (not isAssistMode or (isAssistMode and gAssistDoInterrupt)) then
 			if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
 				e("PerformInterrupt()")
 				eso_skillmanager.latencyTimer = Now() + 300
@@ -1003,12 +1003,12 @@ function eso_skillmanager.Cast( entity )
 				d("Attempting to interrupt enemy.")
 				return true
 			end
-		--end
+		end
 	end
 	
 	local interruptable = esominion.activeTip == eso_skillmanager.TIP_INTERRUPT2
 	if (interruptable) then
-		--if (not isAssistMode or (isAssistMode and gAssistDoInterrupt == "1")) then
+		if (not isAssistMode or (isAssistMode and gAssistDoInterrupt)) then
 			if (TimeSince(eso_skillmanager.lastInterrupt) > 1000) then
 				e("PerformInterrupt()")
 				eso_skillmanager.latencyTimer = Now() + 300
@@ -1016,12 +1016,12 @@ function eso_skillmanager.Cast( entity )
 				d("Attempting to interrupt enemy attack.")
 				return true
 			end
-		--end
+		end
 	end
 	
 	local breakable = esominion.activeTip == eso_skillmanager.TIP_BREAK
 	if (breakable) then
-		--if (not isAssistMode or (isAssistMode and gAssistDoBreak == "1")) then
+		if (not isAssistMode or (isAssistMode and gAssistDoBreak)) then
 			if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
 				e("RollDodgeStart()")
 				eso_skillmanager.roll = true
@@ -1030,12 +1030,12 @@ function eso_skillmanager.Cast( entity )
 				d("Attempting to break CC.")
 				return true
 			end
-		--end
+		end
 	end
 	
 	local avoidable = esominion.activeTip == eso_skillmanager.TIP_AVOID
 	if (avoidable) then
-		--if (not isAssistMode or (isAssistMode and gAssistDoAvoid == "1")) then
+		if (not isAssistMode or (isAssistMode and gAssistDoAvoid)) then
 			if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
 				if (Player.stamina.percent > 50) then
 					e("RollDodgeStart()")
@@ -1046,7 +1046,7 @@ function eso_skillmanager.Cast( entity )
 					return true
 				end
 			end
-		--end
+		end
 	end
 		
 		
