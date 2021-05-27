@@ -201,11 +201,11 @@ end
 
 function MissingBuff(list, buffName)
 	if table.valid(list) and buffName then
-		if not list[buffName] then
-			return true
+		if list[buffName] then
+			return false
 		end
 	end
-	return false
+	return true
 end
 
 function HasBuffs(list, buffNames)

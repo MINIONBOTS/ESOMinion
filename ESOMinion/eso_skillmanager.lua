@@ -1449,9 +1449,9 @@ function eso_skillmanager.AddDefaultConditions()
 		
 		if (skill.summonskill) then
 			skill.trg = "Self"
-			if hasPet() then
+			--[[if hasPet() then
 				return true
-			end
+			end]]
 		end
 		
 		return false
@@ -1659,12 +1659,12 @@ function eso_skillmanager.AddDefaultConditions()
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		
-		if (skill.pbuffthis) then
+		if (skill.pbuffthis == true) then
 			if not HasBuff(esominion.playerbuffs, realskilldata.id) then 
 				return true
 			end 
 		end
-		if (skill.pnbuffthis) then
+		if (skill.pnbuffthis == true) then
 			if not MissingBuff(esominion.playerbuffs, realskilldata.id) then 
 				return true
 			end
@@ -1680,12 +1680,12 @@ function eso_skillmanager.AddDefaultConditions()
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local target = eso_skillmanager.CurrentTarget
 		
-		if (skill.tbuffthis) then
+		if (skill.tbuffthis == true) then
 			if not HasBuff(esominion.targetbuffs, realskilldata.id) then 
 				return true
 			end 
 		end
-		if (skill.tnbuffthis) then
+		if (skill.tnbuffthis == true) then
 			if not MissingBuff(esominion.targetbuffs, realskilldata.id) then 
 				return true
 			end
@@ -2134,9 +2134,9 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		
 		GUI:PushItemWidth(100)
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PBuffThis",SKM_PBuffThis),"SKM_PBuffThis"); GUI:NextColumn();	
-		GUI:Text(GetString("skmHasBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PBuff",SKM_PBuff),"SKM_PBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Has Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PBuff",SKM_PBuff),"SKM_PBuff"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PNBuffThis",SKM_PNBuffThis),"SKM_PNBuffThis"); GUI:NextColumn();	
-		GUI:Text(GetString("skmMissBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PNBuff",SKM_PNBuff),"SKM_PNBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Miss Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PNBuff",SKM_PNBuff),"SKM_PNBuff"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)
@@ -2147,10 +2147,10 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:PushItemWidth(100)
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TBuffThis",SKM_TBuffThis),"SKM_TBuffThis"); GUI:NextColumn();	
-		GUI:Text(GetString("skmHasBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TBuff",SKM_TBuff),"SKM_TBuff"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("MMissing Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TNBuffThis",SKM_TNBuffThis),"SKM_TNBuffThis"); GUI:NextColumn();	
-		GUI:Text(GetString("skmMissBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNBuff",SKM_TNBuff),"SKM_TNBuff"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TBuffThis",SKM_TBuffThis),"SKM_TBuffThis"); GUI:NextColumn();	
+		GUI:Text(GetString("Has Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TBuff",SKM_TBuff),"SKM_TBuff"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TNBuffThis",SKM_TNBuffThis),"SKM_TNBuffThis"); GUI:NextColumn();	
+		GUI:Text(GetString("Missing Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNBuff",SKM_TNBuff),"SKM_TNBuff"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)
