@@ -27,7 +27,7 @@ eso_skillmanager.bestAOE = 0
 eso_skillmanager.latencyTimer = 0
 eso_skillmanager.resetTimer = 0
 eso_skillmanager.doLoad = true
-
+gSkillManagerDebugPriorities = ""
 eso_skillmanager.lastAvoid = 0
 eso_skillmanager.lastBreak = 0
 eso_skillmanager.lastInterrupt = 0
@@ -662,7 +662,6 @@ function eso_skillmanager.UseDefaultProfile()
 	
 	if (not profileFound) then
 		local starterDefault = eso_skillmanager.StartingProfiles[classid]
-		d(starterDefault)
 		if ( starterDefault ) then
 			local starterDefaultFile = eso_skillmanager.profilepath..starterDefault..".lua"
 			if (FileExists(starterDefaultFile)) then
@@ -1158,17 +1157,13 @@ function eso_skillmanager.DebugOutput( prio, message )
 	local prio = tonumber(prio) or 0
 	local message = tostring(message)
 	
-	if (gSkillManagerDebug == "1") then
-		if (not gSkillManagerDebugPriorities or gSkillManagerDebugPriorities == "") then
+	if (IsNull(gSkillManagerDebugPriorities,"") ~= "") then
+		local priorityChecks = {}
+		for priority in StringSplit(gSkillManagerDebugPriorities,",") do
+			priorityChecks[tonumber(priority)] = true
+		end
+		if (priorityChecks[prio]) then
 			d("[SkillManager] : " .. message)
-		else
-			local priorityChecks = {}
-			for priority in StringSplit(gSkillManagerDebugPriorities,",") do
-				priorityChecks[tonumber(priority)] = true
-			end
-			if (priorityChecks[prio]) then
-				d("[SkillManager] : " .. message)
-			end
 		end
 	end
 end
@@ -1277,8 +1272,6 @@ function eso_skillmanager.CanCast(prio, entity)
 				end
 			end
 			if (not castable) then
-				--d("not cast")
-				--d(condition.name)
 				break
 			end
 		end
@@ -1434,7 +1427,7 @@ function eso_skillmanager.AddDefaultConditions()
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		
-		if (skill.enabled == "0") then
+		if (skill.enabled == false) then
 			return true
 		end
 		
@@ -1458,6 +1451,23 @@ function eso_skillmanager.AddDefaultConditions()
 	end
 	}
 	eso_skillmanager.AddConditional(conditional)
+	
+	
+	
+	
+	conditional = { name = "Skill Slotted Check"
+	, eval = function()	
+		local skill = eso_skillmanager.CurrentSkill
+		
+		if not (eso_skillmanager.skillsbyid[skill.skillID]) then
+			return true
+		end
+		
+		return false
+	end
+	}
+	eso_skillmanager.AddConditional(conditional)
+	
 	--[[conditional = { name = "Client CanCast/Range Check"
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
@@ -1915,6 +1925,11 @@ function eso_skillmanager.Draw()
 			
 			local contentwidth = GUI:GetContentRegionAvailWidth()
 			if table.valid(eso_skillmanager.SkillProfile) then
+		
+				GUI:PushItemWidth(100)
+				eso_skillmanager.CaptureElement(GUI:InputText("Debug Prio##gSkillManagerDebugPriorities",gSkillManagerDebugPriorities),"gSkillManagerDebugPriorities");
+				GUI:PopItemWidth()
+				GUI:Separator()         
 			
 				local doDelete = 0
 				local doPriorityUp = 0
@@ -1933,7 +1948,7 @@ function eso_skillmanager.Draw()
 				GUI:Spacing() GUI:Spacing() GUI:Spacing() GUI:Spacing()]]
 				for prio,skillInfo in spairs(eso_skillmanager.SkillProfile) do
 				
-					if (GUI:Button(skillInfo.name,contentwidth - 85,20)) then -- skill to edit
+					if (GUI:Button(skillInfo.name.." ["..tostring(prio).."]",contentwidth - 85,20)) then -- skill to edit
 					end
 						
 					if (GUI:IsItemHovered()) then
