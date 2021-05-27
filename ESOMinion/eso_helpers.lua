@@ -285,8 +285,8 @@ function BuildBuffs(eventName, eventCode, changeType, effectSlot, effectName, un
 			local pBuffCount = e("GetNumBuffs(player)")
 			if pBuffCount > 0 then
 				for buff = 1 , pBuffCount do
-					local name = e("GetUnitBuffInfo(player, "..buff..")")
-					esominion.playerbuffs[name] = true
+					local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = e("GetUnitBuffInfo(player, "..buff..")")
+					esominion.playerbuffs[abilityId] = buffName
 				end
 			end
 		end
@@ -296,8 +296,8 @@ function BuildBuffs(eventName, eventCode, changeType, effectSlot, effectName, un
 			local tBuffCount = e("GetNumBuffs(reticleover)")
 			if tBuffCount > 0 then
 				for buff = 1, tBuffCount do
-					local name = e("GetUnitBuffInfo(reticleover, "..buff..")")
-					esominion.targetbuffs[name] = true
+					local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer  = e("GetUnitBuffInfo(reticleover, "..buff..")")
+					esominion.targetbuffs[abilityId] = buffName
 				end
 			end
 		end
