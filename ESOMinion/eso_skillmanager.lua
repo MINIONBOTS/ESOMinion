@@ -1620,7 +1620,7 @@ function eso_skillmanager.AddDefaultConditions()
 		end
 		
 		if (skill.powertype == "Magicka") then
-			if Player.magicka.current < eso_skillmanager.skillsbyid[skill.skillID].cost then
+			if Player.magicka.current < IsNull(eso_skillmanager.skillsbyid[skill.skillID].cost,0) then
 				return true
 			end
 			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.magicka.percent) or 
@@ -1629,7 +1629,7 @@ function eso_skillmanager.AddDefaultConditions()
 				return true
 			end
 		elseif (skill.powertype == "Stamina") then
-			if Player.stamina.current < eso_skillmanager.skillsbyid[skill.skillID].cost then
+			if Player.stamina.current < IsNull(eso_skillmanager.skillsbyid[skill.skillID].cost,0) then
 				return true
 			end
 			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.stamina.percent) or 
