@@ -191,35 +191,43 @@ function In(var,...)
 end
 
 function HasBuff(list, buffName)
-	if list[_orids] then
-		return true
+	if table.valid(list) and buffName then
+		if list[buffNames] then
+			return true
+		end
 	end
 	return false
 end
 
-function MissingBuff(list, buffNames)
-	if not list[_orids] then
-		return true
+function MissingBuff(list, buffName)
+	if table.valid(list) and buffName then
+		if not list[buffName] then
+			return true
+		end
 	end
 	return false
 end
 
 function HasBuffs(list, buffNames)
-	for _orids in StringSplit(buffNames,",") do
-		if list[_orids] then
-			return true
+	if table.valid(list) and (buffNames and type(buffNames) == "string") then
+		for _orids in StringSplit(buffNames,",") do
+			if list[_orids] then
+				return true
+			end
 		end
 	end
 	return false
 end
 
 function MissingBuffs(list, buffNames)
-	for _orids in StringSplit(buffNames,",") do
-		if not list[_orids] then
-			return true
+	if table.valid(list) and (buffNames and type(buffNames) == "string") then
+		for _orids in StringSplit(buffNames,",") do
+			if list[_orids] then
+				return false
+			end
 		end
 	end
-	return false
+	return true
 end
 function hasPet()
 	if esominion.petalive ~= nil and TimeSince(esominion.petalivecheck) < 10000 then
