@@ -254,17 +254,19 @@ function LureIsSet()
 
 	return esominion.lureType ~= 0
 end
-function SetBait()
+function SetBait(pondtype)
 	local baitNum = e("GetNumFishingLures()")
 	if baitNum > 0 then
 		d("baitNum = "..tostring(baitNum))
 		for i = 1,9 do
-			local baitInfo = e("GetFishingLureInfo("..i..")") 
-			if baitInfo ~= "" then
-				d("bait info found")
-				d(baitInfo)
-				e("SetFishingLure("..i..")")
-				esominion.lureType = i
+			if not pondtype or (esominion.baits[i] == pondtype) then
+				local baitInfo = e("GetFishingLureInfo("..i..")") 
+				if baitInfo ~= "" then
+					d("bait info found")
+					d(baitInfo)
+					e("SetFishingLure("..i..")")
+					esominion.lureType = i
+				end
 			end
 		end
 	else

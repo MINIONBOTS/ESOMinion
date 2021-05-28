@@ -14,15 +14,15 @@ esominion.targetbuffs = {}
 esominion.currentfishinghole = {}
 esominion.baits = {
 
-	[1] = "Insect Parts", --River
-	[2] = "Crawlers", --Foul
-	[3] = "Guts", --Lake
+	[1] = "River", --"Insect Parts",
+	[2] = "Foul", --"Crawlers",
+	[3] = "Lake", --"Guts",
 	[4] = "Simple Bait",
-	[5] = "Fish Roe", --Foul
-	[6] = "Minnow", --Lake
-	[7] = "Chub", --Saltwater
-	[8] = "Shad", --River
-	[9] = "Worms", -- Saltwater
+	[5] = "Foul", --"Fish Roe",
+	[6] = "Lake", --"Minnow",
+	[7] = "Saltwater", --"Chub",
+	[8] = "River", --"Shad",
+	[9] = "Saltwater", --"Worms",
 }
 function esominion.GetSetting(strSetting,default)
 	if (Settings.ESOMINION[strSetting] == nil) then
