@@ -691,7 +691,7 @@ function Dev.DrawCall(event, ticks )
 						local softTarget = Player:GetSoftTarget()
 						
 						for index,skillInfo in spairs(eso_skillmanager.skillsbyindex) do
-							if GUI:TreeNode(skillInfo.index.." - "..skillInfo.name) then
+							if GUI:TreeNode(tostring(index).." - "..skillInfo.name) then
 								GUI:BulletText("id = "..tostring(skillInfo.id))
 								GUI:BulletText("name = "..tostring(skillInfo.name))
 								GUI:BulletText("passive = "..tostring(skillInfo.passive))
