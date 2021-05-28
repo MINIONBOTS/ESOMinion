@@ -254,7 +254,24 @@ function LureIsSet()
 
 	return esominion.lureType ~= 0
 end
-
+function SetBait()
+	local baitNum = e("GetNumFishingLures()")
+	if baitNum > 0 then
+		d("baitNum = "..tostring(baitNum))
+		for i = 1,10 do
+			local baitInfo = e("GetFishingLureInfo("..i..")") 
+			if baitInfo ~= "" then
+				d("bait info found")
+				d(baitInfo)
+				e("SetFishingLure("..i..")")
+				esominion.lureType = i
+			end
+		end
+	else
+		d("no baits to set")
+		esominion.lureType = 0
+	end
+end
 function loot_update(eventName, eventCode, receivedBy, itemName, quantity, soundCategory, lootType, self, isPickpocketLoot, questItemIcon, itemId, isStolen) 
 	esominion.lootOpen = true
 	esominion.lootTime = Now()

@@ -11,6 +11,7 @@ esominion.petalive = nil
 esominion.petalivecheck = 0
 esominion.playerbuffs = {}
 esominion.targetbuffs = {}
+esominion.currentfishinghole = {}
 function esominion.GetSetting(strSetting,default)
 	if (Settings.ESOMINION[strSetting] == nil) then
 		Settings.ESOMINION[strSetting] = default
