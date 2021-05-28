@@ -258,7 +258,7 @@ function SetBait()
 	local baitNum = e("GetNumFishingLures()")
 	if baitNum > 0 then
 		d("baitNum = "..tostring(baitNum))
-		for i = 1,10 do
+		for i = 1,9 do
 			local baitInfo = e("GetFishingLureInfo("..i..")") 
 			if baitInfo ~= "" then
 				d("bait info found")
