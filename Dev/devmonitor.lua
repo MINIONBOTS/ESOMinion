@@ -302,10 +302,19 @@ function Dev.DrawCall(event, ticks )
 -- END PLAYER INFO
 			
 			-- cbk: Target
-			if ( GUI:TreeNode("Target") ) then
+			if ( GUI:TreeNode("Targets") ) then
 				if( gamestate == 3 ) then 
-					local c = Player:GetPeferedTarget()
-					if ( c ) then Dev.DrawGameObjectDetails(c) else	GUI:Text("No target found.") end
+					local p = Player:GetPeferedTarget()
+					if (not p) then
+						p = Player:GetTargetUnderReticle()
+					end
+					if (not p) then
+						p = Player:GetSoftTarget()
+					end		
+					if ( p ) then
+						Dev.DrawGameObjectDetails(p) else	GUI:Text("No target found.")
+					end
+					
 				else
 					GUI:Text("Not Ingame...")
 				end
