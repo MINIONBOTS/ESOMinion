@@ -46,35 +46,17 @@ function eso_task_assist:Process()
 		if gAssistTargetModeSetting == "Highlighted" then
 			target = Player:GetHilightedTarget()
 		elseif gAssistTargetModeSetting == "Reticle" then
-			target = Player:GetPeferedTarget()
+			target = Player:GetTargetUnderReticle()
+			if not target then
+				target = Player:GetSoftTarget()
+			end
 		elseif gAssistTargetModeSetting == "Scanner" then
 			target = eso_task_assist.GetTarget()
 		end
 		
 		if ( gAssistInitCombat or esominion.incombat ) then
 			if ( target and target.hostile and target.health.current > 0) then
-			
-				--local skillData = eso_skillmanager.skillsbyname["Light Attack"]
-				--[[if e("ArePlayerWeaponsSheathed()") then
-					AbilityList:Cast(skillData.id)
-					d("unsheathe weapon 1st")
-					ml_global_information.Await(500,1000, function () return not e("ArePlayerWeaponsSheathed()") end)
-					return false
-				end]]
-				--if (gPreventAttackingInnocents == "0" or target.hostile) then
-					--d(TimeSince(eso_task_assist.lastcast))
-					--if Now() >= eso_task_assist.lastcast then
-						--if AbilityList:CanCast(skillData.id,target.id) == 10 then
-							--local minDelay = math.max(skillData.casttime,400)
-							--d(minDelay)
-							--eso_task_assist.lastcast = Now() + minDelay
-							--d("cast")
-							--AbilityList:Cast(skillData.id,target.id)
-							
-						--end
-					--end
-					eso_skillmanager.Cast( target )
-				--end
+				eso_skillmanager.Cast( target )
 			end		
 		end
 	end
