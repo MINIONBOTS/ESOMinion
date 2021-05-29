@@ -736,7 +736,7 @@ function Dev.DrawCall(event, ticks )
 					GUI:BulletText("2: " .. GetString("Main Menu"))
 					GUI:BulletText("3: " .. GetString("In Game"))
 					GUI:BulletText("4: " .. GetString("Error"))
-					GUI:BulletText("5: " .. GetString("Loading"))
+					GUI:BulletText("6: " .. GetString("Loading"))
 					GUI:Unindent()
 				end
 				GUI:TreePop()
