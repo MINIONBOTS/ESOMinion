@@ -258,6 +258,7 @@ function SetBait(pondtype)
 	local baitNum = e("GetNumFishingLures()")
 	if baitNum > 0 then
 		d("baitNum = "..tostring(baitNum))
+		local baitfound = false
 		for i = 1,9 do
 			if not pondtype or (esominion.baits[i] == pondtype) then
 				local baitInfo = e("GetFishingLureInfo("..i..")") 
@@ -266,13 +267,73 @@ function SetBait(pondtype)
 					d(baitInfo)
 					e("SetFishingLure("..i..")")
 					esominion.lureType = i
+					baitfound = true
 				end
 			end
+		end
+		if not baitfound then
+			esominion.lureType = 0
 		end
 	else
 		d("no baits to set")
 		esominion.lureType = 0
 	end
+end
+
+function GetNearestFromList(strList,pos,radius)
+	local el = EntityList(strList)
+	if (table.valid(el)) then
+		
+		local filteredList = {}
+		for i,entity in pairs(el) do
+			local epos = entity.pos
+			if (NavigationManager:IsReachable(epos)) then
+				if (not radius or (radius >= 150)) then
+					table.insert(filteredList,entity)
+				else
+					local dist = Distance2D(pos.x,pos.z,epos.x,epos.z)
+					if (dist <= radius) then
+						table.insert(filteredList,entity)
+					end
+				end
+			else
+				local ppos = Player.pos
+				d("[GetNearestFromList]- Entity at ["..tostring(math.round(epos.x,0))..","..tostring(math.round(epos.y,0))..","..tostring(math.round(epos.z,0)).."] not reachable from ["..tostring(math.round(ppos.x,0))..","..tostring(math.round(ppos.y,0))..","..tostring(math.round(ppos.z,0)).."]")
+			end
+		end
+		
+		if (table.valid(filteredList)) then
+			table.sort(filteredList,function(a,b) return a.distance2d < b.distance2d end)
+			for i,e in ipairs(filteredList) do
+				if (i and e) then
+					return e
+				end
+			end
+		end
+	end
+	
+	return nil
+end
+
+function FindClosestMesh(pos,distance)
+	local minDist = IsNull(distance,10)
+	
+	local closest,closestDistance = nil, 100
+	
+	local p = NavigationManager:GetClosestPointOnMesh(pos)
+	if (table.valid(p)) then
+		if (p.distance <= minDist) then
+			if (p.distance < closestDistance) then
+				closest = p
+			end
+		end
+	end
+	
+	if (closest) then
+		return closest
+	end
+	
+	return nil
 end
 function loot_update(eventName, eventCode, receivedBy, itemName, quantity, soundCategory, lootType, self, isPickpocketLoot, questItemIcon, itemId, isStolen) 
 	esominion.lootOpen = true
@@ -348,8 +409,18 @@ function addLure(eventName, eventCode, fishingLure)
 end
 function clearLure(eventName, eventCode)
 	esominion.lureType = 0
+	d("event clear bait")
 end
 RegisterForEvent("EVENT_FISHING_LURE_SET", true)
 RegisterEventHandler("GAME_EVENT_FISHING_LURE_SET", addLure, "Lure Set")
 RegisterForEvent("EVENT_FISHING_LURE_CLEARED", true)
 RegisterEventHandler("GAME_EVENT_FISHING_LURE_CLEARED", clearLure, "Lure Clear")
+
+function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
+	if itemSoundCategory == "39" then
+		esominion.hooked = true
+		esominion.hooktimer = Now()
+	end
+end
+RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
+RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")

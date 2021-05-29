@@ -4,13 +4,9 @@ eso_fish.biteDetected = 0
 eso_fish.firstRun = nil
 eso_fish.firstRunCompleted = false
 eso_fish.profilePath = GetStartupPath()..[[\LuaMods\esominion\FishProfiles\]]
-eso_fish.profiles = {}
-eso_fish.profilesDisplay = {}
-eso_fish.accessmaplist = {}
-
-eso_fish.profileData = {}
-eso_fish.currentTask = {}
 eso_fish.currentTaskIndex = 0
+eso_fish.thisPosition = {}
+eso_fish.lastPosition = {}
 
 eso_fish.GUI = {
 	x = 0,
@@ -229,9 +225,8 @@ end
 
 c_bite = inheritsFrom( ml_cause )
 e_bite = inheritsFrom( ml_effect )
-e_bite.hooked = false
 function c_bite:evaluate()
-	if e_bite.hooked then
+	if esominion.hooked then
 		d("has bite")
 		return true
 	end
@@ -246,9 +241,8 @@ function e_bite:execute()
 		local doHook = true
 		if doHook then
 			Player:CameraInteractionStart()
-			d("hook")
 		end
-		e_bite.hooked = false
+		esominion.hooked = false
 	end
 end
 
@@ -274,36 +268,27 @@ end
 
 c_setbait = inheritsFrom( ml_cause )
 e_setbait = inheritsFrom( ml_effect )
-e_setbait.needbait = false
+e_setbait.needbait = true
 e_setbait.baitid = 0
 e_setbait.baitname = ""
 function c_setbait:evaluate()
 	if not e_setbait.needbait then
 		return false
 	end
+	if (not table.valid(esominion.currentfishinghole)) then
+		return false
+	end
 	local currentBait = esominion.lureType
 	if (currentBait == 0) then
-		local baitNum = e("GetNumFishingLures()")
-		if baitNum > 0 then
-			for i = 1,10 do
-				local baitInfo = e("GetFishingLureInfo("..i..")") 
-				if baitInfo ~= "" then
-					e_setbait.baitid = i
-					e_setbait.baitname = baitInfo
-					d("bait info found")
-					d(baitInfo)
-					return true
-				end
-			end
-		end
+		return true
 	end
         
     return false
 end
 function e_setbait:execute()
-	e("SetFishingLure("..e_setbait.baitid..")")
-	d("set bait")
-
+local locationType = esominion.reversefishingNodes[esominion.currentfishinghole.contentid]
+d("locationType = "..tostring(locationType))
+	SetBait(locationType)
 end
 
 c_fishnexttask = inheritsFrom( ml_cause )
@@ -493,34 +478,8 @@ function eso_task_fish:Init()
 	--local ke_dead = ml_element:create( "Dead", c_dead, e_dead, 150 )
     --self:add( ke_dead, self.overwatch_elements)
 	
-	--local ke_flee = ml_element:create( "Flee", c_gatherflee, e_gatherflee, 130 )
-	--self:add( ke_flee, self.overwatch_elements)
-	
-	--local ke_inventoryFull = ml_element:create( "InventoryFull", c_inventoryfull, e_inventoryfull, 100 )
-    --self:add( ke_inventoryFull, self.overwatch_elements)  
-	
-    --init Process() cnes
-	--local ke_isLoading = ml_element:create( "IsLoading", c_fishisloading, e_fishisloading, 300 )
-    --self:add( ke_isLoading, self.process_elements)
-	
-	--local ke_repair = ml_element:create( "Repair", cf_needsrepair, ef_needsrepair, 240 )
-   --self:add( ke_repair, self.process_elements)
-	
-	
-    --local ke_resetIdle = ml_element:create( "ResetIdle", c_resetidle, e_resetidle, 200 )
-    --self:add(ke_resetIdle, self.process_elements)
-	
-	--local ke_nextTask = ml_element:create( "NextTask", c_fishnexttask, e_fishnexttask, 180 )
-    --self:add( ke_nextTask, self.process_elements)
-		
-	--local ke_nextProfileMap = ml_element:create( "NextProfileMap", c_fishnextprofilemap, e_fishnextprofilemap, 110 )
-    --self:add( ke_nextProfileMap, self.process_elements)
-	
-	--local ke_nextProfilePos = ml_element:create( "NextProfilePos", c_fishnextprofilepos, e_fishnextprofilepos, 100 )
-    --self:add( ke_nextProfilePos, self.process_elements)
-    
-    --local ke_returnToMarker = ml_element:create( "ReturnToMarker", c_returntomarker, e_returntomarker, 100 )
-    --self:add( ke_returnToMarker, self.process_elements)
+	local ke_stopmovetonode = ml_element:create( "StopMoveToNode", c_stoptonode, e_stoptonode, 2 )
+    self:add(ke_stopmovetonode, self.overwatch_elements)	
 	
 	local ke_loot = ml_element:create( "Loot", c_loot, e_loot, 100 )
     self:add(ke_loot, self.process_elements)
@@ -530,13 +489,22 @@ function eso_task_fish:Init()
 	
 	--local ke_syncadjust = ml_element:create( "SyncAdjust", c_syncadjust, e_syncadjust, 25)
 	--self:add(ke_syncadjust, self.process_elements)
-    
-	
+    	
     local ke_cast = ml_element:create( "Cast", c_cast, e_cast, 20 )
     self:add(ke_cast, self.process_elements)
     
     local ke_bite = ml_element:create( "Bite", c_bite, e_bite, 10 )
     self:add(ke_bite, self.process_elements)
+	
+	local ke_findnode = ml_element:create( "FindNode", c_findnode, e_findnode, 5 )
+    self:add(ke_findnode, self.process_elements)	
+	
+	local ke_movetorandom = ml_element:create( "MoveToRandom", c_movetorandom, e_movetorandom, 2 )
+    self:add(ke_movetorandom, self.process_elements)
+	
+	local ke_movetonode = ml_element:create( "MoveToNode", c_movetonode, e_movetonode, 1 )
+    self:add(ke_movetonode, self.process_elements)
+	
 	
 	--local ke_fishing = ml_element:create( "Fishing", c_isfishing, e_isfishing, 1 )
     --self:add(ke_fishing, self.process_elements)
@@ -617,11 +585,164 @@ function eso_fish.ResetLastGather()
 	Settings.ESOMINION.gFishLockout = {}
 end
 
-function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-	d(inventoryUpdateReason)
-	if itemSoundCategory == "39" then
-		e_bite.hooked = true
+c_findnode = inheritsFrom( ml_cause )
+e_findnode = inheritsFrom( ml_effect )
+e_findnode.blockOnly = false
+function c_findnode:evaluate()
+	if (table.valid(esominion.currentfishinghole)) then
+		return false
+	end
+		
+	local whitelist = BuildWhitelist()
+	local radius = 100
+	local filter = ""
+	if whitelist  == "" then
+		return false
+	end
+	filter = "onmesh,contentid="..whitelist
+
+	local gatherable = nil				
+	if (gatherable == nil) then
+		gatherable = GetNearestFromList(filter,Player.pos,radius)
+	end
+	
+	if (table.valid(gatherable)) then
+		esominion.currentfishinghole = EntityList:Get(gatherable.id)
+		return true
+	end
+	
+    return false
+end
+function e_findnode:execute()
+end
+
+c_movetonode = inheritsFrom( ml_cause )
+e_movetonode = inheritsFrom( ml_effect )
+function c_movetonode:evaluate()
+	if (not table.valid(esominion.currentfishinghole)) then
+		return false
+	end
+	if TimeSince(esominion.hooktimer) < 5000 then
+		return false
+	end
+	local gatherable = esominion.currentfishinghole
+    if (gatherable) then
+		local interactable = e("GetGameCameraInteractableActionInfo()")
+		local reachable = (gatherable.distance <= 20 and not In(interactable,nil,false))
+		if (not reachable) then
+			return true
+        end
+    end
+    
+    return false
+end
+function e_movetonode:execute()
+	eso_fish.thisPosition = {}
+	local gatherable = esominion.currentfishinghole
+	if (table.valid(gatherable)) then
+		local gpos = gatherable.meshpos
+		if (table.valid(gpos)) then
+			
+			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, 15)
+		end
 	end
 end
-RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
-RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")
+
+c_movetorandom = inheritsFrom( ml_cause )
+e_movetorandom = inheritsFrom( ml_effect )
+function c_movetorandom:evaluate()
+	if (table.valid(esominion.currentfishinghole)) then
+		return false
+	end
+	if TimeSince(esominion.hooktimer) < 5000 then
+		return false
+	end
+	local ppos = Player.pos
+	if table.valid(eso_fish.thisPosition) then
+		local pos = eso_fish.thisPosition
+		local dist = math.distance3d(ppos.x, ppos.y, ppos.z, pos.x, pos.y, pos.z)
+		d("dist = "..tostring(dist))
+		if dist > 10 then
+    d("random false x")
+			return false
+		end
+	end
+	for i = 1,10 do
+		local newPos = NavigationManager:GetRandomPointOnCircle(ppos.x,ppos.y,ppos.z,100,200)
+		if (table.valid(newPos)) then
+			local p = FindClosestMesh(newPos,30)
+			if (p) then
+				if not table.valid(eso_fish.lastPosition) then
+					eso_fish.lastPosition = eso_fish.thisPosition
+					eso_fish.thisPosition =  p
+					d("new position")
+					return true
+				else
+					local dist = math.distance3d(ppos.x, ppos.y, ppos.z, p.x, p.y, p.z)
+					local dist2 = math.distance3d(eso_fish.lastPosition.x, eso_fish.lastPosition.y, eso_fish.lastPosition.z, p.x, p.y, p.z)
+					if dist < dist2 then
+						eso_fish.lastPosition = eso_fish.thisPosition
+						eso_fish.thisPosition = p
+					d("new position 2")
+						return true
+					end
+				end
+			end
+		end
+	end
+    d("random false x")
+    return false
+end
+function e_movetorandom:execute()
+	
+	local randomPos = eso_fish.thisPosition
+	if (table.valid(randomPos)) then
+		local rpos = randomPos
+		if (table.valid(rpos)) then
+			Player:MoveTo(rpos.x, rpos.y, rpos.z, false, 0, 5)
+		end
+	end
+end
+
+c_stoptonode = inheritsFrom( ml_cause )
+e_stoptonode = inheritsFrom( ml_effect )
+function c_stoptonode:evaluate()
+	if (not table.valid(esominion.currentfishinghole)) then
+		return false
+	end
+	if not Player:IsMoving() then
+		return false
+	end
+	local gatherable = esominion.currentfishinghole
+    if (gatherable) then
+		local interactable = e("GetGameCameraInteractableActionInfo()")
+		local reachable = (gatherable.distance <= 20 and not In(interactable,nil,false))
+		if (reachable) then
+			Player:StopMovement()
+			return true
+        end
+    end
+    
+    return false
+end
+function e_stoptonode:execute()
+	
+end
+function BuildWhitelist()
+	local whitelist = ""
+	for i = 1,9 do
+		local baitInfo = e("GetFishingLureInfo("..i..")") 
+		if baitInfo ~= "" then
+			local poolType = esominion.baits[i]
+			local id = esominion.fishingNodes[poolType]
+			if id then
+				if whitelist == "" then
+					whitelist = tostring(id)
+				else
+					whitelist = whitelist..";"..tostring(id)
+				end
+			end
+		end
+	end
+	return whitelist
+end

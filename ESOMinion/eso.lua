@@ -6,23 +6,38 @@ esominion.lootTime = 0
 esominion.playerdead = false
 esominion.incombat = false
 esominion.lureType = 0
+esominion.lureTypes = {}
 esominion.activeTip = 0
 esominion.petalive = nil
 esominion.petalivecheck = 0
 esominion.playerbuffs = {}
 esominion.targetbuffs = {}
 esominion.currentfishinghole = {}
+esominion.hooked = false
+esominion.hooktimer = 0
 esominion.baits = {
 
-	[1] = "River", --"Insect Parts",
-	[2] = "Foul", --"Crawlers",
-	[3] = "Lake", --"Guts",
-	[4] = "Simple Bait",
-	[5] = "Foul", --"Fish Roe",
-	[6] = "Lake", --"Minnow",
-	[7] = "Saltwater", --"Chub",
-	[8] = "River", --"Shad",
-	[9] = "Saltwater", --"Worms",
+	[1] = "Saltwater", --"Chub",
+	[2] = "River", --"Shad",
+	[3] = "Saltwater", --"Worms",
+	[4] = "River", --"Insect Parts",
+	[5] = "Foul", --"Crawlers",
+	[6] = "Lake", --"Guts",
+	[7] = "Simple Bait",
+	[8] = "Foul", --"Fish Roe",
+	[9] = "Lake", --"Minnow",
+}
+esominion.fishingNodes = {
+	["Saltwater"] = "909",
+	["Lake"] = "910",
+	["River"] = "911",
+	["Foul"] = "912",
+}
+esominion.reversefishingNodes = {
+	[909] = "Saltwater",
+	[910] = "Lake",
+	[911] = "River",
+	[912] = "Foul",
 }
 function esominion.GetSetting(strSetting,default)
 	if (Settings.ESOMINION[strSetting] == nil) then
