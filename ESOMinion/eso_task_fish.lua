@@ -11,6 +11,9 @@ eso_fish.needbaits = false
 eso_fish.curerntgatherbait = {}
 eso_fish.gatherbaitid = 0
 eso_fish.killtargetid = 0
+eso_fish.idLockoutattempts = 0
+eso_fish.lockoutids = {}
+eso_fish.baitstring = "29849;48922;48923;48924;48925;48926;74219;74225;74226;74227"
 
 eso_fish.GUI = {
 	x = 0,
@@ -659,7 +662,7 @@ function c_movetonode:evaluate()
 			return true
 		else
 			if In(interactable,nil,false) then 
-				Player:SetFacing(gatherable.id,true)
+				Player:SetFacing(gatherable.pos,true)
 				e_movetonode.block = true
 				return true
 			end
@@ -813,14 +816,14 @@ function c_findbaits:evaluate()
 	if table.valid(esominion.currentfishinghole) then
 		return false
 	end
-	local whitelist = "29849;48922;48923;48924;48925;48926;74225;74226;74227"
+	local whitelist = eso_fish.baitstring
 	local radius = 75
 	local filter = ""
 	filter = "onmesh,contentid="..whitelist
 
 	local gatherable = nil				
 	if (gatherable == nil) then
-		gatherable = GetNearestFromList(filter,Player.pos,30)
+		gatherable = GetNearestFromList(filter,Player.pos,30,eso_fish.lockoutids)
 	end
 	
 	if (table.valid(gatherable)) then
@@ -859,6 +862,10 @@ function c_movetobait:evaluate()
 	d("[c_movetobait] false 4")
 		return false
 	end
+	if eso_fish.idLockoutattempts >= 5 then
+		eso_fish.lockoutids[eso_fish.curerntgatherbait.id] = true
+		eso_fish.curerntgatherbait = {}
+	end
 	c_movetobait.doblock = false
 	if (gatherable) then
 		local interactable = MGetGameCameraInteractableActionInfo()
@@ -867,12 +874,13 @@ function c_movetobait:evaluate()
 			return true
 		else
 			if interactable == "Take" then
-				local TargetList = MEntityList("maxdistance=5,contentid=29849;48922;48923;48924;48925;48926;74225;74226;74227")
+				local TargetList = MEntityList("maxdistance=5,contentid="..eso_fish.baitstring)
 				if TargetList then
 					id,mytarget = next (TargetList)
 					mytarget:Interact()
 					ml_global_information.Await(1000)
 					c_movetobait.doblock = true
+					eso_fish.idLockoutattempts = eso_fish.idLockoutattempts + 1
 					return true
 				end
 			end
@@ -930,7 +938,7 @@ end
 function e_setfacing:execute()
 
 	local gatherable = e_setfacing.gatherable
-	Player:SetFacing(gatherable.id,true)
+	Player:SetFacing(gatherable.pos,true)
 	
 end
 

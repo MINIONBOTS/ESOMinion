@@ -283,25 +283,28 @@ function SetBait(pondtype)
 	return true
 end
 
-function GetNearestFromList(strList,pos,radius)
+function GetNearestFromList(strList,pos,radius,excludelist)
 	local el = EntityList(strList)
+	local excludelist = IsNull(excludelist,{})
 	if (table.valid(el)) then
 		
 		local filteredList = {}
 		for i,entity in pairs(el) do
-			local epos = entity.pos
-			if (NavigationManager:IsReachable(epos)) then
-				if (not radius or (radius >= 150)) then
-					table.insert(filteredList,entity)
-				else
-					local dist = Distance2D(pos.x,pos.z,epos.x,epos.z)
-					if (dist <= radius) then
+			if not excludelist[entity.id] then
+				local epos = entity.pos
+				if (NavigationManager:IsReachable(epos)) then
+					if (not radius or (radius >= 150)) then
 						table.insert(filteredList,entity)
+					else
+						local dist = Distance2D(pos.x,pos.z,epos.x,epos.z)
+						if (dist <= radius) then
+							table.insert(filteredList,entity)
+						end
 					end
+				else
+					local ppos = Player.pos
+					d("[GetNearestFromList]- Entity at ["..tostring(math.round(epos.x,0))..","..tostring(math.round(epos.y,0))..","..tostring(math.round(epos.z,0)).."] not reachable from ["..tostring(math.round(ppos.x,0))..","..tostring(math.round(ppos.y,0))..","..tostring(math.round(ppos.z,0)).."]")
 				end
-			else
-				local ppos = Player.pos
-				d("[GetNearestFromList]- Entity at ["..tostring(math.round(epos.x,0))..","..tostring(math.round(epos.y,0))..","..tostring(math.round(epos.z,0)).."] not reachable from ["..tostring(math.round(ppos.x,0))..","..tostring(math.round(ppos.y,0))..","..tostring(math.round(ppos.z,0)).."]")
 			end
 		end
 		
