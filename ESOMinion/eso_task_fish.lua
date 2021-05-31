@@ -197,6 +197,8 @@ end
 
 c_cast = inheritsFrom( ml_cause )
 e_cast = inheritsFrom( ml_effect )
+c_cast.doblock = false
+c_cast.blocktime = 0
 function c_cast:evaluate()
 -- SetFishingLure(number lureIndex) 
 -- GetFishingLure()
@@ -212,6 +214,21 @@ function c_cast:evaluate()
 		e_setbait.needbait = true
 		return false
 	end
+	if TimeSince(c_cast.blocktime) < 5000 then
+		return false
+	end
+	c_cast.doblock = false
+	if Player.isswimming == 1 then
+		local gatherable = eso_fish.currenttask
+		local newPos = NavigationManager:GetRandomPointOnCircle(gatherable.pos.x,gatherable.pos.y,gatherable.pos.z,5,10)
+		if (table.valid(newPos)) then
+			Player:MoveTo(newPos.x, newPos.y, newPos.z, false, 0, 2)
+			c_cast.doblock = true
+			c_cast.blocktime = Now()
+			d("find alternate pos")
+		end
+		return true
+	end
 	local interactable = MGetGameCameraInteractableActionInfo()
 	if interactable == "Fish" then
 		return true
@@ -220,7 +237,9 @@ function c_cast:evaluate()
 	return false
 end
 function e_cast:execute()
-
+	if c_cast.doblock then
+		return true
+	end
 	local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
 	if TargetList then
 		id,mytarget = next (TargetList)
@@ -746,6 +765,9 @@ function c_stoptonode:evaluate()
 	if (not table.valid(eso_fish.currenttask)) then
 		return false
 	end
+	if TimeSince(c_cast.blocktime) < 5000 then
+		return false
+	end
 	if not Player:IsMoving() then
 		return false
 	end
@@ -837,6 +859,9 @@ function c_movetobest:evaluate()
 	d("[c_movetobest] false 1")
 		return false
 	end
+	if TimeSince(c_cast.blocktime) < 5000 then
+		return false
+	end
 	local gatherable = eso_fish.currenttask
 	if not MGetEntity(gatherable.id) then
 		eso_fish.currenttask = {}
@@ -878,6 +903,7 @@ function c_movetobest:evaluate()
 					return true
 				end
 			end
+			
 		end
 	end
 	
