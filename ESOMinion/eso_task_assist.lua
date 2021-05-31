@@ -76,7 +76,7 @@ function eso_task_assist.SelectTargetExtended(maxrange, los, aggro)
 	
 	if (gAssistTargetMode == "Biggest Crowd") then filterstring = filterstring..",clustered=6" end
 	--if (gPreventAttackingInnocents == "1") then filterstring = filterstring..",hostile" end
-	local TargetList = EntityList(filterstring)
+	local TargetList = MEntityList(filterstring)
 	if ( TargetList ) then
 		local id,entry = next(TargetList)
 		if (id and entry ) then

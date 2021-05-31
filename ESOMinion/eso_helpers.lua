@@ -260,7 +260,7 @@ function SetBait(pondtype)
 		d("baitNum = "..tostring(baitNum))
 		local baitfound = false
 		for i = 1,9 do
-			if not pondtype or (esominion.baits[i] == pondtype) then
+			if not pondtype or (esominion.baits[i] == pondtype) or i == 1 then
 				local baitInfo = e("GetFishingLureInfo("..i..")") 
 				if baitInfo ~= "" then
 					d("bait info found")
@@ -273,11 +273,14 @@ function SetBait(pondtype)
 		end
 		if not baitfound then
 			esominion.lureType = 0
+			return false
 		end
 	else
 		d("no baits to set")
 		esominion.lureType = 0
+			return false
 	end
+	return true
 end
 
 function GetNearestFromList(strList,pos,radius)
@@ -424,3 +427,10 @@ function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCate
 end
 RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
 RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")
+function registertest()
+
+RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
+RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")
+
+
+end

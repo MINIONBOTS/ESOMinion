@@ -17,15 +17,15 @@ esominion.hooked = false
 esominion.hooktimer = 0
 esominion.baits = {
 
-	[1] = "Saltwater", --"Chub",
-	[2] = "River", --"Shad",
-	[3] = "Saltwater", --"Worms",
+	[1] = "Simple Bait",
+	[2] = "Lake", --"Guts",
+	[3] = "Foul", --"Crawlers",
 	[4] = "River", --"Insect Parts",
-	[5] = "Foul", --"Crawlers",
-	[6] = "Lake", --"Guts",
-	[7] = "Simple Bait",
-	[8] = "Foul", --"Fish Roe",
-	[9] = "Lake", --"Minnow",
+	[5] = "Saltwater", --"Worms",
+	[6] = "River", --"Shad",
+	[7] = "Saltwater", --"Chub",
+	[8] = "Lake", --"Minnow",
+	[9] = "Foul", --"Fish Roe", -- 9
 }
 esominion.fishingNodes = {
 	["Saltwater"] = "909",
@@ -400,6 +400,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	end
 	ml_global_information.throttleTick = tickcount + 35
 	
+	memoize = {}
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
 		ESO_Common_BotRunning = false
@@ -455,6 +456,10 @@ function ml_global_information.ToggleRun()
 		ml_task_hub.shouldRun = false		
 		ml_task_hub:ClearQueues()
 		ml_global_information.UpdateMode()
+		
+		if Player:IsMoving() then
+			Player:StopMovement()
+		end	
 	else
 		--ml_task_hub.shouldRun = true
 		ESO_Common_BotRunning = true

@@ -3,7 +3,7 @@
 -- Since we have different "types" of movement, add all types and assign a value to them. Make sure to include one entry for each of the 4 kinds below per movement type!
 -- todo: modify stop distance along with movement speed
 ml_navigation.NavPointReachedDistances = { ["Walk"] = 1, ["Diving"] = 1, ["Mounted"] = 1, ["Swimming"] = 1 }      -- Distance to the next node in the path at which the ml_navigation.pathindex is iterated
-ml_navigation.PathDeviationDistances = { ["Walk"] = 1, ["Diving"] = 1, ["Mounted"] = 1, ["Swimming"] = 1 }      -- The max. distance the playerposition can be away from the current path. (The Point-Line distance between player and the last & next pathnode)
+ml_navigation.PathDeviationDistances = { ["Walk"] = 2, ["Diving"] = 2, ["Mounted"] = 2, ["Swimming"] = 2 }      -- The max. distance the playerposition can be away from the current path. (The Point-Line distance between player and the last & next pathnode)
 ml_navigation.GameStates = { [1] = "CHARACTERSCREEN", [2] = "MAINMENUSCREEN", [3] = "INGAME", [4] = "ERROR", [6] = "LOADING" }
 ml_navigation.lastMount = 0
 ml_navigation.movement_status = 0
@@ -943,7 +943,7 @@ function ml_navigation:GetRaycast_Player_Node_Distance(ppos, node)
 
         if Player:IsMoving() then
             -- we are still moving towards the same node
-            local dist2d = math.distance2d(ppos, node)
+            local dist2d = ml_navigation:GetRemainingPathLenght()
             if (dist2d < 5 * ml_navigation.NavPointReachedDistances[Player:GetMovementType()]) then
                 -- count / record if we are getting closer to it or if we are spinning around
                 if (self.lastpathnodedist) then
