@@ -8,7 +8,7 @@ eso_fish.currentTaskIndex = 0
 eso_fish.thisPosition = {}
 eso_fish.lastPosition = {}
 eso_fish.needbaits = false
-eso_fish.curerntgatherbait = {}
+eso_fish.currenttask = {}
 eso_fish.gatherbaitid = 0
 eso_fish.killtargetid = 0
 eso_fish.idLockoutattempts = 0
@@ -282,7 +282,7 @@ function c_setbait:evaluate()
 	if not e_setbait.needbait then
 		return false
 	end
-	if (not table.valid(esominion.currentfishinghole)) then
+	if (not table.valid(eso_fish.currenttask)) then
 		return false
 	end
 	local currentBait = esominion.lureType
@@ -293,10 +293,10 @@ function c_setbait:evaluate()
 	return false
 end
 function e_setbait:execute()
-local locationType = esominion.reversefishingNodes[esominion.currentfishinghole.contentid]
+local locationType = esominion.reversefishingNodes[eso_fish.currenttask.contentid]
 	d("locationType = "..tostring(locationType))
 	if not SetBait(locationType) then
-		esominion.currentfishinghole = {}
+		eso_fish.currenttask = {}
 	end
 end
 
@@ -516,12 +516,9 @@ function eso_task_fish:Init()
 	
 	local ke_findbait = ml_element:create( "FindBait", c_findbaits, e_findbaits, 8 )
 	self:add(ke_findbait, self.process_elements)
-	
-	local ke_movetonode = ml_element:create( "MoveToNode", c_movetonode, e_movetonode, 7 )
-	self:add(ke_movetonode, self.process_elements)
-	
-	local ke_movetobait = ml_element:create( "MoveToBait", c_movetobait, e_movetobait, 6 )
-	self:add(ke_movetobait, self.process_elements)
+		
+	local ke_movetobest = ml_element:create( "MoveToBait", c_movetobest, e_movetobest, 6 )
+	self:add(ke_movetobest, self.process_elements)
 	
 	local ke_movetorandom = ml_element:create( "MoveToRandom", c_movetorandom, e_movetorandom, 5 )
 	self:add(ke_movetorandom, self.process_elements)
@@ -610,10 +607,7 @@ c_findnode = inheritsFrom( ml_cause )
 e_findnode = inheritsFrom( ml_effect )
 e_findnode.blockOnly = false
 function c_findnode:evaluate()
-	if table.valid(eso_fish.curerntgatherbait) then
-		return false
-	end
-	if table.valid(esominion.currentfishinghole) then
+	if table.valid(eso_fish.currenttask) then
 		return false
 	end
 		
@@ -624,7 +618,6 @@ function c_findnode:evaluate()
 		eso_fish.needbaits = true
 		return false
 	end
-	d(filter)
 	filter = "onmesh,contentid="..whitelist
 
 	local gatherable = nil				
@@ -633,7 +626,7 @@ function c_findnode:evaluate()
 	end
 	
 	if (table.valid(gatherable)) then
-		esominion.currentfishinghole = MGetEntity(gatherable.id)
+		eso_fish.currenttask = MGetEntity(gatherable.id)
 		return true
 	end
 	
@@ -646,17 +639,21 @@ c_movetonode = inheritsFrom( ml_cause )
 e_movetonode = inheritsFrom( ml_effect )
 e_movetonode.block = false
 function c_movetonode:evaluate()
-	if (not table.valid(esominion.currentfishinghole)) then
+	if (not table.valid(eso_fish.currenttask)) then
 		return false
 	end
 	if TimeSince(esominion.hooktimer) < 5000 then
 		return false
 	end
 	e_movetonode.block = false
-	local gatherable = esominion.currentfishinghole
+	local gatherable = eso_fish.currenttask
 	if (gatherable) then
 		local interactable = MGetGameCameraInteractableActionInfo()
-		local reachable = (gatherable.distance <= 20)
+		local distanceMax = 5
+		if In(gatherable.contentid,909,910,911,912) then
+			distanceMax = 15
+		end
+		local reachable = (gatherable.distance <= distanceMax)
 		if (not reachable) then
 			e_movetonode.block = false
 			return true
@@ -676,12 +673,15 @@ function e_movetonode:execute()
 		return false
 	end
 	eso_fish.thisPosition = {}
-	local gatherable = esominion.currentfishinghole
+	local gatherable = eso_fish.currenttask
 	if (table.valid(gatherable)) then
 		local gpos = gatherable.meshpos
+		local distanceMax = 5
+		if In(gatherable.contentid,909,910,911,912) then
+			distanceMax = 15
+		end
 		if (table.valid(gpos)) then
-			
-			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, 15)
+			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
 		end
 	end
 end
@@ -689,12 +689,8 @@ end
 c_movetorandom = inheritsFrom( ml_cause )
 e_movetorandom = inheritsFrom( ml_effect )
 function c_movetorandom:evaluate()
-	if (table.valid(esominion.currentfishinghole)) then
+	if (table.valid(eso_fish.currenttask)) then
 	d("[c_movetorandom] false 1")
-		return false
-	end
-	if (table.valid(eso_fish.curerntgatherbait)) then
-	d("[c_movetorandom] false 2")
 		return false
 	end
 	if InCombat() then
@@ -706,34 +702,30 @@ function c_movetorandom:evaluate()
 		return false
 	end
 	local ppos = Player.pos
-	if table.valid(eso_fish.thisPosition) then
-		local pos = eso_fish.thisPosition
-		local dist = math.distance3d(ppos.x, ppos.y, ppos.z, pos.x, pos.y, pos.z)
-		if dist > 10 then
-	d("[c_movetorandom] false 5")
-			return false
-		end
-	end
-	for i = 1,10 do
-		local newPos = NavigationManager:GetRandomPointOnCircle(ppos.x,ppos.y,ppos.z,50,125)
-		if (table.valid(newPos)) then
-			local p = FindClosestMesh(newPos,30)
-			if (p) then
-				if not table.valid(eso_fish.lastPosition) then
-					eso_fish.lastPosition = eso_fish.thisPosition
-					eso_fish.thisPosition = p
-					return true
-				else
-					local dist = math.distance3d(ppos.x, ppos.y, ppos.z, p.x, p.y, p.z)
-					local dist2 = math.distance3d(eso_fish.lastPosition.x, eso_fish.lastPosition.y, eso_fish.lastPosition.z, p.x, p.y, p.z)
-					if dist < dist2 then
+	if not table.valid(eso_fish.thisPosition) then
+		for i = 1,10 do
+			local newPos = NavigationManager:GetRandomPointOnCircle(ppos.x,ppos.y,ppos.z,50,125)
+			if (table.valid(newPos)) then
+				local p = FindClosestMesh(newPos,30)
+				if (p) then
+					if not table.valid(eso_fish.lastPosition) then
 						eso_fish.lastPosition = eso_fish.thisPosition
 						eso_fish.thisPosition = p
 						return true
+					else
+						local dist = math.distance3d(ppos.x, ppos.y, ppos.z, p.x, p.y, p.z)
+						local dist2 = math.distance3d(eso_fish.lastPosition.x, eso_fish.lastPosition.y, eso_fish.lastPosition.z, p.x, p.y, p.z)
+						if dist < dist2 then
+							eso_fish.lastPosition = eso_fish.thisPosition
+							eso_fish.thisPosition = p
+							return true
+						end
 					end
 				end
 			end
 		end
+	else
+		return true
 	end
 	return false
 end
@@ -751,7 +743,7 @@ end
 c_stoptonode = inheritsFrom( ml_cause )
 e_stoptonode = inheritsFrom( ml_effect )
 function c_stoptonode:evaluate()
-	if (not table.valid(esominion.currentfishinghole)) then
+	if (not table.valid(eso_fish.currenttask)) then
 		return false
 	end
 	if not Player:IsMoving() then
@@ -761,10 +753,14 @@ function c_stoptonode:evaluate()
 		Player:StopMovement()
 		return true
 	end
-	local gatherable = esominion.currentfishinghole
+	local gatherable = eso_fish.currenttask
 	if (gatherable) then
 		local interactable = MGetGameCameraInteractableActionInfo()
-		local reachable = (gatherable.distance <= 20 and not In(interactable,nil,false))
+		local distanceMax = 5
+		if In(gatherable.contentid,909,910,911,912) then
+			distanceMax = 15
+		end
+		local reachable = (gatherable.distance <= distanceMax and not In(interactable,nil,false))
 		if (reachable) then
 			Player:StopMovement()
 			return true
@@ -810,10 +806,7 @@ function c_findbaits:evaluate()
 	d("[c_findbaits] false 1")
 		return false
 	end
-	if table.valid(eso_fish.curerntgatherbait) then
-		return false
-	end
-	if table.valid(esominion.currentfishinghole) then
+	if table.valid(eso_fish.currenttask) then
 		return false
 	end
 	local whitelist = eso_fish.baitstring
@@ -827,7 +820,7 @@ function c_findbaits:evaluate()
 	end
 	
 	if (table.valid(gatherable)) then
-		eso_fish.curerntgatherbait = MGetEntity(gatherable.id)
+		eso_fish.currenttask = MGetEntity(gatherable.id)
 		return true
 	end
 	
@@ -836,40 +829,40 @@ end
 function e_findbaits:execute()
 end
 
-c_movetobait = inheritsFrom( ml_cause )
-e_movetobait = inheritsFrom( ml_effect )
-c_movetobait.doblock = false
-function c_movetobait:evaluate()
-	if (not table.valid(eso_fish.curerntgatherbait)) then
-	d("[c_movetobait] false 1")
+c_movetobest = inheritsFrom( ml_cause )
+e_movetobest = inheritsFrom( ml_effect )
+c_movetobest.doblock = false
+function c_movetobest:evaluate()
+	if (not table.valid(eso_fish.currenttask)) then
+	d("[c_movetobest] false 1")
 		return false
 	end
-	local gatherable = eso_fish.curerntgatherbait
+	local gatherable = eso_fish.currenttask
 	if not MGetEntity(gatherable.id) then
-		eso_fish.curerntgatherbait = {}
+		eso_fish.currenttask = {}
 		d("clear baits 1")
 		return false
 	end
 	if InCombat() then
-	d("[c_movetobait] false 2")
-		return false
-	end
-	if table.valid(esominion.currentfishinghole) then
-	d("[c_movetobait] false 3")
+	d("[c_movetobest] false 2")
 		return false
 	end
 	if TimeSince(esominion.hooktimer) < 5000 then
-	d("[c_movetobait] false 4")
+	d("[c_movetobest] false 4")
 		return false
 	end
 	if eso_fish.idLockoutattempts >= 5 then
-		eso_fish.lockoutids[eso_fish.curerntgatherbait.id] = true
-		eso_fish.curerntgatherbait = {}
+		eso_fish.lockoutids[eso_fish.currenttask.id] = true
+		eso_fish.currenttask = {}
 	end
-	c_movetobait.doblock = false
+	c_movetobest.doblock = false
 	if (gatherable) then
+		local distanceMax = 5
+		if In(gatherable.contentid,909,910,911,912) then
+			distanceMax = 15
+		end
 		local interactable = MGetGameCameraInteractableActionInfo()
-		local reachable = (gatherable.distance <= 5 and not In(interactable,nil,false))
+		local reachable = (gatherable.distance <= distanceMax and not In(interactable,nil,false))
 		if (not reachable) then
 			return true
 		else
@@ -879,7 +872,7 @@ function c_movetobait:evaluate()
 					id,mytarget = next (TargetList)
 					mytarget:Interact()
 					ml_global_information.Await(1000)
-					c_movetobait.doblock = true
+					c_movetobest.doblock = true
 					eso_fish.idLockoutattempts = eso_fish.idLockoutattempts + 1
 					return true
 				end
@@ -889,17 +882,21 @@ function c_movetobait:evaluate()
 	
 	return false
 end
-function e_movetobait:execute()
-	if c_movetobait.doblock then
+function e_movetobest:execute()
+	if c_movetobest.doblock then
 		return false
 	end
 	eso_fish.thisPosition = {}
-	local gatherable = eso_fish.curerntgatherbait
+	local gatherable = eso_fish.currenttask
 	if (table.valid(gatherable)) then
 		local gpos = gatherable.meshpos
+		local distanceMax = 5
+		if In(gatherable.contentid,909,910,911,912) then
+			distanceMax = 15
+		end
 		if (table.valid(gpos)) then
 			
-			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, 5)
+			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
 		end
 	end
 end
@@ -912,22 +909,16 @@ function c_setfacing:evaluate()
 		return false
 	end
 	e_setfacing.gatherable = {}
-	if (table.valid(esominion.currentfishinghole)) then
-		local gatherable = esominion.currentfishinghole
-		if gatherable.distance < 20 then
-			local interactable = MGetGameCameraInteractableActionInfo()
-			if In(interactable,nil,false) then 
-				e_setfacing.gatherable = esominion.currentfishinghole
-				return true
-			end
+	if (table.valid(eso_fish.currenttask)) then
+		local gatherable = eso_fish.currenttask
+		local distanceMax = 5
+		if In(gatherable.contentid,909,910,911,912) then
+			distanceMax = 15
 		end
-	end
-	if (table.valid(eso_fish.curerntgatherbait)) then
-		local gatherable = eso_fish.curerntgatherbait
-		if gatherable.distance < 20 then
+		if gatherable.distance < distanceMax then
 			local interactable = MGetGameCameraInteractableActionInfo()
 			if In(interactable,nil,false) then 
-				e_setfacing.gatherable = eso_fish.curerntgatherbait
+				e_setfacing.gatherable = eso_fish.currenttask
 				return true
 			end
 		end
@@ -963,8 +954,6 @@ function e_fishingloot:execute()
 	else
 		e("EndLooting()")
 	end
-	--esominion.currentfishinghole = {}
-	--eso_fish.curerntgatherbait = {}
 	c_fishingloot.lootattempt = false
 end
 c_findaggro = inheritsFrom( ml_cause )
@@ -1003,7 +992,7 @@ function c_killaggro:evaluate()
 	if eso_fish.killtargetid == 0 then
 		return false
 	end
-	if Player.isswimming then
+	if Player.isswimming ~= 0 then
 		return false
 	end
 	return true
