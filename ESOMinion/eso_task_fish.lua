@@ -517,7 +517,7 @@ function eso_task_fish:Init()
 	local ke_findbait = ml_element:create( "FindBait", c_findbaits, e_findbaits, 8 )
 	self:add(ke_findbait, self.process_elements)
 		
-	local ke_movetobest = ml_element:create( "MoveToBait", c_movetobest, e_movetobest, 6 )
+	local ke_movetobest = ml_element:create( "MoveToBest", c_movetobest, e_movetobest, 6 )
 	self:add(ke_movetobest, self.process_elements)
 	
 	local ke_movetorandom = ml_element:create( "MoveToRandom", c_movetorandom, e_movetorandom, 5 )
@@ -642,7 +642,7 @@ function c_movetonode:evaluate()
 	if (not table.valid(eso_fish.currenttask)) then
 		return false
 	end
-	if TimeSince(esominion.hooktimer) < 5000 then
+	if TimeSince(esominion.hooktimer) < 3000 then
 		return false
 	end
 	e_movetonode.block = false
@@ -697,7 +697,7 @@ function c_movetorandom:evaluate()
 	d("[c_movetorandom] false 3")
 		return false
 	end
-	if TimeSince(esominion.hooktimer) < 5000 then
+	if TimeSince(esominion.hooktimer) < 3000 then
 	d("[c_movetorandom] false 4")
 		return false
 	end
@@ -847,7 +847,7 @@ function c_movetobest:evaluate()
 	d("[c_movetobest] false 2")
 		return false
 	end
-	if TimeSince(esominion.hooktimer) < 5000 then
+	if TimeSince(esominion.hooktimer) < 3000 then
 	d("[c_movetobest] false 4")
 		return false
 	end
@@ -863,6 +863,7 @@ function c_movetobest:evaluate()
 		end
 		local interactable = MGetGameCameraInteractableActionInfo()
 		local reachable = (gatherable.distance <= distanceMax and not In(interactable,nil,false))
+		d("reachable = "..tostring(reachable))
 		if (not reachable) then
 			return true
 		else
@@ -883,10 +884,12 @@ function c_movetobest:evaluate()
 	return false
 end
 function e_movetobest:execute()
+
+	d("[c_movetobest] execute")
 	if c_movetobest.doblock then
 		return false
 	end
-	eso_fish.thisPosition = {}
+	d("[c_movetobest] execute 1")
 	local gatherable = eso_fish.currenttask
 	if (table.valid(gatherable)) then
 		local gpos = gatherable.meshpos
@@ -894,8 +897,10 @@ function e_movetobest:execute()
 		if In(gatherable.contentid,909,910,911,912) then
 			distanceMax = 15
 		end
+	d("[c_movetobest] execute 2")
 		if (table.valid(gpos)) then
 			
+	d("[c_movetobest] execute 3")
 			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
 		end
 	end
