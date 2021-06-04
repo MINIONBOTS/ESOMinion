@@ -392,6 +392,7 @@ end
 RegisterForEvent("EVENT_EFFECT_CHANGED", true)
 RegisterEventHandler("GAME_EVENT_EFFECT_CHANGED", BuildBuffs, "BuffChecks")
 function changeCombatState(eventName, eventCode, inCombat)
+d("in combat state changed")
 	Player.incombat = toboolean(inCombat)
 	esominion.incombat = toboolean(inCombat)
 end
@@ -430,3 +431,10 @@ function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCate
 end
 RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
 RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")
+
+
+function update_skill_bar(eventName, eventCode, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory) 
+	eso_skillmanager.needsrebuild = true
+end
+RegisterForEvent("EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED", true)
+RegisterEventHandler("GAME_EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED", update_skill_bar, "update_skill_bar")

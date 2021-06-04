@@ -6,6 +6,7 @@
 eso_skillmanager = {}
 eso_skillmanager.version = "2.0";
 eso_skillmanager.lastTick = 0
+eso_skillmanager.debug = 0
 eso_skillmanager.ConditionList = {}
 eso_skillmanager.CurrentSkill = {}
 eso_skillmanager.CurrentSkillData = {}
@@ -31,6 +32,7 @@ gSkillManagerDebugPriorities = ""
 eso_skillmanager.lastAvoid = 0
 eso_skillmanager.lastBreak = 0
 eso_skillmanager.lastInterrupt = 0
+eso_skillmanager.needsrebuild = true
 
 eso_skillmanager.TIP_BLOCK = 1
 eso_skillmanager.TIP_EXPLOIT = 2
@@ -816,7 +818,7 @@ function eso_skillmanager.BuildSkillsList()
 	for i = 1,8 do
 		local skillid = AbilityList:GetSlotInfo(i) 
 		if skillid ~= 0 then
-			local skillData = ESOLib.API.Action.GetSkillData(skillid)
+			local skillData = AbilityList:Get(skillid)
 			if skillData then
 		
 				eso_skillmanager.skillsbyid[skillid] = skillData
@@ -835,7 +837,7 @@ function eso_skillmanager.BuildSkillsList()
 	for id,skill in pairs (eso_skillmanager.SummonSkills) do
 		local skillid = id
 		if skillid ~= 0 then
-			local skillData = ESOLib.API.Action.GetSkillData(skillid)
+			local skillData = AbilityList:Get(skillid)
 			if skillData then
 		
 				eso_skillmanager.skillsbyid[skillid] = skillData
@@ -843,6 +845,7 @@ function eso_skillmanager.BuildSkillsList()
 			end
 		end
 	end
+	eso_skillmanager.needsrebuild = false
 end
 
 function eso_skillmanager.BuildAllSkills()
@@ -1051,37 +1054,6 @@ function eso_skillmanager.Cast( entity )
 			end
 		end
 	end
-	
-	local breakable = esominion.activeTip == eso_skillmanager.TIP_BREAK
-	if (breakable) then
-		if (not isAssistMode or (isAssistMode and gAssistDoBreak)) then
-			if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
-				e("RollDodgeStart()")
-				eso_skillmanager.roll = true
-				eso_skillmanager.latencyTimer = Now() + 300
-				eso_skillmanager.lastBreak = Now()
-				d("Attempting to break CC.")
-				return true
-			end
-		end
-	end
-	
-	local avoidable = esominion.activeTip == eso_skillmanager.TIP_AVOID
-	if (avoidable) then
-		if (not isAssistMode or (isAssistMode and gAssistDoAvoid)) then
-			if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
-				if (Player.stamina.percent > 50) then
-					e("RollDodgeStart()")
-					eso_skillmanager.roll = true
-					eso_skillmanager.latencyTimer = Now() + 300
-					eso_skillmanager.lastAvoid = Now()
-					d("Attempting to avoid.")
-					return true
-				end
-			end
-		end
-	end
-		
 		
 	if gSKMWeaving then
 		if TimeSince(eso_skillmanager.lastcast) > 2000 then

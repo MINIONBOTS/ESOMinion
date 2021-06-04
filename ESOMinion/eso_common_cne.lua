@@ -13,7 +13,7 @@ function c_loot:evaluate()
 	if c_loot.lootattempt then
 		return true
 	end
-	return esominion.lootOpen
+	return (Player.interacting and Player.interacttype == 2)
 end
 function e_loot:execute()
 	if not c_loot.lootattempt then

@@ -120,6 +120,7 @@ function esominion.Init()
 	esominion.SetMainVars()
 	esominion.AddMode(GetString("assistMode"), eso_task_assist)
 	esominion.AddMode(GetString("fishMode"), eso_task_fish)
+	esominion.AddMode(GetString("gatherMode"), eso_task_gather)
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
@@ -415,18 +416,42 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		
 		ml_global_information.lastPulse = math.random(300,500)
 		ml_global_information.nextRun = tickcount + ml_global_information.lastPulse
-		--ml_global_information.lastPulseShortened = false
-				
-       --[[ if (ml_task_hub:CurrentTask() ~= nil) then
-            FFXIV_Core_ActiveTaskName = ml_task_hub:CurrentTask().name
-        end]]
 		
-		--[[if Lockpicker.OnUpdate() then
-			return true
-		end]]
-		
+		if eso_skillmanager.needsrebuild then
+			eso_skillmanager.BuildSkillsList()
+		end
 		if eso_skillmanager.roll then
 			e("RollDodgeStop()")
+		end
+		
+		local breakable = esominion.activeTip == eso_skillmanager.TIP_BREAK
+		if (breakable) then
+			if (not isAssistMode or (isAssistMode and gAssistDoBreak)) then
+				if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
+					e("RollDodgeStart()")
+					eso_skillmanager.roll = true
+					eso_skillmanager.latencyTimer = Now() + 300
+					eso_skillmanager.lastBreak = Now()
+					d("Attempting to break CC.")
+					return true
+				end
+			end
+		end
+		
+		local avoidable = esominion.activeTip == eso_skillmanager.TIP_AVOID
+		if (avoidable) then
+			if (not isAssistMode or (isAssistMode and gAssistDoAvoid)) then
+				if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
+					if (Player.stamina.percent > 50) then
+						e("RollDodgeStart()")
+						eso_skillmanager.roll = true
+						eso_skillmanager.latencyTimer = Now() + 300
+						eso_skillmanager.lastAvoid = Now()
+						d("Attempting to avoid.")
+						return true
+					end
+				end
+			end
 		end
 	
 		if (ml_task_hub.shouldRun) then
