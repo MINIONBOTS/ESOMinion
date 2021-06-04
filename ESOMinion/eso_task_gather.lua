@@ -280,9 +280,9 @@ function c_findnode:evaluate()
 		eso_gather.currenttask = MGetEntity(gatherable.id)
 		return true
 	else
-		d("no gatherables")
+		--d("no gatherables")
 	end
-	d("failed out")
+	--d("failed out")
 	return false
 end
 function e_findnode:execute()
@@ -334,11 +334,11 @@ c_movetorandom = inheritsFrom( ml_cause )
 e_movetorandom = inheritsFrom( ml_effect )
 function c_movetorandom:evaluate()
 	if (table.valid(eso_gather.currenttask)) then
-	d("[c_movetorandom] false 1")
+	--d("[c_movetorandom] false 1")
 		return false
 	end
 	if InCombat() then
-	d("[c_movetorandom] false 3")
+	--d("[c_movetorandom] false 3")
 		return false
 	end
 	local ppos = Player.pos
@@ -374,14 +374,14 @@ function c_movetorandom:evaluate()
 	else
 		local dist = math.distance3d(ppos.x, ppos.y, ppos.z, eso_gather.thisPosition.x, eso_gather.thisPosition.y, eso_gather.thisPosition.z)
 		if dist > 5 then
-			d("move to random execute 1")
+			--d("move to random execute 1")
 			return true
 		else
 			eso_gather.thisPosition = {}
 			return true
 		end
 	end
-	d("[c_movetorandom] false 4")
+	--d("[c_movetorandom] false 4")
 	
 	return false
 end
@@ -389,7 +389,7 @@ function e_movetorandom:execute()
 	
 	local randomPos = eso_gather.thisPosition
 	if (table.valid(randomPos)) then
-	d("move")
+	--d("move")
 		local rpos = randomPos
 		if (table.valid(rpos)) then
 			Player:MoveTo(rpos.x, rpos.y, rpos.z, false, 0, 5)
@@ -435,15 +435,15 @@ e_movetobest = inheritsFrom( ml_effect )
 c_movetobest.doblock = false
 function c_movetobest:evaluate()
 	if (not table.valid(eso_gather.currenttask)) then
-	d("[c_movetobest] false 1")
+	--d("[c_movetobest] false 1")
 		return false
 	end
 	if (Player.interacting and Player.interacttype ~= 0) then
-	d("[c_movetobest] false 2")
+	--d("[c_movetobest] false 2")
 		return false
 	end
 	if TimeSince(c_cast.blocktime) < 5000 then
-	d("[c_movetobest] false 3")
+	--d("[c_movetobest] false 3")
 		return false
 	end
 	--[[if eso_gather.idLockoutattempts >= 5 then
@@ -461,7 +461,7 @@ function c_movetobest:evaluate()
 		return false
 	end
 	if InCombat() then
-	d("[c_movetobest] false 4")
+	--d("[c_movetobest] false 4")
 		return false
 	end
 	c_movetobest.doblock = false
@@ -469,7 +469,7 @@ function c_movetobest:evaluate()
 		local distanceMax = 5
 		local interactable = MGetGameCameraInteractableActionInfo()
 		local reachable = (IsNull(gatherable.distance,100) <= distanceMax and not In(interactable,nil,false))
-		d("reachable = "..tostring(reachable))
+		--d("reachable = "..tostring(reachable))
 		if (not reachable) then
 			return true
 		else
@@ -492,23 +492,23 @@ function c_movetobest:evaluate()
 	return false
 end
 function e_movetobest:execute()
-d("e_movetobest")
+--d("e_movetobest")
 	if c_movetobest.doblock then
-	d("blocked")
+	--d("blocked")
 		return false
 	end
 	local gatherable = eso_gather.currenttask
 	if (table.valid(gatherable)) then
 		local gpos = gatherable.meshpos
 		local distanceMax = 5
-	d("[c_movetobest] execute 2")
+	--d("[c_movetobest] execute 2")
 		if (table.valid(gpos)) then
 			
-	d("[c_movetobest] execute 3")
+	--d("[c_movetobest] execute 3")
 			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
 		end
 	end
-	d("end")
+	--d("end")
 end
 
 c_setfacing = inheritsFrom( ml_cause )
@@ -551,7 +551,7 @@ function c_gatherloot:evaluate()
 	if c_gatherloot.lootattempt then
 		return true
 	end
-	return esominion.lootOpen or (Player.interacting and Player.interacttype == 2)
+	return (Player.interacting and Player.interacttype == 2)
 end
 function e_gatherloot:execute()
 	if not c_gatherloot.lootattempt then
