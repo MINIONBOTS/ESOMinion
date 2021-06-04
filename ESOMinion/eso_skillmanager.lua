@@ -977,6 +977,10 @@ function eso_skillmanager.Cast( entity )
 		end
 	--end
 
+	--if eso_skillmanager.needsrebuild then
+		eso_skillmanager.BuildSkillsList()
+	--end
+		
 	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
 	if not defaultAttack then
 		eso_skillmanager.BuildSkillsList()
@@ -1606,7 +1610,9 @@ function eso_skillmanager.AddDefaultConditions()
 			end
 		end
 		
-		if (skill.powertype == "Magicka") then
+		
+		--https://i.imgur.com/ijmyVho.png
+		if (skill.powertype == "Magicka") then -- cost type 0
 			if Player.magicka.current < IsNull(eso_skillmanager.skillsbyid[skill.skillID].cost,0) then
 				return true
 			end
@@ -1615,7 +1621,7 @@ function eso_skillmanager.AddDefaultConditions()
 			then 
 				return true
 			end
-		elseif (skill.powertype == "Stamina") then
+		elseif (skill.powertype == "Stamina") then -- cost type 6
 			if Player.stamina.current < IsNull(eso_skillmanager.skillsbyid[skill.skillID].cost,0) then
 				return true
 			end
@@ -1624,7 +1630,7 @@ function eso_skillmanager.AddDefaultConditions()
 			then 
 				return true
 			end
-		--[[elseif (skill.powertype == "Ultimate") then
+		--[[elseif (skill.powertype == "Ultimate") then -- cost type 10
 			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > ml_global_information.Player_Ultimate.percent)	or 
 				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < ml_global_information.Player_Ultimate.percent))
 			then 

@@ -630,7 +630,7 @@ function c_findnode:evaluate()
 		return false
 	end
 		
-	local whitelist = BuildWhitelist()
+	local whitelist = eso_fish.BuildWhitelist()
 	local radius = 100
 	local filter = ""
 	if whitelist == "" then
@@ -794,27 +794,6 @@ end
 function e_stoptonode:execute()
 	
 end
-function BuildWhitelist()
-	local whitelist = ""
-	for i = 1,9 do
-		local baitInfo, icon, stack = e("GetFishingLureInfo("..i..")") 
-		if baitInfo ~= "" and stack > 0 then
-			if i == 1 then
-				return "909;910;911;912"
-			end
-			local poolType = esominion.baits[i]
-			local id = esominion.fishingNodes[poolType]
-			if id then
-				if whitelist == "" then
-					whitelist = tostring(id)
-				else
-					whitelist = whitelist..";"..tostring(id)
-				end
-			end
-		end
-	end
-	return whitelist
-end
 
 c_findbaits = inheritsFrom( ml_cause )
 e_findbaits = inheritsFrom( ml_effect )
@@ -975,7 +954,7 @@ function c_fishingloot:evaluate()
 	if c_fishingloot.lootattempt then
 		return true
 	end
-	return esominion.lootOpen
+	return (Player.interacting and Player.interacttype == 2)
 end
 function e_fishingloot:execute()
 	if not c_fishingloot.lootattempt then
@@ -1042,4 +1021,26 @@ function e_killaggro:execute()
 		eso_fish.killtargetid = 0
 	end
 	eso_fish.thisPosition = {}
+end
+
+function eso_fish.BuildWhitelist()
+	local whitelist = ""
+	for i = 1,9 do
+		local baitInfo, icon, stack = e("GetFishingLureInfo("..i..")") 
+		if baitInfo ~= "" and stack > 0 then
+			if i == 1 then
+				return "909;910;911;912"
+			end
+			local poolType = esominion.baits[i]
+			local id = esominion.fishingNodes[poolType]
+			if id then
+				if whitelist == "" then
+					whitelist = tostring(id)
+				else
+					whitelist = whitelist..";"..tostring(id)
+				end
+			end
+		end
+	end
+	return whitelist
 end

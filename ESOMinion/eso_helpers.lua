@@ -432,9 +432,17 @@ end
 RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
 RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")
 
-
+--[[
 function update_skill_bar(eventName, eventCode, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory) 
 	eso_skillmanager.needsrebuild = true
+	d("rebuild due to slot change")
 end
 RegisterForEvent("EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED", true)
 RegisterEventHandler("GAME_EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED", update_skill_bar, "update_skill_bar")
+
+function update_skill_bar2(eventName, eventCode, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory) 
+	eso_skillmanager.needsrebuild = true
+	d("rebuild due to slot change 2")
+end
+RegisterForEvent("EVENT_HOTBAR_SLOT_CHANGE_REQUESTED", true)
+RegisterEventHandler("GAME_EVENT_HOTBAR_SLOT_CHANGE_REQUESTED", update_skill_bar2, "update_skill_bar2")]]
