@@ -430,10 +430,3 @@ function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCate
 end
 RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
 RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")
-function registertest()
-
-RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
-RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")
-
-
-end
