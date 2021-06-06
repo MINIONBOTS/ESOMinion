@@ -417,6 +417,9 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_global_information.lastPulse = math.random(300,500)
 		ml_global_information.nextRun = tickcount + ml_global_information.lastPulse
 		
+		if eso_skillmanager.needsrebuild then
+			eso_skillmanager.BuildSkillsList()
+		end
 		if eso_skillmanager.roll then
 			e("RollDodgeStop()")
 		end
