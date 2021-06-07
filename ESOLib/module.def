@@ -1,6 +1,6 @@
 [Module]
 Name=ESOLib
 Version=1
-Files=lib_action.lua
+Files=lib_action.lua,lib_common.lua
 Enabled=1
 Dependencies=minionlib

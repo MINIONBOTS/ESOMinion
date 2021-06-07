@@ -3,10 +3,9 @@ lib_action.dictionaries = {}
 lib_action.ModuleFunctions = GetPrivateModuleFunctions()
 lib_action.testingPath = GetStartupPath()..[[\LuaMods\ESOLib\data\]]
 lib_action.API = {}
-
-_G["ESOLib"] = {}
-ESOLib.API = {}
-
+if not ESOLib then
+	_G["ESOLib"] = {}
+end
 
 function lib_action.StripFileExtension(filename)
 	return string.gsub(filename,"%..+$","")
@@ -76,4 +75,4 @@ function lib_action.GetSkillData(id)
 end
 lib_action.API.GetSkillData = lib_action.GetSkillData
 
-ESOLib.API.Action = setmetatable({}, {__index = lib_action.API, __newindex = function() end, __metatable = false})
+ESOLib.Action = setmetatable({}, {__index = lib_action.API, __newindex = function() end, __metatable = false})
