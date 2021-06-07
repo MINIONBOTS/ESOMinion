@@ -188,6 +188,8 @@ function Player:StopMovement()
     --gw2_unstuck.SoftReset()
     Player:Stop()
     NavigationManager:ResetPath()
+    ml_navigation.path = {}
+    ml_navigation.debug = true
     --gw2_combat_movement:StopCombatMovement()
 end
 
