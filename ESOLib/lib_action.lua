@@ -12,9 +12,9 @@ function lib_action.StripFileExtension(filename)
 end
 function lib_action.LoadData()	
 	if (not ValidTable(lib_action.ModuleFunctions)) then
-		lib_action.LoadTestingData("skill_data.lua")
+		--lib_action.LoadTestingData("skill_data.lua")
 	else
-		lib_action.LoadPrivateData("skill_data.lua")
+		--lib_action.LoadPrivateData("skill_data.lua")
 	end
 end
 lib_action.API.LoadData = lib_action.LoadData

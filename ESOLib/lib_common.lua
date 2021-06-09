@@ -50,9 +50,35 @@ lib_common.API.BT_defaultUIMain = lib_common.BT_defaultUIMain
 
 -- todo: add gatherable type from setting?
 -- todo: add chest here
+
+lib_common.whitelistchecks = {
+	["Tailoring"] = "913;1858",
+	["Woodworking"] = "1860;2065",
+	["Smithing"] = "1862;2067",
+	["Alchemy"] = "62;97;478;514;515;517;518;520;521;522;523;524;525;526;527;2100;2101",
+	["Enchanting"] = "1957",
+	["Jewlery"] = "2085",
+}
+function lib_common.BuildWhitelist()
+	local whitelist = ""
+	
+	for key,list in pairs (lib_common.whitelistchecks) do
+		local addList = _G["gGather"..tostring(key)]
+		if addList then
+			if whitelist ~= "" then
+				whitelist = whitelist..";"..tostring(list)
+			else
+				whitelist = list
+			end
+		end
+	end
+	
+	return whitelist
+end
+
 function lib_common.GetNearbyGatherable(blacklist)
     local bl = blacklist or {}
-    local el = MEntityList("gatherable")
+    local el = MEntityList("gatherable,contentid="..tostring(lib_common.BuildWhitelist()))
     local nr
     for x = 1, 5 do
         if table.valid(el) then
