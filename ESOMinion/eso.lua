@@ -179,6 +179,14 @@ esominion.GUI = {
 		open_until = 0,
 		colors = { r = 1, g = 1, b = 1, a = 1 },
 	},
+	lockpicking = {
+		name = "Lockpick Window",
+		open = false,
+		visible = true,
+		message = "",
+		open_until = 0,
+		colors = { r = 1, g = 1, b = 1, a = 1 },
+	},
 	current_tab = 1,
 	draw_mode = 1,
 }

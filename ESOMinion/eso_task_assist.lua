@@ -54,7 +54,7 @@ function eso_task_assist:Process()
 			target = eso_task_assist.GetTarget()
 		end
 		
-		if ( gAssistInitCombat or esominion.incombat ) then
+		if ( gAssistInitCombat or Player.incombat ) then
 			if ( target and target.hostile and target.health.current > 0) then
 				eso_skillmanager.Cast( target )
 			end		
@@ -193,6 +193,11 @@ function Lockpicker.timeRemaining()
 	end
 	return 0
 end
+Lockpicker.Chamber1 = ""
+Lockpicker.Chamber2 = ""
+Lockpicker.Chamber3 = ""
+Lockpicker.Chamber4 = ""
+Lockpicker.Chamber5 = ""
 function Lockpicker.OnUpdate()
 	if (GetGameState() == ESO.GAMESTATE.INGAME) then
 	
@@ -205,6 +210,7 @@ function Lockpicker.OnUpdate()
 		if Now() > Lockpicker.delay then
 			if Player.interacting then
 				if Player.interacttype == 20 then
+				Lockpicker.draw()
 					if Lockpicker.timer == 0 then
 						Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
 					end
@@ -221,27 +227,138 @@ function Lockpicker.OnUpdate()
 									Lockpicker.chamber = i
 									ml_global_information.Await(math.random(400,600))
 									return true
+								else
+									if i == 1 then
+										Lockpicker.Chamber1 = "Set"
+									elseif i == 2 then
+										Lockpicker.Chamber2 = "Set"
+									elseif i == 3 then
+										Lockpicker.Chamber3 = "Set"
+									elseif i == 4 then
+										Lockpicker.Chamber4 = "Set"
+									elseif i == 5 then
+										Lockpicker.Chamber5 = "Set"
+									end
 								end
 							end
 						else
 							local chamberStress = e("GetSettingChamberStress()")
+							--d("chamberStress = "..tostring(chamberStress))
 							if (chamberStress >= 0.2) then
 								e("PlaySound(Lockpicking_chamber_stress)")
 								e("StopSettingChamber()")
 								d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
 								Lockpicker.chamber = 0
 								ml_global_information.Await(math.random(800,1000))
-								return true
 							end
+							return true
 						end
 					end
 				end
 			else
 				Lockpicker.timer = 0
+				Lockpicker.Chamber1 = ""
+				Lockpicker.Chamber2 = ""
+				Lockpicker.Chamber3 = ""
+				Lockpicker.Chamber4 = ""
+				Lockpicker.Chamber5 = ""
 			end
 			Lockpicker.delay = Now() + math.random(400,600)
 		end
+		Lockpicker.Chamber1 = ""
+		Lockpicker.Chamber2 = ""
+		Lockpicker.Chamber3 = ""
+		Lockpicker.Chamber4 = ""
+		Lockpicker.Chamber5 = ""
 	end
 	return false
+end
+function Lockpicker.draw()
+
+	--if (esominion.GUI.lockpicking.open) then
+		GUI:SetNextWindowSize(250,125,GUI.SetCond_Always) --set the next window size, only on first ever	
+		GUI:SetNextWindowCollapsed(false,GUI.SetCond_Always)
+		
+		local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+		GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .75)
+		
+		local flags = (GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoCollapse)
+		esominion.GUI.lockpicking.visible, esominion.GUI.lockpicking.open = GUI:Begin(esominion.GUI.lockpicking.name, esominion.GUI.lockpicking.open, flags)
+		if ( esominion.GUI.lockpicking.visible ) then 
+		
+			local x, y = GUI:GetWindowPos()
+			local width, height = GUI:GetWindowSize()
+			local contentwidth = GUI:GetContentRegionAvailWidth()
+			
+			esominion.GUI.x = x; esominion.GUI.y = y; esominion.GUI.width = width; esominion.GUI.height = height;
+	
+	
+			GUI:Separator()
+			
+			GUI:AlignFirstTextHeightToWidgets() 
+			GUI:Text(GetString("Chamber 1"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber1 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 1 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+			GUI:Text(GetString("Chamber 2"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber2 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 2 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+			GUI:Text(GetString("Chamber 3"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber3 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 3 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+			GUI:Text(GetString("Chamber 4"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber4 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 4 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+			GUI:Text(GetString("Chamber 5"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber5 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 5 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+		end
+		GUI:End()
+		GUI:PopStyleColor()
+	--end
 end
 RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
