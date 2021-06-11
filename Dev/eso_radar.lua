@@ -607,7 +607,7 @@ function eso_radar.Radar() -- Table
 						Draw = true
 					end
 					
-					if (gRadarTroves) and In(e.contentid,20089,10079) then
+					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,1811) then
 						Colour = gRadarTrovesColour.colour
 						Draw = true
 					end
@@ -676,6 +676,7 @@ function eso_radar.AddPreset()
 		[1862] = { ["Name"] = "Iron Ore", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[1957] = { ["Name"] = "Runestone", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2065] = { ["Name"] = "Oak Log", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[2066] = { ["Name"] = "Flax", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2067] = { ["Name"] = "High Iron Ore", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2085] = { ["Name"] = "Pewter Seam", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2100] = { ["Name"] = "Pure Water", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
@@ -841,6 +842,7 @@ function eso_radar.SetData()
 		[1862] = { ["Name"] = "Iron Ore", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[1957] = { ["Name"] = "Runestone", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2065] = { ["Name"] = "Oak Log", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
+		[2066] = { ["Name"] = "Flax", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2067] = { ["Name"] = "High Iron Ore", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2085] = { ["Name"] = "Pewter Seam", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
 		[2100] = { ["Name"] = "Pure Water", ["Enabled"] = false, ["Colour"] = { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 }, ["ColourU32"] = 4294967295 },
