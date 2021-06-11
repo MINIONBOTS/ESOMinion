@@ -210,12 +210,12 @@ function Lockpicker.OnUpdate()
 		if Now() > Lockpicker.delay then
 			if Player.interacting then
 				if Player.interacttype == 20 then
-				Lockpicker.draw()
 					if Lockpicker.timer == 0 then
 						Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
 					end
 					local timeRemaining = Lockpicker.timeRemaining()
 					if (timeRemaining > 0) then
+						esominion.GUI.lockpicking.open = true
 						if Lockpicker.chamber == 0 then
 							for i = 1,5 do
 								local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
@@ -270,12 +270,13 @@ function Lockpicker.OnUpdate()
 		Lockpicker.Chamber3 = ""
 		Lockpicker.Chamber4 = ""
 		Lockpicker.Chamber5 = ""
+		esominion.GUI.lockpicking.open = false
 	end
 	return false
 end
-function Lockpicker.draw()
+function Lockpicker.Draw()
 
-	--if (esominion.GUI.lockpicking.open) then
+	if (esominion.GUI.lockpicking.open) then
 		GUI:SetNextWindowSize(250,125,GUI.SetCond_Always) --set the next window size, only on first ever	
 		GUI:SetNextWindowCollapsed(false,GUI.SetCond_Always)
 		
@@ -359,6 +360,7 @@ function Lockpicker.draw()
 		end
 		GUI:End()
 		GUI:PopStyleColor()
-	--end
+	end
 end
+RegisterEventHandler("Gameloop.Draw",Lockpicker.Draw,"Lockpicker Draw")
 RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
