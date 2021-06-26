@@ -2,7 +2,9 @@
 
 -- Since we have different "types" of movement, add all types and assign a value to them. Make sure to include one entry for each of the 4 kinds below per movement type!
 -- todo: modify stop distance along with movement speed
-ml_navigation.NavPointReachedDistances = { ["Walk"] = 1, ["Diving"] = 1, ["Mounted"] = 1, ["Swimming"] = 1 }      -- Distance to the next node in the path at which the ml_navigation.pathindex is iterated
+-- todo: make minionlib uuid setup UI for copy existing value
+
+ml_navigation.NavPointReachedDistances = { ["Walk"] = 2, ["Diving"] = 2, ["Mounted"] = 2, ["Swimming"] = 2 }      -- Distance to the next node in the path at which the ml_navigation.pathindex is iterated
 ml_navigation.PathDeviationDistances = { ["Walk"] = 2, ["Diving"] = 2, ["Mounted"] = 2, ["Swimming"] = 2 }      -- The max. distance the playerposition can be away from the current path. (The Point-Line distance between player and the last & next pathnode)
 ml_navigation.GameStates = { [1] = "CHARACTERSCREEN", [2] = "MAINMENUSCREEN", [3] = "INGAME", [4] = "ERROR", [6] = "LOADING" }
 ml_navigation.lastMount = 0
@@ -51,15 +53,17 @@ the movement direction depends on camera
 
 
 ]]--
-if not Settings.ESOMINION.MountActivation then
-    Settings.ESOMINION.MountActivation = {}
+
+-- todo: need to check moutable or not somehow later
+if not SettingsUUID.MountActivation.default then
+    SettingsUUID.MountActivation.default = false
 end
 
 function ml_navigation.SettingUI()
     if GetGameState() == 3 and table.valid(Player) then
         local name, ch = Player.name
-        if not Settings.ESOMINION.MountActivation[name] then
-            Settings.ESOMINION.MountActivation[name] = false
+        if not SettingsUUID.MountActivation[name] then
+            SettingsUUID.ESOMINION.MountActivation[name] = false
         end
         Settings.ESOMINION.MountActivation[name], ch = GUI:Checkbox(GetString("Use Mount (Character Bound)"), Settings.ESOMINION.MountActivation[name])
         if ch then
@@ -261,7 +265,12 @@ function Player:Jump()
     end
 end
 
-
+function Player:IsOnMesh()
+    if table.valid(Player.meshpos) then
+        return NavigationManager:IsOnMeshExact(Player.meshpos)
+    end
+    return false
+end
 
 --e("JumpAscendStart()")
 --e("TurnRightStart()")
@@ -288,15 +297,21 @@ function Player:MoveTo(x, y, z, staymounted, targetid, stoppingdistance, randomm
         ml_navigation.debug = nil --disable debug mode
         ml_navigation.targetposition = { x = x, y = y, z = z }
 
+        ---check npc collision here and generate evasive path
+        --- mainly for npc entities
+        if table.valid(MadaoLib) then
+
+        end
+
         if (not ml_navigation.navconnection or ml_navigation.navconnection.type == 5) then
             -- We are not currently handling a NavConnection / ignore MacroMesh Connections, these have to be replaced with a proper path by calling this exact function here
             if (ml_navigation.navconnection) then
                 ---need to make unstuck
-                -- gw2_unstuck.Reset()
+                eso_unstuck.Reset()
             end
             ml_navigation.navconnection = nil
 
-            ---get ml_navigation.path here
+            ---generate ml_navigation.path here
             local status = ml_navigation:MoveTo(x, y, z, targetid)
             ml_navigation.movement_status = status
 
@@ -308,13 +323,13 @@ function Player:MoveTo(x, y, z, staymounted, targetid, stoppingdistance, randomm
             end
 
             -- Handle stuck if we start off mesh
-            if (status == -1 or status == -7) then
+            if eso_unstuck.HandleOffMesh(status) then
+                -- status -7 or -1
                 -- We're starting off the mesh, so return 0 (valid) to let unstuck handle moving without failing the moveto
-                --gw2_unstuck.HandleStuck()
-
                 return 0
             end
             return status
+
         else
             return table.size(ml_navigation.path)
         end
@@ -355,13 +370,14 @@ function ml_navigation.Navigate(event, ticks)
                 end
             end
             if playerpos then
-                ---needs to be added
+                -- todo:needs to be added
                 if (ml_navigation.forcereset) then
                     ml_navigation.forcereset = nil
                     Player:StopMovement()
                     return
                 end
-                --- Sync in case we are not
+
+                -- todo:Sync in case we are not // mainly for mount case in gw2 (not sure need this one inside eso)
                 if ml_navigation.sync ~= nil then
                     local moving = Player.ismoving
                     if ml_navigation.sync == true or not moving then
@@ -373,13 +389,13 @@ function ml_navigation.Navigate(event, ticks)
                     end
                 end
 
+                --- moveTo main
                 if (not ml_navigation.debug) then
                     local allowMount = Player:IsMountMap()
                     ml_navigation.pathindex = NavigationManager.NavPathNode   -- gets the current path index which is saved in c++ ( and changed there on updating / adjusting the path, which happens each time MoveTo() is called. Index starts at 1 and 'usually' is 2 whne running
                     local pathsize = table.size(ml_navigation.path)
                     if (pathsize > 0) then
                         if (ml_navigation.pathindex <= pathsize) then
-
                             local lastnode = ml_navigation.pathindex > 1 and ml_navigation.path[ml_navigation.pathindex - 1] or nil
                             local nextnode = ml_navigation.path[ml_navigation.pathindex]
                             local nextnextnode = ml_navigation.path[ml_navigation.pathindex + 1]
@@ -393,6 +409,7 @@ function ml_navigation.Navigate(event, ticks)
                             end
 
                             --- Handle Current NavConnections
+                            --- nav connection 'MUST' be 'Zero' stuck since they added manually by hands so ofc
                             if (ml_navigation.navconnection) then
                                 -- Temp solution to cancel navcon handling after 10 sec
                                 if allowMount and
@@ -431,7 +448,6 @@ function ml_navigation.Navigate(event, ticks)
                                         -- JUMP
                                         if (Player.ismounted) then
                                             Player:Dismount()
-                                            ml_navigation.PauseMountUsage(3000)
                                         end
                                         lastnode = nextnode
                                         nextnode = ml_navigation.path[ml_navigation.pathindex + 1]
@@ -634,8 +650,13 @@ function ml_navigation.Navigate(event, ticks)
                             if (ml_navigation:NextNodeReached(playerpos, nextnode, nextnextnode)) then
                                 ml_navigation.pathindex = ml_navigation.pathindex + 1
                                 NavigationManager.NavPathNode = ml_navigation.pathindex
+                                eso_unstuck.ResetPathStuck()
                             else
-                                -- Dismount when we are close to our target position, so we can get to the actual point and not overshooting it or similiar unprecise stuff
+                                --- unstuck here // stuck checker
+                                local unstuck = eso_unstuck.HandlePathStuck(playerpos, lastnode, nextnode)
+                                -- todo:mount behavior // below is for gw2 behavior
+                                --[[
+                                 -- Dismount when we are close to our target position, so we can get to the actual point and not overshooting it or similiar unprecise stuff
                                 -- if (pathsize - ml_navigation.pathindex < 5 and   Player.ismounted and ml_navigation.staymounted == false)then
                                 if (Player.ismounted and ml_navigation.staymounted == false) then
                                     local remainingPathLenght = ml_navigation:GetRemainingPathLenght()
@@ -644,7 +665,13 @@ function ml_navigation.Navigate(event, ticks)
                                         Player:Dismount()
                                     end
                                 end
-                                ml_navigation:MoveToNextNode(playerpos, lastnode, nextnode)
+                                ]]
+
+                                if unstuck then
+
+                                else
+                                    ml_navigation:MoveToNextNode(playerpos, lastnode, nextnode)
+                                end
                             end
                             return
                         else
@@ -654,7 +681,7 @@ function ml_navigation.Navigate(event, ticks)
                             end
                             Player:StopMovement()
                             -- todo: need to make unstuck
-                            --gw2_unstuck.Reset()
+                            eso_unstuck.Reset()
                         end
                     end
                 end
@@ -738,7 +765,7 @@ end
 function ml_navigation:MoveToNextNode(playerpos, lastnode, nextnode)
     self.turningOnMount = nil
     -- Only check unstuck when we are not handling a navconnection
-    if true or ml_navigation.navconnection then
+    if true then  --or ml_navigation.navconnection
         -- todo:add unstuck is on handling check for this check
         -- or (not ml_navigation.navconnection and not gw2_unstuck.HandleStuck())
         -- We have not yet reached our next node
@@ -931,8 +958,8 @@ end
 -- Tries to use RayCast to determine the exact floor height from Player and Node, and uses that to calculate the correct distance.
 function ml_navigation:GetRaycast_Player_Node_Distance(ppos, node)
     -- Raycast from "top to bottom" @PlayerPos and @NodePos
-    local P_hit, P_hitx, P_hity, P_hitz = RenderManager:RayCast(ppos.x, ppos.y, ppos.z - 1.2, ppos.x, ppos.y, ppos.z + 2.5)
-    local N_hit, N_hitx, N_hity, N_hitz = RenderManager:RayCast(node.x - 0.25, node.y - 0.25, node.z - 1.2, node.x, node.y, node.z + 2.5)
+    local P_hit, P_hitx, P_hity, P_hitz = RenderManager:RayCast(ppos.x, ppos.y - 1.2, ppos.z, ppos.x, ppos.y + 2.5, ppos.z)
+    local N_hit, N_hitx, N_hity, N_hitz = RenderManager:RayCast(node.x - 0.25, node.y - 1.2, node.z - 0.25, node.x, node.y + 2.5, node.z)
     local dist = math.distance3d(ppos, node)
 
     -- To prevent spinny dancing when we are unable to reach the 3D targetposition due to whatever reason , a little safety check here
@@ -954,8 +981,8 @@ function ml_navigation:GetRaycast_Player_Node_Distance(ppos, node)
                     else
                         if (self.lastpathnodecloser > 1) then
                             -- start counting after we actually started moving closer, else turns or at start of moving fucks the logic
-							d("self.lastpathnodedist = "..tostring(self.lastpathnodedist))
-							d("current dist = "..tostring(dist2d))
+                            d("self.lastpathnodedist = " .. tostring(self.lastpathnodedist))
+                            d("current dist = " .. tostring(dist2d))
                             --self.lastpathnodefar = self.lastpathnodefar + 1
                         end
                     end
@@ -1181,6 +1208,7 @@ function ml_navigation.PauseMountUsage(time)
     ml_navigation.lastMount = ml_global_information.Now + time
 end
 
+---this one is for gw2 not modified to eso
 function ml_navigation.ObstacleCheck(input_distance, amount, front, front_amount)
     local hit = {
         left = 0,
@@ -1376,4 +1404,3 @@ end
 function ml_navigation.Sync(ms)
     ml_navigation.sync = true
 end
-
