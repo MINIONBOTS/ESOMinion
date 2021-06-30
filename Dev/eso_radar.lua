@@ -586,7 +586,7 @@ function eso_radar.Radar() -- Table
 			end
 			-- Add New Data.
 			for i,e in pairs(EntityTable) do
-				local ID = e.id
+				local ID = e.index
 				if RadarTable[ID] == nil then
 					local Colour = ""
 					local Draw = false
