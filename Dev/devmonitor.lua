@@ -250,50 +250,157 @@ function Dev.DrawCall(event, ticks )
 			-- cbk: Player
 			if ( GUI:TreeNode("Player") ) then
 				if( gamestate == 3 ) then 
-					local c = Player
-					
-					
-					GUI:BulletText("interacting: "..tostring(c.interacting))
-					GUI:BulletText("interacttype: "..tostring(c.interacttype))
-					if ( GUI:TreeNode("Stats")) then
-						GUI:Text("Health")
-						local stat = Player.health
-						if (table.valid(stat)) then
-							for key, value in pairs(stat) do
-								GUI:BulletText(tostring(key).." - "..tostring(value))							
+					if ( GUI:TreeNode("Stats") ) then
+						GUI:BulletText(".name = "..tostring(Player.name))
+						if ValidTable(Player.health) then
+							if GUI:TreeNode(".health") then
+								GUI:BulletText(".percent = "..tostring(Player.health.percent))
+								GUI:BulletText(".current = "..tostring(Player.health.current))
+								GUI:BulletText(".max = "..tostring(Player.health.max))
+								GUI:TreePop()
 							end
 						end
-						GUI:Text("Magicka")
-						local stat = Player.magicka
-						if (table.valid(stat)) then
-							for key, value in pairs(stat) do
-								GUI:BulletText(tostring(key).." - "..tostring(value))							
+						if ValidTable(Player.magicka) then
+							if GUI:TreeNode(".magicka") then
+								GUI:BulletText(".percent = "..tostring(Player.magicka.percent))
+								GUI:BulletText(".current = "..tostring(Player.magicka.current))
+								GUI:BulletText(".max = "..tostring(Player.magicka.max))
+								GUI:TreePop()
 							end
 						end
-						GUI:Text("Stamina")
-						local stat = Player.stamina
-						if (table.valid(stat)) then
-							for key, value in pairs(stat) do
-								GUI:BulletText(tostring(key).." - "..tostring(value))							
+						if ValidTable(Player.stamina) then
+							if GUI:TreeNode(".stamina") then
+								GUI:BulletText(".percent = "..tostring(Player.stamina.percent))
+								GUI:BulletText(".current = "..tostring(Player.stamina.current))
+								GUI:BulletText(".max = "..tostring(Player.stamina.max))
+								GUI:TreePop()
 							end
 						end
-						
 						GUI:TreePop()
 					end
-					
-					
+					if ( GUI:TreeNode("Movement") ) then
+						GUI:BulletText(".ismoving = "..tostring(Player.ismoving))
+						GUI:BulletText(".ismovingforward = "..tostring(Player.ismovingforward))
+						GUI:BulletText(".ismovingbackward = "..tostring(Player.ismovingbackward))
+						GUI:BulletText(".ismovingleft = "..tostring(Player.ismovingleft))
+						GUI:BulletText(".ismovingright = "..tostring(Player.ismovingright))
+						GUI:BulletText(".ismounted = "..tostring(Player.ismounted))
+						GUI:BulletText(".isfalling = "..tostring(Player.isfalling))
+						GUI:BulletText(".isjumping = "..tostring(Player.isjumping))
+						GUI:BulletText(".movementspeed = "..tostring(Player.movementspeed))
+						GUI:TreePop()
+					end
+					if ( GUI:TreeNode("Position") ) then
+						GUI:BulletText(".mapid = "..tostring(Player.mapid))
+						if ValidTable(Player.pos) then
+							if GUI:TreeNode(".pos - Mesh Space Position") then
+								GUI:BulletText(".x = "..tostring(Player.pos.x))
+								GUI:BulletText(".y = "..tostring(Player.pos.y))
+								GUI:BulletText(".z = "..tostring(Player.pos.z))
+								GUI:BulletText(".height = "..tostring(Player.pos.height))
+								GUI:TreePop()
+							end
+						end
+						if ValidTable(Player.worldpos) then
+							if GUI:TreeNode(".worldpos - Game World Position") then
+								GUI:BulletText(".x = "..tostring(Player.worldpos.x))
+								GUI:BulletText(".y = "..tostring(Player.worldpos.y))
+								GUI:BulletText(".z = "..tostring(Player.worldpos.z))
+								GUI:BulletText(".h = "..tostring(Player.worldpos.h))
+								GUI:BulletText(".height = "..tostring(Player.worldpos.height))
+								GUI:TreePop()
+							end
+						end
+						if ValidTable(Player.renderpos) then
+							if GUI:TreeNode(".renderpos - Game's Render Position") then
+								GUI:BulletText(".x = "..tostring(Player.renderpos.x))
+								GUI:BulletText(".y = "..tostring(Player.renderpos.y))
+								GUI:BulletText(".z = "..tostring(Player.renderpos.z))
+								GUI:BulletText(".h = "..tostring(Player.renderpos.h))
+								GUI:BulletText(".height = "..tostring(Player.renderpos.height))
+								GUI:TreePop()
+							end
+						end
+						if ValidTable(Player.meshpos) then
+							if GUI:TreeNode(".meshpos") then
+								GUI:BulletText(".x = "..tostring(Player.meshpos.x))
+								GUI:BulletText(".y = "..tostring(Player.meshpos.y))
+								GUI:BulletText(".z = "..tostring(Player.meshpos.z))
+								GUI:BulletText(".distance = "..tostring(Player.meshpos.distance))
+								GUI:BulletText(".meshdistance = "..tostring(Player.meshpos.meshdistance))
+								GUI:TreePop()
+							end
+						end
+						if ValidTable(Player.camera) then
+							if GUI:TreeNode(".camera") then
+								GUI:BulletText(".x = "..tostring(Player.camera.x))
+								GUI:BulletText(".y = "..tostring(Player.camera.y))
+								GUI:BulletText(".z = "..tostring(Player.camera.z))
+								GUI:BulletText(".h = "..tostring(Player.camera.h))
+								GUI:BulletText(".pitch = "..tostring(Player.camera.pitch))
+								GUI:TreePop()
+							end
+						end
+						GUI:TreePop()
+					end
+					if ( GUI:TreeNode("Other") ) then
+						GUI:BulletText(".id = "..tostring(Player.id))
+						GUI:BulletText(".index = "..tostring(Player.index))
+						GUI:BulletText(".contentid = "..tostring(Player.contentid))
+						GUI:BulletText(".friendly = "..tostring(Player.friendly))
+						GUI:BulletText(".hostile = "..tostring(Player.hostile))
+						GUI:BulletText(".type = "..tostring(Player.type))
+						GUI:BulletText(".los = "..tostring(Player.los))
+						GUI:BulletText(".distance = "..tostring(Player.distance))
+						GUI:BulletText(".distance2d = "..tostring(Player.distance2d))
+						GUI:BulletText(".pathdistance = "..tostring(Player.pathdistance))
+						GUI:BulletText(".isreachable = "..tostring(Player.isreachable))
+						GUI:BulletText(".istargetable = "..tostring(Player.istargetable))
+						GUI:BulletText(".iscritter = "..tostring(Player.iscritter))
+						GUI:BulletText(".isnpc = "..tostring(Player.isnpc))
+						GUI:BulletText(".interacttype = "..tostring(Player.interacttype))
+						GUI:TreePop()
+					end
+					if ( GUI:TreeNode("Functions") ) then
+						if GUI:Button("Interact()",0,0) then Player:Interact() end
+						if GUI:Button("CameraInteractionStart()",0,0) then Player:CameraInteractionStart() end
+						local function FixNil(tbl)
+							if not tbl then
+								return "none"
+							end
+							if table.valid(tbl) then
+								if tbl.name and tbl.name ~= "" then
+									return tbl.name
+								else
+									return "no name"
+								end
+							else
+								return "invalid table"
+							end
+						end
+						local preftarget = FixNil(Player:GetPeferedTarget())
+						GUI:BulletText("GetPeferedTarget() = "..tostring(preftarget))
+						local softtarget = FixNil(Player:GetSoftTarget())
+						GUI:BulletText("GetSoftTarget() = "..tostring(softtarget))
+						local hightarget = FixNil(Player:GetHilightedTarget())
+						GUI:BulletText("GetHilightedTarget() = "..tostring(hightarget))
+						local target = FixNil(Player:GetTarget())
+						GUI:BulletText("GetTarget() = "..tostring(target))
+						local rettarget = FixNil(Player:GetTargetUnderReticle())
+						GUI:BulletText("GetTargetUnderReticle() = "..tostring(rettarget))
+						GUI:BulletText("SetFacing()")
+						GUI:BulletText("MoveTo()")
+						GUI:TreePop()
+					end
+					GUI:TreePop()
 					--if ( c ) then Dev.DrawGameObjectDetails(c,true) else	GUI:Text("No Player found.") end
                     --local mapX, mapY, mapZ = WorldToMapCoords(c.localmapid, c.pos.x, c.pos.y, c.pos.z)
-					
 					--GUI:BulletText("Map ID") GUI:SameLine(200) GUI:InputText("##Devuf2",tostring(c.localmapid))
 					--GUI:BulletText("Map Name") GUI:SameLine(200) GUI:InputText("##Devuf3",GetMapName(c.localmapid))
 					--GUI:BulletText("Map X") GUI:SameLine(200) GUI:InputText("##Devuf4",tostring(mapX))
 					--GUI:BulletText("Map Y") GUI:SameLine(200) GUI:InputText("##Devuf5",tostring(mapY))
 					--GUI:BulletText("Map Z") GUI:SameLine(200) GUI:InputText("##Devuf6",tostring(mapZ))
 					--GUI:BulletText("Pulse Duration") GUI:SameLine(200) GUI:InputText("##Devuf7",tostring(GetBotPerformance()))
-					
-					
-					
 				else
 					GUI:Text("Not Ingame...")
 				end
@@ -573,6 +680,9 @@ function Dev.DrawCall(event, ticks )
 										GUI:BulletText(".distance2d = "..tostring(entity.distance2d))
 										GUI:BulletText(".pathdistance = "..tostring(entity.pathdistance))
 										GUI:BulletText(".isreachable = "..tostring(entity.isreachable))
+										GUI:BulletText(".istargetable = "..tostring(entity.istargetable))
+										GUI:BulletText(".iscritter = "..tostring(entity.iscritter))
+										GUI:BulletText(".isnpc = "..tostring(entity.isnpc))
 										if ValidTable(entity.health) then
 											if GUI:TreeNode(".health") then
 												GUI:BulletText(".percent = "..tostring(entity.health.percent))
@@ -581,11 +691,11 @@ function Dev.DrawCall(event, ticks )
 												GUI:TreePop()
 											end
 										end
-										if ValidTable(entity.magika) then
-											if GUI:TreeNode(".magika") then
-												GUI:BulletText(".percent = "..tostring(entity.magika.percent))
-												GUI:BulletText(".current = "..tostring(entity.magika.current))
-												GUI:BulletText(".max = "..tostring(entity.magika.max))
+										if ValidTable(entity.magicka) then
+											if GUI:TreeNode(".magicka") then
+												GUI:BulletText(".percent = "..tostring(entity.magicka.percent))
+												GUI:BulletText(".current = "..tostring(entity.magicka.current))
+												GUI:BulletText(".max = "..tostring(entity.magicka.max))
 												GUI:TreePop()
 											end
 										end
