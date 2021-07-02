@@ -51,7 +51,7 @@ function Dev.ModuleInit()
 	ml_gui.ui_mgr:AddMember({ id = "ESOMINION##MENU_ACR", name = "Dev", onClick = function() Dev.GUI.open = not Dev.GUI.open end, tooltip = "Open the Dev addon."},"ESOMINION##MENU_HEADER")
 end
 
-
+--deploytest
 
 function Dev.GUIVarUpdate(Event, NewVals, OldVals)
     for k,v in pairs(NewVals) do
