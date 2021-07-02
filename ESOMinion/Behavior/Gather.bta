@@ -60,7 +60,7 @@ local tbl =
 					class = "PrioritySelector",
 					info = 
 					{
-						title = "Fish part",
+						title = "Gather part",
 					},
 					nodes = 
 					{
@@ -83,17 +83,11 @@ local tbl =
 								runcode = 
 								{
 									"---init/gather.bta",
-									"if not context.gather then",
-									"    ml_error(\"context.gather is empty? wtf?\")",
-									"    self:success()",
-									"    return",
-									"end",
 									"if not context.gather.init then",
-									"    d(\"gather init\")",
 									"    context.gather.init = true",
 									"end",
-									"if context.gather.mapid ~= Player.localmapid then",
-									"    context.gather.mapid = Player.localmapid",
+									"if context.gather.mapid ~= Player.mapid then",
+									"    context.gather.mapid = Player.mapid",
 									"    context.gather.blacklist = {}",
 									"end",
 									"",
@@ -108,7 +102,7 @@ local tbl =
 									"",
 									"---get lootable nearby",
 									"if not context.gather.gatherable_id then",
-									"    context.gather.gatherable_id = eso_bt_helper.Get_GatherableNearby(context.gather.blacklist)",
+									"    context.gather.gatherable_id = ESOLib.Common.GetNearbyGatherable(context.gather.blacklist)",
 									"end",
 									"",
 									"--- interact",
@@ -136,7 +130,7 @@ local tbl =
 									"            if math.distance3d(tp, b.pos) < 3 and (b.interacttype == 28 or b.interacttype == 2) then",
 									"                d(\"other player started interact at assigned gatherable node\")",
 									"                context.gather.blacklist[b.id] = Now() + 30000",
-									"                context.gather.gatherable_id = eso_bt_helper.Get_GatherableNearby(context.gather.blacklist)",
+									"                context.gather.gatherable_id = ESOLib.Common.GetNearbyGatherable(context.gather.blacklist)",
 									"                break",
 									"            end",
 									"        end",
@@ -160,6 +154,7 @@ local tbl =
 									"",
 									"end",
 									"self:fail()",
+									"",
 									"",
 								},
 							},
@@ -317,10 +312,16 @@ local tbl =
 			"Player:StopMovement()",
 		},
 		menucode = 
-		{
+		{			
 			"\t\tESO_Common_BotRunning = true",
-			"GUI:Text(\"Demo Fish Mode.\\nGo Get Closest Fishing Hole\")",
-			"eso_bt_helper.BT_defaultUIMain()",
+			"GUI:Text(\"Demo Gather Mode.\")",
+			"GUI:Text(\"Get Closest Gathering Node\")",
+			"GUI_Capture(GUI:Checkbox(\"Tailoring##gGatherTailoring\", gGatherTailoring),\"gGatherTailoring\")",
+			"GUI_Capture(GUI:Checkbox(\"Woodworking##gGatherWoodworking\", gGatherWoodworking),\"gGatherWoodworking\")",
+			"GUI_Capture(GUI:Checkbox(\"Smithing##gGatherSmithing\", gGatherSmithing),\"gGatherSmithing\")",
+			"GUI_Capture(GUI:Checkbox(\"Alchemy##gGatherAlchemy\", gGatherAlchemy),\"gGatherAlchemy\")",
+			"GUI_Capture(GUI:Checkbox(\"Enchanting##gGatherEnchanting\", gGatherEnchanting),\"gGatherEnchanting\")",
+			"GUI_Capture(GUI:Checkbox(\"Jewlery##gGatherJewlery\", gGatherJewlery),\"gGatherJewlery\")",
 		},
 		startcode = 
 		{
