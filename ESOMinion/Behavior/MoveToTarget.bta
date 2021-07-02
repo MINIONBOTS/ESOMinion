@@ -1,0 +1,111 @@
+local tbl = 
+{
+	class = "BehaviorTree",
+	info = 
+	{
+		createlocalcontext = true,
+	},
+	nodes = 
+	{
+		
+		{
+			class = "PrioritySelector",
+			info = 
+			{
+			},
+			nodes = 
+			{
+				
+				{
+					class = "Action",
+					info = 
+					{
+					},
+					nodes = 
+					{
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+						runcode = 
+						{
+							"self:fail()",
+						},
+					},
+				},
+				
+				{
+					class = "Action",
+					info = 
+					{
+					},
+					nodes = 
+					{
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+						runcode = 
+						{
+							"if table.valid(context.recorded_position) then",
+							"    local e = context.recorded_position",
+							"    local dist = math.distance3d(e , Player.pos)",
+							"    if dist < 2 then",
+							"        if Player:IsMoving() then",
+							"            Player:StopMovement()",
+							"        end",
+							"        self:success()",
+							"        return",
+							"    end",
+							"    if not self.timer or self.timer < Now() then",
+							"        self.timer = Now() + math.random(800, 1200)",
+							"        Player:MoveTo(e.x, e.y, e.z, false, e.id, 15)",
+							"    end",
+							"    ---running provides visual detail and ignores sequence actions",
+							"    self:running()",
+							"    return",
+							"end",
+							"self:success()",
+						},
+					},
+				},
+			},
+			settings = 
+			{
+			},
+			variables = 
+			{
+			},
+		},
+	},
+	settings = 
+	{
+	},
+	variables = 
+	{
+		abortcode = 
+		{
+			"Player:StopMovement()",
+		},
+		menucode = 
+		{
+			"if GUI:Button(\"Record Player Pos\") then",
+			"    context.recorded_position = Player.meshpos",
+			"end",
+			"",
+			"if table.valid(context.recorded_position) then",
+			"    GUI:Text(\"Recorded Position\")",
+			"    GUI:Text(tostring(context.recorded_position))",
+			"end",
+			"",
+		},
+	},
+}
+
+
+
+return tbl

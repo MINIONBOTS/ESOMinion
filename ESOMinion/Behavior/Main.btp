@@ -1,0 +1,21 @@
+local tbl = 
+{
+	class = "BehaviorTree",
+	info = 
+	{
+		createlocalcontext = true,
+	},
+	nodes = 
+	{
+	},
+	settings = 
+	{
+	},
+	variables = 
+	{
+	},
+}
+
+
+
+return tbl

@@ -1,0 +1,337 @@
+local tbl = 
+{
+	class = "BehaviorTree",
+	info = 
+	{
+		createlocalcontext = true,
+	},
+	nodes = 
+	{
+		
+		{
+			class = "PrioritySelector",
+			info = 
+			{
+			},
+			nodes = 
+			{
+				
+				{
+					class = "SubTree",
+					info = 
+					{
+						createlocalcontext = true,
+						description = "priority node (self:fail() in the end) \nCheck Game State / Wait handler / Loot Picker\n\n\ntodo : Death handler.",
+						title = "BT Top",
+					},
+					nodes = 
+					{
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+						filename = "BT_TOP.st",
+					},
+				},
+				
+				{
+					class = "SubTree",
+					info = 
+					{
+						createlocalcontext = true,
+						description = "",
+						title = "Kill Aggro",
+					},
+					nodes = 
+					{
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+						filename = "KillAggro.st",
+					},
+				},
+				
+				{
+					class = "PrioritySelector",
+					info = 
+					{
+						title = "Fish part",
+					},
+					nodes = 
+					{
+						
+						{
+							class = "Action",
+							info = 
+							{
+								description = "---init/gather.bta ",
+								title = "---init/gather.bta ",
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								runcode = 
+								{
+									"---init/gather.bta",
+									"if not context.gather then",
+									"    ml_error(\"context.gather is empty? wtf?\")",
+									"    self:success()",
+									"    return",
+									"end",
+									"if not context.gather.init then",
+									"    d(\"gather init\")",
+									"    context.gather.init = true",
+									"end",
+									"if context.gather.mapid ~= Player.localmapid then",
+									"    context.gather.mapid = Player.localmapid",
+									"    context.gather.blacklist = {}",
+									"end",
+									"",
+									"if table.valid(context.gather.blacklist) then",
+									"    local now = Now()",
+									"    for i, b in pairs(context.gather.blacklist) do",
+									"        if b < now then",
+									"            context.gather.blacklist[i] = nil",
+									"        end",
+									"    end",
+									"end",
+									"",
+									"---get lootable nearby",
+									"if not context.gather.gatherable_id then",
+									"    context.gather.gatherable_id = eso_bt_helper.Get_GatherableNearby(context.gather.blacklist)",
+									"end",
+									"",
+									"--- interact",
+									"--- node exists update",
+									"--- check other player is already digging",
+									"if context.gather.gatherable_id then",
+									"    local target = EntityList:Get(context.gather.gatherable_id)",
+									"    if not table.valid(target) or target.interacttype ~= 3 then",
+									"        context.gather.gatherable_id = false",
+									"        d(\"disable gather node / no longer exists\")",
+									"        self:success()",
+									"        return",
+									"    end",
+									"",
+									"    ---check other player is digging already",
+									"    local el = MEntityList(\"player,maxdistance=30\")",
+									"    --[[",
+									"    interactingtype:",
+									"    2 looting",
+									"    28",
+									"    ]]",
+									"    if table.valid(el) then",
+									"        local tp = target.pos",
+									"        for i, b in pairs(el) do",
+									"            if math.distance3d(tp, b.pos) < 3 and (b.interacttype == 28 or b.interacttype == 2) then",
+									"                d(\"other player started interact at assigned gatherable node\")",
+									"                context.gather.blacklist[b.id] = Now() + 30000",
+									"                context.gather.gatherable_id = eso_bt_helper.Get_GatherableNearby(context.gather.blacklist)",
+									"                break",
+									"            end",
+									"        end",
+									"    end",
+									"    if context.gather.gatherable_id then",
+									"        if target.distance < 4 then",
+									"            local interactable = MGetGameCameraInteractableActionInfo()",
+									"            if interactable then",
+									"                --if In(interactable,\"Collect\",\"Cut\",\"Mine\") then",
+									"                d(\"lootable status detected\")",
+									"                target:Interact()",
+									"                if Player:IsMoving() then",
+									"                    Player:StopMovement()",
+									"                end",
+									"                self:success()",
+									"                return",
+									"            end",
+									"        end",
+									"        context.moveto = target",
+									"    end",
+									"",
+									"end",
+									"self:fail()",
+									"",
+								},
+							},
+						},
+						
+						{
+							class = "Sequence",
+							info = 
+							{
+								title = "move to random location",
+							},
+							nodes = 
+							{
+								
+								{
+									class = "Action",
+									info = 
+									{
+									},
+									nodes = 
+									{
+									},
+									settings = 
+									{
+									},
+									variables = 
+									{
+										runcode = 
+										{
+											"if not context.gather.gatherable_id then",
+											"    self:success()",
+											"else",
+											"    self:fail()",
+											"end",
+										},
+									},
+								},
+								
+								{
+									class = "SubTree",
+									info = 
+									{
+										createlocalcontext = true,
+										description = "",
+										title = "",
+									},
+									nodes = 
+									{
+									},
+									settings = 
+									{
+									},
+									variables = 
+									{
+										filename = "MoveToRandom.st",
+									},
+								},
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+							},
+						},
+						
+						{
+							class = "Action",
+							info = 
+							{
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								runcode = 
+								{
+									"if not context.gather.gatherable_id then",
+									"d(\"no gather id\")",
+									"    self:success()",
+									"else",
+									"    self:fail()",
+									"end",
+								},
+							},
+						},
+						
+						{
+							class = "SubTree",
+							info = 
+							{
+								createlocalcontext = true,
+								description = "context.moveto = {\n pos = {x = 0 , y = 0 , z = 0},\n meshpos = {x = 0 , y = 0 , z = 0},\n mapid = 0,\n}",
+								title = "moveto node. need context.moveto",
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								filename = "Moveto.st",
+							},
+						},
+						
+						{
+							class = "Action",
+							info = 
+							{
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								runcode = 
+								{
+									"self:success()",
+								},
+							},
+						},
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+					},
+				},
+			},
+			settings = 
+			{
+			},
+			variables = 
+			{
+			},
+		},
+	},
+	settings = 
+	{
+	},
+	variables = 
+	{
+		abortcode = 
+		{
+			"Player:StopMovement()",
+		},
+		menucode = 
+		{
+			"\t\tESO_Common_BotRunning = true",
+			"GUI:Text(\"Demo Fish Mode.\\nGo Get Closest Fishing Hole\")",
+			"eso_bt_helper.BT_defaultUIMain()",
+		},
+		startcode = 
+		{
+			"ml_error(\"start check\")",
+			"context.base = {}",
+			"context.gather = {} ",
+			"context.combat = {}",
+		},
+	},
+}
+
+
+
+return tbl

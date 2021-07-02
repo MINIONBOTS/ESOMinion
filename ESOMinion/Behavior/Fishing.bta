@@ -1,0 +1,428 @@
+local tbl = 
+{
+	class = "BehaviorTree",
+	info = 
+	{
+		createlocalcontext = true,
+	},
+	nodes = 
+	{
+		
+		{
+			class = "PrioritySelector",
+			info = 
+			{
+			},
+			nodes = 
+			{
+				
+				{
+					class = "SubTree",
+					info = 
+					{
+						createlocalcontext = true,
+						description = "priority node (self:fail() in the end) \nCheck Game State / Wait handler / Loot Picker\n\n\ntodo : Death handler.",
+						title = "BT Top",
+					},
+					nodes = 
+					{
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+						filename = "BT_TOP.st",
+					},
+				},
+				
+				{
+					class = "SubTree",
+					info = 
+					{
+						createlocalcontext = true,
+						description = "",
+						title = "Kill Aggro",
+					},
+					nodes = 
+					{
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+						filename = "KillAggro.st",
+					},
+				},
+				
+				{
+					class = "PrioritySelector",
+					info = 
+					{
+						title = "Fish part",
+					},
+					nodes = 
+					{
+						
+						{
+							class = "Action",
+							info = 
+							{
+								description = "---init / check bait stock / get fish hole",
+								title = "---init / check bait stock / get fish hole",
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								runcode = 
+								{
+									"---init / check bait stock / get fish hole",
+									"if not context.fish.init then",
+									"",
+									"",
+									"    context.fish.init = true",
+									"end",
+									"if not context.fish.bag_checked then",
+									"    local whitelist, stocks = eso_fish.BuildWhitelist()",
+									"    context.fish.bait_stocks = stocks",
+									"    context.fish.hole_whitelist_string = whitelist",
+									"    context.fish.bag_checked = true",
+									"end",
+									"",
+									"---get fish hole",
+									"if not table.valid(context.fish.currentfishinghole) then",
+									"    local TargetList = EntityList(\"contentid=\" .. tostring(context.fish.hole_whitelist_string))",
+									"    if table.valid(TargetList) then",
+									"        local closestDist = 9999999",
+									"        local closest = nil",
+									"        local myPos = Player.pos",
+									"        for i, e in pairs(TargetList) do",
+									"            local dist = math.distance3d(myPos.x, myPos.y, myPos.z, e.pos.x, e.pos.y, e.pos.z)",
+									"            if dist < closestDist then",
+									"                closest = e",
+									"                closestDist = dist",
+									"                d(\"new closest found\")",
+									"            end",
+									"        end",
+									"        if closest then",
+									"",
+									"            if not closest.meshpos or not closest.onmesh then",
+									"                local mpos = NavigationManager:GetClosestPointOnMesh(closest.pos)",
+									"                if table.valid(mpos) then",
+									"                    context.fish.currentfishinghole = closest",
+									"                    context.fish.currentfishinghole.meshpos = mpos",
+									"                else",
+									"                    ml_error(\"fish hole is not onmesh\")",
+									"                    self:success()",
+									"                    return",
+									"                end",
+									"            else",
+									"                context.fish.currentfishinghole = closest",
+									"            end",
+									"            context.fish.currentfishinghole.random_mpos = eso_bt_helper.GetRandomPointOnCricle(context.fish.currentfishinghole.meshpos, 2, 4, 10)",
+									"            d(\"new node assigned\")",
+									"            self:success()",
+									"            return",
+									"        end",
+									"    end",
+									"end",
+									"",
+									"",
+									"self:fail()",
+									"",
+								},
+							},
+						},
+						
+						{
+							class = "Sequence",
+							info = 
+							{
+								title = "move to random location",
+							},
+							nodes = 
+							{
+								
+								{
+									class = "Action",
+									info = 
+									{
+									},
+									nodes = 
+									{
+									},
+									settings = 
+									{
+									},
+									variables = 
+									{
+										runcode = 
+										{
+											"if not table.valid(context.fish.currentfishinghole) then",
+											"    self:success()",
+											"else",
+											"    self:fail()",
+											"end ",
+										},
+									},
+								},
+								
+								{
+									class = "SubTree",
+									info = 
+									{
+										createlocalcontext = true,
+										description = "",
+										title = "",
+									},
+									nodes = 
+									{
+									},
+									settings = 
+									{
+									},
+									variables = 
+									{
+										filename = "MoveToRandom.st",
+									},
+								},
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+							},
+						},
+						
+						{
+							class = "Action",
+							info = 
+							{
+								title = "Set bait",
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								runcode = 
+								{
+									"if not LureIsSet() then",
+									"    SetBait()",
+									"    self:success()",
+									"else",
+									"    self:fail()",
+									"end",
+								},
+							},
+						},
+						
+						{
+							class = "Action",
+							info = 
+							{
+								description = "---setbait // move to target and interact",
+								title = "---setbait // move to target and interact",
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								runcode = 
+								{
+									"---setbait // move to target and interact",
+									"if table.valid(context.fish.currentfishinghole) then",
+									"    --and not table.valid(ml_navigation.path)",
+									"    local hole = context.fish.currentfishinghole",
+									"    local myPos = Player.meshpos",
+									"    local mpos = table.valid(hole.random_mpos) and hole.random_mpos or hole.meshpos",
+									"    local dist = math.distance3d(myPos.x, myPos.y, myPos.z, mpos.x, mpos.y, mpos.z)",
+									"",
+									"    ---set bait",
+									"    if not hole.currentfishinghole.bait_checked then",
+									"        local pondtype = esominion.reversefishingNodes[hole.contentid]",
+									"        if not pondtype then",
+									"            ml_error(\"invalid fish hole type? hole contentid : \" .. tostring(hole.contentid))",
+									"            self:success()",
+									"            return",
+									"        end",
+									"        local detected_bait",
+									"        for i = 9, 1, -1 do",
+									"            if pondtype == esominion.baits[i] and context.fish.bait_stocks[i] and context.fish.bait_stocks[i] > 0 then",
+									"                detected_bait = i",
+									"            end",
+									"        end",
+									"        if not detected_bait then",
+									"            ml_error(\"no valid bait detected ? wierd ? \")",
+									"            self:success()",
+									"            return",
+									"        end",
+									"        if esominion.lureType ~= detected_bait then",
+									"            d(\"Assign Detected Bait : \" .. tostring(detected_bait))",
+									"            e(\"SetFishingLure(\" .. detected_bait .. \")\")",
+									"        end",
+									"        hole.currentfishinghole.bait_checked = true",
+									"    end",
+									"",
+									"    if dist < 7 then",
+									"        --local interactable = MGetGameCameraInteractableActionInfo()",
+									"        local interactable, hole_type = MGetGameCameraInteractableActionInfo() -- ml_navigation:UseApi(\"GetGameCameraInteractableActionInfo()\", 200)",
+									"        d(\"interactable  check >> \" .. tostring(interactable))",
+									"        if interactable == \"Fish\" then",
+									"            d(\"fish\")",
+									"            local currentBait = IsNull(e(\"GetFishingLure()\"), 0)",
+									"            if (currentBait == 0) then",
+									"                e_setbait.needbait = true",
+									"                esominion.lureType = 0",
+									"                ml_error(\"need bait\")",
+									"                self:success()",
+									"                return",
+									"            end",
+									"            local TargetList = EntityList(\"maxdistance=20,contentid=909;910;911\")",
+									"            if TargetList then",
+									"                local id, mytarget = next(TargetList)",
+									"                mytarget:Interact()",
+									"                if Player:IsMoving() then",
+									"                    Player:StopMovement()",
+									"                end",
+									"                self:success()",
+									"                return",
+									"            end",
+									"        elseif interactable == \"Reel In\" then",
+									"            ---check fish update // fish_bite() event resister",
+									"            -- SettingsUUID.Btree.pulseList",
+									"            local pulse = SettingsUUID.Btree.pulseList[BehaviorManager:GetActiveBehaviorName()] or 250",
+									"            if esominion.hooked and Now() - esominion.hooktimer < 500 then",
+									"                esominion.hooked = false",
+									"                local TargetList = EntityList(\"maxdistance=20,contentid=909;910;911\")",
+									"                if TargetList then",
+									"                    local id, mytarget = next(TargetList)",
+									"                    d(\"Reel In\")",
+									"                    context.wait = {",
+									"                        func = function()",
+									"                            local interactable, hole_type = MGetGameCameraInteractableActionInfo()",
+									"                            if MGetGameCameraInteractableActionInfo() ~= \"Reel In\" then",
+									"                                if esominion.lureType == 0 then",
+									"                                    context.fish.bag_checked = false -- regenerate whitelist, bait stock",
+									"                                else",
+									"                                    context.fish.bait_stocks[esominion.lureType] = context.fish.bait_stocks[esominion.lureType] - 1",
+									"                                    if context.fish.bait_stocks[esominion.lureType] <= 0 then",
+									"                                        context.fish.bag_checked = false -- regenerate whitelist, bait stock",
+									"                                    end",
+									"                                end",
+									"                                context.fish.currentfishinghole.bait_checked = false",
+									"                                return true",
+									"                            end",
+									"                        end",
+									"                    }",
+									"                    mytarget:Interact()",
+									"                    if Player:IsMoving() then",
+									"                        Player:StopMovement()",
+									"                    end",
+									"                    self:success()",
+									"                    return",
+									"                end",
+									"            end",
+									"",
+									"            if Player:IsMoving() then",
+									"                Player:StopMovement()",
+									"            end",
+									"            self:success()",
+									"            return",
+									"        else",
+									"            if dist < 2 and table.valid(hole.random_mpos) then",
+									"                hole.random_mpos = false",
+									"                d(\"failed to use random position for fish hole.\")",
+									"                mpos = hole.meshpos",
+									"            end",
+									"",
+									"        end",
+									"    end",
+									"",
+									"    ---i think 1 is the character radius",
+									"    if dist < 2 then",
+									"        if not hole.face_timer or hole.face_timer < Now() then",
+									"            hole.face_timer = Now() + 500",
+									"            d(\"set facing to fish hole\")",
+									"            Player:SetFacing(hole.pos, true)",
+									"        end",
+									"        if Player:IsMoving() then",
+									"            Player:StopMovement()",
+									"        end",
+									"        self:success()",
+									"        return",
+									"    else",
+									"        ---player moveto is just providing path generation",
+									"        if not self.timer or self.timer < Now() then",
+									"            self.timer = Now() + math.random(800, 1200)",
+									"            Player:MoveTo(mpos.x, mpos.y, mpos.z, false, hole.id, 15)",
+									"        end",
+									"        ---running provides visual detail and ignores sequence actions",
+									"        self:running()",
+									"        return",
+									"    end",
+									"end",
+									"self:success()",
+									"",
+									"",
+								},
+							},
+						},
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+					},
+				},
+			},
+			settings = 
+			{
+			},
+			variables = 
+			{
+			},
+		},
+	},
+	settings = 
+	{
+	},
+	variables = 
+	{
+		abortcode = 
+		{
+			"ml_error(\"stop fish mode\")",
+			"Player:StopMovement()",
+		},
+		menucode = 
+		{
+			"\t\tESO_Common_BotRunning = true",
+			"GUI:Text(\"Demo Fish Mode.\\nGo Get Closest Fishing Hole\")",
+		},
+		startcode = 
+		{
+			"ml_error(\"start check\")",
+			"context.fish = {} ",
+			"context.combat = {}",
+		},
+	},
+}
+
+
+
+return tbl

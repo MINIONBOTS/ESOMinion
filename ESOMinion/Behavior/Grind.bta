@@ -1,0 +1,182 @@
+local tbl = 
+{
+	class = "BehaviorTree",
+	info = 
+	{
+		createlocalcontext = true,
+	},
+	nodes = 
+	{
+		
+		{
+			class = "PrioritySelector",
+			info = 
+			{
+			},
+			nodes = 
+			{
+				
+				{
+					class = "SubTree",
+					info = 
+					{
+						createlocalcontext = true,
+						description = "priority node (self:fail() in the end) \nCheck Game State / Wait handler / Loot Picker\n\n\ntodo : Death handler.",
+						title = "BT Top",
+					},
+					nodes = 
+					{
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+						filename = "BT_TOP.st",
+					},
+				},
+				
+				{
+					class = "SubTree",
+					info = 
+					{
+						createlocalcontext = true,
+						description = "",
+						title = "Kill Aggro",
+					},
+					nodes = 
+					{
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+						filename = "KillAggro.st",
+					},
+				},
+				
+				{
+					class = "PrioritySelector",
+					info = 
+					{
+						title = "Grind ",
+					},
+					nodes = 
+					{
+						
+						{
+							class = "Action",
+							info = 
+							{
+								description = "--- init grind.bta // aggro handling is already assigned at upper node",
+								title = "--- init grind.bta // aggro handling is already assigned at upper node",
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								runcode = 
+								{
+									"--- init grind.bta // aggro handling is already assigned at upper node",
+									"-- todo: add mob balcklist",
+									"local el = MEntityList(\"hostile,nearest,alive\")",
+									"if table.valid(el) then",
+									"    local id , tbl = next(el)",
+									"    -- toss this as aggro id for kill aggro st",
+									"    d(\"detected hostile target. \"..tostring(tbl.name))",
+									"    context.combat.aggro_target_id = id",
+									"    self:success()",
+									"    return",
+									"end",
+									"self:fail()",
+									"",
+								},
+							},
+						},
+						
+						{
+							class = "SubTree",
+							info = 
+							{
+								createlocalcontext = true,
+								description = "",
+								title = "",
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								filename = "MoveToRandom.st",
+							},
+						},
+						
+						{
+							class = "Action",
+							info = 
+							{
+							},
+							nodes = 
+							{
+							},
+							settings = 
+							{
+							},
+							variables = 
+							{
+								runcode = 
+								{
+									"self:success()",
+								},
+							},
+						},
+					},
+					settings = 
+					{
+					},
+					variables = 
+					{
+					},
+				},
+			},
+			settings = 
+			{
+			},
+			variables = 
+			{
+			},
+		},
+	},
+	settings = 
+	{
+	},
+	variables = 
+	{
+		abortcode = 
+		{
+			"Player:StopMovement()",
+		},
+		menucode = 
+		{
+			"\t\tESO_Common_BotRunning = true",
+			"GUI:Text(\"Demo Fish Mode.\\nGo Get Closest Fishing Hole\")",
+		},
+		startcode = 
+		{
+			"context.fish = {} ",
+			"context.combat = {}",
+		},
+	},
+}
+
+
+
+return tbl
