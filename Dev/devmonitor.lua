@@ -53,6 +53,9 @@ end
 
 --deploytest
 
+
+--deploytest2
+
 function Dev.GUIVarUpdate(Event, NewVals, OldVals)
     for k,v in pairs(NewVals) do
         if (k == "HackNoCl") then
