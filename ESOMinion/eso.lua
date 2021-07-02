@@ -49,6 +49,21 @@ function esominion.SetMainVars()
 	-- Login
 	local uuid = GetUUID()
 	
+	if ( Settings.Global.ESO_Login_ServiceAccounts and string.valid(uuid) and Settings.Global.ESO_Login_ServiceAccounts[uuid] ) then
+		ESO_Login_ServiceAccount = Settings.Global.ESO_Login_ServiceAccounts[uuid]
+	else
+		ESO_Login_ServiceAccount = ""
+	end
+	if ( Settings.Global.ESO_Login_ServiceAccountPasswords and string.valid(uuid) and Settings.Global.ESO_Login_ServiceAccountPasswords[uuid] ) then
+		ESO_Login_ServiceAccountPassword = Settings.Global.ESO_Login_ServiceAccountPasswords[uuid]
+	else
+		ESO_Login_ServiceAccountPassword = ""
+	end
+	
+	ESO_Login_CharName = esominion.GetSetting("ESO_Login_CharName","")
+	ESO_Login_CharIndex = esominion.GetSetting("ESO_Login_CharIndex",1)
+	gAutoSelect = esominion.GetSetting("gAutoSelect",false)
+	gAutoLogin = esominion.GetSetting("gAutoLogin",false)
 	gBotModeIndex = 1
 	gBotMode = esominion.GetSetting("gBotMode",GetString("assistMode"))
 	gBotModeList = {GetString("none")}
@@ -163,7 +178,12 @@ esominion.GUI = {
 	},
 	login = {
 		name = "Login",
-		open = false,
+		open = true,
+		visible = true,
+	},
+	CharWindow = {
+		name = "Character Name",
+		open = true,
 		visible = true,
 	},
 	help = {
@@ -179,6 +199,7 @@ esominion.GUI = {
 		open_until = 0,
 		colors = { r = 1, g = 1, b = 1, a = 1 },
 	},
+	
 	lockpicking = {
 		name = "Lockpick Window",
 		open = false,
@@ -374,6 +395,8 @@ function ml_global_information.Draw( event, ticks )
 	
 	ml_global_information.DrawMainFull()
 	ml_global_information.DrawSmall()
+	ml_global_information.DrawLoginHandler()
+	ml_global_information.DrawCharHandler()
 end
 
 function ml_global_information.OnUpdate( event, tickcount )
@@ -386,16 +409,15 @@ function ml_global_information.OnUpdate( event, tickcount )
 		--d("stuck in yield")
 		return false
 	end
-	
 	-- Switch according to the gamestate
 	if (gamestate == ESO.GAMESTATE.INGAME) then
 		--ml_global_information.ResetLoginVars()
 		ml_global_information.InGameOnUpdate( event, tickcount );
-	--[[elseif (gamestate == ESO.GAMESTATE.MAINMENUSCREEN) then
+	elseif (gamestate == ESO.GAMESTATE.MAINMENUSCREEN) then
 		ml_global_information.MainMenuScreenOnUpdate( event, tickcount )
 	elseif (gamestate == ESO.GAMESTATE.CHARACTERSCREEN) then
 		ml_global_information.CharacterSelectScreenOnUpdate( event, tickcount )
-	elseif (gamestate == ESO.GAMESTATE.ERROR) then
+	--[[elseif (gamestate == ESO.GAMESTATE.ERROR) then
 		ml_global_information.ResetLoginVars()
 		ml_global_information.ErrorScreenOnUpdate( event, tickcount )]]
 	end
@@ -403,6 +425,7 @@ end
 
 ml_global_information.throttleTick = 0
 ml_global_information.lastPulse = 0
+ml_global_information.lasttick = 0
 function ml_global_information.InGameOnUpdate( event, tickcount )	
 	if (ml_global_information.throttleTick > tickcount) or not Player then
 		return false
@@ -470,6 +493,197 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	end
 end
 
+function ml_global_information.MainMenuScreenOnUpdate( event, tickcount )	
+
+	ml_global_information.Now = tickcount
+	
+	-- show/hide correct windows for gamestate
+	if ( ml_global_information.gamestatechanged == true ) then
+		local window = WindowManager:GetWindow(esominion.login_window.name)
+	
+		if (window and not window.visible) then
+			window:Show()
+		end
+		
+		ml_global_information.gamestatechanged = false		
+	end	
+				
+	if ( tickcount - ml_global_information.lasttick > 10000 ) then
+		ml_global_information.lasttick = tickcount
+		local currentState = tostring(e("PregameStateManager_GetCurrentState()"))
+		
+		if ( currentState == "GammaAdjust" ) then
+			e("PregameStateManager_ReenterLoginState()")
+			return
+		
+		-- There are 4 different agreement screens and the agree functions for the three other than
+		-- the EULA dialog are not defined in the ESO LUA. For now just force the user to agree to
+		-- these after install or client update, maybe do it automatically later when there is more
+		-- time to spend looking
+		
+		--elseif ( currentstate == "ShowEULA" ) then
+		--	e("AgreeToEULA()")
+			
+		elseif ( currentState == "AccountLogin" ) then
+			d("AccountLogin... ")
+			
+			if ( ESO_Login_ServiceAccount ~= "" and ESO_Login_ServiceAccountPassword ~= "" and gAutoLogin) then
+				d("Trying to login....")			
+				if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
+					e("PregameLogin("..ESO_Login_ServiceAccount..","..ESO_Login_ServiceAccountPassword..")")
+				else
+					ml_log("Login Error detected....trying again in 10 seconds..")
+					e("ZO_Dialogs_ReleaseAllDialogs(true)")
+				end
+				
+			end	
+		
+		end
+		-- Update the Statusbar on the left/bottom screen
+		--GUI_SetStatusBar(ml_GetTraceString())
+	end
+
+end
+ml_global_information.charList = {}
+function ml_global_information.CharacterSelectScreenOnUpdate( event, tickcount )
+	ml_global_information.Now = tickcount
+	-- show/hide correct windows for gamestate		
+	if ( ml_global_information.gamestatechanged == true or not table.valid(ml_global_information.charList) ) then
+	
+		ml_global_information.gamestatechanged = false
+		ml_global_information.charList = {}
+		d("check 2")
+		local charcount = e("GetNumCharacters()")
+		-- populate char-dropdown-list
+		for i = 1, charcount do
+			local charName = TrimString(e("GetCharacterInfo("..tostring(i)..")"),3)
+			d(charName)
+			table.insert(ml_global_information.charList,charName)
+		end
+	end	
+	
+	if ( tickcount - ml_global_information.lasttick > 10000 ) then
+		ml_global_information.lasttick = tickcount
+		d("InCharacterSelectScreen: ")
+		
+		if ( gAutoSelect and tostring(e("PregameStateManager_GetCurrentState()")) == "CharacterSelect") then
+			if ( not e("ZO_Dialogs_IsShowingDialog()") ) then
+				d("Select character and login! ")
+				for i = 1, e("GetNumCharacters()") do
+					local charName = TrimString(e("GetCharacterInfo("..tostring(i)..")"),3)
+					if (charName == ESO_Login_CharName) then
+						e("SelectCharacterToView("..tostring(i)..")")
+					end
+				end
+				e("ZO_CharacterSelect_Login(false)")
+			else
+				d("Login Error detected....trying again in 10 seconds..")
+				e("RequestCharacterList()")
+			end
+		end		
+		
+		-- Update the Statusbar on the left/bottom screen
+		--GUI_SetStatusBar(ml_GetTraceString())		
+	end
+end
+
+
+function ml_global_information.DrawLoginHandler()
+	local gamestate = GetGameState()
+	if (gamestate == 2) then
+		if (esominion.GUI.login.open) then
+			GUI:SetNextWindowSize(250,125,GUI.SetCond_Always) --set the next window size, only on first ever	
+			GUI:SetNextWindowCollapsed(false,GUI.SetCond_Always)
+			
+			local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+			GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .75)
+			esominion.GUI.login.visible, esominion.GUI.login.open = GUI:Begin(esominion.GUI.login.name, esominion.GUI.login.open)
+						
+			GUI:PushItemWidth(150)
+			
+			local uuid = GetUUID()
+				
+			local val,changed = GUI:InputText(GetString("Account Name"),ESO_Login_ServiceAccount)
+			if (changed and ESO_Login_ServiceAccount ~= val) then
+				ESO_Login_ServiceAccount = val
+				if not Settings.Global.ESO_Login_ServiceAccounts then
+					Settings.Global.ESO_Login_ServiceAccounts = {}
+				end
+				Settings.Global.ESO_Login_ServiceAccounts[uuid] = val
+				Settings.Global.ESO_Login_ServiceAccounts = Settings.Global.ESO_Login_ServiceAccounts
+				
+			end
+			
+			local val,changed = GUI:InputText(GetString("Password"),ESO_Login_ServiceAccountPassword)
+			if (changed and ESO_Login_ServiceAccountPassword ~= val) then
+				ESO_Login_ServiceAccountPassword = val
+				if not Settings.Global.ESO_Login_ServiceAccountPasswords then
+					Settings.Global.ESO_Login_ServiceAccountPasswords = {}
+				end
+				Settings.Global.ESO_Login_ServiceAccountPasswords[uuid] = val
+				Settings.Global.ESO_Login_ServiceAccountPasswords = Settings.Global.ESO_Login_ServiceAccountPasswords
+			end
+					
+			GUI_Capture(GUI:Checkbox(GetString("Auto Login"),gAutoLogin),"gAutoLogin");
+			
+			GUI:PopItemWidth()
+			GUI:End()
+			GUI:PopStyleColor()
+		end
+	end
+end
+function ml_global_information.DrawCharHandler()
+	local gamestate = GetGameState()
+	if (gamestate == 1) then
+		if (esominion.GUI.login.open) then
+			GUI:SetNextWindowSize(250,125,GUI.SetCond_Always) --set the next window size, only on first ever	
+			GUI:SetNextWindowCollapsed(false,GUI.SetCond_Always)
+			
+			local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+			GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .75)
+			esominion.GUI.CharWindow.visible, esominion.GUI.CharWindow.open = GUI:Begin(esominion.GUI.CharWindow.name, esominion.GUI.CharWindow.open)
+						
+			GUI:PushItemWidth(150)
+			
+			local uuid = GetUUID()
+				
+			local val,changed = GUI:Combo("Select Char", ESO_Login_CharIndex, ml_global_information.charList )
+			if (changed and ESO_Login_CharIndex ~= val) then
+				ESO_Login_CharIndex = val
+				Settings.ESOMINION["ESO_Login_CharIndex"] = ESO_Login_CharIndex
+				ESO_Login_CharName = ml_global_information.charList[val]
+				Settings.ESOMINION["ESO_Login_CharName"] = ESO_Login_CharName
+			end
+			GUI_Capture(GUI:Checkbox(GetString("Auto Select"),gAutoSelect),"gAutoSelect");
+			
+			GUI:PopItemWidth()
+			GUI:End()
+			GUI:PopStyleColor()
+		end
+	end
+end
+
+function ml_global_information.DrawAccountDetails()
+
+			
+	GUI:SetNextWindowSize(350,300,GUI.SetCond_FirstUseEver) --set the next window size, only on first ever	
+	GUI:SetNextWindowCollapsed(false,GUI.SetCond_Once)
+	
+	local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+	GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .75)
+	
+	esominion.GUI.main.visible, esominion.GUI.main.open = GUI:Begin(esominion.GUI.main.name, esominion.GUI.main.open)
+	local x, y = GUI:GetWindowPos()
+	local width, height = GUI:GetWindowSize()
+	local contentwidth = GUI:GetContentRegionAvailWidth()
+	
+	esominion.GUI.x = x; esominion.GUI.y = y; esominion.GUI.width = width; esominion.GUI.height = height;
+	
+	
+			
+			
+
+end
 function ml_global_information.UpdateMode()
 	if (gBotMode == GetString("none")) then	
 		ml_task_hub:ClearQueues()
@@ -526,3 +740,187 @@ end
 RegisterEventHandler("Module.Initalize",esominion.Init, "esominion.Init")
 RegisterEventHandler("Gameloop.Update",ml_global_information.OnUpdate,"esominion OnUpdate")
 RegisterEventHandler("Gameloop.Draw", ml_global_information.Draw,"esominion Draw")
+
+Lockpicker = {}
+Lockpicker.delay = 0
+Lockpicker.chamber = 0
+Lockpicker.timer = 0
+Lockpicker.interactType = 0
+function Lockpicker.timeRemaining()
+
+	if Lockpicker.timer > 0  then
+		return  Lockpicker.timer - Now() 
+	end
+	return 0
+end
+Lockpicker.Chamber1 = ""
+Lockpicker.Chamber2 = ""
+Lockpicker.Chamber3 = ""
+Lockpicker.Chamber4 = ""
+Lockpicker.Chamber5 = ""
+function Lockpicker.OnUpdate()
+	if (GetGameState() == ESO.GAMESTATE.INGAME) then
+	
+		--[[if not ESO_Common_BotRunning then
+			return false
+		end]]
+		if (gBotMode == GetString("assistMode") and not gAssistDoLockpick) then
+			return false
+		end
+		if Now() > Lockpicker.delay then
+			if Player.interacting then
+				if Player.interacttype == 20 then
+					if Lockpicker.timer == 0 then
+						Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
+					end
+					local timeRemaining = Lockpicker.timeRemaining()
+					if (timeRemaining > 0) then
+						esominion.GUI.lockpicking.open = true
+						if Lockpicker.chamber == 0 then
+							for i = 1,5 do
+								local isChamberSolved = e("IsChamberSolved(" .. i .. ")")
+								if (not isChamberSolved) then
+									d("Start setting Chamber "..tostring(i)..".")
+									e("StartSettingChamber(" .. i .. ")")
+									e("PlaySound(Lockpicking_Lockpicker_contact)")
+									e("PlaySound(Lockpicking_chamber_start)")
+									Lockpicker.chamber = i
+									ml_global_information.Await(math.random(400,600))
+									return true
+								else
+									if i == 1 then
+										Lockpicker.Chamber1 = "Set"
+									elseif i == 2 then
+										Lockpicker.Chamber2 = "Set"
+									elseif i == 3 then
+										Lockpicker.Chamber3 = "Set"
+									elseif i == 4 then
+										Lockpicker.Chamber4 = "Set"
+									elseif i == 5 then
+										Lockpicker.Chamber5 = "Set"
+									end
+								end
+							end
+						else
+							local chamberStress = e("GetSettingChamberStress()")
+							--d("chamberStress = "..tostring(chamberStress))
+							if (chamberStress >= 0.2) then
+								e("PlaySound(Lockpicking_chamber_stress)")
+								e("StopSettingChamber()")
+								d("Chamber "..tostring(Lockpicker.chamber).." is solved.")
+								Lockpicker.chamber = 0
+								ml_global_information.Await(math.random(800,1000))
+							end
+							return true
+						end
+					end
+				end
+			else
+				Lockpicker.timer = 0
+				Lockpicker.Chamber1 = ""
+				Lockpicker.Chamber2 = ""
+				Lockpicker.Chamber3 = ""
+				Lockpicker.Chamber4 = ""
+				Lockpicker.Chamber5 = ""
+			end
+			Lockpicker.delay = Now() + math.random(400,600)
+		end
+		Lockpicker.Chamber1 = ""
+		Lockpicker.Chamber2 = ""
+		Lockpicker.Chamber3 = ""
+		Lockpicker.Chamber4 = ""
+		Lockpicker.Chamber5 = ""
+		esominion.GUI.lockpicking.open = false
+	end
+	return false
+end
+function Lockpicker.Draw()
+
+	if (esominion.GUI.lockpicking.open) then
+		GUI:SetNextWindowSize(250,125,GUI.SetCond_Always) --set the next window size, only on first ever	
+		GUI:SetNextWindowCollapsed(false,GUI.SetCond_Always)
+		
+		local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+		GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .75)
+		
+		local flags = (GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoCollapse)
+		esominion.GUI.lockpicking.visible, esominion.GUI.lockpicking.open = GUI:Begin(esominion.GUI.lockpicking.name, esominion.GUI.lockpicking.open, flags)
+		if ( esominion.GUI.lockpicking.visible ) then 
+		
+			local x, y = GUI:GetWindowPos()
+			local width, height = GUI:GetWindowSize()
+			local contentwidth = GUI:GetContentRegionAvailWidth()
+			
+			esominion.GUI.x = x; esominion.GUI.y = y; esominion.GUI.width = width; esominion.GUI.height = height;
+	
+	
+			GUI:Separator()
+			
+			GUI:AlignFirstTextHeightToWidgets() 
+			GUI:Text(GetString("Chamber 1"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber1 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 1 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+			GUI:Text(GetString("Chamber 2"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber2 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 2 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+			GUI:Text(GetString("Chamber 3"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber3 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 3 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+			GUI:Text(GetString("Chamber 4"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber4 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 4 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+			GUI:Text(GetString("Chamber 5"))
+			GUI:SameLine()
+			GUI:Text(" | ")
+			GUI:SameLine()
+			if Lockpicker.Chamber5 == "Set" then
+				GUI:TextColored(0,.8,.3,1,GetString("SET"))
+			elseif Lockpicker.chamber == 5 then
+				GUI:TextColored(1,.5,0,1,GetString("RUNNING"))
+			else
+				GUI:TextColored(1,.1,.2,1,GetString("...Waiting"))
+			end
+			GUI:Separator()
+		end
+		GUI:End()
+		GUI:PopStyleColor()
+	end
+end
+RegisterEventHandler("Gameloop.Draw",Lockpicker.Draw,"Lockpicker Draw")
+RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
