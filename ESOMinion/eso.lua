@@ -552,16 +552,19 @@ function ml_global_information.CharacterSelectScreenOnUpdate( event, tickcount )
 	
 		ml_global_information.gamestatechanged = false
 		ml_global_information.charList = {}
-		d("check 2")
 		local charcount = e("GetNumCharacters()")
 		-- populate char-dropdown-list
 		for i = 1, charcount do
 			local charName = TrimString(e("GetCharacterInfo("..tostring(i)..")"),3)
-			d(charName)
 			table.insert(ml_global_information.charList,charName)
 		end
 	end	
-	
+	if table.valid(ml_global_information.charList) then
+		if not ml_global_information.charList[ESO_Login_CharIndex] then
+			ESO_Login_CharIndex = 1
+		end
+	end
+			
 	if ( tickcount - ml_global_information.lasttick > 10000 ) then
 		ml_global_information.lasttick = tickcount
 		d("InCharacterSelectScreen: ")
