@@ -313,6 +313,28 @@ function ml_global_information.DrawMainFull()
 					GUI:PopItemWidth()
 					
 					local contentwidth = GUI:GetContentRegionAvailWidth()
+					GUI:Spacing()
+					GUI:Separator()
+					GUI:Spacing()
+					if esominion.smartrecord then
+						if (GUI:Button(GetString("Stop Record"),contentwidth,20)) then
+							esominion.smartrecord = not esominion.smartrecord
+						end
+						if (GUI:Button(GetString("Delete area"),contentwidth,20)) then
+							ml_mesh_mgr.data.flooreditormode = 10
+							NavigationManager.FloorEditorMode = 10
+							NavigationManager.RecordDistance = 0
+							NavigationManager.PreciseRecordDistance = 50
+							ml_mesh_mgr.data.running = true
+						end
+					else
+						if (GUI:Button(GetString("Sebbs Record"),contentwidth,20)) then
+							esominion.smartrecord = not esominion.smartrecord
+						end
+					end
+					GUI:Spacing()
+					GUI:Separator()
+					GUI:Spacing()
 					if (GUI:Button(GetString("Start / Stop"),contentwidth,20)) then
 						ml_global_information.ToggleRun()	
 					end
@@ -426,6 +448,7 @@ end
 ml_global_information.throttleTick = 0
 ml_global_information.lastPulse = 0
 ml_global_information.lasttick = 0
+esominion.smartrecord = false
 function ml_global_information.InGameOnUpdate( event, tickcount )	
 	if (ml_global_information.throttleTick > tickcount) or not Player then
 		return false
@@ -444,7 +467,29 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	end
 	
 	if (Now() >= ml_global_information.nextRun) then
-		
+		if esominion.smartrecord and not NavigationManager.ProcessingFloorMesh then
+			--if Player.isswimming == 1 then
+			if ml_mesh_mgr.data.flooreditormode ~= 5 then
+					ml_mesh_mgr.data.flooreditormode = 5
+					NavigationManager.FloorEditorMode = 5
+					NavigationManager.RecordDistance = 0
+					NavigationManager.RenderDistance = 1
+					NavigationManager.PreciseRecordDistance = 50
+					NavigationManager.UseMouseEditor = false
+					NavigationManager.AutoSaveMesh = false
+					ml_mesh_mgr.data.running = true
+				--end
+			elseif ml_mesh_mgr.data.flooreditormode ~= 3 then
+				ml_mesh_mgr.data.flooreditormode = 3
+				NavigationManager.FloorEditorMode = 3
+				NavigationManager.RecordDistance = 0
+				NavigationManager.RenderDistance = 1
+				NavigationManager.PreciseRecordDistance = 50
+				NavigationManager.UseMouseEditor = false
+				NavigationManager.AutoSaveMesh = false
+				ml_mesh_mgr.data.running = true
+			end
+		end
 		ml_global_information.lastPulse = math.random(300,500)
 		ml_global_information.nextRun = tickcount + ml_global_information.lastPulse
 		
