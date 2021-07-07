@@ -58,13 +58,6 @@ function eso_radar.Init()
 	gRadarFletcherflyColour = esominion.GetSetting("gRadarFletcherflyColour",{r = 0.5, g = 0.0, b = 0.5, a = 1.0, colour = 4286578816})
 end
 
-function ConvertHeading(heading)
-	if (heading < 0) then
-		return heading + 2 * math.pi
-	else
-		return heading
-	end
-end
 function eso_radar.DrawCall(event, ticks )
 	if not(GUI_NewWindow) then
 		local gamestate = GetGameState()
