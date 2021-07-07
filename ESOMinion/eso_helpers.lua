@@ -148,6 +148,14 @@ writers = {
 	--end;
 end
 
+function ConvertHeading(heading)
+	local heading = heading -(1.5708)
+	if (heading < 0) then
+		return heading + 2 * math.pi
+	else
+		return heading
+	end
+end
 function GetLowestValue(...)
 	local lowestValue = math.huge
 	
