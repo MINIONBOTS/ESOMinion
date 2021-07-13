@@ -346,7 +346,6 @@ function Dev.DrawCall(event, ticks )
 								GUI:TreePop()
 							end
 						end
-						GUI:TreePop()
 					end
 					if ( GUI:TreeNode("Other") ) then
 						GUI:BulletText(".id = "..tostring(Player.id))
@@ -367,8 +366,6 @@ function Dev.DrawCall(event, ticks )
 						GUI:TreePop()
 					end
 					if ( GUI:TreeNode("Functions") ) then
-						if GUI:Button("Interact()",0,0) then Player:Interact() end
-						if GUI:Button("CameraInteractionStart()",0,0) then Player:CameraInteractionStart() end
 						local function FixNil(tbl)
 							if not tbl then
 								return "none"
@@ -395,6 +392,8 @@ function Dev.DrawCall(event, ticks )
 						GUI:BulletText("GetTargetUnderReticle() = "..tostring(rettarget))
 						GUI:BulletText("SetFacing()")
 						GUI:BulletText("MoveTo()")
+						GUI:BulletText("Interact()")
+						GUI:BulletText("MoveTo()")
 						GUI:TreePop()
 					end
 					GUI:TreePop()
@@ -409,7 +408,6 @@ function Dev.DrawCall(event, ticks )
 				else
 					GUI:Text("Not Ingame...")
 				end
-				GUI:TreePop()
 			end
 -- END PLAYER INFO
 			
@@ -842,9 +840,8 @@ function Dev.DrawCall(event, ticks )
 			-- END ABILITYLIST
 
 			if ( GUI:TreeNode("Utility Functions")) then
-				if( gamestate == 3 ) then
 					GUI:PushItemWidth(200)
-					GUI:BulletText("GetGameState") GUI:SameLine(200) GUI:InputText("##DevUT0",tostring(GetGameState()))
+					GUI:BulletText("GetGameState()") GUI:SameLine(200) GUI:InputText("##DevUT0",tostring(GetGameState()))
 					GUI:PopItemWidth()
 					GUI:Indent()
 					GUI:BulletText("1: " .. GetString("Character Select"))
@@ -853,7 +850,11 @@ function Dev.DrawCall(event, ticks )
 					GUI:BulletText("4: " .. GetString("Error"))
 					GUI:BulletText("6: " .. GetString("Loading"))
 					GUI:Unindent()
-				end
+					GUI:BulletText("PlaySound()")
+					GUI:SameLine()
+					if (GUI:Button(GetString("Test Sound"),150,15)) then
+						PlaySound(GetStartupPath() .. "\\LuaMods\\Dev\\Sample.wav")
+					end
 				GUI:TreePop()
 			end
 		end
