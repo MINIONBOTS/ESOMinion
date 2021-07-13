@@ -51,11 +51,6 @@ function Dev.ModuleInit()
 	ml_gui.ui_mgr:AddMember({ id = "ESOMINION##MENU_ACR", name = "Dev", onClick = function() Dev.GUI.open = not Dev.GUI.open end, tooltip = "Open the Dev addon."},"ESOMINION##MENU_HEADER")
 end
 
---deploytest
-
-
---deploytest2
-
 function Dev.GUIVarUpdate(Event, NewVals, OldVals)
     for k,v in pairs(NewVals) do
         if (k == "HackNoCl") then
@@ -67,192 +62,16 @@ function Dev.GUIVarUpdate(Event, NewVals, OldVals)
         end	
 	end
 end
+
 function Dev.DrawCall(event, ticks )
-	
 	if ( Dev.GUI.open  ) then 
 		GUI:SetNextWindowPosCenter(GUI.SetCond_Appearing)
 		GUI:SetNextWindowSize(500,400,GUI.SetCond_FirstUseEver) --set the next window size, only on first ever
 		Dev.GUI.visible, Dev.GUI.open = GUI:Begin("Dev-Monitor", Dev.GUI.open)
 		if ( Dev.GUI.visible ) then 
-			local gamestate = GetGameState()
-									
+			local gamestate = GetGameState()									
 			GUI:PushStyleVar(GUI.StyleVar_FramePadding, 4, 0)
 			GUI:PushStyleVar(GUI.StyleVar_ItemSpacing, 8, 2)
-
-			if ( GUI:TreeNode("UI Events")) then
-				Dev.logUiEvent = GUI:Checkbox("Logs UI events", Dev.logUiEvent)
-				GUI:TreePop()
-			end
-			-- cbk: Addon Controls
-			
-			if ( GUI:TreeNode("AddonControls")) then
-				GUI:PushItemWidth(200); gDevAddonTextFilter = GUI:InputText("Filter by Name",gDevAddonTextFilter); GUI:PopItemWidth();
-				gDevAddonOpenFilter = GUI:Checkbox("Show Open Only",gDevAddonOpenFilter)
-				gDevAddonClosedFilter = GUI:Checkbox("Show Closed Only",gDevAddonClosedFilter)
-				
-				if ( GUI:TreeNode("Active Controls")) then
-					--local controls = GetControls()
-					if (table.valid(controls)) then
-						for id, e in pairs(controls) do
-							if (gDevAddonTextFilter == "" or string.contains(e.name,gDevAddonTextFilter)) then
-								
-								local isopen = e:IsOpen()
-								if ((gDevAddonOpenFilter and isopen) or (gDevAddonClosedFilter and not isopen) or (not gDevAddonOpenFilter and not gDevAddonClosedFilter)) then
-									GUI:PushItemWidth(150)
-									if ( GUI:TreeNode(tostring(id).." - "..e.name.." ("..tostring(table.size(e:GetActions())).." / "..tostring(table.size(e:GetData()))..")") ) then
-										GUI:BulletText("Ptr") GUI:SameLine(200) GUI:InputText("##Devc0"..tostring(id),tostring(string.format( "%X",e.ptr)))
-										
-										GUI:BulletText("IsOpen") GUI:SameLine(200) GUI:InputText("##Devc1"..tostring(id),tostring(isopen))
-										local x,y = e:GetXY()
-										GUI:BulletText("Position") GUI:SameLine(200) GUI:InputText("##Devc1pos"..tostring(id),tostring(x).. ", "..tostring(y)) 
-										GUI:PushItemWidth(50)
-										gDevX = GUI:InputText("##Devc1pos2"..tostring(id),tostring(gDevX)) 
-										GUI:SameLine(140) 
-										GUI:PushItemWidth(50)
-										gDevY = GUI:InputText("##Devc1pos3"..tostring(id),tostring(gDevY))
-									
-										GUI:SameLine(200)
-									
-									if (GUI:Button("Set Pos",75,15) ) then e:SetXY(tonumber(gDevX),tonumber(gDevY)) end
-										
-										
-										GUI:PushItemWidth(150)
-										
-										if (isopen == false) then
-											if (GUI:Button("Open",100,15) ) then d("Opening Control Result: "..tostring(e:Open())) end
-											GUI:SameLine()
-											if (GUI:Button("Destroy",100,15) ) then d("Destroy Control Result: "..tostring(e:Destroy())) end
-											
-										else
-											if (GUI:Button("Close",100,15) ) then d("Closing Control Result: "..tostring(e:Close())) end
-											GUI:SameLine()
-											if (GUI:Button("Destroy",100,15) ) then d("Destroy Control Result: "..tostring(e:Destroy())) end
-											
-											local ac = e:GetActions()
-											if (table.valid(ac)) then
-												GUI:SetNextTreeNodeOpened(true,GUI.SetCond_Always)
-												if ( GUI:TreeNode("Control Actions##"..tostring(id)) ) then
-													for aid, action in pairs(ac) do
-														if (GUI:Button(action,150,15) ) then d("Action Result with arg "..tostring(Dev.addoncontrolarg).." :" ..tostring(e:Action(action,Dev.addoncontrolarg))) end
-														GUI:SameLine()
-														if (not Dev.addoncontrolarg) then Dev.addoncontrolarg = 0 end
-														Dev.addoncontrolarg = GUI:InputInt("Arg 1##"..tostring(aid)..tostring(id), Dev.addoncontrolarg)
-													end
-													GUI:TreePop()
-												end
-											end
-
-											local ad = e:GetData()
-											if (table.valid(ad)) then
-												for key, value in pairs(ad) do	
-													if (type(value) == "table") then
-														GUI:BulletText(key)
-														for vk,vv in pairs(value) do
-															if (type(vv) == "table") then
-																GUI:Text("") GUI:SameLine(0,30) GUI:Text("["..tostring(vk).."] -") GUI:SameLine(0,10)
-																for vvk,vvv in pairs(vv) do
-																	GUI:Text("["..tostring(vvk).."]:") GUI:SameLine(0,5) GUI:Text(vvv) GUI:SameLine(0,5)
-																end
-															else
-																GUI:BulletText(vk) GUI:SameLine(200) GUI:InputText("##Devcvdata"..tostring(vk),tostring(vv))
-															end
-															GUI:NewLine()
-														end
-													else
-														GUI:BulletText(key) GUI:SameLine(200) GUI:InputText("##Devcdata"..tostring(key),tostring(value))
-													end
-												end										
-											end
-                                        											
-											if ( GUI:TreeNode("Strings##"..tostring(id)) ) then
-												local str = e:GetStrings()
-												if (table.valid(str)) then
-													for key, value in pairs(str) do												
-														GUI:BulletText(tostring(key)) GUI:SameLine(200) GUI:InputText("##Devcdatastr"..tostring(key),value)													
-													end										
-												end
-												GUI:TreePop()
-											end	
-
-											if (GUI:TreeNode("RawData##"..tostring(id)) ) then
-												local datas = e:GetRawData()
-												if (table.valid(datas)) then	
-													GUI:Separator()                                            
-													GUI:Columns(3, "##RawDataDetails",true)
-													GUI:Text("Index"); GUI:NextColumn()
-													GUI:Text("Type"); GUI:NextColumn()
-													GUI:Text("Value"); GUI:NextColumn()
-													GUI:Separator()             
-													for index, data in pairs(datas) do			
-														if (data.type ~= "0") then
-															GUI:Text(tostring(index)) GUI:NextColumn()
-															GUI:Text(tostring(data.type)) GUI:NextColumn()
-															GUI:PushItemWidth(500)
-															if (data.type == "int32") then
-																GUI:Text(tostring(data.value))
-															elseif (data.type == "uint32") then
-																GUI:Text(tostring(data.value))
-															elseif (data.type == "bool") then
-																GUI:Text(tostring(data.value))
-															elseif (data.type == "string") then
-																GUI:Text(data.value)
-															elseif (data.type == "float") then
-																GUI:Text(tostring(data.value))
-															elseif (data.type == "4bytes") then
-																GUI:Text("A: "..tostring(data.value.A).." B: "..tostring(data.value.B).." C: "..tostring(data.value.C).." D: "..tostring(data.value.D))
-															else
-																GUI:Text("")  
-															end        
-															GUI:NextColumn()  
-															GUI:PopItemWidth()                                           
-														end
-													end	
-													GUI:Separator()
-													GUI:Columns(1)		
-												end
-												GUI:TreePop()
-											end
-											
-											if ( GUI:TreeNode("Dev##"..tostring(id)) ) then										
-												if (GUI:Button("PushButton",100,15) ) then d("Push Button Result: "..tostring(e:PushButton(Dev.pushbuttonA, Dev.pushbuttonB))) end
-												GUI:SameLine()										
-												if ( not Dev.pushbuttonA or Dev.pushbuttonA < 0) then Dev.pushbuttonA = 0 end
-												Dev.pushbuttonA = GUI:InputInt("##Devc2"..tostring(id),Dev.pushbuttonA ,1,1) 
-												GUI:SameLine()
-												if ( not Dev.pushbuttonB or Dev.pushbuttonB < 0) then Dev.pushbuttonB = 0 end
-												Dev.pushbuttonB = GUI:InputInt("##Devc3"..tostring(id),Dev.pushbuttonB ,1,1)																					
-												GUI:TreePop()
-											end
-										end								
-										GUI:TreePop()
-									end					
-									GUI:PopItemWidth()
-								end
-							end
-						end
-					end
-					GUI:TreePop()
-				end	
-				if ( GUI:TreeNode("All Controls")) then	
-					--local controls = GetControlList()
-					GUI:PushItemWidth(200)
-					if (table.valid(controls)) then
-						for id, e in pairs(controls) do
-							if (gDevAddonTextFilter == "" or string.contains(e,gDevAddonTextFilter)) then
-								GUI:BulletText("ID: "..tostring(id)) GUI:SameLine(150) GUI:InputText("##Devac0"..tostring(id), e) 
-								GUI:SameLine() 
-								if (GUI:Button("Create##"..tostring(id),50,15) ) then d("Creating Control Result: "..tostring(CreateControl(id))) end
-							end
-						end
-					end
-					GUI:PopItemWidth()
-					GUI:TreePop()
-				end				
-				GUI:TreePop()
-			end
-			--End Active Controls
-			
-			-- cbk: Player
 			if ( GUI:TreeNode("Player") ) then
 				if( gamestate == 3 ) then 
 					if ( GUI:TreeNode("Stats") ) then
@@ -397,41 +216,11 @@ function Dev.DrawCall(event, ticks )
 						GUI:TreePop()
 					end
 					GUI:TreePop()
-					--if ( c ) then Dev.DrawGameObjectDetails(c,true) else	GUI:Text("No Player found.") end
-                    --local mapX, mapY, mapZ = WorldToMapCoords(c.localmapid, c.pos.x, c.pos.y, c.pos.z)
-					--GUI:BulletText("Map ID") GUI:SameLine(200) GUI:InputText("##Devuf2",tostring(c.localmapid))
-					--GUI:BulletText("Map Name") GUI:SameLine(200) GUI:InputText("##Devuf3",GetMapName(c.localmapid))
-					--GUI:BulletText("Map X") GUI:SameLine(200) GUI:InputText("##Devuf4",tostring(mapX))
-					--GUI:BulletText("Map Y") GUI:SameLine(200) GUI:InputText("##Devuf5",tostring(mapY))
-					--GUI:BulletText("Map Z") GUI:SameLine(200) GUI:InputText("##Devuf6",tostring(mapZ))
-					--GUI:BulletText("Pulse Duration") GUI:SameLine(200) GUI:InputText("##Devuf7",tostring(GetBotPerformance()))
 				else
 					GUI:Text("Not Ingame...")
 				end
 			end
--- END PLAYER INFO
 			
-			-- cbk: Target
-			if ( GUI:TreeNode("Targets") ) then
-				if( gamestate == 3 ) then 
-					local p = Player:GetPeferedTarget()
-					if (not p) then
-						p = Player:GetTargetUnderReticle()
-					end
-					if (not p) then
-						p = Player:GetSoftTarget()
-					end		
-					if ( p ) then
-						Dev.DrawGameObjectDetails(p) else	GUI:Text("No target found.")
-					end
-					
-				else
-					GUI:Text("Not Ingame...")
-				end
-				GUI:TreePop()
-			end
-
-			-- cbk: Scanner
 			if ( GUI:TreeNode("Scanner") ) then
 				if( gamestate == 3 ) then 
 					GUI:Separator()
@@ -462,8 +251,6 @@ function Dev.DrawCall(event, ticks )
 							GUI:Indent()
 							GUI:PushStyleVar(GUI.StyleVar_ScrollbarSize,20)
 							GUI:BeginChild("##DevEntityListFilterScrollArea",0,152,false,GUI.SetCond_Always+GUI.WindowFlags_ForceVerticalScrollbar)
-
-
 								Dev.aggro = GUI:Checkbox(".aggro", Dev.aggro)
 								Dev.alive = GUI:Checkbox(".alive", Dev.alive)
 								Dev.attackable = GUI:Checkbox(".attackable", Dev.attackable)
@@ -501,7 +288,6 @@ function Dev.DrawCall(event, ticks )
 								Dev.targetable = GUI:Checkbox(".targetable", Dev.targetable)
 								GUI:PushItemWidth(100); Dev.targeting = GUI:InputText("targeting",Dev.targeting); GUI:PopItemWidth();
 								Dev.targetingme = GUI:Checkbox(".targetingme", Dev.targetingme)
-
 								GUI:PopStyleVar()
 							GUI:EndChild()
 							GUI:Unindent()
@@ -766,7 +552,6 @@ function Dev.DrawCall(event, ticks )
 				GUI:TreePop()
 			end
 						
-			-- cbk: AbilityList
 			if ( GUI:TreeNode("AbilityList")) then
 				if( gamestate == 3 ) then 
 					GUI:NewLine()
@@ -796,7 +581,6 @@ function Dev.DrawCall(event, ticks )
 					GUI:Unindent()
 					GUI:NewLine()
 					GUI:Separator( )
-					
 					GUI:Separator( )
 					GUI:TextWrapped(GetString("Ability List"))
 					GUI:Separator()
@@ -807,11 +591,9 @@ function Dev.DrawCall(event, ticks )
 							eso_skillmanager.BuildSkillsBook()
 						end
 					end
-					
 					GUI:PushItemWidth(200)
 					if (table.valid(eso_skillmanager.skillsbyid)) then
 						local softTarget = Player:GetSoftTarget()
-						
 						for index,skillInfo in spairs(eso_skillmanager.skillsbyindex) do
 							if GUI:TreeNode(tostring(index).." - "..skillInfo.name) then
 								GUI:BulletText("id = "..tostring(skillInfo.id))
@@ -837,8 +619,7 @@ function Dev.DrawCall(event, ticks )
 				end
 				GUI:TreePop()
 			end
-			-- END ABILITYLIST
-
+			
 			if ( GUI:TreeNode("Utility Functions")) then
 					GUI:PushItemWidth(200)
 					GUI:BulletText("GetGameState()") GUI:SameLine(200) GUI:InputText("##DevUT0",tostring(GetGameState()))
