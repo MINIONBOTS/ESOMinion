@@ -116,6 +116,13 @@ function Dev.DrawCall(event, ticks )
 					end
 					if ( GUI:TreeNode("Position") ) then
 						GUI:BulletText(".mapid = "..tostring(Player.mapid))
+						GUI:BulletText(".mapcontenttype = "..tostring(Player.mapcontenttype))
+						GUI:Indent()
+							GUI:BulletText("MAP_CONTENT_NONE = 0")
+							GUI:BulletText("MAP_CONTENT_AVA = 1")
+							GUI:BulletText("MAP_CONTENT_DUNGEON = 2")
+							GUI:BulletText("MAP_CONTENT_BATTLEGROUND = 3")
+						GUI:Unindent()
 						if ValidTable(Player.pos) then
 							if GUI:TreeNode(".pos - Mesh Space Position") then
 								GUI:BulletText(".x = "..tostring(Player.pos.x))
@@ -165,6 +172,7 @@ function Dev.DrawCall(event, ticks )
 								GUI:TreePop()
 							end
 						end
+						GUI:TreePop()
 					end
 					if ( GUI:TreeNode("Other") ) then
 						GUI:BulletText(".id = "..tostring(Player.id))
