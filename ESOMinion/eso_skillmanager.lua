@@ -752,7 +752,7 @@ function eso_skillmanager.BuildSkillsBook()
 		for i = 1,100 do
 			local skillid = e("GetAbilityIdByIndex("..i..")")
 			if skillid ~= 0 then
-				local skillData = ESOLib.API.Action.GetSkillData(skillid)
+				local skillData = AbilityList:Get(skillid)
 				if skillData then
 					eso_skillmanager.skillsbyindex[i] = skillData
 					eso_skillmanager.skillsbyid[skillid] = skillData
@@ -769,16 +769,14 @@ function eso_skillmanager.BuildSkillsBook()
 			end
 		end
 	end
-	
 	for i = 1,8 do
 		local skillid = AbilityList:GetSlotInfo(i) 
 		if skillid ~= 0 then
-			local skillData = ESOLib.API.Action.GetSkillData(skillid)
+			local skillData = AbilityList:Get(skillid)
 			if skillData then
 				if not eso_skillmanager.skillsbyid[skillid] then
 					table.insert(eso_skillmanager.skillsbyindex,skillData)
 				end
-		
 				eso_skillmanager.skillsbyid[skillid] = skillData
 				eso_skillmanager.skillsbyname[skillData.name] = skillData
 			
@@ -796,7 +794,7 @@ function eso_skillmanager.BuildSkillsBook()
 		for id,skill in pairs (eso_skillmanager.SummonSkills) do
 			local skillid = id
 			if skillid ~= 0 then
-				local skillData = ESOLib.API.Action.GetSkillData(skillid)
+				local skillData = AbilityList:Get(skillid)
 				if skillData then
 					if not eso_skillmanager.skillsbyid[skillid] then
 						table.insert(eso_skillmanager.skillsbyindex,skillData)
@@ -808,10 +806,10 @@ function eso_skillmanager.BuildSkillsBook()
 			end
 		end
 	end
+	
 	return eso_skillmanager.skillsbyindex
 end
 function eso_skillmanager.BuildSkillsList()
-	d("build new skill list")
 	
 	eso_skillmanager.skillsbyid = {}
 	eso_skillmanager.skillsbyname = {}
@@ -1003,7 +1001,9 @@ function eso_skillmanager.Cast( entity )
 			return false
 		end
 	end
-	
+	if not esominion.buffList[entity.index] then
+		BuildBuffsByIndex(entity.index)
+	end
 	--Check for blocks/interrupts.
 	local isAssistMode = (gBotMode == GetString("assistMode"))
 	
@@ -1646,14 +1646,14 @@ function eso_skillmanager.AddDefaultConditions()
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
-		
+		local playerBuffs = esominion.buffList[Player.index]
 		if (skill.pbuffthis == true) then
-			if not HasBuff(esominion.playerbuffs, realskilldata.id) then 
+			if not HasBuff(playerBuffs, realskilldata.id) then 
 				return true
 			end 
 		end
 		if (skill.pnbuffthis == true) then
-			if not MissingBuff(esominion.playerbuffs, realskilldata.id) then 
+			if not MissingBuff(playerBuffs, realskilldata.id) then 
 				return true
 			end
 		end			
@@ -1665,16 +1665,17 @@ function eso_skillmanager.AddDefaultConditions()
 	conditional = { name = "Target Single Buff Check"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
-		local realskilldata = eso_skillmanager.CurrentSkillData
 		local target = eso_skillmanager.CurrentTarget
+		local realskilldata = eso_skillmanager.CurrentSkillData
+		local targetBuffs = esominion.buffList[target.index]
 		
 		if (skill.tbuffthis == true) then
-			if not HasBuff(esominion.targetbuffs, realskilldata.id) then 
+			if not HasBuff(targetBuffs, realskilldata.id) then 
 				return true
 			end 
 		end
 		if (skill.tnbuffthis == true) then
-			if not MissingBuff(esominion.targetbuffs, realskilldata.id) then 
+			if not MissingBuff(targetBuffs, realskilldata.id) then 
 				return true
 			end
 		end			
@@ -1687,14 +1688,14 @@ function eso_skillmanager.AddDefaultConditions()
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
-		
+		local playerBuffs = esominion.buffList[Player.index]
 		if (skill.pbuff ~= "") then
-			if not HasBuffs(esominion.playerbuffs, skill.pbuff) then 
+			if not HasBuffs(playerBuffs, skill.pbuff) then 
 				return true
 			end 
 		end
 		if (skill.pnbuff ~= "") then
-			if not MissingBuffs(esominion.playerbuffs, skill.pnbuff) then 
+			if not MissingBuffs(playerBuffs, skill.pnbuff) then 
 				return true
 			end
 		end			
@@ -1706,15 +1707,17 @@ function eso_skillmanager.AddDefaultConditions()
 	conditional = { name = "Target Buff Checks"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
+		local target = eso_skillmanager.CurrentTarget
 		local realskilldata = eso_skillmanager.CurrentSkillData
+		local targetBuffs = esominion.buffList[target.index]
 		
 		if (skill.pbuff ~= "") then
-			if not HasBuffs(esominion.targetbuffs, skill.tbuff) then 
+			if not HasBuffs(targetBuffs, skill.tbuff) then 
 				return true
 			end 
 		end
 		if (skill.pnbuff ~= "") then
-			if not MissingBuffs(esominion.targetbuffs, skill.tnbuff) then 
+			if not MissingBuffs(targetBuffs, skill.tnbuff) then 
 				return true
 			end
 		end			

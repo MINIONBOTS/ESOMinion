@@ -92,7 +92,10 @@ function eso_task_assist.GetTarget()
 	if not eso_skillmanager.skillsbyname["Default"] then
 		eso_skillmanager.BuildSkillsList()
 	end
-	target = eso_task_assist.SelectTargetExtended(ml_global_information.AttackRange, true,true) -- check for aggro targets 1st
+	target = eso_task_assist.SelectTargetExtended(ml_global_information.AttackRange, true, true) -- check for aggro targets 1st
+	if ( not ValidTable(target) ) then 
+		target = eso_task_assist.SelectTargetExtended(ml_global_information.AttackRange, false, true) -- normal targets next
+	end	
 	if ( not ValidTable(target) ) then 
 		target = eso_task_assist.SelectTargetExtended(ml_global_information.AttackRange, true) -- normal targets next
 	end	

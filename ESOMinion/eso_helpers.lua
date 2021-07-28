@@ -197,6 +197,22 @@ function In(var,...)
 	
 	return false
 end
+function BuildBuffsByIndex(index)
+	local target = EntityList:Get(index)
+	if table.valid(target) then
+		if not esominion.buffList[index] then
+			esominion.buffList[index] = {}
+		end
+		local buffCount = e("GetNumBuffs("..tostring(index)..")")
+		if buffCount > 0 then
+			for buff = 1 , buffCount do
+				local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = e("GetUnitBuffInfo("..tostring(index)..", "..buff..")")
+				esominion.buffList[index][abilityId] = buffName
+			end
+		end
+	end
+end
+
 
 function HasBuff(list, buffName)
 	if table.valid(list) and buffName then
@@ -372,33 +388,6 @@ end
 RegisterForEvent("EVENT_PLAYER_DEAD", true)
 RegisterEventHandler("GAME_EVENT_PLAYER_DEAD", death_update_dead, "Death Update Dead")
 
-function BuildBuffs(eventName, eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
-	if In(changeType,"1","2") then
-		if In(unitTag,"player") then
-			esominion.playerbuffs = {}
-			local pBuffCount = e("GetNumBuffs(player)")
-			if pBuffCount > 0 then
-				for buff = 1 , pBuffCount do
-					local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = e("GetUnitBuffInfo(player, "..buff..")")
-					esominion.playerbuffs[abilityId] = buffName
-				end
-			end
-		end
-		
-		if In(unitTag,"reticleover") then
-			esominion.targetbuffs = {}
-			local tBuffCount = e("GetNumBuffs(reticleover)")
-			if tBuffCount > 0 then
-				for buff = 1, tBuffCount do
-					local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer  = e("GetUnitBuffInfo(reticleover, "..buff..")")
-					esominion.targetbuffs[abilityId] = buffName
-				end
-			end
-		end
-	end
-end
-RegisterForEvent("EVENT_EFFECT_CHANGED", true)
-RegisterEventHandler("GAME_EVENT_EFFECT_CHANGED", BuildBuffs, "BuffChecks")
 function changeCombatState(eventName, eventCode, inCombat)
 d("in combat state changed")
 	Player.incombat = toboolean(inCombat)

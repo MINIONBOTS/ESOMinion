@@ -10,8 +10,7 @@ esominion.lureTypes = {}
 esominion.activeTip = 0
 esominion.petalive = nil
 esominion.petalivecheck = 0
-esominion.playerbuffs = {}
-esominion.targetbuffs = {}
+esominion.buffList = {}
 esominion.currentfishinghole = {}
 esominion.hooked = false
 esominion.hooktimer = 0
@@ -467,6 +466,8 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	end
 	
 	if (Now() >= ml_global_information.nextRun) then
+		esominion.buffList = {}
+		BuildBuffsByIndex(Player.index)
 		if esominion.smartrecord and not NavigationManager.ProcessingFloorMesh then
 			--if Player.isswimming == 1 then
 			if ml_mesh_mgr.data.flooreditormode ~= 5 then
