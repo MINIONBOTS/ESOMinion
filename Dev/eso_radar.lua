@@ -595,12 +595,12 @@ function eso_radar.Radar() -- Table
 						Colour = gRadarSkyshardsColour.colour
 						Draw = true
 					end
-					if (gRadarFish) and In(e.contentid,909,910,911,912) then
+					if (gRadarFish) and In(e.contentid,909,910,911,912,2738) then
 						Colour = gRadarFishColour.colour
 						Draw = true
 					end
 					
-					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,1811) then
+					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,10082,1811) then
 						Colour = gRadarTrovesColour.colour
 						Draw = true
 					end
