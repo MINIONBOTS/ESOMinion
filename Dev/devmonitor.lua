@@ -461,7 +461,7 @@ function Dev.DrawCall(event, ticks )
 									if not entity.name or entity.name == "" then
 										entity.name = GetString("No Name")
 									end
-									if GUI:TreeNode(entity.contentid .. " - " .. entity.name) then
+									if GUI:TreeNode(entity.index .. " - " .. entity.name) then
 										GUI:BulletText(".id = "..tostring(entity.id))
 										GUI:BulletText(".name = "..tostring(entity.name))
 										GUI:BulletText(".index = "..tostring(entity.index))
