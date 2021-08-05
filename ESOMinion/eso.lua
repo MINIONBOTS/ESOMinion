@@ -501,31 +501,33 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			e("RollDodgeStop()")
 		end
 		
-		local breakable = esominion.activeTip == eso_skillmanager.TIP_BREAK
-		if (breakable) then
-			if (not isAssistMode or (isAssistMode and gAssistDoBreak)) then
-				if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
-					e("RollDodgeStart()")
-					eso_skillmanager.roll = true
-					eso_skillmanager.latencyTimer = Now() + 300
-					eso_skillmanager.lastBreak = Now()
-					d("Attempting to break CC.")
-					return true
-				end
-			end
-		end
-		
-		local avoidable = esominion.activeTip == eso_skillmanager.TIP_AVOID
-		if (avoidable) then
-			if (not isAssistMode or (isAssistMode and gAssistDoAvoid)) then
-				if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
-					if (Player.stamina.percent > 50) then
+		if (ESO_Common_BotRunning) then
+			local breakable = esominion.activeTip == eso_skillmanager.TIP_BREAK
+			if (breakable) then
+				if (not isAssistMode or (isAssistMode and gAssistDoBreak)) then
+					if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
 						e("RollDodgeStart()")
 						eso_skillmanager.roll = true
 						eso_skillmanager.latencyTimer = Now() + 300
-						eso_skillmanager.lastAvoid = Now()
-						d("Attempting to avoid.")
+						eso_skillmanager.lastBreak = Now()
+						d("Attempting to break CC.")
 						return true
+					end
+				end
+			end
+			
+			local avoidable = esominion.activeTip == eso_skillmanager.TIP_AVOID
+			if (avoidable) then
+				if (not isAssistMode or (isAssistMode and gAssistDoAvoid)) then
+					if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
+						if (Player.stamina.percent > 50) then
+							e("RollDodgeStart()")
+							eso_skillmanager.roll = true
+							eso_skillmanager.latencyTimer = Now() + 300
+							eso_skillmanager.lastAvoid = Now()
+							d("Attempting to avoid.")
+							return true
+						end
 					end
 				end
 			end
