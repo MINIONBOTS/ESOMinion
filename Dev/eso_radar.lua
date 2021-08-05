@@ -591,16 +591,16 @@ function eso_radar.Radar() -- Table
 						Colour = gRadarHostileColour.colour
 						Draw = true
 					end
-					if (gRadarSkyshards) and In(e.contentid,22637,22638,22639,22640,22641,22642,22643) then
+					if (gRadarSkyshards) and In(e.contentid,22637,22638,22639,22640,22641,22642,22643,28459,28465,28466,28467,28468) then
 						Colour = gRadarSkyshardsColour.colour
 						Draw = true
 					end
-					if (gRadarFish) and In(e.contentid,909,910,911,912,2738) then
+					if (gRadarFish) and In(e.contentid,909,910,911,912) then
 						Colour = gRadarFishColour.colour
 						Draw = true
 					end
 					
-					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,10082,1811) then
+					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,1811) then
 						Colour = gRadarTrovesColour.colour
 						Draw = true
 					end
