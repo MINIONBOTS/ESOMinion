@@ -133,8 +133,6 @@ function esominion.Init()
 	} 
 	esominion.SetMainVars()
 	esominion.AddMode(GetString("assistMode"), eso_task_assist)
-	esominion.AddMode(GetString("fishMode"), eso_task_fish)
-	esominion.AddMode(GetString("gatherMode"), eso_task_gather)
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
