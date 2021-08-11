@@ -600,7 +600,7 @@ function eso_radar.Radar() -- Table
 						Draw = true
 					end
 					
-					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,1811) then
+					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,10082,1811,18842,18846,18851,18852,18864,18870,18837) then
 						Colour = gRadarTrovesColour.colour
 						Draw = true
 					end
