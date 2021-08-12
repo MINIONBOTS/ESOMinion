@@ -2,5 +2,5 @@
 Name=ESOMinion
 Dependencies=minionlib,BehaviorTree
 Version=1
-Files=eso.lua,eso_init.lua,eso_task_assist.lua,eso_common_cne.lua,eso_skillmanager.lua,eso_helpers.lua,eso_helpers_gui.lua,eso_helpers_memoized.lua,eso_navigation.lua,eso_unstuck.lua,eso_common.lua
+Files=eso.lua,eso_init.lua,eso_task_assist.lua,eso_common_cne.lua,eso_skillmanager.lua,eso_helpers.lua,eso_helpers_gui.lua,eso_helpers_memoized.lua,eso_navigation.lua,eso_unstuck.lua,eso_common.lua,eso_task_gather.lua,eso_task_fish.lua
 Enabled=1
