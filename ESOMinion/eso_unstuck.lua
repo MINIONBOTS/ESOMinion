@@ -95,7 +95,7 @@ function eso_unstuck.HandleOffMesh(status)
                     eso_unstuck.mesh.nextnode = NavigationManager:GetClosestPointOnMesh(Player.pos)
                     ud("assigned off-mesh-moveto")
                 end
-                local dist = math.distance3d(Player.pos, eso_unstuck.mesh.nextnode)
+                local dist = math.distance2d(Player.pos, eso_unstuck.mesh.nextnode)
                 if dist < 2 then
                     ud("reached. closest mesh position. (should be)")
                     if Player:IsMoving() then
@@ -158,14 +158,14 @@ function eso_unstuck.HandlePathStuck(playerpos, lastnode, nextnode)
         if data.prepos then
             local now = Now()
             local threshold, removal_th = 1, 2 --todo: add threshold setting i guess.. but 1 is ok?
-            local th_check = math.distance3d(playerpos, data.prepos) < threshold
+            local th_check = math.distance2d(playerpos, data.prepos) < threshold
             local ch
             ---add history // incase the shit is moving around somewhat// make history and compare each of them
             local active_pos
             ---consider this is as not moving // palyerpos should have unique memory address in each minion pulse due to it is called by c++ minion core
             if table.valid(data.history) then
                 for pos, b in pairs(data.history) do
-                    local d2 = math.distance3d(playerpos, pos)
+                    local d2 = math.distance2d(playerpos, pos)
                     if th_check and not ch and d2 < threshold then
                         ch = true
                     end
