@@ -359,7 +359,7 @@ function c_fishnextprofilepos:evaluate()
 	if (task.mapid == Player.localmapid) then
 		local pos = GetCurrentTaskPos()
 		local myPos = Player.pos
-		local dist = math.distance3d(myPos.x, myPos.y, myPos.z, pos.x, pos.y, pos.z)
+		local dist = math.distance2d(myPos.x, myPos.z, pos.x, pos.z)
 		if (dist > 3 or ml_task_hub:CurrentTask().requiresRelocate) then
 			c_fishnextprofilepos.distance = dist
 			return true
@@ -530,17 +530,17 @@ function eso_task_fish:Init()
 	local ke_bite = ml_element:create( "Bite", c_bite, e_bite, 10 )
 	self:add(ke_bite, self.process_elements)
 		
-	local ke_findnode = ml_element:create( "FindNode", c_findnode, e_findnode, 9 )
-	self:add(ke_findnode, self.process_elements)	
+	local kef_findnode = ml_element:create( "FindNode", cf_findnode, ef_findnode, 9 )
+	self:add(kef_findnode, self.process_elements)	
 	
 	local ke_findbait = ml_element:create( "FindBait", c_findbaits, e_findbaits, 8 )
 	self:add(ke_findbait, self.process_elements)
 		
-	local ke_movetobest = ml_element:create( "MoveToBest", c_movetobest, e_movetobest, 6 )
-	self:add(ke_movetobest, self.process_elements)
+	local kef_movetobest = ml_element:create( "MoveToBest", cf_movetobest, ef_movetobest, 6 )
+	self:add(kef_movetobest, self.process_elements)
 	
-	local ke_movetorandom = ml_element:create( "MoveToRandom", c_movetorandom, e_movetorandom, 5 )
-	self:add(ke_movetorandom, self.process_elements)
+	local kef_movetorandom = ml_element:create( "MoveToRandom", cf_movetorandom, ef_movetorandom, 5 )
+	self:add(kef_movetorandom, self.process_elements)
 	
 	
 	--local ke_fishing = ml_element:create( "Fishing", c_isfishing, e_isfishing, 1 )
@@ -622,10 +622,10 @@ function eso_fish.ResetLastGather()
 	Settings.ESOMINION.gFishLockout = {}
 end
 
-c_findnode = inheritsFrom( ml_cause )
-e_findnode = inheritsFrom( ml_effect )
-e_findnode.blockOnly = false
-function c_findnode:evaluate()
+cf_findnode = inheritsFrom( ml_cause )
+ef_findnode = inheritsFrom( ml_effect )
+ef_findnode.blockOnly = false
+function cf_findnode:evaluate()
 	if table.valid(eso_fish.currenttask) then
 		return false
 	end
@@ -645,13 +645,13 @@ function c_findnode:evaluate()
 	end
 	
 	if (table.valid(gatherable)) then
-		eso_fish.currenttask = MGetEntity(gatherable.id)
+		eso_fish.currenttask = MGetEntity(gatherable.index)
 		return true
 	end
 	
 	return false
 end
-function e_findnode:execute()
+function ef_findnode:execute()
 end
 
 c_movetonode = inheritsFrom( ml_cause )
@@ -705,19 +705,19 @@ function e_movetonode:execute()
 	end
 end
 
-c_movetorandom = inheritsFrom( ml_cause )
-e_movetorandom = inheritsFrom( ml_effect )
-function c_movetorandom:evaluate()
+cf_movetorandom = inheritsFrom( ml_cause )
+ef_movetorandom = inheritsFrom( ml_effect )
+function cf_movetorandom:evaluate()
 	if (table.valid(eso_fish.currenttask)) then
-	d("[c_movetorandom] false 1")
+	d("[cf_movetorandom] false 1")
 		return false
 	end
 	if InCombat() then
-	d("[c_movetorandom] false 3")
+	d("[cf_movetorandom] false 3")
 		return false
 	end
 	if TimeSince(esominion.hooktimer) < 3000 then
-	d("[c_movetorandom] false 4")
+	d("[cf_movetorandom] false 4")
 		return false
 	end
 	local ppos = Player.pos
@@ -732,8 +732,8 @@ function c_movetorandom:evaluate()
 						eso_fish.thisPosition = p
 						return true
 					else
-						local dist = math.distance3d(ppos.x, ppos.y, ppos.z, p.x, p.y, p.z)
-						local dist2 = math.distance3d(eso_fish.lastPosition.x, eso_fish.lastPosition.y, eso_fish.lastPosition.z, p.x, p.y, p.z)
+						local dist = math.distance2d(ppos.x, ppos.z, p.x, p.z)
+						local dist2 = math.distance2d(eso_fish.lastPosition.x, eso_fish.lastPosition.z, p.x, p.z)
 						if dist < dist2 then
 							eso_fish.lastPosition = eso_fish.thisPosition
 							eso_fish.thisPosition = p
@@ -748,13 +748,22 @@ function c_movetorandom:evaluate()
 	end
 	return false
 end
-function e_movetorandom:execute()
+function ef_movetorandom:execute()
+	d("[ef_movetorandom] execute")
 	
 	local randomPos = eso_fish.thisPosition
 	if (table.valid(randomPos)) then
 		local rpos = randomPos
+		local myPos = Player.pos
+		local dist = math.distance2d(myPos.x, myPos.z, rpos.x, rpos.z)
 		if (table.valid(rpos)) then
-			Player:MoveTo(rpos.x, rpos.y, rpos.z, false, 0, 5)
+			if dist > 5 then
+				Player:MoveTo(rpos.x, rpos.y, rpos.z, false, 0, 5)
+			else
+				eso_fish.lastPosition = eso_fish.thisPosition
+				eso_fish.thisPosition = {}
+				d("has position close by")
+			end
 		end
 	end
 end
@@ -821,7 +830,7 @@ function c_findbaits:evaluate()
 	end
 	
 	if (table.valid(gatherable)) then
-		eso_fish.currenttask = MGetEntity(gatherable.id)
+		eso_fish.currenttask = MGetEntity(gatherable.index)
 		return true
 	end
 	
@@ -830,36 +839,36 @@ end
 function e_findbaits:execute()
 end
 
-c_movetobest = inheritsFrom( ml_cause )
-e_movetobest = inheritsFrom( ml_effect )
-c_movetobest.doblock = false
-function c_movetobest:evaluate()
+cf_movetobest = inheritsFrom( ml_cause )
+ef_movetobest = inheritsFrom( ml_effect )
+cf_movetobest.doblock = false
+function cf_movetobest:evaluate()
 	if (not table.valid(eso_fish.currenttask)) then
-	d("[c_movetobest] false 1")
+	d("[cf_movetobest] false 1")
 		return false
 	end
 	if TimeSince(c_cast.blocktime) < 5000 then
 		return false
 	end
 	local gatherable = eso_fish.currenttask
-	if not MGetEntity(gatherable.id) then
+	if not MGetEntity(gatherable.index) then
 		eso_fish.currenttask = {}
 		d("clear baits 1")
 		return false
 	end
 	if InCombat() then
-	d("[c_movetobest] false 2")
+	d("[cf_movetobest] false 2")
 		return false
 	end
 	if TimeSince(esominion.hooktimer) < 3000 then
-	d("[c_movetobest] false 4")
+	d("[cf_movetobest] false 4")
 		return false
 	end
 	if eso_fish.idLockoutattempts >= 5 then
-		eso_fish.lockoutids[eso_fish.currenttask.id] = true
+		eso_fish.lockoutids[eso_fish.currenttask.index] = true
 		eso_fish.currenttask = {}
 	end
-	c_movetobest.doblock = false
+	cf_movetobest.doblock = false
 	if (gatherable) then
 		local distanceMax = 5
 		if In(gatherable.contentid,909,910,911,912) then
@@ -876,8 +885,9 @@ function c_movetobest:evaluate()
 				if TargetList then
 					id,mytarget = next (TargetList)
 					mytarget:Interact()
+					d("interact 2")
 					ml_global_information.Await(1000)
-					c_movetobest.doblock = true
+					cf_movetobest.doblock = true
 					eso_fish.idLockoutattempts = eso_fish.idLockoutattempts + 1
 					return true
 				end
@@ -888,13 +898,13 @@ function c_movetobest:evaluate()
 	
 	return false
 end
-function e_movetobest:execute()
+function ef_movetobest:execute()
 
-	d("[c_movetobest] execute")
-	if c_movetobest.doblock then
+	d("[cf_movetobest] execute")
+	if cf_movetobest.doblock then
 		return false
 	end
-	d("[c_movetobest] execute 1")
+	d("[cf_movetobest] execute 1")
 	local gatherable = eso_fish.currenttask
 	if (table.valid(gatherable)) then
 		local gpos = gatherable.meshpos
@@ -902,10 +912,10 @@ function e_movetobest:execute()
 		if In(gatherable.contentid,909,910,911,912) then
 			distanceMax = 15
 		end
-	d("[c_movetobest] execute 2")
+	d("[cf_movetobest] execute 2")
 		if (table.valid(gpos)) then
 			
-	d("[c_movetobest] execute 3")
+	d("[cf_movetobest] execute 3")
 			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
 		end
 	end
@@ -986,7 +996,7 @@ function c_findaggro:evaluate()
 			end
 		end
 		if best then
-			eso_fish.killtargetid = best.id
+			eso_fish.killtargetid = best.index
 			return best
 		end
 	end

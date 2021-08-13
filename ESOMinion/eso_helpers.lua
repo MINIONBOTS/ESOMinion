@@ -314,7 +314,7 @@ function GetNearestFromList(strList,pos,radius,excludelist)
 		
 		local filteredList = {}
 		for i,entity in pairs(el) do
-			if not excludelist[entity.id] then
+			if not excludelist[entity.index] then
 				local epos = entity.pos
 				if (NavigationManager:IsReachable(epos)) then
 					if (not radius or (radius >= 150)) then
@@ -329,6 +329,11 @@ function GetNearestFromList(strList,pos,radius,excludelist)
 					local ppos = Player.pos
 					d("[GetNearestFromList]- Entity at ["..tostring(math.round(epos.x,0))..","..tostring(math.round(epos.y,0))..","..tostring(math.round(epos.z,0)).."] not reachable from ["..tostring(math.round(ppos.x,0))..","..tostring(math.round(ppos.y,0))..","..tostring(math.round(ppos.z,0)).."]")
 				end
+			else
+				d("entity is excluded")
+				d(entity.contentid)
+				d(entity.index)
+				
 			end
 		end
 		
