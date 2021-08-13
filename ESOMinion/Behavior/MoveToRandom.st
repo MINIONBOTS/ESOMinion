@@ -51,7 +51,6 @@ local tbl =
 							"end",
 							"",
 							"if table.valid(context.moveToRandom) then",
-							"d(\"random position active\")",
 							"    if math.distance2d(Player.pos ,  context.moveToRandom.pos) < 3 then",
 							"        d(\"reached random point. generate random point again\")",
 							"        context.moveToRandom = false",

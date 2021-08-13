@@ -88,7 +88,7 @@ local tbl =
 							"-- todo: set proper stop distance from pulse and movement_speed",
 							"local mpos = context.moveto.meshpos",
 							"if table.valid(mpos) then",
-							"    if math.distance3d(Player.meshpos , mpos) < 2 then",
+							"    if math.distance2d(Player.meshpos , mpos) < 2 then",
 							"        if Player:IsMoving() then",
 							"            Player:StopMovement()",
 							"        end",
