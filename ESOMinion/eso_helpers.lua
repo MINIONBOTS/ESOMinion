@@ -288,8 +288,10 @@ function SetBait(pondtype)
 				local baitInfo = e("GetFishingLureInfo("..i..")") 
 				if baitInfo ~= "" then
 					--d("bait info found")
-					--d(baitInfo)
-					--e("SetFishingLure("..i..")")
+					d("set bait")
+					d(i)
+					d(baitInfo)
+					e("SetFishingLure("..i..")")
 					esominion.lureType = i
 					baitfound = true
 				end
@@ -297,10 +299,11 @@ function SetBait(pondtype)
 		end
 		if not baitfound then
 			esominion.lureType = 0
+			d("no baits available")
 			return false
 		end
 	else
-		--d("no baits to set")
+		d("no baits to set")
 		esominion.lureType = 0
 		return false
 	end
