@@ -886,12 +886,12 @@ function cf_movetobest:evaluate()
 		if In(gatherable.contentid,909,910,911,912) then
 			distanceMax = 15
 		end
-		local interactable = MGetGameCameraInteractableActionInfo()
-		local reachable = (gatherable.distance <= distanceMax and not In(interactable,nil,false))
+		--local interactable = MGetGameCameraInteractableActionInfo()
+		local reachable = (gatherable.distance <= distanceMax)
 		if (not reachable) then
 			return true
 		else
-			if interactable == "Take" then
+			--if interactable == "Take" then
 				local TargetList = MEntityList("maxdistance=5,contentid="..eso_fish.baitstring)
 				if TargetList then
 					id,mytarget = next (TargetList)
@@ -901,8 +901,7 @@ function cf_movetobest:evaluate()
 					eso_fish.idLockoutattempts[eso_fish.currenttask.index] = IsNull(eso_fish.idLockoutattempts[eso_fish.currenttask.index],0) + 1
 					return true
 				end
-			end
-			
+			--end
 		end
 	end
 	
