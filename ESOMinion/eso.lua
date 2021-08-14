@@ -14,6 +14,7 @@ esominion.buffList = {}
 esominion.currentfishinghole = {}
 esominion.hooked = false
 esominion.hooktimer = 0
+esominion.petid = 0
 esominion.baits = {
 
 	[1] = "Simple Bait",
@@ -466,6 +467,9 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	end
 	
 	if (Now() >= ml_global_information.nextRun) then
+		if esominion.hooked and TimeSince(esominion.hooktimer) > 5000 then
+			esominion.hooked = false
+		end
 		esominion.buffList = {}
 		BuildBuffsByIndex(Player.index)
 		if esominion.smartrecord and not NavigationManager.ProcessingFloorMesh then

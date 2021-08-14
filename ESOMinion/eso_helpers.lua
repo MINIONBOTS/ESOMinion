@@ -260,8 +260,38 @@ function hasPet()
 	local petAlive = e("DoesUnitExist(playerpet1)")
 	esominion.petalive = petAlive
 	esominion.petalivecheck = Now()
+	if petAlive and esominion.petid == 0 then
+		local petList = MEntityList("maxdistance=20,friendly,isnpc,interactype=0,nocritter")
+		if table.valid(petList) then
+			for i,e in pairs(petList) do
+				if e.health and e.health.percent > 0 then
+					esominion.petid = e.id
+					break
+				end
+			end
+		end
+	end
 	return petAlive
 end
+function getPetID()
+	if hasPet() then
+		if esominion.petid == 0 then
+			local petList = MEntityList("maxdistance=20,friendly,isnpc,interactype=0,nocritter")
+			if table.valid(petList) then
+				for i,e in pairs(petList) do
+					if e.health and e.health.percent > 0 then
+						esominion.petid = e.id
+						return esominion.petid
+					end
+				end
+			end
+		end
+	else
+		esominion.petid = 0
+	end
+	return 0
+end
+
 function IsLootOpen()
 
 	return esominion.lootOpen
@@ -319,7 +349,7 @@ function GetNearestFromList(strList,pos,radius,excludelist)
 		for i,entity in pairs(el) do
 			if not excludelist[entity.index] then
 				local epos = entity.pos
-				if (NavigationManager:IsReachable(epos)) then
+				if (NavigationManager:IsReachable(epos)) and (entity.meshpos and entity.meshpos.meshdistance < 4) then
 					if (not radius or (radius >= 150)) then
 						table.insert(filteredList,entity)
 					else

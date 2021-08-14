@@ -33,11 +33,20 @@ function c_findaggro:evaluate()
 		return false
 	end
 	
-	local TargetList = MEntityList("maxdistance=20,hostile,aggro")
-	if table.valid(TargetList) then
+	local targetList = MEntityList("maxdistance=20,hostile,aggro")
+	if not table.valid(targetList) then
+		targetList = MEntityList("maxdistance=20,hostile,targetingme")
+	end
+	if not table.valid(targetList) and hasPet() then
+		getPetID()
+		if esominion.petid ~= 0 then
+			targetList = MEntityList("maxdistance=20,hostile,targeting="..tostring(esominion.petid))
+		end
+	end
+	if table.valid(targetList) then
 		local best = nil
 		local lowestHP = math.huge
-		for i,e in pairs(TargetList) do
+		for i,e in pairs(targetList) do
 			if e.health.current > 0 then
 				if e.health.current < lowestHP then
 					lowestHP = e.health.current
