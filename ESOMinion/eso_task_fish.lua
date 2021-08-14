@@ -267,6 +267,13 @@ function e_bite:execute()
 		local doHook = true
 		if doHook then
 			Player:CameraInteractionStart()
+			--[[local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
+			if TargetList then
+				id,mytarget = next (TargetList)
+				mytarget:Interact()
+				d("check new reel in type stuff")
+				--ml_global_information.Await(1000)
+			end]]
 		end
 		esominion.hooked = false
 	end
@@ -709,15 +716,15 @@ cf_movetorandom = inheritsFrom( ml_cause )
 ef_movetorandom = inheritsFrom( ml_effect )
 function cf_movetorandom:evaluate()
 	if (table.valid(eso_fish.currenttask)) then
-	d("[cf_movetorandom] false 1")
+	--d("[cf_movetorandom] false 1")
 		return false
 	end
 	if InCombat() then
-	d("[cf_movetorandom] false 3")
+	--d("[cf_movetorandom] false 3")
 		return false
 	end
 	if TimeSince(esominion.hooktimer) < 3000 then
-	d("[cf_movetorandom] false 4")
+	--d("[cf_movetorandom] false 4")
 		return false
 	end
 	local ppos = Player.pos
@@ -813,17 +820,17 @@ function c_findbaits:evaluate()
 		return false
 	end]]
 	if InCombat() then
-	d("[c_findbaits] false 1")
+	--d("[c_findbaits] false 1")
 		return false
 	end
 	if table.valid(eso_fish.currenttask) then
+	--d("[c_findbaits] false 2")
 		return false
 	end
 	local whitelist = eso_fish.baitstring
 	local radius = 75
 	local filter = ""
 	filter = "onmesh,contentid="..whitelist
-
 	local gatherable = nil				
 	if (gatherable == nil) then
 		gatherable = GetNearestFromList(filter,Player.pos,30,eso_fish.lockoutids)
@@ -844,7 +851,7 @@ ef_movetobest = inheritsFrom( ml_effect )
 cf_movetobest.doblock = false
 function cf_movetobest:evaluate()
 	if (not table.valid(eso_fish.currenttask)) then
-	d("[cf_movetobest] false 1")
+	--d("[cf_movetobest] false 1")
 		return false
 	end
 	if TimeSince(c_cast.blocktime) < 5000 then
@@ -853,15 +860,14 @@ function cf_movetobest:evaluate()
 	local gatherable = eso_fish.currenttask
 	if not MGetEntity(gatherable.index) then
 		eso_fish.currenttask = {}
-		d("clear baits 1")
 		return false
 	end
 	if InCombat() then
-	d("[cf_movetobest] false 2")
+	--d("[cf_movetobest] false 2")
 		return false
 	end
 	if TimeSince(esominion.hooktimer) < 3000 then
-	d("[cf_movetobest] false 4")
+	--d("[cf_movetobest] false 4")
 		return false
 	end
 	if eso_fish.idLockoutattempts >= 5 then
@@ -876,7 +882,6 @@ function cf_movetobest:evaluate()
 		end
 		local interactable = MGetGameCameraInteractableActionInfo()
 		local reachable = (gatherable.distance <= distanceMax and not In(interactable,nil,false))
-		d("reachable = "..tostring(reachable))
 		if (not reachable) then
 			return true
 		else
@@ -885,7 +890,6 @@ function cf_movetobest:evaluate()
 				if TargetList then
 					id,mytarget = next (TargetList)
 					mytarget:Interact()
-					d("interact 2")
 					ml_global_information.Await(1000)
 					cf_movetobest.doblock = true
 					eso_fish.idLockoutattempts = eso_fish.idLockoutattempts + 1
@@ -899,12 +903,10 @@ function cf_movetobest:evaluate()
 	return false
 end
 function ef_movetobest:execute()
-
-	d("[cf_movetobest] execute")
 	if cf_movetobest.doblock then
 		return false
 	end
-	d("[cf_movetobest] execute 1")
+	--d("[cf_movetobest] execute 1")
 	local gatherable = eso_fish.currenttask
 	if (table.valid(gatherable)) then
 		local gpos = gatherable.meshpos
@@ -912,10 +914,10 @@ function ef_movetobest:execute()
 		if In(gatherable.contentid,909,910,911,912) then
 			distanceMax = 15
 		end
-	d("[cf_movetobest] execute 2")
+	--d("[cf_movetobest] execute 2")
 		if (table.valid(gpos)) then
 			
-	d("[cf_movetobest] execute 3")
+	--d("[cf_movetobest] execute 3")
 			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
 		end
 	end
@@ -975,62 +977,6 @@ function e_fishingloot:execute()
 		e("EndLooting()")
 	end
 	c_fishingloot.lootattempt = false
-end
-c_findaggro = inheritsFrom( ml_cause )
-e_findaggro = inheritsFrom( ml_effect )
-function c_findaggro:evaluate()
-	if eso_fish.killtargetid ~= 0 then
-		return false
-	end
-	
-	local TargetList = MEntityList("maxdistance=20,hostile,aggro")
-	if table.valid(TargetList) then
-		local best = nil
-		local lowestHP = math.huge
-		for i,e in pairs(TargetList) do
-			if e.health.current > 0 then
-				if e.health.current < lowestHP then
-					lowestHP = e.health.current
-					best = e
-				end
-			end
-		end
-		if best then
-			eso_fish.killtargetid = best.index
-			return best
-		end
-	end
-	
-	return false
-end
-function e_findaggro:execute()
-end
-
-c_killaggro = inheritsFrom( ml_cause )
-e_killaggro = inheritsFrom( ml_effect )
-function c_killaggro:evaluate()
-	if eso_fish.killtargetid == 0 then
-		return false
-	end
-	if Player.isswimming ~= 0 then
-		return false
-	end
-	return true
-end
-function e_killaggro:execute()
-	d("KILL!!!")
-	if Player:IsMoving() then
-		Player:StopMovement()
-	end
-	eso_fish.thisPosition = {}
-	local target = MGetEntity(eso_fish.killtargetid)
-	if target and target.health.current > 0 then
-		Player:SetFacing(target.id,true)
-		eso_skillmanager.Cast( target )
-	else
-		eso_fish.killtargetid = 0
-	end
-	eso_fish.thisPosition = {}
 end
 
 function eso_fish.BuildWhitelist()

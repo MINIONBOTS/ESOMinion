@@ -25,3 +25,58 @@ function e_loot:execute()
 	end
 	c_loot.lootattempt = false
 end
+
+c_findaggro = inheritsFrom( ml_cause )
+e_findaggro = inheritsFrom( ml_effect )
+function c_findaggro:evaluate()
+	if eso_gather.killtargetid ~= 0 then
+		return false
+	end
+	
+	local TargetList = MEntityList("maxdistance=20,hostile,aggro")
+	if table.valid(TargetList) then
+		local best = nil
+		local lowestHP = math.huge
+		for i,e in pairs(TargetList) do
+			if e.health.current > 0 then
+				if e.health.current < lowestHP then
+					lowestHP = e.health.current
+					best = e
+				end
+			end
+		end
+		if best then
+			eso_gather.killtargetid = best.index
+			return best
+		end
+	end
+	
+	return false
+end
+function e_findaggro:execute()
+end
+c_killaggro = inheritsFrom( ml_cause )
+e_killaggro = inheritsFrom( ml_effect )
+function c_killaggro:evaluate()
+	if eso_gather.killtargetid == 0 then
+		return false
+	end
+	if Player.isswimming ~= 0 then
+		return false
+	end
+	return true
+end
+function e_killaggro:execute()
+	d("KILL!!!")
+	if Player:IsMoving() then
+		Player:StopMovement()
+	end
+	eso_gather.thisPosition = {}
+	local target = MGetEntity(eso_gather.killtargetid)
+	if target and target.health.current > 0 then
+		Player:SetFacing(target.id,true)
+		eso_skillmanager.Cast( target )
+	else
+		eso_gather.killtargetid = 0
+	end
+end

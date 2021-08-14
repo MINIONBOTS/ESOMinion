@@ -465,7 +465,6 @@ function c_movetobest:evaluate()
 	local gatherable = eso_gather.currenttask
 	if not MGetEntity(gatherable.index) then
 		eso_gather.currenttask = {}
-		d("clear gather")
 		return false
 	end
 	if InCombat() then
@@ -487,7 +486,6 @@ function c_movetobest:evaluate()
 				if TargetList then
 					id,mytarget = next (TargetList)
 					mytarget:Interact()
-					d("interact 1")
 					ml_global_information.Await(1000)
 					c_movetobest.doblock = true
 					--eso_gather.idLockoutattempts = eso_gather.idLockoutattempts + 1
@@ -501,23 +499,18 @@ function c_movetobest:evaluate()
 	return false
 end
 function e_movetobest:execute()
---d("e_movetobest")
 	if c_movetobest.doblock then
-	--d("blocked")
 		return false
 	end
 	local gatherable = eso_gather.currenttask
 	if (table.valid(gatherable)) then
 		local gpos = gatherable.meshpos
 		local distanceMax = 5
-	--d("[c_movetobest] execute 2")
 		if (table.valid(gpos)) then
 			
-	--d("[c_movetobest] execute 3")
 			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
 		end
 	end
-	--d("end")
 end
 
 c_setfacing = inheritsFrom( ml_cause )
@@ -572,61 +565,7 @@ function e_gatherloot:execute()
 	end
 	c_gatherloot.lootattempt = false
 end
-c_findaggro = inheritsFrom( ml_cause )
-e_findaggro = inheritsFrom( ml_effect )
-function c_findaggro:evaluate()
-	if eso_gather.killtargetid ~= 0 then
-		return false
-	end
-	
-	local TargetList = MEntityList("maxdistance=20,hostile,aggro")
-	if table.valid(TargetList) then
-		local best = nil
-		local lowestHP = math.huge
-		for i,e in pairs(TargetList) do
-			if e.health.current > 0 then
-				if e.health.current < lowestHP then
-					lowestHP = e.health.current
-					best = e
-				end
-			end
-		end
-		if best then
-			eso_gather.killtargetid = best.index
-			return best
-		end
-	end
-	
-	return false
-end
-function e_findaggro:execute()
-end
 
-c_killaggro = inheritsFrom( ml_cause )
-e_killaggro = inheritsFrom( ml_effect )
-function c_killaggro:evaluate()
-	if eso_gather.killtargetid == 0 then
-		return false
-	end
-	if Player.isswimming ~= 0 then
-		return false
-	end
-	return true
-end
-function e_killaggro:execute()
-	d("KILL!!!")
-	if Player:IsMoving() then
-		Player:StopMovement()
-	end
-	eso_gather.thisPosition = {}
-	local target = MGetEntity(eso_gather.killtargetid)
-	if target and target.health.current > 0 then
-		Player:SetFacing(target.id,true)
-		eso_skillmanager.Cast( target )
-	else
-		eso_gather.killtargetid = 0
-	end
-end
 
 function eso_gather.BuildWhitelist()
 	local whitelist = ""
