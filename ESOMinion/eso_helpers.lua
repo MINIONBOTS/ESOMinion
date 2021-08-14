@@ -317,10 +317,6 @@ function SetBait(pondtype)
 			if not pondtype or (esominion.baits[i] == pondtype) or i == 1 then
 				local baitInfo = e("GetFishingLureInfo("..i..")") 
 				if baitInfo ~= "" then
-					--d("bait info found")
-					d("set bait")
-					d(i)
-					d(baitInfo)
 					e("SetFishingLure("..i..")")
 					esominion.lureType = i
 					baitfound = true

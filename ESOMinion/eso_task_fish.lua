@@ -230,15 +230,22 @@ function c_cast:evaluate()
 			return true
 		end
 	end
-	local interactable = MGetGameCameraInteractableActionInfo()
-	if interactable == "Fish" then
-		return true
-	end
 	
+	local interactable = MGetGameCameraInteractableActionInfo()
+	if not In(interactable,"Reel In") then
+		local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
+		if TargetList then
+			id,mytarget = next (TargetList)
+			mytarget:Interact()
+			esominion.lureType = 0
+			ml_global_information.Await(1000)
+			return true
+		end
+	end
 	return false
 end
 function e_cast:execute()
-	if c_cast.doblock then
+	--[[if c_cast.doblock then
 		return true
 	end
 	local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
@@ -247,7 +254,7 @@ function e_cast:execute()
 		mytarget:Interact()
 		esominion.lureType = 0
 		ml_global_information.Await(1000)
-	end
+	end]]
 end
 
 c_bite = inheritsFrom( ml_cause )
@@ -260,15 +267,12 @@ function c_bite:evaluate()
 	return false
 end
 function e_bite:execute()
-d("bite execute")
 	if (eso_fish.biteDetected == 0) then
 		eso_fish.biteDetected = Now() + math.random(250,750)
-		d("bite set")
 		return
 	elseif (Now() > eso_fish.biteDetected) then
 		local doHook = true
 		if doHook then
-		d("do hook")
 			Player:CameraInteractionStart()
 			--[[local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
 			if TargetList then
@@ -323,7 +327,6 @@ function c_setbait:evaluate()
 end
 function e_setbait:execute()
 local locationType = esominion.reversefishingNodes[eso_fish.currenttask.contentid]
-	d("locationType = "..tostring(locationType))
 	if not SetBait(locationType) then
 		eso_fish.currenttask = {}
 		d("clear task 3")
@@ -535,11 +538,12 @@ function eso_task_fish:Init()
 	--local ke_syncadjust = ml_element:create( "SyncAdjust", c_syncadjust, e_syncadjust, 25)
 	--self:add(ke_syncadjust, self.process_elements)
 		
+	
+	local ke_bite = ml_element:create( "Bite", c_bite, e_bite, 22 )
+	self:add(ke_bite, self.process_elements)
+	
 	local ke_cast = ml_element:create( "Cast", c_cast, e_cast, 20 )
 	self:add(ke_cast, self.process_elements)
-	
-	local ke_bite = ml_element:create( "Bite", c_bite, e_bite, 10 )
-	self:add(ke_bite, self.process_elements)
 		
 	local kef_findnode = ml_element:create( "FindNode", cf_findnode, ef_findnode, 9 )
 	self:add(kef_findnode, self.process_elements)	
