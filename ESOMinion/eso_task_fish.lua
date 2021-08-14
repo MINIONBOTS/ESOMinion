@@ -11,7 +11,7 @@ eso_fish.needbaits = false
 eso_fish.currenttask = {}
 eso_fish.gatherbaitid = 0
 eso_fish.killtargetid = 0
-eso_fish.idLockoutattempts = 0
+eso_fish.idLockoutattempts = {}
 eso_fish.lockoutids = {}
 eso_fish.baitstring = "29849;48922;48923;48924;48925;48926;74219;74225;74226;74227"
 
@@ -203,7 +203,6 @@ function c_cast:evaluate()
 -- SetFishingLure(number lureIndex) 
 -- GetFishingLure()
 -- GetNumFishingLures() 
-
 	local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
 	if not TargetList then
 		return false
@@ -220,14 +219,16 @@ function c_cast:evaluate()
 	c_cast.doblock = false
 	if Player.isswimming == 1 then
 		local gatherable = eso_fish.currenttask
-		local newPos = NavigationManager:GetRandomPointOnCircle(gatherable.pos.x,gatherable.pos.y,gatherable.pos.z,5,10)
-		if (table.valid(newPos)) then
-			Player:MoveTo(newPos.x, newPos.y, newPos.z, false, 0, 2)
-			c_cast.doblock = true
-			c_cast.blocktime = Now()
-			d("find alternate pos")
+		if table.valid(gatherable) then
+			local newPos = NavigationManager:GetRandomPointOnCircle(gatherable.pos.x,gatherable.pos.y,gatherable.pos.z,5,10)
+			if (table.valid(newPos)) then
+				Player:MoveTo(newPos.x, newPos.y, newPos.z, false, 0, 2)
+				c_cast.doblock = true
+				c_cast.blocktime = Now()
+				d("find alternate pos")
+			end
+			return true
 		end
-		return true
 	end
 	local interactable = MGetGameCameraInteractableActionInfo()
 	if interactable == "Fish" then
@@ -259,6 +260,7 @@ function c_bite:evaluate()
 	return false
 end
 function e_bite:execute()
+d("bite execute")
 	if (eso_fish.biteDetected == 0) then
 		eso_fish.biteDetected = Now() + math.random(250,750)
 		d("bite set")
@@ -266,6 +268,7 @@ function e_bite:execute()
 	elseif (Now() > eso_fish.biteDetected) then
 		local doHook = true
 		if doHook then
+		d("do hook")
 			Player:CameraInteractionStart()
 			--[[local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
 			if TargetList then
@@ -323,6 +326,7 @@ local locationType = esominion.reversefishingNodes[eso_fish.currenttask.contenti
 	d("locationType = "..tostring(locationType))
 	if not SetBait(locationType) then
 		eso_fish.currenttask = {}
+		d("clear task 3")
 	end
 end
 
@@ -516,8 +520,8 @@ function eso_task_fish:Init()
 	local ke_stopmovetonode = ml_element:create( "StopMoveToNode", c_stoptonode, e_stoptonode, 2 )
 	self:add(ke_stopmovetonode, self.overwatch_elements)	
 	
-	local ke_fishingloot = ml_element:create( "Loot", c_fishingloot, e_fishingloot, 100 )
-	self:add(ke_fishingloot, self.process_elements)
+	local ke_loot = ml_element:create( "Loot", c_loot, e_loot, 100 )
+	self:add(ke_loot, self.process_elements)
 	
 	local ke_findaggro = ml_element:create( "FindAggro", c_findaggro, e_findaggro, 99 )
 	self:add(ke_findaggro, self.process_elements)
@@ -637,7 +641,7 @@ function cf_findnode:evaluate()
 		return false
 	end
 		
-	local whitelist = eso_fish.BuildWhitelist()
+	local whitelist = ESOLib.Common.BuildWhiteFishlist()
 	local radius = 100
 	local filter = ""
 	if whitelist == "" then
@@ -653,6 +657,7 @@ function cf_findnode:evaluate()
 	
 	if (table.valid(gatherable)) then
 		eso_fish.currenttask = MGetEntity(gatherable.index)
+		d("node found")
 		return true
 	end
 	
@@ -756,7 +761,6 @@ function cf_movetorandom:evaluate()
 	return false
 end
 function ef_movetorandom:execute()
-	d("[ef_movetorandom] execute")
 	
 	local randomPos = eso_fish.thisPosition
 	if (table.valid(randomPos)) then
@@ -860,6 +864,7 @@ function cf_movetobest:evaluate()
 	local gatherable = eso_fish.currenttask
 	if not MGetEntity(gatherable.index) then
 		eso_fish.currenttask = {}
+		d("clear task 1")
 		return false
 	end
 	if InCombat() then
@@ -870,9 +875,10 @@ function cf_movetobest:evaluate()
 	--d("[cf_movetobest] false 4")
 		return false
 	end
-	if eso_fish.idLockoutattempts >= 5 then
+	if IsNull(eso_fish.idLockoutattempts[eso_fish.currenttask.index],0) >= 5 then
 		eso_fish.lockoutids[eso_fish.currenttask.index] = true
 		eso_fish.currenttask = {}
+		d("clear task 2")
 	end
 	cf_movetobest.doblock = false
 	if (gatherable) then
@@ -892,7 +898,7 @@ function cf_movetobest:evaluate()
 					mytarget:Interact()
 					ml_global_information.Await(1000)
 					cf_movetobest.doblock = true
-					eso_fish.idLockoutattempts = eso_fish.idLockoutattempts + 1
+					eso_fish.idLockoutattempts[eso_fish.currenttask.index] = IsNull(eso_fish.idLockoutattempts[eso_fish.currenttask.index],0) + 1
 					return true
 				end
 			end
@@ -953,52 +959,4 @@ function e_setfacing:execute()
 	local gatherable = e_setfacing.gatherable
 	Player:SetFacing(gatherable.pos,true)
 	
-end
-
-c_fishingloot = inheritsFrom( ml_cause )
-e_fishingloot = inheritsFrom( ml_effect )
-c_fishingloot.lootattempt = false
-c_fishingloot.timesince = 0
-function c_fishingloot:evaluate()
-	if TimeSince(esominion.lootTime) < 500 then
-		return false
-	end
-	if c_fishingloot.lootattempt then
-		return true
-	end
-	return (Player.interacting and Player.interacttype == 2)
-end
-function e_fishingloot:execute()
-	if not c_fishingloot.lootattempt then
-		e("LootAll(true)")
-		c_fishingloot.lootattempt = true
-		return 
-	else
-		e("EndLooting()")
-	end
-	c_fishingloot.lootattempt = false
-end
-
-function eso_fish.BuildWhitelist()
-	local whitelist = ""
-	local baits = {}
-	for i = 1,9 do
-		local baitInfo, icon, stack = e("GetFishingLureInfo("..i..")") 
-		if baitInfo ~= "" and stack > 0 then
-			baits[i] = stack
-			if i == 1 then
-				return "909;910;911;912"
-			end
-			local poolType = esominion.baits[i]
-			local id = esominion.fishingNodes[poolType]
-			if id then
-				if whitelist == "" then
-					whitelist = tostring(id)
-				else
-					whitelist = whitelist..";"..tostring(id)
-				end
-			end
-		end
-	end
-	return whitelist, baits
 end

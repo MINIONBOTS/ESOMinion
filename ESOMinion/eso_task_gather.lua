@@ -145,8 +145,8 @@ function eso_task_gather:Init()
 	local ke_stopmovetonode = ml_element:create( "StopMoveToNode", c_stoptonode, e_stoptonode, 2 )
 	self:add(ke_stopmovetonode, self.overwatch_elements)	
 	
-	local ke_gatherloot = ml_element:create( "Loot", c_gatherloot, e_gatherloot, 100 )
-	self:add(ke_gatherloot, self.process_elements)
+	local ke_loot = ml_element:create( "Loot", c_loot, e_loot, 100 )
+	self:add(ke_loot, self.process_elements)
 	
 	local ke_findaggro = ml_element:create( "FindAggro", c_findaggro, e_findaggro, 99 )
 	self:add(ke_findaggro, self.process_elements)
@@ -263,7 +263,7 @@ function c_findnode:evaluate()
 		return false
 	end
 		
-	local whitelist = eso_gather.BuildWhitelist()
+	local whitelist = ESOLib.Common.BuildWhitelist()
 	local radius = 100
 	local filter = ""
 	if whitelist == "" then
@@ -482,7 +482,7 @@ function c_movetobest:evaluate()
 		else
 			if interactable then
 			--if In(interactable,"Collect","Cut","Mine") then
-				local TargetList = MEntityList("maxdistance=5,contentid="..eso_gather.BuildWhitelist())
+				local TargetList = MEntityList("maxdistance=5,contentid="..ESOLib.Common.BuildWhitelist())
 				if TargetList then
 					id,mytarget = next (TargetList)
 					mytarget:Interact()
@@ -540,46 +540,4 @@ function e_setfacing:execute()
 	local gatherable = e_setfacing.gatherable
 	Player:SetFacing(gatherable.pos,true)
 	
-end
-
-c_gatherloot = inheritsFrom( ml_cause )
-e_gatherloot = inheritsFrom( ml_effect )
-c_gatherloot.lootattempt = false
-c_gatherloot.timesince = 0
-function c_gatherloot:evaluate()
-	if TimeSince(esominion.lootTime) < 500 then
-		return false
-	end
-	if c_gatherloot.lootattempt then
-		return true
-	end
-	return (Player.interacting and Player.interacttype == 2)
-end
-function e_gatherloot:execute()
-	if not c_gatherloot.lootattempt then
-		e("LootAll(true)")
-		c_gatherloot.lootattempt = true
-		return 
-	else
-		e("EndLooting()")
-	end
-	c_gatherloot.lootattempt = false
-end
-
-
-function eso_gather.BuildWhitelist()
-	local whitelist = ""
-	
-	for key,list in pairs (eso_gather.whitelistchecks) do
-		local addList = _G["gGather"..tostring(key)]
-		if addList then
-			if whitelist ~= "" then
-				whitelist = whitelist..";"..tostring(list)
-			else
-				whitelist = list
-			end
-		end
-	end
-	
-	return whitelist
 end
