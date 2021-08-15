@@ -195,6 +195,16 @@ function GetNextTaskPos()
 	return newIndex, newPos
 end
 
+c_checkspace = inheritsFrom( ml_cause )
+e_checkspace = inheritsFrom( ml_effect )
+function c_checkspace:evaluate()
+	return not e("CheckInventorySpaceSilently(1)")
+end
+function e_checkspace:execute()
+	d("Inventory space full, stopping bot...")
+	ml_global_information.ToggleRun()
+end
+
 c_cast = inheritsFrom( ml_cause )
 e_cast = inheritsFrom( ml_effect )
 c_cast.doblock = false
@@ -537,7 +547,9 @@ function eso_task_fish:Init()
 	
 	--local ke_syncadjust = ml_element:create( "SyncAdjust", c_syncadjust, e_syncadjust, 25)
 	--self:add(ke_syncadjust, self.process_elements)
-		
+
+	local ke_checkinventoryspace = ml_element:create("CheckInventorySpace", c_checkspace, e_checkspace, 101 )
+	self:add(ke_checkinventoryspace, self.process_elements)
 	
 	local ke_bite = ml_element:create( "Bite", c_bite, e_bite, 22 )
 	self:add(ke_bite, self.process_elements)

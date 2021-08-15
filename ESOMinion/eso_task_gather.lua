@@ -141,6 +141,9 @@ function eso_task_gather:Init()
 	--init ProcessOverwatch() cnes
 	--local ke_dead = ml_element:create( "Dead", c_dead, e_dead, 150 )
 	--self:add( ke_dead, self.overwatch_elements)
+
+	local ke_checkinventoryspace = ml_element:create("CheckInventorySpace", c_checkspace, e_checkspace, 101 )
+	self:add(ke_checkinventoryspace, self.process_elements)
 	
 	local ke_stopmovetonode = ml_element:create( "StopMoveToNode", c_stoptonode, e_stoptonode, 2 )
 	self:add(ke_stopmovetonode, self.overwatch_elements)	
@@ -255,6 +258,16 @@ function eso_gather.GetLockout(profile,task)
 	return 0
 end
 
+c_checkspace = inheritsFrom( ml_cause )
+e_checkspace = inheritsFrom( ml_effect )
+function c_checkspace:evaluate()
+	return not e("CheckInventorySpaceSilently(1)")
+end
+function e_checkspace:execute()
+	d("Inventory space full, stopping bot...")
+	ml_global_information.ToggleRun()
+end
+
 c_findnode = inheritsFrom( ml_cause )
 e_findnode = inheritsFrom( ml_effect )
 e_findnode.blockOnly = false
@@ -286,6 +299,7 @@ function c_findnode:evaluate()
 	return false
 end
 function e_findnode:execute()
+	return false
 end
 
 c_movetonode = inheritsFrom( ml_cause )
