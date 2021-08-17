@@ -198,7 +198,7 @@ function Dev.DrawCall(event, ticks )
 												GUI:BulletText("conditionCount = ".. tostring(condition_count))
 												if(	GUI:TreeNode("Conditions")) then
 													for condition_index = 1,condition_count do
-														if(	GUI:TreeNode(tostring(step_index))) then
+														if(	GUI:TreeNode(tostring(condition_index))) then
 															local condition_text, current, max, is_fail_condition, is_complete, is_visible, condition_type = e("GetJournalQuestConditionInfo(".. tostring(journal_index) .. "," .. tostring(step_index) .. "," .. tostring(condition_index) .. ")")
 															GUI:BulletText("conditionText = ".. condition_text)
 															GUI:BulletText("current = ".. tostring(current))
@@ -207,8 +207,8 @@ function Dev.DrawCall(event, ticks )
 															GUI:BulletText("isComplete = ".. tostring(is_complete))
 															GUI:BulletText("isVisible = ".. tostring(is_visible))
 															GUI:BulletText("conditionType = ".. tostring(condition_type))
-															GUI:TreePop()
 														end
+														GUI:TreePop()
 													end
 													GUI:TreePop()
 												end
