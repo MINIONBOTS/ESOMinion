@@ -174,6 +174,58 @@ function Dev.DrawCall(event, ticks )
 						end
 						GUI:TreePop()
 					end
+
+					if( GUI:TreeNode("Quests")) then
+						if( gamestate == 3 ) then 
+							for journal_index = 1,25 do
+								local quest_name, bg_text, current_step_text, current_step_type, _, completed, tracked, quest_type = e("GetJournalQuestInfo(" .. tostring(journal_index) .. ")")
+								local step_count = e("GetJournalQuestNumSteps(" .. journal_index .. ")")
+								if(	quest_name ~= "" and GUI:TreeNode(tostring(journal_index) .. " - " .. quest_name)) then
+									GUI:BulletText("name = ".. quest_name)
+									GUI:BulletText("backgroundText = ".. bg_text)
+									GUI:BulletText("stepText = ".. current_step_text)
+									GUI:BulletText("stepType = ".. tostring(current_step_type))
+									GUI:BulletText("completed = ".. tostring(completed))
+									GUI:BulletText("tracked = ".. tostring(tracked))
+									GUI:BulletText("questType = ".. tostring(quest_type))
+									GUI:BulletText("stepCount = ".. tostring(step_count))
+									if(	GUI:TreeNode("Steps")) then
+										for step_index = 1,step_count do
+											local step_text, _, step_type, _, condition_count = e("GetJournalQuestStepInfo(" .. journal_index .. "," .. step_index .. ")")
+											if(	GUI:TreeNode(tostring(step_index))) then
+												GUI:BulletText("stepText = ".. step_text)
+												GUI:BulletText("stepType = ".. tostring(step_type))
+												GUI:BulletText("conditionCount = ".. tostring(condition_count))
+												if(	GUI:TreeNode("Conditions")) then
+													for condition_index = 1,condition_count do
+														if(	GUI:TreeNode(tostring(condition_index))) then
+															local condition_text, current, max, is_fail_condition, is_complete, _, is_visible, condition_type = e("GetJournalQuestConditionInfo(".. tostring(journal_index) .. "," .. tostring(step_index) .. "," .. tostring(condition_index) .. ")")
+															GUI:BulletText("conditionText = ".. condition_text)
+															GUI:BulletText("current = ".. tostring(current))
+															GUI:BulletText("max = ".. tostring(max))
+															GUI:BulletText("isFailCondition = ".. tostring(is_fail_condition))
+															GUI:BulletText("isComplete = ".. tostring(is_complete))
+															GUI:BulletText("isVisible = ".. tostring(is_visible))
+															GUI:BulletText("conditionType = ".. tostring(condition_type))
+														end
+														GUI:TreePop()
+													end
+													GUI:TreePop()
+												end
+												GUI:TreePop()
+											end
+										end
+										GUI:TreePop()
+									end
+									GUI:TreePop()
+								end
+							end
+						else
+							GUI:Text("Not Ingame...")
+						end
+						GUI:TreePop()
+					end
+
 					if ( GUI:TreeNode("Other") ) then
 						GUI:BulletText(".id = "..tostring(Player.id))
 						GUI:BulletText(".index = "..tostring(Player.index))
@@ -228,6 +280,8 @@ function Dev.DrawCall(event, ticks )
 					GUI:Text("Not Ingame...")
 				end
 			end
+
+
 			
 			if ( GUI:TreeNode("Scanner") ) then
 				if( gamestate == 3 ) then 

@@ -258,16 +258,6 @@ function eso_gather.GetLockout(profile,task)
 	return 0
 end
 
-c_checkspace = inheritsFrom( ml_cause )
-e_checkspace = inheritsFrom( ml_effect )
-function c_checkspace:evaluate()
-	return not e("CheckInventorySpaceSilently(1)")
-end
-function e_checkspace:execute()
-	d("Inventory space full, stopping bot...")
-	ml_global_information.ToggleRun()
-end
-
 c_findnode = inheritsFrom( ml_cause )
 e_findnode = inheritsFrom( ml_effect )
 e_findnode.blockOnly = false

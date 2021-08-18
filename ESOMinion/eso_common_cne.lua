@@ -89,3 +89,13 @@ function e_killaggro:execute()
 		eso_gather.killtargetid = 0
 	end
 end
+
+c_checkspace = inheritsFrom( ml_cause )
+e_checkspace = inheritsFrom( ml_effect )
+function c_checkspace:evaluate()
+	return not e("CheckInventorySpaceSilently(1)")
+end
+function e_checkspace:execute()
+	d("Inventory space full, stopping bot...")
+	ml_global_information.ToggleRun()
+end
