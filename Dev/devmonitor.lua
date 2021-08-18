@@ -412,7 +412,7 @@ function Dev.DrawCall(event, ticks )
 							end
 							if Dev.noplayersaround then
 								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
-								gDevScannerString = gDevScannerString..tostring("noplayersaround")
+								gDevScannerString = gDevScannerString..tostring("noplayersaround=10")
 							end
 							if Dev.notincombat then
 								if gDevScannerString ~= "" then gDevScannerString = gDevScannerString..tostring(",") end
