@@ -613,7 +613,34 @@ function Dev.DrawCall(event, ticks )
 				end
 				GUI:TreePop()
 			end
-						
+			if (GUI:CollapsingHeader("Fixtures")) then -- haha tities
+				local el = FixtureList("interactable")
+				if (table.valid(el)) then
+					for index,entity in spairs(el) do
+						if not entity.name or entity.name == "" then
+							entity.name = GetString("No Name")
+						end
+						if GUI:TreeNode(entity.index .. " - " .. entity.name) then
+							GUI:BulletText(".id = "..tostring(entity.id))
+							GUI:BulletText(".name = "..tostring(entity.name))
+							GUI:BulletText(".index = "..tostring(entity.index))
+							GUI:BulletText(".isactive = "..tostring(entity.isactive))
+							GUI:BulletText(".isinteractable = "..tostring(entity.isinteractable))
+							GUI:BulletText(".cameraactiontype = "..tostring(entity.cameraactiontype))					
+							if ValidTable(entity.pos) then
+								if GUI:TreeNode(".pos") then
+									GUI:BulletText(".x = "..tostring(entity.pos.x))
+									GUI:BulletText(".y = "..tostring(entity.pos.y))
+									GUI:BulletText(".z = "..tostring(entity.pos.z))
+									GUI:TreePop()
+								end
+							end
+							
+							GUI:TreePop()
+						end
+					end	
+				end
+			end										
 			if ( GUI:TreeNode("AbilityList")) then
 				if( gamestate == 3 ) then 
 					GUI:NewLine()
