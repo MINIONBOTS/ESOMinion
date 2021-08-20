@@ -59,6 +59,8 @@ function eso_radar.Init()
 	
 	gRadarFixtures = esominion.GetSetting("gRadarFixtures",false)
 	gRadarFixturesColour = esominion.GetSetting("gRadarFixturesColour",{r = 0.8, g = 0.8, b = 0.8, a = 1, colour = 4291611852})
+	gRadarFixturesSteal = esominion.GetSetting("gRadarFixturesSteal",false)
+	gRadarFixturesStealColour = esominion.GetSetting("gRadarFixturesStealColour",{r = 1, g = 0.4, b = 0.7, a = 1, colour = 4289947391})
 	
 end
 
@@ -281,6 +283,23 @@ function eso_radar.DrawCall(event, ticks )
 							gRadarFixturesColour.colour = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
 							Settings.ESOMINION["gRadarFixturesColour"] = gRadarFixturesColour
 						end
+						GUI:SameLine(150)
+						gRadarFixturesSteal, changed = GUI:Checkbox("Steal##gRadarFixturesSteal", gRadarFixturesSteal) 
+						if (changed) then
+							Settings.ESOMINION["gRadarFixturesSteal"] = gRadarFixturesSteal
+							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
+						end
+						GUI:SameLine(275)
+						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarFixtures",gRadarFixturesStealColour.r,gRadarFixturesStealColour.g,gRadarFixturesStealColour.b,gRadarFixturesStealColour.a) 
+						if (changed) then 
+							gRadarFixturesStealColour.r = eso_radar.AddColour.Colour.r
+							gRadarFixturesStealColour.g = eso_radar.AddColour.Colour.g
+							gRadarFixturesStealColour.b = eso_radar.AddColour.Colour.b
+							gRadarFixturesStealColour.a = eso_radar.AddColour.Colour.a
+							gRadarFixturesStealColour.colour = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
+							Settings.ESOMINION["gRadarFixturesStealColour"] = gRadarFixturesStealColour
+						end
 						
 					elseif gRadarSettingsRadio == 2 then -- Custom List Tab.
 							-- Add to custom list.
@@ -397,9 +416,6 @@ function eso_radar.DrawCall(event, ticks )
 							eDistance = math.round(e.distance,0)
 						end
 						local eDistance2D = string.format("%.1f",e.distance2d)
-						if e.distance then
-							eDistance2D = string.format("%.1f",e.distance2d)
-						end
 						-- Limit render distance if enabled.
 						if eso_radar.EnableRadarDistance3D and eDistance <= (eso_radar.RadarDistance3D-4) or not eso_radar.EnableRadarDistance3D then
 							local Scale
@@ -521,7 +537,7 @@ function eso_radar.DrawCall(event, ticks )
 					WindowSizex, WindowSizey = WindowSizex-100, WindowSizey-100
 					local CenterX = WindowPosx+(WindowSizex/2)
 					local CenterY = WindowPosy+(WindowSizey/2)
-					local angle = ConvertHeading(PlayerPOS.h)-(1.5708) -- Weird compass rotation (90° Clockwise fix) o.O
+					local angle = ConvertHeading(PlayerPOS.h) -- Weird compass rotation (90° Clockwise fix) o.O
 					local headingx = (math.cos(angle)*-1) -- More weird compass shit (Anticlockwise fix)...
 					local headingy = (math.sin(angle)) -- More weird compass shit...
 					-- Radar Render.
@@ -689,14 +705,20 @@ function eso_radar.Radar() -- Table
 					local CustomName = false
 					local econtentid = e.contentid
 					local ename
+					local ppos = Player.pos
+					local eDistance = math.distance3d(ppos, e.pos)
+					local eDistance2d = math.distance2d(ppos, e.pos)
 					
-					if gRadarFixtures and not Draw then
+					if gRadarFixturesSteal and not Draw and In(e.cameraactiontype,20) then
+						Colour = gRadarFixturesStealColour.colour
+						Draw = true
+					elseif gRadarFixtures and not Draw then
 						Colour = gRadarFixturesColour.colour
 						Draw = true
 					end
 					if Draw then -- Write to table.
 						ename = ename or e.name
-						local dataset = { CustomName = CustomName, id = ID, attackable = eattackable, contentid = econtentid, name = ename, pos = e.pos, worldpos = e.worldpos, distance2d = e.distance2d, distance = e.distance, alive = e.alive, hp = e.hp, ["type"] = etype, Colour = Colour, targetable = e.targetable, friendly = e.friendly, cangather = gatherable }
+						local dataset = { CustomName = CustomName, id = ID, attackable = eattackable, contentid = econtentid, name = ename, pos = e.pos, worldpos = e.worldpos, distance2d = eDistance2d, distance = eDistance, alive = e.alive, hp = e.hp, ["type"] = etype, Colour = Colour, targetable = e.targetable, friendly = e.friendly, cangather = gatherable }
 						RadarTable[ID] = dataset
 					end
 				end 
