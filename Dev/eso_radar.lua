@@ -606,7 +606,7 @@ function eso_radar.Radar() -- Table
 			end
 			-- Add New Data.
 			for i,e in pairs(EntityTable) do
-				local ID = e.index
+				local ID = e.id
 				if RadarTable[ID] == nil then
 					local Colour = ""
 					local Draw = false
@@ -691,14 +691,14 @@ function eso_radar.Radar() -- Table
 						radardata.distance2d = GetEntityList.distance2d
 						radardata.distance = GetEntityList.distance
 						radardata.alive = GetEntityList.alive
-					else -- Remove Old Data.
-						RadarTable[radarindex] = nil
+					--else -- Remove Old Data.
+					--	RadarTable[radarindex] = nil
 					end
 				end
 			end
 			-- Add New Data.
 			for i,e in pairs(fixtureTable) do
-				local ID = e.index
+				local ID = e.id
 				if RadarTable[ID] == nil then
 					local Colour = ""
 					local Draw = false
