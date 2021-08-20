@@ -56,6 +56,10 @@ function eso_radar.Init()
 	gRadarButterflyColour = esominion.GetSetting("gRadarButterflyColour",{ r = 1.0, g = 0.4, b = 0.7, a = 1.0, colour = 4289947391})
 	gRadarFletcherfly = esominion.GetSetting("gRadarFletcherfly",false)
 	gRadarFletcherflyColour = esominion.GetSetting("gRadarFletcherflyColour",{r = 0.5, g = 0.0, b = 0.5, a = 1.0, colour = 4286578816})
+	
+	gRadarFixtures = esominion.GetSetting("gRadarFixtures",false)
+	gRadarFixturesColour = esominion.GetSetting("gRadarFixturesColour",{r = 0.8, g = 0.8, b = 0.8, a = 1, colour = 4291611852})
+	
 end
 
 function eso_radar.DrawCall(event, ticks )
@@ -244,9 +248,6 @@ function eso_radar.DrawCall(event, ticks )
 							Settings.ESOMINION["gRadarFletcherflyColour"] = gRadarFletcherflyColour
 						end
 						
-						
-						
-						
 						gRadarAll, changed = GUI:Checkbox("All##gRadarAll", gRadarAll) 
 						if (changed) then
 							Settings.ESOMINION["gRadarAll"] = gRadarAll
@@ -262,6 +263,23 @@ function eso_radar.DrawCall(event, ticks )
 							gRadarAllColour.a = eso_radar.AddColour.Colour.a
 							gRadarAllColour.colour = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
 							Settings.ESOMINION["gRadarAllColour"] = gRadarAllColour
+						end
+						
+						gRadarFixtures, changed = GUI:Checkbox("Fixtures##gRadarFixtures", gRadarFixtures) 
+						if (changed) then
+							Settings.ESOMINION["gRadarFixtures"] = gRadarFixtures
+							Settings.eso_radar.CustomList = eso_radar.CustomList RadarTable = {}
+						end
+						GUI:SameLine(125)
+						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarFixtures",gRadarFixturesColour.r,gRadarFixturesColour.g,gRadarFixturesColour.b,gRadarFixturesColour.a) 
+						if (changed) then 
+							gRadarFixturesColour.r = eso_radar.AddColour.Colour.r
+							gRadarFixturesColour.g = eso_radar.AddColour.Colour.g
+							gRadarFixturesColour.b = eso_radar.AddColour.Colour.b
+							gRadarFixturesColour.a = eso_radar.AddColour.Colour.a
+							gRadarFixturesColour.colour = GUI:ColorConvertFloat4ToU32(eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a) 
+							Settings.ESOMINION["gRadarFixturesColour"] = gRadarFixturesColour
 						end
 						
 					elseif gRadarSettingsRadio == 2 then -- Custom List Tab.
@@ -370,8 +388,14 @@ function eso_radar.DrawCall(event, ticks )
 						local eColour = e.Colour
 						local eHP = e.hp
 						local eType = e.type
-						local eDistance = math.round(e.distance,0)
-						local eDistance2D = string.format("%.1f",e.distance2d)
+						local eDistance = math.huge
+						if e.distance then
+							eDistance = math.round(e.distance,0)
+						end
+						local eDistance2D = math.huge
+						if e.distance then
+							eDistance2D = string.format("%.1f",e.distance2d)
+						end
 						-- Limit render distance if enabled.
 						if eso_radar.EnableRadarDistance3D and eDistance <= (eso_radar.RadarDistance3D-4) or not eso_radar.EnableRadarDistance3D then
 							local Scale
@@ -507,7 +531,10 @@ function eso_radar.DrawCall(event, ticks )
 							local MouseOver = false
 							local eColour = e.Colour
 							local ePOS = e.pos
-							local edistance2d = e.distance2d
+							local edistance2d = math.huge
+							if e.distance2d then
+								edistance2d = e.distance2d
+							end
 							-- Limit render distance slider.
 							local EntityPosX = math.round(((ePOS.x-PlayerPOS.x)/eso_radar.RadarDistance2D)*(WindowSizex/2),0) + CenterX -- Entity X POS within GUI
 							local EntityPosY = math.round(((ePOS.z-PlayerPOS.z)/eso_radar.RadarDistance2D)*(WindowSizey/2),0) + CenterY -- Entity Y POS within GUI
@@ -633,6 +660,98 @@ function eso_radar.Radar() -- Table
 						CustomName = true
 					elseif gRadarAll and not Draw then
 						Colour = gRadarAllColour.colour
+						Draw = true
+					end
+					if Draw then -- Write to table.
+						ename = ename or e.name
+						local dataset = { CustomName = CustomName, id = ID, attackable = eattackable, contentid = econtentid, name = ename, pos = e.pos, worldpos = e.worldpos, distance2d = e.distance2d, distance = e.distance, alive = e.alive, hp = e.hp, ["type"] = etype, Colour = Colour, targetable = e.targetable, friendly = e.friendly, cangather = gatherable }
+						RadarTable[ID] = dataset
+					end
+				end 
+			end
+		end
+		
+		local fixtureTable = FixtureList("maxdistance=50,isactive")
+		if ValidTable(fixtureTable) then
+			-- Update/Clean table.
+			if ValidTable(RadarTable) then
+				for radarindex,radardata in pairs(RadarTable) do
+					local GetEntityList = FixtureList:Get(fixtureId)
+					if ValidTable(GetEntityList) then -- Update Data.
+						-- Fix for attackable targets not being attackable until closer range.
+						if not radardata.attackable and GetEntityList.attackable then RadarTable[radarindex] = nil end 
+						-- Fix for all nodes returning cangather regardless of class when first loaded. 
+						if radardata.cangather ~= GetEntityList.cangather then RadarTable[radarindex] = nil end 
+						-- Fix for friendly targets not being friendly until closer range.
+						if not radardata.friendly and GetEntityList.friendly then RadarTable[radarindex] = nil end 
+						-- Fix for names not showing on NPC's right away...
+						if not radardata.CustomName and radardata.name ~= GetEntityList.name then radardata.name = GetEntityList.name end
+						radardata.hp = GetEntityList.hp
+						radardata.pos = GetEntityList.pos
+						radardata.distance2d = GetEntityList.distance2d
+						radardata.distance = GetEntityList.distance
+						radardata.alive = GetEntityList.alive
+					else -- Remove Old Data.
+						RadarTable[radarindex] = nil
+					end
+				end
+			end
+			-- Add New Data.
+			for i,e in pairs(fixtureTable) do
+				local ID = e.index
+				if RadarTable[ID] == nil then
+					local Colour = ""
+					local Draw = false
+					if (gRadarGatherable) and e.interacttype == 3 then
+						Colour = gRadarGatherableColour.colour
+						Draw = true
+					end
+					if (gRadarHostile) and e.hostile then
+						Colour = gRadarHostileColour.colour
+						Draw = true
+					end
+					if (gRadarSkyshards) and In(e.contentid,22637,22638,22639,22640,22641,22642,22643,28459,28465,28466,28467,28468) then
+						Colour = gRadarSkyshardsColour.colour
+						Draw = true
+					end
+					if (gRadarFish) and In(e.contentid,909,910,911,912) then
+						Colour = gRadarFishColour.colour
+						Draw = true
+					end
+					
+					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,1811) then
+						Colour = gRadarTrovesColour.colour
+						Draw = true
+					end
+					if (gRadarDragonfly) and In(e.contentid,74225,74226,74227) then
+						Colour = gRadarDragonflyColour.colour
+						Draw = true
+					end
+					if (gRadarFletcherfly) and In(e.contentid,74219) then
+						Colour = gRadarFletcherflyColour.colour
+						Draw = true
+					end
+					if (gRadarButterfly) and In(e.contentid,29849,48922,48923,48924,48925,48926) then
+						Colour = gRadarButterflyColour.colour
+						Draw = true
+					end
+					
+					local CustomName = false
+					local econtentid = e.contentid
+					local gatherable = e.interacttype == 3
+					local eattackable = e.hostile
+					local efriendly = e.friendly
+					local etype = e.type
+					local ename
+					if eso_radar.CustomList[econtentid] ~= nil and eso_radar.CustomList[econtentid].Enabled then -- Custom List
+						Colour = eso_radar.CustomList[econtentid].ColourU32
+						if eso_radar.CustomList[econtentid].Name ~= "" then 
+							ename = eso_radar.CustomList[econtentid].Name 
+						end
+						Draw = true
+						CustomName = true
+					elseif gRadarFixtures and not Draw then
+						Colour = gRadarFixturesColour.colour
 						Draw = true
 					end
 					if Draw then -- Write to table.
