@@ -68,6 +68,16 @@ function ml_global_information.Init()
 			end
 		end
 	end
+	
+	local eso_mainmenu = {
+		header = { id = "ESOMINION##MENU_HEADER", expanded = false, name = "ESOMinion", texture = GetStartupPath().."\\GUI\\UI_Textures\\ffxiv_shiny.png"},
+		members = {	
+			--{ id = "ESOMINION##MENU_MAINMENU", name = "Windows", sort = true },
+			{ id = "ESOMINION##MENU_MAINMENU", name = "Main Task", onClick = function() esominion.GUI.main.open = true end, tooltip = "Open the Main Task window." },
+			{ id = "ESOMINION##MENU_DEV", name = "Dev Tools", onClick = function() Dev.GUI.open = not Dev.GUI.open end, tooltip = "Open the Developer tools." },
+		}
+	}
+	ml_gui.ui_mgr:AddComponent(eso_mainmenu)
 end
 
 

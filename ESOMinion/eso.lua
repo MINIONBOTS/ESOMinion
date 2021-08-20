@@ -128,10 +128,6 @@ end
 
 function esominion.Init()
 	-- Register Button 
-	local esomainmenu = {
-		header = { id = "ESOMINION##MENU_HEADER", expanded = false, name = "ESOMinion", texture = GetStartupPath().."\\GUI\\UI_Textures\\eso.png"},
-		members = {{ id = "ESOMINION##MENU_ADDONS", name = "Addons", tooltip = "Installed Lua Addons.", texture = GetStartupPath().."\\GUI\\UI_Textures\\addon.png"}	}
-	} 
 	esominion.SetMainVars()
 	esominion.AddMode(GetString("assistMode"), eso_task_assist)
 	esominion.AddMode(GetString("fishMode"), eso_task_fish)
@@ -145,7 +141,6 @@ function esominion.Init()
 	-- set settings on startup
 		
 	gEnableLog = false
-	ml_gui.ui_mgr:AddComponent(esomainmenu)
 end
 
 esominion.GUI = {
