@@ -371,6 +371,7 @@ function eso_radar.DrawCall(event, ticks )
 			
 			-- Check radar toggles and form list.
 			-- Overlay/Radar GUI.
+			local ppos = Player.pos
 			if eso_radar.Enable3D or eso_radar.Enable2D then
 				eso_radar.Radar() -- Check table
 			
@@ -388,11 +389,14 @@ function eso_radar.DrawCall(event, ticks )
 						local eColour = e.Colour
 						local eHP = e.hp
 						local eType = e.type
-						local eDistance = math.huge
-						if e.distance then
+						local eDistance
+						if not e.distance then
+							eDistance = math.distance3d(ppos, e.pos)
+							e.distance2d = math.distance2d(ppos, e.pos)
+						else
 							eDistance = math.round(e.distance,0)
 						end
-						local eDistance2D = math.huge
+						local eDistance2D = string.format("%.1f",e.distance2d)
 						if e.distance then
 							eDistance2D = string.format("%.1f",e.distance2d)
 						end
@@ -422,8 +426,10 @@ function eso_radar.DrawCall(event, ticks )
 											end
 										end
 									end
-								else
+								elseif eDistance then
 									EntityString = "["..e.name.."] ".."["..tostring(math.round(eDistance,0)).."]"
+								else
+									EntityString = "["..e.name.."]"
 								end
 								local stringsize = (GUI:CalcTextSize(EntityString))
 								local stringheight = GUI:GetWindowFontSize()+2
@@ -673,84 +679,18 @@ function eso_radar.Radar() -- Table
 		
 		local fixtureTable = FixtureList("maxdistance=50,isactive")
 		if ValidTable(fixtureTable) then
-			-- Update/Clean table.
-			if ValidTable(RadarTable) then
-				for radarindex,radardata in pairs(RadarTable) do
-					local GetEntityList = FixtureList:Get(fixtureId)
-					if ValidTable(GetEntityList) then -- Update Data.
-						-- Fix for attackable targets not being attackable until closer range.
-						if not radardata.attackable and GetEntityList.attackable then RadarTable[radarindex] = nil end 
-						-- Fix for all nodes returning cangather regardless of class when first loaded. 
-						if radardata.cangather ~= GetEntityList.cangather then RadarTable[radarindex] = nil end 
-						-- Fix for friendly targets not being friendly until closer range.
-						if not radardata.friendly and GetEntityList.friendly then RadarTable[radarindex] = nil end 
-						-- Fix for names not showing on NPC's right away...
-						if not radardata.CustomName and radardata.name ~= GetEntityList.name then radardata.name = GetEntityList.name end
-						radardata.hp = GetEntityList.hp
-						radardata.pos = GetEntityList.pos
-						radardata.distance2d = GetEntityList.distance2d
-						radardata.distance = GetEntityList.distance
-						radardata.alive = GetEntityList.alive
-					--else -- Remove Old Data.
-					--	RadarTable[radarindex] = nil
-					end
-				end
-			end
 			-- Add New Data.
 			for i,e in pairs(fixtureTable) do
 				local ID = e.id
 				if RadarTable[ID] == nil then
 					local Colour = ""
 					local Draw = false
-					if (gRadarGatherable) and e.interacttype == 3 then
-						Colour = gRadarGatherableColour.colour
-						Draw = true
-					end
-					if (gRadarHostile) and e.hostile then
-						Colour = gRadarHostileColour.colour
-						Draw = true
-					end
-					if (gRadarSkyshards) and In(e.contentid,22637,22638,22639,22640,22641,22642,22643,28459,28465,28466,28467,28468) then
-						Colour = gRadarSkyshardsColour.colour
-						Draw = true
-					end
-					if (gRadarFish) and In(e.contentid,909,910,911,912) then
-						Colour = gRadarFishColour.colour
-						Draw = true
-					end
-					
-					if (gRadarTroves) and In(e.contentid,20089,10079,10080,10081,1811) then
-						Colour = gRadarTrovesColour.colour
-						Draw = true
-					end
-					if (gRadarDragonfly) and In(e.contentid,74225,74226,74227) then
-						Colour = gRadarDragonflyColour.colour
-						Draw = true
-					end
-					if (gRadarFletcherfly) and In(e.contentid,74219) then
-						Colour = gRadarFletcherflyColour.colour
-						Draw = true
-					end
-					if (gRadarButterfly) and In(e.contentid,29849,48922,48923,48924,48925,48926) then
-						Colour = gRadarButterflyColour.colour
-						Draw = true
-					end
 					
 					local CustomName = false
 					local econtentid = e.contentid
-					local gatherable = e.interacttype == 3
-					local eattackable = e.hostile
-					local efriendly = e.friendly
-					local etype = e.type
 					local ename
-					if eso_radar.CustomList[econtentid] ~= nil and eso_radar.CustomList[econtentid].Enabled then -- Custom List
-						Colour = eso_radar.CustomList[econtentid].ColourU32
-						if eso_radar.CustomList[econtentid].Name ~= "" then 
-							ename = eso_radar.CustomList[econtentid].Name 
-						end
-						Draw = true
-						CustomName = true
-					elseif gRadarFixtures and not Draw then
+					
+					if gRadarFixtures and not Draw then
 						Colour = gRadarFixturesColour.colour
 						Draw = true
 					end
