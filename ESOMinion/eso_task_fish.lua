@@ -561,6 +561,9 @@ function eso_task_fish:Init()
 	local kef_movetorandom = ml_element:create( "MoveToRandom", cf_movetorandom, ef_movetorandom, 5 )
 	self:add(kef_movetorandom, self.process_elements)
 	
+	local kef_movetocustom = ml_element:create( "MoveToCustom", cf_movetonextpath, ef_movetonextpath, 4 )
+	self:add(kef_movetocustom, self.process_elements)	
+	
 	
 	--local ke_fishing = ml_element:create( "Fishing", c_isfishing, e_isfishing, 1 )
 	--self:add(ke_fishing, self.process_elements)
@@ -599,6 +602,7 @@ function eso_task_fish:UIInit()
 	gFishLake = esominion.GetSetting("gFishLake",true)
 	gFishRiver = esominion.GetSetting("gFishRiver",true)
 	gFishFoul = esominion.GetSetting("gFishFoul",true)
+	gFishPositionShow = false
 	gFishPosition = esominion.GetSetting("gFishPosition",{})
 				
 	self.GUI = {}
@@ -643,7 +647,7 @@ function eso_task_fish:Draw()
 		
 		local flags = (GUI.WindowFlags_NoCollapse)
 		esominion.GUI.fishingedit.visible, esominion.GUI.fishingedit.open = GUI:Begin(esominion.GUI.fishingedit.name, esominion.GUI.fishingedit.open, flags)
-		if ( esominion.GUI.fishingedit.visible ) then 
+		if ( esominion.GUI.fishingedit.visible) then 
 		
 			local x, y = GUI:GetWindowPos()
 			local width, height = GUI:GetWindowSize()
@@ -899,6 +903,11 @@ function cf_movetorandom:evaluate()
 	--d("[cf_movetorandom] false 4")
 		return false
 	end
+	
+	local positions = gFishPosition[Player.mapid]
+	if table.valid(positions) then
+		return false
+	end
 	local ppos = Player.pos
 	if not table.valid(eso_fish.thisPosition) then
 		for i = 1,10 do
@@ -941,6 +950,78 @@ function ef_movetorandom:execute()
 				eso_fish.lastPosition = eso_fish.thisPosition
 				eso_fish.thisPosition = {}
 				d("has position close by")
+			end
+		end
+	end
+end
+cf_movetonextpath = inheritsFrom( ml_cause )
+ef_movetonextpath = inheritsFrom( ml_effect )
+cf_movetonextpath.index = 0
+function cf_movetonextpath:evaluate()
+	if (table.valid(eso_fish.currenttask)) then
+	--d("[cf_movetonextpath] false 1")
+		return false
+	end
+	if InCombat() then
+	--d("[cf_movetonextpath] false 3")
+		return false
+	end
+	if TimeSince(esominion.hooktimer) < 3000 then
+	--d("[cf_movetonextpath] false 4")
+		return false
+	end
+	
+	local positions = gFishPosition[Player.mapid]
+	if not table.valid(positions) then
+		return false
+	end
+	local ppos = Player.pos
+	if not table.valid(eso_fish.thisPosition) then
+		if table.valid(positions[cf_movetonextpath.index +1]) then
+			eso_fish.thisPosition = positions[cf_movetonextpath.index +1] 
+			cf_movetonextpath.index = cf_movetonextpath.index + 1
+		else
+			local closest = math.huge
+			local best = nil
+			for i = 1,table.size(positions) do
+				local testPos = positions[i]
+				if NavigationManager:IsReachable(testPos) and cf_movetonextpath.index ~= i then
+					local dist = math.distance2d(testPos.x, testPos.z, ppos.x, ppos.z)
+					if dist < closest then
+						closest = dist
+						best = testPos
+						
+					end
+				end
+			end
+			if best then
+				eso_fish.thisPosition = best
+				return true
+			end
+		end
+	else
+		return true
+	end
+	return false
+end
+function ef_movetonextpath:execute()
+	
+	local positions = gFishPosition[Player.mapid]
+	local nextPos = eso_fish.thisPosition
+	if (table.valid(nextPos)) then
+		local rpos = nextPos
+		local myPos = Player.pos
+		local dist = math.distance2d(myPos.x, myPos.z, rpos.x, rpos.z)
+		if (table.valid(rpos)) then
+			if dist > 5 then
+				Player:MoveTo(rpos.x, rpos.y, rpos.z, false, 0, 5)
+			else
+				eso_fish.lastPosition = eso_fish.thisPosition
+				eso_fish.thisPosition = {}
+				d("has position close by")
+				if table.size(positions) == cf_movetonextpath.index then
+					cf_movetonextpath.index = 0
+				end
 			end
 		end
 	end
