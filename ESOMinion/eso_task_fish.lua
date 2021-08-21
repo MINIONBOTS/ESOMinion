@@ -307,6 +307,22 @@ end
 function e_isfishing:execute()
 	ml_debug("Preventing idle while waiting for bite.")
 end
+c_isidle = inheritsFrom( ml_cause )
+e_isidle = inheritsFrom( ml_effect )
+function c_isidle:evaluate()
+	if (table.valid(eso_fish.currenttask)) then
+		local activeBaitCount = tostring(select(3,e("GetFishingLureInfo("..tostring(esominion.activeBait)..")")))
+		if tonumber(activeBaitCount) == 0 then
+			eso_fish.currenttask = {}
+			d("reset task, Ran out of bait")
+			return true
+		end
+	end
+
+	return false
+end
+function e_isidle:execute()
+end
 
 c_setbait = inheritsFrom( ml_cause )
 e_setbait = inheritsFrom( ml_effect )
@@ -565,8 +581,11 @@ function eso_task_fish:Init()
 	self:add(kef_movetocustom, self.process_elements)	
 	
 	
-	--local ke_fishing = ml_element:create( "Fishing", c_isfishing, e_isfishing, 1 )
-	--self:add(ke_fishing, self.process_elements)
+	local ke_fishing = ml_element:create( "Fishing", c_isfishing, e_isfishing, 2 )
+	self:add(ke_fishing, self.process_elements)
+	
+	local ke_idle = ml_element:create( "Idle", c_isidle, e_isidle, 1 )
+	self:add(ke_idle, self.process_elements)
 	 
 	self:InitExtras()
 	self:AddTaskCheckCEs()
@@ -602,6 +621,7 @@ function eso_task_fish:UIInit()
 	gFishLake = esominion.GetSetting("gFishLake",true)
 	gFishRiver = esominion.GetSetting("gFishRiver",true)
 	gFishFoul = esominion.GetSetting("gFishFoul",true)
+	gFishBaits = esominion.GetSetting("gFishBaits",true)
 	gFishPositionShow = false
 	gFishPosition = esominion.GetSetting("gFishPosition",{})
 				
@@ -620,6 +640,7 @@ function eso_task_fish:Draw()
 	--local tabindex, tabname = GUI_DrawTabs(self.GUI.main_tabs)
 	GUI:AlignFirstTextHeightToWidgets() 
 	
+	GUI_Capture(GUI:Checkbox(GetString("Gather baits"),gFishBaits),"gFishBaits");
 	GUI_Capture(GUI:Checkbox(GetString("Saltwater Nodes"),gFishSaltwater),"gFishSaltwater");
 	GUI_Capture(GUI:Checkbox(GetString("Lake Nodes"),gFishLake),"gFishLake");
 	GUI_Capture(GUI:Checkbox(GetString("River Nodes"),gFishRiver),"gFishRiver");
@@ -830,6 +851,8 @@ function cf_findnode:evaluate()
 		eso_fish.currenttask = MGetEntity(gatherable.index)
 		d("node found")
 		return true
+	else
+		d("no node found")
 	end
 	
 	return false
@@ -1071,7 +1094,7 @@ function c_findbaits:evaluate()
 	d("[c_findbaits] false 1")
 		return false
 	end]]
-	if InCombat() then
+	if InCombat() or not gFishBaits then
 	--d("[c_findbaits] false 1")
 		return false
 	end
@@ -1221,7 +1244,6 @@ function eso_task_fish.DrawPathFinder(event, ticks)
 		gamestate = 1
 	end
 	
-	-- Switch according to the gamestate
 	if (gamestate == ESO.GAMESTATE.INGAME) then
 		if esominion.GUI.fishingedit.open then
 			local maxWidth, maxHeight = GUI:GetScreenSize()

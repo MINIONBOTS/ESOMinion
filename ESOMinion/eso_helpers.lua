@@ -260,36 +260,13 @@ function hasPet()
 	local petAlive = e("DoesUnitExist(playerpet1)")
 	esominion.petalive = petAlive
 	esominion.petalivecheck = Now()
-	if petAlive and esominion.petid == 0 then
-		local petList = MEntityList("maxdistance=20,friendly,isnpc,interactype=0,nocritter")
-		if table.valid(petList) then
-			for i,e in pairs(petList) do
-				if e.health and e.health.percent > 0 then
-					esominion.petid = e.id
-					break
-				end
-			end
+	if petAlive then
+		local pet = EntityList:Get("playerpet1")
+		if table.valid(pet) then
+			esominion.petid = pet.id
 		end
 	end
-	return petAlive
-end
-function getPetID()
-	if hasPet() then
-		if esominion.petid == 0 then
-			local petList = MEntityList("maxdistance=20,friendly,isnpc,interactype=0,nocritter")
-			if table.valid(petList) then
-				for i,e in pairs(petList) do
-					if e.health and e.health.percent > 0 then
-						esominion.petid = e.id
-						return esominion.petid
-					end
-				end
-			end
-		end
-	else
-		esominion.petid = 0
-	end
-	return 0
+	return petAlive 
 end
 
 function IsLootOpen()
