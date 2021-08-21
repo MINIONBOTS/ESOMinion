@@ -534,9 +534,9 @@ function eso_task_syncadjust:task_fail_eval()
 end
 
 function eso_task_fish:Init()
-	--init ProcessOverwatch() cnes
-	--local ke_dead = ml_element:create( "Dead", c_dead, e_dead, 150 )
-	--self:add( ke_dead, self.overwatch_elements)
+
+	local ke_death = ml_element:create( "Dead", c_isdead, e_isdead, 150 )
+	self:add( ke_death, self.overwatch_elements)
 	
 	local ke_stopmovetonode = ml_element:create( "StopMoveToNode", c_stoptonode, e_stoptonode, 2 )
 	self:add(ke_stopmovetonode, self.overwatch_elements)	
