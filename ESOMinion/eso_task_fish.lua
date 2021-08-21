@@ -237,6 +237,9 @@ function c_cast:evaluate()
 		if TargetList then
 			id,mytarget = next (TargetList)
 			mytarget:Interact()
+			local baitCount = tostring(select(3,e("GetFishingLureInfo("..tostring(esominion.lureType)..")")))
+			esominion.lureBaitCount = tonumber(baitCount)
+			esominion.activeBait = esominion.lureType
 			esominion.lureType = 0
 			ml_global_information.Await(1000)
 			return true
@@ -260,9 +263,14 @@ end
 c_bite = inheritsFrom( ml_cause )
 e_bite = inheritsFrom( ml_effect )
 function c_bite:evaluate()
-	if esominion.hooked then
-		d("has bite")
-		return true
+	local activeBaitCount = tostring(select(3,e("GetFishingLureInfo("..tostring(esominion.activeBait)..")")))
+	if In(Player.interacttype,24) then
+		if IsNull(tonumber(activeBaitCount),0) > 0 then
+			if IsNull(tonumber(activeBaitCount),0) < esominion.lureBaitCount then
+				d("has bite")
+				return true
+			end
+		end
 	end
 	return false
 end
@@ -273,16 +281,11 @@ function e_bite:execute()
 	elseif (Now() > eso_fish.biteDetected) then
 		local doHook = true
 		if doHook then
-			Player:CameraInteractionStart()
-			--[[local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
-			if TargetList then
-				id,mytarget = next (TargetList)
-				mytarget:Interact()
-				d("check new reel in type stuff")
-				--ml_global_information.Await(1000)
-			end]]
+			d("hook")
+			Player:ReelFishIn()
 		end
 		esominion.hooked = false
+		esominion.lureBaitCount = 0
 	end
 end
 

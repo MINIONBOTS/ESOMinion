@@ -15,6 +15,8 @@ esominion.currentfishinghole = {}
 esominion.hooked = false
 esominion.hooktimer = 0
 esominion.petid = 0
+esominion.lureBaitCount = 0
+esominion.activeBait = 0
 esominion.baits = {
 
 	[1] = "Simple Bait",

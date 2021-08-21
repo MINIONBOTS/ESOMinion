@@ -38,7 +38,6 @@ function c_findaggro:evaluate()
 		targetList = MEntityList("maxdistance=20,hostile,targetingme")
 	end
 	if not table.valid(targetList) and hasPet() then
-		getPetID()
 		if esominion.petid ~= 0 then
 			targetList = MEntityList("maxdistance=20,hostile,targeting="..tostring(esominion.petid))
 		end
@@ -68,6 +67,10 @@ c_killaggro = inheritsFrom( ml_cause )
 e_killaggro = inheritsFrom( ml_effect )
 function c_killaggro:evaluate()
 	if eso_gather.killtargetid == 0 then
+		return false
+	end
+	if not table.valid(MGetEntity(eso_gather.killtargetid)) then
+		eso_gather.killtargetid = 0
 		return false
 	end
 	if Player.isswimming ~= 0 then
