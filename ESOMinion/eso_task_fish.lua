@@ -220,7 +220,7 @@ function c_cast:evaluate()
 	local gatherable = eso_fish.currenttask
 	if Player.isswimming == 1 then
 		if table.valid(gatherable) then
-			local newPos = NavigationManager:GetRandomPointOnCircle(gatherable.pos.x,gatherable.pos.y,gatherable.pos.z,5,10)
+			local newPos = NavigationManager:GetRandomPointOnCircle(gatherable.pos.x,gatherable.pos.y,gatherable.pos.z,5,10,0,true,2)
 			if (table.valid(newPos)) then
 				Player:MoveTo(newPos.x, newPos.y, newPos.z, false, 0, 2)
 				c_cast.doblock = true
@@ -892,6 +892,9 @@ function cf_movetobest:evaluate()
 	--d("[cf_movetobest] false 4")
 		return false
 	end
+	if In(Player.interacttype,24) then
+		return false
+	end
 	if IsNull(eso_fish.idLockoutattempts[eso_fish.currenttask.index],0) >= 5 then
 		eso_fish.lockoutids[eso_fish.currenttask.index] = true
 		eso_fish.currenttask = {}
@@ -915,7 +918,9 @@ function cf_movetobest:evaluate()
 					mytarget:Interact()
 					ml_global_information.Await(1000)
 					cf_movetobest.doblock = true
-					eso_fish.idLockoutattempts[eso_fish.currenttask.index] = IsNull(eso_fish.idLockoutattempts[eso_fish.currenttask.index],0) + 1
+					if table.valid(eso_fish.currenttask) then
+						eso_fish.idLockoutattempts[eso_fish.currenttask.index] = IsNull(eso_fish.idLockoutattempts[eso_fish.currenttask.index],0) + 1
+					end
 					return true
 				end
 			--end
