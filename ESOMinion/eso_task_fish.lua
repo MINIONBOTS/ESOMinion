@@ -599,6 +599,7 @@ function eso_task_fish:UIInit()
 	gFishLake = esominion.GetSetting("gFishLake",true)
 	gFishRiver = esominion.GetSetting("gFishRiver",true)
 	gFishFoul = esominion.GetSetting("gFishFoul",true)
+	gFishPosition = esominion.GetSetting("gFishPosition",{})
 				
 	self.GUI = {}
 	
@@ -609,17 +610,166 @@ function eso_task_fish:UIInit()
 		main_tabs = GUI_CreateTabs("Manage,Add,Edit",true),
 	}
 end
-
+eso_task_fish.positionClose = 0
 function eso_task_fish:Draw()
 	local MarkerOrProfileWidth = (GUI:GetContentRegionAvail() - 10)
 	--local tabindex, tabname = GUI_DrawTabs(self.GUI.main_tabs)
 	GUI:AlignFirstTextHeightToWidgets() 
-	GUI:Text("Fish Mode")
 	
 	GUI_Capture(GUI:Checkbox(GetString("Saltwater Nodes"),gFishSaltwater),"gFishSaltwater");
 	GUI_Capture(GUI:Checkbox(GetString("Lake Nodes"),gFishLake),"gFishLake");
 	GUI_Capture(GUI:Checkbox(GetString("River Nodes"),gFishRiver),"gFishRiver");
 	GUI_Capture(GUI:Checkbox(GetString("Foul Nodes"),gFishFoul),"gFishFoul");
+	
+	local contentwidth = GUI:GetContentRegionAvailWidth()
+	GUI:PushItemWidth(contentwidth)
+	if ( GUI:Button("Add Position")) then
+		if not gFishPosition[Player.mapid] then
+			gFishPosition[Player.mapid] = {}
+		end
+		table.insert(gFishPosition[Player.mapid],Player.pos)
+		Settings.ESOMINION.gFishPosition = gFishPosition
+	end
+	if ( GUI:Button("Edit Positions")) then
+		esominion.GUI.fishingedit.open = not esominion.GUI.fishingedit.open
+	end
+	GUI:PopItemWidth()
+	if esominion.GUI.fishingedit.open then
+		GUI:SetNextWindowSize(200,400,GUI.SetCond_Once) --set the next window size, only on first ever	
+		GUI:SetNextWindowCollapsed(false,GUI.SetCond_Always)
+		
+		local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+		GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .75)
+		
+		local flags = (GUI.WindowFlags_NoCollapse)
+		esominion.GUI.fishingedit.visible, esominion.GUI.fishingedit.open = GUI:Begin(esominion.GUI.fishingedit.name, esominion.GUI.fishingedit.open, flags)
+		if ( esominion.GUI.fishingedit.visible ) then 
+		
+			local x, y = GUI:GetWindowPos()
+			local width, height = GUI:GetWindowSize()
+			local contentwidth = GUI:GetContentRegionAvailWidth()
+			
+			esominion.GUI.x = x; esominion.GUI.y = y; esominion.GUI.width = width; esominion.GUI.height = height;
+	
+	
+			GUI:Separator()
+			local positions = gFishPosition[Player.mapid]
+			if table.valid(positions) then
+				local closest = math.huge
+				local best = 0
+				local ppos = Player.pos
+				local doDelete = 0
+				local doPriorityUp = 0
+				local doPriorityDown = 0
+				local doPriorityTop = 0
+				local doPriorityBottom = 0
+			
+				for prio,e in pairs(positions) do
+					if prio == eso_task_fish.positionClose then
+						if (GUI:Button("["..tostring(prio).."] [Closest Node]",contentwidth - 85,20)) then
+						end		
+					else
+						if (GUI:Button("["..tostring(prio).."]",contentwidth - 85,20)) then
+						end		
+					end
+                    local dist = math.distance2d(ppos, e)
+					if dist < closest then
+						closest = dist
+						best = prio
+					end
+					GUI:SameLine(0,5)
+					if (GUI:ImageButton("##eso_skillmanager-manage-prioup-"..tostring(prio),ml_global_information.path.."\\GUI\\UI_Textures\\w_up.png", 16, 16)) then	
+						doPriorityUp = prio
+					end
+					if (GUI:IsItemHovered()) then
+						if (GUI:IsMouseClicked(1)) then
+							doPriorityTop = prio
+						end
+					end	
+					GUI:SameLine(0,5)
+					if (GUI:ImageButton("##eso_skillmanager-manage-priodown-"..tostring(prio),ml_global_information.path.."\\GUI\\UI_Textures\\w_down.png", 16, 16)) then
+						doPriorityDown = prio
+					end
+					if (GUI:IsItemHovered()) then
+						if (GUI:IsMouseClicked(1)) then
+							doPriorityBottom = prio
+						end
+					end	
+					GUI:SameLine(0,5)
+					if (GUI:ImageButton("##eso_skillmanager-manage-delete-"..tostring(prio),ml_global_information.path.."\\GUI\\UI_Textures\\bt_alwaysfail_fail.png", 16, 16)) then
+						doDelete = prio
+					end
+				end
+				eso_task_fish.positionClose = best
+				
+				if (doPriorityTop ~= 0 and doPriorityTop ~= 1) then
+					local currentPos = doPriorityTop
+					local newPos = doPriorityTop
+					
+					while currentPos > 1 do
+						local temp = gFishPosition[Player.mapid][newPos]
+						gFishPosition[Player.mapid][newPos] = gFishPosition[Player.mapid][currentPos]
+						gFishPosition[Player.mapid][currentPos] = temp	
+						currentPos = newPos
+						newPos = newPos - 1
+					end
+					
+					Settings.ESOMINION.gFishPosition = gFishPosition
+				end
+				
+				if (doPriorityUp ~= 0 and doPriorityUp ~= 1) then
+					local currentPos = doPriorityUp
+					local newPos = doPriorityUp - 1
+					
+					local temp = gFishPosition[Player.mapid][newPos]
+					gFishPosition[Player.mapid][newPos] = gFishPosition[Player.mapid][currentPos]
+					gFishPosition[Player.mapid][currentPos] = temp	
+					
+					Settings.ESOMINION.gFishPosition = gFishPosition
+				end
+				if (doPriorityDown ~= 0 and doPriorityDown < TableSize(gFishPosition[Player.mapid])) then
+					local currentPos = doPriorityDown
+					local newPos = doPriorityDown + 1
+					
+					local temp = gFishPosition[Player.mapid][newPos]
+					gFishPosition[Player.mapid][newPos] = gFishPosition[Player.mapid][currentPos]
+					gFishPosition[Player.mapid][currentPos] = temp
+					
+					Settings.ESOMINION.gFishPosition = gFishPosition
+				end
+				
+				local profSize = TableSize(gFishPosition[Player.mapid])
+				if (doPriorityBottom ~= 0 and doPriorityBottom < profSize) then
+				
+					local currentPos = doPriorityBottom
+					local newPos = doPriorityBottom + 1
+					
+					while currentPos < profSize do
+						local temp = gFishPosition[Player.mapid][newPos]
+						gFishPosition[Player.mapid][newPos] = gFishPosition[Player.mapid][currentPos]
+						gFishPosition[Player.mapid][currentPos] = temp	
+						currentPos = newPos
+						newPos = newPos + 1
+					end
+					
+					Settings.ESOMINION.gFishPosition = gFishPosition
+				end
+				
+				if (doDelete ~= 0) then
+					gFishPosition[Player.mapid] = TableRemoveSort(gFishPosition[Player.mapid],doDelete)
+					for prio,skill in pairsByKeys(gFishPosition[Player.mapid]) do
+						if (skill.prio ~= prio) then
+							gFishPosition[Player.mapid][prio].prio = prio
+						end
+					end
+					Settings.ESOMINION.gFishPosition = gFishPosition
+				end
+			end
+			
+		end	
+		GUI:End()
+		GUI:PopStyleColor()
+	end
 end
 
 function eso_fish.GetLockout(profile,task)
@@ -981,3 +1131,39 @@ function e_setfacing:execute()
 	Player:SetFacing(gatherable.pos,true)
 	
 end
+
+function eso_task_fish.DrawPathFinder(event, ticks)
+	local gamestate;
+	if (GetGameState and GetGameState()) then
+		gamestate = GetGameState()
+	else
+		gamestate = 1
+	end
+	
+	-- Switch according to the gamestate
+	if (gamestate == ESO.GAMESTATE.INGAME) then
+		if esominion.GUI.fishingedit.open then
+			local maxWidth, maxHeight = GUI:GetScreenSize()
+			GUI:SetNextWindowPos(0, 0, GUI.SetCond_Always)
+			GUI:SetNextWindowSize(maxWidth,maxHeight,GUI.SetCond_Always) --set the next window size
+			local winBG = ml_gui.style.current.colors[GUI.Col_WindowBg]
+			GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], 0)
+			flags = (GUI.WindowFlags_NoInputs + GUI.WindowFlags_NoBringToFrontOnFocus + GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoCollapse)
+			GUI:Begin("Show Nav Space", true, flags)
+			
+				local positions = gFishPosition[Player.mapid]
+				if table.valid(positions) then
+					for prio,e in pairs(positions) do
+						local RoundedPos = { x = math.round(e.x,2), y = math.round(e.y,2), z = math.round(e.z,2) }
+						local screenPos = RenderManager:WorldToScreen(RoundedPos)
+						if table.valid(screenPos) then
+							GUI:AddCircleFilled(screenPos.x,screenPos.y,7, 4281545727)
+						end
+					end
+				end
+			GUI:End()
+			GUI:PopStyleColor()
+		end
+	end
+end
+RegisterEventHandler("Gameloop.Draw", eso_task_fish.DrawPathFinder,"eso_task_fish.DrawPathFinder")
