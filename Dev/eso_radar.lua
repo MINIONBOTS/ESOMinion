@@ -291,7 +291,7 @@ function eso_radar.DrawCall(event, ticks )
 						end
 						GUI:SameLine(275)
 						GUI:ColorEditMode(GUI.ColorEditMode_NoInputs+GUI.ColorEditMode_AlphaBar)
-						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##AddColourgRadarFixtures",gRadarFixturesStealColour.r,gRadarFixturesStealColour.g,gRadarFixturesStealColour.b,gRadarFixturesStealColour.a) 
+						eso_radar.AddColour.Colour.r,eso_radar.AddColour.Colour.g,eso_radar.AddColour.Colour.b,eso_radar.AddColour.Colour.a,changed = GUI:ColorEdit4("##gRadarFixturesStealColour",gRadarFixturesStealColour.r,gRadarFixturesStealColour.g,gRadarFixturesStealColour.b,gRadarFixturesStealColour.a) 
 						if (changed) then 
 							gRadarFixturesStealColour.r = eso_radar.AddColour.Colour.r
 							gRadarFixturesStealColour.g = eso_radar.AddColour.Colour.g
@@ -640,7 +640,7 @@ function eso_radar.Radar() -- Table
 						Colour = gRadarHostileColour.colour
 						Draw = true
 					end
-					if (gRadarSkyshards) and In(e.contentid,22637,22638,22639,22640,22641,22642,22643,28459,28465,28466,28467,28468) then
+					if (gRadarSkyshards) and In(e.contentid,14697,22637,22638,22639,22640,22641,22642,22643,28459,28465,28466,28467,28468) then
 						Colour = gRadarSkyshardsColour.colour
 						Draw = true
 					end
