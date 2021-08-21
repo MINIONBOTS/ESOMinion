@@ -217,8 +217,8 @@ function c_cast:evaluate()
 		return false
 	end
 	c_cast.doblock = false
+	local gatherable = eso_fish.currenttask
 	if Player.isswimming == 1 then
-		local gatherable = eso_fish.currenttask
 		if table.valid(gatherable) then
 			local newPos = NavigationManager:GetRandomPointOnCircle(gatherable.pos.x,gatherable.pos.y,gatherable.pos.z,5,10)
 			if (table.valid(newPos)) then
@@ -233,10 +233,9 @@ function c_cast:evaluate()
 	
 	local interactable = MGetGameCameraInteractableActionInfo()
 	if not In(interactable,"Reel In") then
-		local TargetList = MEntityList("maxdistance=20,contentid=909;910;911;912")
-		if TargetList then
-			id,mytarget = next (TargetList)
-			mytarget:Interact()
+		local targetPool = EntityList:Get(gatherable.index)
+		if targetPool then
+			targetPool:Interact()
 			local baitCount = tostring(select(3,e("GetFishingLureInfo("..tostring(esominion.lureType)..")")))
 			esominion.lureBaitCount = tonumber(baitCount)
 			esominion.activeBait = esominion.lureType
@@ -303,7 +302,7 @@ end
 c_isfishing = inheritsFrom( ml_cause )
 e_isfishing = inheritsFrom( ml_effect )
 function c_isfishing:evaluate()
-	return false
+	return In(Player.interacttype,24)
 end
 function e_isfishing:execute()
 	ml_debug("Preventing idle while waiting for bite.")
@@ -329,10 +328,10 @@ function c_setbait:evaluate()
 	return false
 end
 function e_setbait:execute()
+d("set bait execute")
 local locationType = esominion.reversefishingNodes[eso_fish.currenttask.contentid]
 	if not SetBait(locationType) then
 		eso_fish.currenttask = {}
-		d("clear task 3")
 	end
 end
 
@@ -596,6 +595,10 @@ function eso_task_fish:UIInit()
 	gFishDebugLevel = esominion.GetSetting("gFishDebugLevel",1)
 	gFishDebugLevelIndex = GetKeyByValue(gFishDebugLevel,debugLevels)
 	
+	gFishSaltwater = esominion.GetSetting("gFishSaltwater",true)
+	gFishLake = esominion.GetSetting("gFishLake",true)
+	gFishRiver = esominion.GetSetting("gFishRiver",true)
+	gFishFoul = esominion.GetSetting("gFishFoul",true)
 				
 	self.GUI = {}
 	
@@ -612,6 +615,11 @@ function eso_task_fish:Draw()
 	--local tabindex, tabname = GUI_DrawTabs(self.GUI.main_tabs)
 	GUI:AlignFirstTextHeightToWidgets() 
 	GUI:Text("Fish Mode")
+	
+	GUI_Capture(GUI:Checkbox(GetString("Saltwater Nodes"),gFishSaltwater),"gFishSaltwater");
+	GUI_Capture(GUI:Checkbox(GetString("Lake Nodes"),gFishLake),"gFishLake");
+	GUI_Capture(GUI:Checkbox(GetString("River Nodes"),gFishRiver),"gFishRiver");
+	GUI_Capture(GUI:Checkbox(GetString("Foul Nodes"),gFishFoul),"gFishFoul");
 end
 
 function eso_fish.GetLockout(profile,task)
@@ -691,7 +699,7 @@ function c_movetonode:evaluate()
 		local interactable = MGetGameCameraInteractableActionInfo()
 		local distanceMax = 5
 		if In(gatherable.contentid,909,910,911,912) then
-			distanceMax = 15
+			distanceMax = 12
 		end
 		local reachable = (gatherable.distance <= distanceMax)
 		if (not reachable) then
@@ -718,7 +726,7 @@ function e_movetonode:execute()
 		local gpos = gatherable.meshpos
 		local distanceMax = 5
 		if In(gatherable.contentid,909,910,911,912) then
-			distanceMax = 15
+			distanceMax = 12
 		end
 		if (table.valid(gpos)) then
 			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
@@ -809,7 +817,7 @@ function c_stoptonode:evaluate()
 		local interactable = MGetGameCameraInteractableActionInfo()
 		local distanceMax = 5
 		if In(gatherable.contentid,909,910,911,912) then
-			distanceMax = 15
+			distanceMax = 12
 		end
 		local reachable = (gatherable.distance <= distanceMax and not In(interactable,nil,false))
 		if (reachable) then
@@ -893,7 +901,7 @@ function cf_movetobest:evaluate()
 	if (gatherable) then
 		local distanceMax = 5
 		if In(gatherable.contentid,909,910,911,912) then
-			distanceMax = 15
+			distanceMax = 12
 		end
 		--local interactable = MGetGameCameraInteractableActionInfo()
 		local reachable = (gatherable.distance <= distanceMax)
@@ -926,7 +934,7 @@ function ef_movetobest:execute()
 		local gpos = gatherable.meshpos
 		local distanceMax = 5
 		if In(gatherable.contentid,909,910,911,912) then
-			distanceMax = 15
+			distanceMax = 12
 		end
 	--d("[cf_movetobest] execute 2")
 		if (table.valid(gpos)) then
@@ -949,7 +957,7 @@ function c_setfacing:evaluate()
 		local gatherable = eso_fish.currenttask
 		local distanceMax = 5
 		if In(gatherable.contentid,909,910,911,912) then
-			distanceMax = 15
+			distanceMax = 12
 		end
 		if gatherable.distance < distanceMax then
 			local interactable = MGetGameCameraInteractableActionInfo()
