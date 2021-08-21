@@ -102,3 +102,23 @@ function e_checkspace:execute()
 	d("Inventory space full, stopping bot...")
 	ml_global_information.ToggleRun()
 end
+
+c_isdead = inheritsFrom( ml_cause )
+e_isdead = inheritsFrom( ml_effect )
+
+function c_isdead:evaluate()
+	return e("IsUnitDead(player)")
+end
+
+-- Use soulgem to revive if ticked, else just respawn to shrine
+function e_isdead:execute()
+	local targetLevel = e("GetUnitEffectiveLevel(player)")
+	local stackCount = select(3, e("GetSoulGemInfo(1," .. tostring(targetLevel) .. ")"))
+	if AdvancedSettings.shouldUseSoulGem and stackCount > 0 then
+		e("Revive()")
+	else 
+		-- 'R' key is the default to respawn on shrine, maybe change this in the future
+		KeyDown(82)
+		KeyUp(82)
+	end
+end

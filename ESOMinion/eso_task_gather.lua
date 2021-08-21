@@ -138,9 +138,8 @@ function HasBaits(name)
 end
 
 function eso_task_gather:Init()
-	--init ProcessOverwatch() cnes
-	--local ke_dead = ml_element:create( "Dead", c_dead, e_dead, 150 )
-	--self:add( ke_dead, self.overwatch_elements)
+	local ke_death = ml_element:create( "Dead", c_isdead, e_isdead, 150 )
+	self:add( ke_death, self.overwatch_elements)
 
 	local ke_checkinventoryspace = ml_element:create("CheckInventorySpace", c_checkspace, e_checkspace, 101 )
 	self:add(ke_checkinventoryspace, self.process_elements)

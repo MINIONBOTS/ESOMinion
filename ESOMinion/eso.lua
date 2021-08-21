@@ -18,7 +18,6 @@ esominion.petid = 0
 esominion.lureBaitCount = 0
 esominion.activeBait = 0
 esominion.baits = {
-
 	[1] = "Simple Bait",
 	[2] = "Lake", --"Guts",
 	[3] = "Foul", --"Crawlers",
@@ -211,6 +210,7 @@ esominion.GUI = {
 		visible = true,
 		colors = { r = 1, g = 1, b = 1, a = 1 },
 	},
+	
 	current_tab = 1,
 	draw_mode = 1,
 }
@@ -343,6 +343,9 @@ function ml_global_information.DrawMainFull()
 					end
 					if (GUI:Button(GetString("Skill Manager"),contentwidth,20)) then
 						eso_skillmanager.GUI.skillbook.open = not eso_skillmanager.GUI.skillbook.open
+					end
+					if (GUI:Button(GetString("Advanced Settings"),contentwidth,20)) then
+						esominion.GUI.settings.open = not esominion.GUI.settings.open
 					end
 					if (GUI:Button(GetString("Debug"),contentwidth,20)) then
 						gEnableLog = not gEnableLog
@@ -982,3 +985,37 @@ function Lockpicker.Draw()
 end
 RegisterEventHandler("Gameloop.Draw",Lockpicker.Draw,"Lockpicker Draw")
 RegisterEventHandler("Gameloop.Update",Lockpicker.OnUpdate,"Lockpicker OnUpdate")
+
+
+AdvancedSettings = {}
+AdvancedSettings.shouldUseSoulGem = true
+function AdvancedSettings.Draw()
+	if (esominion.GUI.settings.open) then
+		GUI:SetNextWindowSize(600,500,GUI.SetCond_FirstUseEver)	
+		GUI:SetNextWindowCollapsed(false,GUI.SetCond_Once)
+		local winBG = GUI:GetStyle().colors[GUI.Col_WindowBg]
+		GUI:PushStyleColor(GUI.Col_WindowBg, winBG[1], winBG[2], winBG[3], .75)
+		esominion.GUI.settings.visible, esominion.GUI.settings.open = GUI:Begin(esominion.GUI.settings.name, esominion.GUI.settings.open)
+		if ( esominion.GUI.settings.visible ) then
+			GUI:BeginChild("main-sidebar", 150, 0, true)
+			local tabindex, tabname = GUI_DrawVerticalTabs(esominion.GUI.settings.main_tabs)
+			GUI:EndChild()
+			GUI:SameLine(170)
+			GUI:BeginChild("main-content", 0, 0, false)
+			if (tabindex == 1) then
+				GUI:BeginChild("##main-header-general", 0, GUI_GetFrameHeight(10), true)
+				AdvancedSettings.shouldUseSoulGem = GUI:Checkbox("Use SoulGem on death", AdvancedSettings.shouldUseSoulGem)
+				GUI:EndChild()
+			end
+			GUI:EndChild()
+		end
+		GUI:End()
+		GUI:PopStyleColor()
+	end
+end
+
+function AdvancedSettings.Init()
+	esominion.GUI.settings.main_tabs = GUI_CreateTabs("General", true)
+end
+RegisterEventHandler("Module.Initalize", AdvancedSettings.Init,"AdvancedSettings Init")
+RegisterEventHandler("Gameloop.Draw", AdvancedSettings.Draw,"AdvancedSettings Draw")
