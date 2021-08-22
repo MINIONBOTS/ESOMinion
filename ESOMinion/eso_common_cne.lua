@@ -26,13 +26,7 @@ function e_loot:execute()
 	c_loot.lootattempt = false
 end
 
-c_findaggro = inheritsFrom( ml_cause )
-e_findaggro = inheritsFrom( ml_effect )
-function c_findaggro:evaluate()
-	if eso_gather.killtargetid ~= 0 then
-		return false
-	end
-	
+function get_aggro_list()
 	local targetList = MEntityList("maxdistance=20,hostile,aggro")
 	if not table.valid(targetList) then
 		targetList = MEntityList("maxdistance=20,hostile,targetingme")
@@ -42,6 +36,17 @@ function c_findaggro:evaluate()
 			targetList = MEntityList("maxdistance=20,hostile,targeting="..tostring(esominion.petid))
 		end
 	end
+	return targetList
+end
+
+c_findaggro = inheritsFrom( ml_cause )
+e_findaggro = inheritsFrom( ml_effect )
+function c_findaggro:evaluate()
+	if eso_gather.killtargetid ~= 0 then
+		return false
+	end
+	
+	local targetList = get_aggro_list()
 	if table.valid(targetList) then
 		local best = nil
 		local lowestHP = math.huge
@@ -63,15 +68,28 @@ function c_findaggro:evaluate()
 end
 function e_findaggro:execute()
 end
+
 c_killaggro = inheritsFrom( ml_cause )
 e_killaggro = inheritsFrom( ml_effect )
+
 function c_killaggro:evaluate()
 	if eso_gather.killtargetid == 0 then
 		return false
 	end
-	if not table.valid(MGetEntity(eso_gather.killtargetid)) then
+
+	local targetList = get_aggro_list()
+	if not table.valid(targetList) then
 		eso_gather.killtargetid = 0
 		return false
+	else
+		for _, target in pairs(targetList) do
+			if target.index == eso_gather.killtargetid then
+				return true
+			else
+				eso_gather.killtargetid = 0
+				return false
+			end
+		end
 	end
 	if Player.isswimming ~= 0 then
 		return false
