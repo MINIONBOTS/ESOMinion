@@ -18,6 +18,7 @@ esominion.petid = 0
 esominion.lureBaitCount = 0
 esominion.activeBait = 0
 esominion.baits = {
+
 	[1] = "Simple Bait",
 	[2] = "Lake", --"Guts",
 	[3] = "Foul", --"Crawlers",
@@ -133,6 +134,7 @@ function esominion.Init()
 	esominion.AddMode(GetString("assistMode"), eso_task_assist)
 	esominion.AddMode(GetString("fishMode"), eso_task_fish)
 	esominion.AddMode(GetString("gatherMode"), eso_task_gather)
+	esominion.AddMode(GetString("grindMode"), eso_task_grind)
 	
 	if (table.valid(esominion.modesToLoad)) then
 		esominion.LoadModes()
@@ -210,7 +212,6 @@ esominion.GUI = {
 		visible = true,
 		colors = { r = 1, g = 1, b = 1, a = 1 },
 	},
-	
 	current_tab = 1,
 	draw_mode = 1,
 }
@@ -476,6 +477,9 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		if esominion.hooked and TimeSince(esominion.hooktimer) > 5000 then
 			esominion.hooked = false
 		end
+		-- Update global variables \\ THIS MUST REMAIN THE FIRST UPDATE, OTHERWISE THERE WILL BE MISSING GLOBALS.
+		ml_globals.UpdateGlobals()
+		
 		esominion.buffList = {}
 		BuildBuffsByIndex(Player.index)
 		if esominion.smartrecord and not NavigationManager.ProcessingFloorMesh then

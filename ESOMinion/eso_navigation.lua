@@ -281,14 +281,13 @@ end
 -- Main function to move the player. 'targetid' is optional but should be used as often as possible, if there is no target, use 0
 function Player:MoveTo(x, y, z, staymounted, targetid, stoppingdistance, randommovement, smoothturns)
     -- get movement state // cant get this every pulse
-
     local ms = Player:GetMovementType()
     local last_dest = ml_navigation.path and ml_navigation.path[table.size(ml_navigation.path)]
 
     --- Check if we are synced with the world due to teleports or what not; added here to handle everything movement related.
-    if (ms ~= "Falling" and ms ~= "Jumping") or
-            not table.valid(ml_navigation.path) or
-            (last_dest and math.distance3d(last_dest, { x = x, y = y, z = z }) > 5) then
+    if (ms ~= "Falling" and ms ~= "Jumping") or not table.valid(ml_navigation.path) or
+        (last_dest and math.distance3d(last_dest, { x = x, y = y, z = z }) > 5) then
+		
         ml_navigation.stoppingdistance = stoppingdistance or 154
         ml_navigation.randommovement = randommovement
         ml_navigation.smoothturns = smoothturns or true
@@ -299,9 +298,7 @@ function Player:MoveTo(x, y, z, staymounted, targetid, stoppingdistance, randomm
 
         ---check npc collision here and generate evasive path
         --- mainly for npc entities
-        if table.valid(MadaoLib) then
-
-        end
+		
 
         if (not ml_navigation.navconnection or ml_navigation.navconnection.type == 5) then
             -- We are not currently handling a NavConnection / ignore MacroMesh Connections, these have to be replaced with a proper path by calling this exact function here
@@ -343,6 +340,83 @@ function Player:MoveTo(x, y, z, staymounted, targetid, stoppingdistance, randomm
 end
 ml_navigation.characterid = "empty"
 
+ml_navigation.lastPathUpdate = 0
+ml_navigation.lastconnectiontimer = 0
+ml_navigation.pathchanged = false
+function Player:BuildPath(x, y, z, floorfilters, cubefilters, targetid)
+	ml_navigation.debug = nil -- this is just for being able to click "Get Path to target" in the navmanager, so you see the current path and can check  the nodes / manually optimize that path without actually start flying
+	local floorfilters = IsNull(floorfilters,0,true)
+	local cubefilters = IsNull(cubefilters,0,true)
+	if (targetid == 0) then
+		targetid = nil
+	end
+
+	--[[if (MPlayerDriving()) then
+		d("[NAVIGATION]: Releasing control to Player..")
+		ml_navigation:ResetCurrentPath()
+		return -1337
+	end]]
+	
+	if (x == nil or y == nil or z == nil) then -- yes this happens regularly inside fates, because some of the puzzle code calls moveto nil/nil/nil
+		d("[NAVIGATION]: Invalid Move To Position :["..tostring(x)..","..tostring(y)..","..tostring(z).."]")
+		return 0
+	end
+	
+	local ppos = Player.pos	
+	local newGoal = { x = x, y = y, z = z }
+	
+	local hasCurrentPath = table.valid(ml_navigation.path)
+	local currentPathSize = table.size(ml_navigation.path)
+	local sametarget = ml_navigation.lasttargetid and targetid and ml_navigation.lasttargetid == targetid -- needed, so it doesnt constantly pull a new path n doing a spinny dance on the navcon startpoint when following a moving target 
+	local hasPreviousPath = hasCurrentPath and table.valid(newGoal) and table.valid(ml_navigation.targetposition) and ( (not sametarget and math.distance3d(newGoal,ml_navigation.targetposition) < 1) or sametarget )
+	--if (hasPreviousPath and (ml_navigation.lastconnectionid ~= 0 or TimeSince(ml_navigation.lastPathUpdate) < 2000)) then
+	if (hasPreviousPath and (ml_navigation.lastconnectionid ~= 0) and (TimeSince(ml_navigation.lastconnectiontimer) < 5000)) then
+		d("[NAVIGATION]: We are currently using a Navconnection / ascending / descending, wait until we finish to pull a new path.")
+		return currentPathSize
+	end
+	
+	local distanceToGoal = math.distance2d(newGoal.x,newGoal.z,ppos.x,ppos.z)
+	-- Filter things for special tasks/circumstances
+	if (Player.incombat and (not Player.ismounted or not Player.mountcanfly)) 
+	then
+		cubefilters = bit.bor(cubefilters, GLOBAL.CUBE.AIR)
+	end
+	
+	NavigationManager:SetExcludeFilter(GLOBAL.NODETYPE.CUBE, cubefilters)
+	NavigationManager:SetExcludeFilter(GLOBAL.NODETYPE.FLOOR, floorfilters)
+	
+	--d("building path to ["..tostring(newGoal.x)..","..tostring(newGoal.y)..","..tostring(newGoal.z)..",floor:"..tostring(floorfilters)..",cube:"..tostring(cubefilters)..",tid:"..tostring(targetid))
+	local ret = ml_navigation:MoveTo(newGoal.x,newGoal.y,newGoal.z, targetid)
+	ml_navigation.lastPathUpdate = Now()
+	ml_navigation.lastconnectionid = 0
+	ml_navigation.lastconnectiontimer = 0
+	
+	if (ret <= 0) then
+		if (hasPreviousPath) then
+			d("[NAVIGATION]: Encountered an issue on path pull, using previous path, errors may be encountered here.")
+			return currentPathSize
+		else
+			ml_navigation:ResetCurrentPath()
+		end
+		local ppos = Player.pos
+		ml_navigation.startposition = { x=0, y=0, z=0 }
+		ml_navigation.targetposition = { x=0, y=0, z=0 }
+		ml_navigation.lasttargetid = nil
+	else
+		ml_navigation.startposition = { x=ppos.x, y=ppos.y, z=ppos.z }
+		ml_navigation.targetposition = newGoal
+		ml_navigation.lasttargetid = targetid	
+	end
+	
+	if (ret > 0 and hasCurrentPath) then
+		for _,node in pairs(ml_navigation.path) do
+			ml_navigation.TagNode(node)
+		end
+	end
+	
+	--table.print(ml_navigation.path)
+	return ret
+end
 --- Handles the Navigation along the current Path. Is not supposed to be called manually.
 function ml_navigation.Navigate(event, ticks)
     if ((ticks - (ml_navigation.lastupdate or 0)) > 10) then
