@@ -222,7 +222,11 @@ function c_cast:evaluate()
 		if table.valid(gatherable) then
 			local newPos = NavigationManager:GetRandomPointOnCircle(gatherable.pos.x,gatherable.pos.y,gatherable.pos.z,5,10,0,true,2)
 			if (table.valid(newPos)) then
-				Player:MoveTo(newPos.x, newPos.y, newPos.z, false, 0, 2)
+				local newTask = eso_task_movetopos.Create()
+				newTask.pos = newPos
+				newTask.range = math.random(2,5)
+				newTask.remainMounted = false
+				ml_task_hub:CurrentTask():AddSubTask(newTask)
 				c_cast.doblock = true
 				c_cast.blocktime = Now()
 				d("find alternate pos")
@@ -314,9 +318,13 @@ function c_isidle:evaluate()
 		local activeBaitCount = tostring(select(3,e("GetFishingLureInfo("..tostring(esominion.activeBait)..")")))
 		if tonumber(activeBaitCount) == 0 then
 			eso_fish.currenttask = {}
+			esominion.lureType = 0
 			d("reset task, Ran out of bait")
 			return true
 		end
+	end
+	if TimeSince(c_cast.blocktime) > 5000 then
+		esominion.lureType = 0
 	end
 
 	return false
@@ -555,9 +563,7 @@ function eso_task_fish:Init()
 	
 	--local ke_syncadjust = ml_element:create( "SyncAdjust", c_syncadjust, e_syncadjust, 25)
 	--self:add(ke_syncadjust, self.process_elements)
-
-	local ke_checkinventoryspace = ml_element:create("CheckInventorySpace", c_checkspace, e_checkspace, 101 )
-	self:add(ke_checkinventoryspace, self.process_elements)
+		
 	
 	local ke_bite = ml_element:create( "Bite", c_bite, e_bite, 22 )
 	self:add(ke_bite, self.process_elements)
@@ -906,7 +912,13 @@ function e_movetonode:execute()
 			distanceMax = 12
 		end
 		if (table.valid(gpos)) then
-			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
+			local newTask = eso_task_movetointeract.Create()
+			newTask.pos = gatherable.pos
+			newTask.interact = gatherable.index
+			newTask.interactRange = 2
+			newTask.range = 2
+			newTask.remainMounted = false
+			ml_task_hub:CurrentTask():AddSubTask(newTask)
 		end
 	end
 end
@@ -968,7 +980,11 @@ function ef_movetorandom:execute()
 		local dist = math.distance2d(myPos.x, myPos.z, rpos.x, rpos.z)
 		if (table.valid(rpos)) then
 			if dist > 5 then
-				Player:MoveTo(rpos.x, rpos.y, rpos.z, false, 0, 5)
+				local newTask = eso_task_movetopos.Create()
+				newTask.pos = rpos
+				newTask.range = math.random(2,5)
+				newTask.remainMounted = false
+				ml_task_hub:CurrentTask():AddSubTask(newTask)
 			else
 				eso_fish.lastPosition = eso_fish.thisPosition
 				eso_fish.thisPosition = {}
@@ -1037,7 +1053,11 @@ function ef_movetonextpath:execute()
 		local dist = math.distance2d(myPos.x, myPos.z, rpos.x, rpos.z)
 		if (table.valid(rpos)) then
 			if dist > 5 then
-				Player:MoveTo(rpos.x, rpos.y, rpos.z, false, 0, 5)
+				local newTask = eso_task_movetopos.Create()
+				newTask.pos = rpos
+				newTask.range = math.random(2,5)
+				newTask.remainMounted = false
+				ml_task_hub:CurrentTask():AddSubTask(newTask)
 			else
 				eso_fish.lastPosition = eso_fish.thisPosition
 				eso_fish.thisPosition = {}
@@ -1197,9 +1217,13 @@ function ef_movetobest:execute()
 		end
 	--d("[cf_movetobest] execute 2")
 		if (table.valid(gpos)) then
-			
-	--d("[cf_movetobest] execute 3")
-			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
+			local newTask = eso_task_movetointeract.Create()
+			newTask.pos = gatherable.pos
+			newTask.interact = gatherable.index
+			newTask.interactRange = 2
+			newTask.range = 2
+			newTask.remainMounted = false
+			ml_task_hub:CurrentTask():AddSubTask(newTask)
 		end
 	end
 end

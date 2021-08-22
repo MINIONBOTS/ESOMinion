@@ -288,7 +288,6 @@ function c_findnode:evaluate()
 	return false
 end
 function e_findnode:execute()
-	return false
 end
 
 c_movetonode = inheritsFrom( ml_cause )
@@ -328,7 +327,13 @@ function e_movetonode:execute()
 		local gpos = gatherable.meshpos
 		local distanceMax = 5
 		if (table.valid(gpos)) then
-			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
+			
+			local newTask = eso_task_movetointeract.Create()
+			newTask.pos = gatherable.pos
+			newTask.interact = gatherable.index
+			newTask.interactRange = 2
+			newTask.postDelay = 4000	
+			ml_task_hub:CurrentTask():AddSubTask(newTask)	
 		end
 	end
 end
@@ -398,7 +403,11 @@ function e_movetorandom:execute()
 		local dist = math.distance2d(myPos.x, myPos.z, rpos.x, rpos.z)
 		if (table.valid(rpos)) then
 			if dist > 5 then
-				Player:MoveTo(rpos.x, rpos.y, rpos.z, false, 0, 5)
+				local newTask = eso_task_movetopos.Create()
+				newTask.pos = rpos
+				newTask.range = math.random(2,5)
+				newTask.remainMounted = false
+				ml_task_hub:CurrentTask():AddSubTask(newTask)
 			else
 				eso_gather.lastPosition = eso_fish.thisPosition
 				eso_gather.thisPosition = {}
@@ -510,8 +519,11 @@ function e_movetobest:execute()
 		local gpos = gatherable.meshpos
 		local distanceMax = 5
 		if (table.valid(gpos)) then
-			
-			 Player:MoveTo(gpos.x, gpos.y, gpos.z, false, 0, distanceMax)
+			local newTask = eso_task_movetopos.Create()
+			newTask.pos = gpos
+			newTask.range = math.random(2,5)
+			newTask.remainMounted = false
+			ml_task_hub:CurrentTask():AddSubTask(newTask)
 		end
 	end
 end

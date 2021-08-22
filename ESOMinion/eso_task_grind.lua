@@ -270,7 +270,6 @@ function c_nextgrindobjective:evaluate()
 		gatherable = EntityList:Get(gatherid)
 		if (ValidTable(gatherable)) then
 			gatherdistance = math.distance2d(Player.pos,gatherable.pos)
-			d("gatherable path dist = "..tostring(gatherdistance))
 		end
 	end
 	
@@ -278,11 +277,8 @@ function c_nextgrindobjective:evaluate()
 		target = EntityList:Get(targetid)
 		if (ValidTable(target)) then
 			targetdistance = math.distance2d(Player.pos,target.pos)
-			d("target path dist = "..tostring(targetdistance))
 		end
 	end
-	d("gatherdistance = "..tostring(gatherdistance))
-	d("targetdistance = "..tostring(targetdistance))
 	if (targetdistance < gatherdistance) then
 		if (ValidTable(target)) then
 			local newTask = eso_task_combat.Create()

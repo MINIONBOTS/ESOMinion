@@ -539,8 +539,11 @@ function e_killaggro:execute()
 	eso_gather.thisPosition = {}
 	local target = MGetEntity(eso_gather.killtargetid)
 	if target and target.health.current > 0 then
-		Player:SetFacing(target.id,true)
-		eso_skillmanager.Cast( target )
+		local newTask = eso_task_combat.Create()
+		newTask.targetID = target.index
+		c_nextgrindobjective.task = newTask
+		d("kill task")
+		ml_task_hub:CurrentTask():AddSubTask(newTask)	
 	else
 		eso_gather.killtargetid = 0
 	end
@@ -554,8 +557,7 @@ c_getmovementpath.lastOptimalPath = 0
 function c_getmovementpath:evaluate()
 	if not Player.onmesh then
 		return false
-	end	
-	d("c_getmovementpath")
+	end
 	if (table.valid(ml_task_hub:CurrentTask().pos) or table.valid(ml_task_hub:CurrentTask().gatePos)) then		
 		local gotoPos = nil
 		if (ml_task_hub:CurrentTask().gatePos) then

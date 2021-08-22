@@ -409,9 +409,9 @@ function Player:BuildPath(x, y, z, floorfilters, cubefilters, targetid)
 	end
 	
 	if (ret > 0 and hasCurrentPath) then
-		for _,node in pairs(ml_navigation.path) do
+		--[[for _,node in pairs(ml_navigation.path) do
 			ml_navigation.TagNode(node)
-		end
+		end]]
 	end
 	
 	--table.print(ml_navigation.path)

@@ -288,9 +288,9 @@ end
 
 function eso_task_movetopos:task_complete_execute()
     SafeStop()
-	if (not self.remainMounted and ai_mount:CanDismount()) then
+	--[[if (not self.remainMounted and ai_mount:CanDismount()) then
 		ai_mount:Dismount()
-	end
+	end]]
     self.completed = true
 end
 
@@ -411,7 +411,7 @@ function eso_task_movetointeract:task_complete_eval()
 		local interact = EntityList:Get(tonumber(self.interact))
 		if (interact and interact.targetable and interact.distance < 15) then
 			--Player:SetTarget(interact.id)
-			d("need set target here")
+			--d("need set target here")
 			local ipos = shallowcopy(interact.pos)
 			local p,dist = NavigationManager:GetClosestPointOnMesh(ipos,false)
 			if (ValidTable(p)) then
@@ -435,14 +435,14 @@ function eso_task_movetointeract:task_complete_eval()
 				end
 				if (interact and interact.distance <= self.interactRange) then
 					Player:SetFacing(interact.pos.x,interact.pos.y,interact.pos.z)
-					Player:Interact(interact.id)
+					interact:Interact()
 					self.lastDistance = interact.pathdistance
 					self.lastinteract = Now() + 500
+					ml_global_information.Await(1000)
 				end
 			end
 		end
 	end
-	d("end eval eso_task_movetointeract")
 	return false
 end
 
