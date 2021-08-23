@@ -1204,12 +1204,15 @@ function cf_movetobest:evaluate()
 	return false
 end
 function ef_movetobest:execute()
+d("cast execute")
 	if cf_movetobest.doblock then
+	d("cast block")
 		return false
 	end
 	--d("[cf_movetobest] execute 1")
 	local gatherable = eso_fish.currenttask
 	if (table.valid(gatherable)) then
+	d("valid target")
 		local gpos = gatherable.meshpos
 		local distanceMax = 5
 		if In(gatherable.contentid,909,910,911,912) then
@@ -1226,6 +1229,7 @@ function ef_movetobest:execute()
 			ml_task_hub:CurrentTask():AddSubTask(newTask)
 		end
 	end
+	d("cast block")
 end
 
 c_setfacing = inheritsFrom( ml_cause )
