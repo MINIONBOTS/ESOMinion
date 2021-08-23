@@ -210,7 +210,7 @@ function eso_task_movetopos.Create()
     --eso_task_movetopos members
     newinst.name = "MOVETOPOS"
     newinst.pos = 0
-    newinst.range = 1.5
+    newinst.range = 1
     newinst.pauseTimer = 0
     newinst.remainMounted = false
     newinst.useFollowMovement = false
@@ -336,9 +336,9 @@ function eso_task_movetointeract.Create()
 	newinst.lastDistance = nil
 	newinst.failTimer = 0
 	newinst.forceLOS = false
-	newinst.interactRange = 4
+	newinst.interactRange = 1
 	newinst.dismountDistance = newinst.interactRange + 10
-	newinst.range = 4
+	newinst.range = 1
 	newinst.waitForInteract = false
 	newinst.waitingForInteract = false
 	newinst.checkLootable = false
@@ -407,7 +407,7 @@ function eso_task_movetointeract:task_complete_eval()
 		end
 	end
 	
-	if (self.interact ~= 0) then
+	--[[if (self.interact ~= 0) then
 		local interact = EntityList:Get(tonumber(self.interact))
 		if (interact and interact.targetable and interact.distance < 15) then
 			--Player:SetTarget(interact.id)
@@ -420,7 +420,7 @@ function eso_task_movetointeract:task_complete_eval()
 				end
 			end
 		end
-	end
+	end]]
 	
 	if (self.interact ~= 0 and Now() > self.lastinteract) then
 		if (not isInteracting) then

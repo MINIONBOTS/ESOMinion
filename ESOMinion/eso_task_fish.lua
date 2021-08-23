@@ -1220,8 +1220,8 @@ function ef_movetobest:execute()
 			local newTask = eso_task_movetointeract.Create()
 			newTask.pos = gatherable.pos
 			newTask.interact = gatherable.index
-			newTask.interactRange = 2
-			newTask.range = 2
+			newTask.interactRange = distanceMax
+			newTask.range = distanceMax
 			newTask.remainMounted = false
 			ml_task_hub:CurrentTask():AddSubTask(newTask)
 		end
