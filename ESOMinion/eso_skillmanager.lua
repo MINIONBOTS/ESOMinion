@@ -640,7 +640,7 @@ end
 
 function eso_skillmanager.SetDefaultProfile(strName)
 	local profile = strName or gSMprofile
-	local classid = e("GetUnitClassId(player)")
+	local classid = ml_global_information.CurrentClass
 	Settings.ESOMINION.SMDefaultProfiles[classid] = profile
 	Settings.ESOMINION.SMDefaultProfiles = Settings.ESOMINION.SMDefaultProfiles
 end
@@ -2052,8 +2052,8 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Combat Status")); GUI:NextColumn(); SKM_Combo("##SKM_Combat","gSMBattleStatusIndex","SKM_Combat",gSMBattleStatuses); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Summon Skill")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Summon",SKM_Summon),"SKM_Summon"); GUI:NextColumn();		
-		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "minRange", variable = "SKM_MinR", width = 50, tooltip = "Minimum range the skill can be used (For most skills, this will stay at 0)."}
-		GUI:AlignFirstTextHeightToWidgets(); eso_skillmanager.DrawLineItem{control = "int", name = "maxRange", variable = "SKM_MaxR", width = 50, tooltip = "Maximum range the skill can be used."}
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Min Range")); GUI:NextColumn(); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Minimum range the skill can be used.")) end eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_MinR",SKM_MinR,0,0),"SKM_MinR");  GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Max Range")); GUI:NextColumn(); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Maximum range the skill can be used.")) end eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_MaxR",SKM_MaxR,0,0),"SKM_MaxR"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PSkillID",SKM_PSkillID),"SKM_PSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill NOT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should NOT be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPSkillID",SKM_NPSkillID),"SKM_NPSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Throttle Skill",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Delay reuse of skill. (seconds)")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THROTTLE",SKM_THROTTLE,0,0),"SKM_THROTTLE"); GUI:NextColumn();

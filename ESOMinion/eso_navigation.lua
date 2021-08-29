@@ -309,7 +309,7 @@ function Player:MoveTo(x, y, z, staymounted, targetid, stoppingdistance, randomm
             ml_navigation.navconnection = nil
 
             ---generate ml_navigation.path here
-            local status = ml_navigation:MoveTo(x, y, z, targetid)
+            local status = Player:BuildPath(x, y, z, floorfilters, cubefilters, targetid)
             ml_navigation.movement_status = status
 
             if status > 0 then

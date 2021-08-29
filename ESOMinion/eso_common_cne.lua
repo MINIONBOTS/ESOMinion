@@ -576,17 +576,10 @@ function c_getmovementpath:evaluate()
 				end
 			end
 			if ml_task_hub:CurrentTask().targetid then
-			d("has target")
 				local target = EntityList:Get(ml_task_hub:CurrentTask().targetid)
 				if table.valid(target) then
-				d("valid target")
-					local dist = math.distance2d(ml_task_hub:CurrentTask().pos,target.pos)
-					d("dist = "..tostring(dist))
-					if dist > 3 then	
-						ml_task_hub:CurrentTask().pos = target.pos
-						gotoPos = target.pos
-						d("update target pos")
-					end
+					ml_task_hub:CurrentTask().pos = target.pos
+					gotoPos = target.pos
 				end
 			end
 			

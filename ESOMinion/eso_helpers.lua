@@ -845,32 +845,22 @@ function loot_update(eventName, eventCode, receivedBy, itemName, quantity, sound
 	esominion.lootOpen = true
 	esominion.lootTime = Now()
 end
-RegisterForEvent("EVENT_LOOT_RECEIVED", true)
-RegisterEventHandler("GAME_EVENT_LOOT_RECEIVED", loot_update, "Loot Open")
 function loot_close(eventName, eventCode) 
 	esominion.lootOpen = false
 end
-RegisterForEvent("EVENT_LOOT_CLOSED", true)
-RegisterEventHandler("GAME_EVENT_LOOT_CLOSED", loot_close, "Loot Closed")
 
 function death_update_alive(eventName, eventCode) 
 	esominion.playerdead = false
 end
-RegisterForEvent("EVENT_PLAYER_ALIVE", true)
-RegisterEventHandler("GAME_EVENT_PLAYER_ALIVE", death_update_alive, "Death Update Alive")
 function death_update_dead(eventName, eventCode) 
 	esominion.playerdead = true
 end
-RegisterForEvent("EVENT_PLAYER_DEAD", true)
-RegisterEventHandler("GAME_EVENT_PLAYER_DEAD", death_update_dead, "Death Update Dead")
 
 function changeCombatState(eventName, eventCode, inCombat)
 d("in combat state changed")
 	Player.incombat = toboolean(inCombat)
 	esominion.incombat = toboolean(inCombat)
 end
-RegisterForEvent("EVENT_PLAYER_COMBAT_STATE", true)
-RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE", changeCombatState, "CombatState")
 
 function addCombatTip(eventName, eventCode, activeCombatTipId)
 	esominion.activeTip = tonumber(activeCombatTipId)
@@ -879,10 +869,6 @@ function removeCombatTip(eventName, eventCode, activeCombatTipId)
 	esominion.activeTip = 0
 end
 
-RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
-RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP", addCombatTip, "CombatTipActive")
-RegisterForEvent("EVENT_REMOVE_ACTIVE_COMBAT_TIP", true)
-RegisterEventHandler("GAME_EVENT_REMOVE_ACTIVE_COMBAT_TIP", removeCombatTip, "CombatTipRemove")
 
 function addLure(eventName, eventCode, fishingLure)
 	esominion.lureType = tonumber(fishingLure)
@@ -891,10 +877,6 @@ function clearLure(eventName, eventCode)
 	esominion.lureType = 0
 	d("event clear bait")
 end
-RegisterForEvent("EVENT_FISHING_LURE_SET", true)
-RegisterEventHandler("GAME_EVENT_FISHING_LURE_SET", addLure, "Lure Set")
-RegisterForEvent("EVENT_FISHING_LURE_CLEARED", true)
-RegisterEventHandler("GAME_EVENT_FISHING_LURE_CLEARED", clearLure, "Lure Clear")
 
 function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
 	if itemSoundCategory == "39" then
@@ -902,5 +884,27 @@ function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCate
 		esominion.hooktimer = Now()
 	end
 end
+function loadEvents()
+
+RegisterForEvent("EVENT_LOOT_RECEIVED", true)
+RegisterEventHandler("GAME_EVENT_LOOT_RECEIVED", loot_update, "Loot Open")
+RegisterForEvent("EVENT_LOOT_CLOSED", true)
+RegisterEventHandler("GAME_EVENT_LOOT_CLOSED", loot_close, "Loot Closed")
+RegisterForEvent("EVENT_PLAYER_ALIVE", true)
+RegisterEventHandler("GAME_EVENT_PLAYER_ALIVE", death_update_alive, "Death Update Alive")
+RegisterForEvent("EVENT_PLAYER_DEAD", true)
+RegisterEventHandler("GAME_EVENT_PLAYER_DEAD", death_update_dead, "Death Update Dead")
+RegisterForEvent("EVENT_PLAYER_COMBAT_STATE", true)
+RegisterEventHandler("GAME_EVENT_PLAYER_COMBAT_STATE", changeCombatState, "CombatState")
+RegisterForEvent("EVENT_DISPLAY_ACTIVE_COMBAT_TIP", true)
+RegisterEventHandler("GAME_EVENT_DISPLAY_ACTIVE_COMBAT_TIP", addCombatTip, "CombatTipActive")
+RegisterForEvent("EVENT_REMOVE_ACTIVE_COMBAT_TIP", true)
+RegisterEventHandler("GAME_EVENT_REMOVE_ACTIVE_COMBAT_TIP", removeCombatTip, "CombatTipRemove")
+RegisterForEvent("EVENT_FISHING_LURE_SET", true)
+RegisterEventHandler("GAME_EVENT_FISHING_LURE_SET", addLure, "Lure Set")
+RegisterForEvent("EVENT_FISHING_LURE_CLEARED", true)
+RegisterEventHandler("GAME_EVENT_FISHING_LURE_CLEARED", clearLure, "Lure Clear")
 RegisterForEvent("EVENT_INVENTORY_SINGLE_SLOT_UPDATE", true)
 RegisterEventHandler("GAME_EVENT_INVENTORY_SINGLE_SLOT_UPDATE", fish_bite, "fish Bite")
+end
+

@@ -464,7 +464,9 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	
 	memoize = {}
 	if (table.valid(esominion.modesToLoad)) then
+		ml_globals.UpdateGlobals()
 		esominion.LoadModes()
+		loadEvents()
 		ESO_Common_BotRunning = false
 	end
 	
