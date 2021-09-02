@@ -87,7 +87,7 @@ function e_movetorandom:execute()
 				Sprint()
 				ml_log("eso_common -> movetorandom, distance " .. math.floor(dist) .. " -> ")
 
-				local result = tostring(Player:MoveTo(rpos.x,rpos.y,rpos.z,ml_global_information.randomdistance-1,false,false,false))
+				local result = Player:BuildPath(rpos.x,rpos.y,rpos.z) 
 				if (tonumber(result) >= 0) then
 					return ml_log(true)
 				end
@@ -118,7 +118,7 @@ function c_rest:evaluate()
 	if  g_rest == "1" and
 		not Player.dead and
 		not ml_global_information.Player_InCombat and
-		not Player.isswimming and
+		not IsSwimming() and
 		not Player.iscasting
 	then
 		local hpp = ml_global_information.Player_Health.percent
@@ -278,7 +278,7 @@ c_aggro = inheritsFrom(ml_cause)
 e_aggro = inheritsFrom(ml_effect)
 c_aggro.targetid = 0
 function c_aggro:evaluate()
-	if (Player.isswimming) then
+	if (IsSwimming()) then
 		return false
 	end
 	
@@ -526,7 +526,7 @@ function c_killaggro:evaluate()
 		eso_gather.killtargetid = 0
 		return false
 	end
-	if Player.isswimming ~= 0 then
+	if IsSwimming() then
 		return false
 	end
 	return true
@@ -575,16 +575,29 @@ function c_getmovementpath:evaluate()
 					ml_task_hub:CurrentTask().gatePos = meshpos
 				end
 			end
-			if ml_task_hub:CurrentTask().targetid then
-				local target = EntityList:Get(ml_task_hub:CurrentTask().targetid)
-				if table.valid(target) then
-					ml_task_hub:CurrentTask().pos = target.pos
-					gotoPos = target.pos
-				end
-			end
 			
 			local pathLength = 0
 			local navid = IsNull(ml_task_hub:CurrentTask().navid,0)
+			if not In(navid,0) then
+				local getEntity = EntityList:Get(navid)
+				if table.valid(getEntity) then
+					gotoPos = getEntity.pos
+				end
+			end
+			local targetid1 = IsNull(ml_task_hub:CurrentTask().targetid,0)
+			if not In(targetid1,0) then
+				local getEntity = EntityList:Get(targetid1)
+				if table.valid(getEntity) then
+					gotoPos = getEntity.pos
+				end
+			end
+			local targetid2 = IsNull(ml_task_hub:CurrentTask().targetID,0)
+			if not In(targetid2,0) then
+				local getEntity = EntityList:Get(targetid2)
+				if table.valid(getEntity) then
+					gotoPos = getEntity.pos
+				end
+			end
 			
 			local dist = math.distance2d(gotoPos,Player.pos)
 			if (table.valid(c_getmovementpath.lastGoal)) then

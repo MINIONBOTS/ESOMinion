@@ -201,9 +201,12 @@ function SafeStop()
 	if (Player.issprinting) then
 		e("OnSpecialMoveKeyUp(1)")
 	end
-	Player:Stop()
+	Player:StopMovement()
 end
-
+function IsSwimming()
+	return Player.isswimming == 1
+end
+	
 function InventoryNearlyFull()
 	return (ml_global_information.Player_InventoryFreeSlots <= 5)
 end
@@ -217,6 +220,9 @@ function InCombatRange(targetid)
 		return false
 	end
 	
+	if IsSwimming() then
+		return false
+	end
 	local target = {}
 	--Quick change here to allow passing of a target or just the ID.
 	if (type(targetid) == "table") then
@@ -244,6 +250,11 @@ function InCombatRange(targetid)
 end
 
 function CanAttack(targetid)
+
+	if IsSwimming() then
+		return false
+	end
+		
 	local target = {}
 	--Quick change here to allow passing of a target or just the ID.
 	if (type(targetid) == "table") then
@@ -407,37 +418,29 @@ function GetNearestGrind()
 	el = MEntityList("lowesthealth,alive,aggro,attackable,maxdistance=28,onmesh")
 	if (not ValidTable(el)) then
 		el = MEntityList("shortestpath,alive,aggro,attackable,maxdistance=28,onmesh")
-		d("search el 1")
 	end
 	if (not ValidTable(el)) then
 		 el = MEntityList("nearest,alive,aggro,attackable,maxdistance=28,onmesh")
-		d("search el 2")
 	end
 	
 	if (not ValidTable(el)) then
 		if (whitelist and whitelist ~= "") then
-			d("Checking whitelist section.")
 			el = MEntityList("shortestpath,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
-		d("search el 3")
 			if (not ValidTable(el)) then
 				el = MEntityList("nearest,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",contentid="..whitelist)
-		d("search el 4")
 			end
 		elseif (blacklist and blacklist ~= "") then
-			d("Checking blacklist section.")
 			local filterstring = "shortestpath,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist
 			if (gPreventAttackingInnocents) then
 				filterstring = filterstring..",hostile"
 			end
 			el = MEntityList(filterstring)
-		d("search el 5")
 			if (not ValidTable(el)) then
 				filterstring = "nearest,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist
 				if (gPreventAttackingInnocents) then
 					filterstring = filterstring..",hostile"
 				end
 				el = MEntityList(filterstring)
-		d("search el 6")
 			end
 		else
 			d("Checking other section.")
@@ -446,14 +449,12 @@ function GetNearestGrind()
 				filterstring = filterstring..",hostile"
 			end
 			el = MEntityList(filterstring)
-		d("search el 7")
 			if (not ValidTable(el)) then
 				filterstring = "nearest,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel
 				if (gPreventAttackingInnocents) then
 					filterstring = filterstring..",hostile"
 				end
 				el = MEntityList(filterstring)
-		d("search el 8")
 			end
 			if (not ValidTable(el)) then
 				filterstring = "nearest,attackable,alive,nocritter,onmesh"
@@ -461,7 +462,6 @@ function GetNearestGrind()
 					filterstring = filterstring..",hostile"
 				end
 				el = MEntityList(filterstring)
-		d("search el 9")
 			end
 		end
 	end
@@ -469,12 +469,9 @@ function GetNearestGrind()
 	local closest = math.huge
 	local ppos = Player.pos
 	if (ValidTable(el)) then
-		d("found entity list")
 		for i,e in pairs(el) do
 			if e.health.current > 0 then
 				local dist = math.distance2d(ppos,e.pos)
-				d("dist = " ..tostring(dist))
-				d("closest = " ..tostring(closest))
 				if dist < closest then
 					closest = dist
 					best = e
@@ -483,8 +480,6 @@ function GetNearestGrind()
 		end
 		if best then
 			target = best
-			d("target = ")
-			d(target)
 		end
 	else
 		d("[GetNearestGrind]:Was unable to find valid targets.")

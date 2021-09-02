@@ -220,6 +220,10 @@ function Player:GetMovementState()
     end
 end
 
+ml_navigation.HasPath = function (self)
+	--return (table.valid(self.path) and self.path[self.pathindex] ~= nil)
+	return (table.valid(self.path))
+end
 function Player:GetMovementType()
     if self.isswimming then
         return "Swimming"

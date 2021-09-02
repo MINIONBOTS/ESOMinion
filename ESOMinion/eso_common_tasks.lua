@@ -550,11 +550,41 @@ function eso_task_combat:Process()
 		local pos = target.pos
 		local range = ml_global_information.AttackRange
 		
-		local dist = Distance3D(ppos.x,ppos.y,ppos.z,pos.x,pos.y,pos.z)
+		--local dist = Distance2D(ppos,pos)
+		
+		if not InCombatRange(target.index) or IsSwimming() then
+			if (not target.los and not CanAttack(target.index)) then
+				if not ml_navigation:HasPath() then
+					Player:BuildPath(pos.x,pos.y,pos.z, 0, 0, target.index)
+					self.movementDelay = Now() + 500
+					ml_task_hub:CurrentTask().lastMovement = Now()
+				else
+					c_getmovementpath:evaluate()
+				end
+			end
+		elseif target.los then
+			--[[if (ai_mount:CanDismount()) then
+				ai_mount:Dismount()
+			end]]
+			
+			if Player.ismoving then
+				SafeStop()
+				d("stop")
+			end
+			Player:SetFacing(pos.x,pos.y,pos.z)
+			--[[if (target.los or CanAttack(target.index)) then
+				SafeStop()
+			end]]
+			eso_skillmanager.Cast( target )
+		else
+			c_getmovementpath:evaluate()
+		end
+		
+		--[=[
 		if (ml_global_information.AttackRange > 5) then
 			if ((not InCombatRange(target.index) or (not target.los and not CanAttack(target.index)))) then
 				if (Now() > self.movementDelay) then
-					Player:MoveTo(pos.x,pos.y,pos.z, false, target.id, 5, true,true)
+					Player:BuildPath(pos.x,pos.y,pos.z, 0, 0, target.index)
 					self.movementDelay = Now() + 1000
 				end
 			end
@@ -574,7 +604,7 @@ function eso_task_combat:Process()
 			end
 		else
 			if (not InCombatRange(target.index) or (not target.los and not CanAttack(target.index))) then
-				Player:MoveTo(pos.x,pos.y,pos.z, false, target.id, 2, true,true)
+				Player:BuildPath(pos.x,pos.y,pos.z, 0, 0, target.index)
 				ml_task_hub:CurrentTask().lastMovement = Now()
 			end
 			if (target.distance <= 15) then
@@ -589,7 +619,7 @@ function eso_task_combat:Process()
 				end
 			end
 			eso_skillmanager.Cast( target )
-		end
+		end]=]
 	else
 		d("no valid target")
 	end
