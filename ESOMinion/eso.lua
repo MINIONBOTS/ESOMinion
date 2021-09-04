@@ -484,6 +484,12 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		
 		esominion.buffList = {}
 		BuildBuffsByIndex(Player.index)
+		if ml_task_hub:CurrentTask() and IsNull(ml_task_hub:CurrentTask().targetID,0) ~= 0 then
+			local target = EntityList:Get(ml_task_hub:CurrentTask().targetID)
+			if table.valid(target) then
+				eso_skillmanager.Cast( target )
+			end
+		end
 		if esominion.smartrecord and not NavigationManager.ProcessingFloorMesh then
 			--if Player.isswimming == 1 then
 			if ml_mesh_mgr.data.flooreditormode ~= 5 then

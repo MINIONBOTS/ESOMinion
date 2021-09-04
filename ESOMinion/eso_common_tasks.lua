@@ -553,11 +553,9 @@ function eso_task_combat:Process()
 		--local dist = Distance2D(ppos,pos)
 		
 		if not InCombatRange(target.index) or IsSwimming() then
-			if (not target.los and not CanAttack(target.index)) then
+			if (not target.los or not CanAttack(target.index)) or IsSwimming() then
 				if not ml_navigation:HasPath() then
 					Player:BuildPath(pos.x,pos.y,pos.z, 0, 0, target.index)
-					self.movementDelay = Now() + 500
-					ml_task_hub:CurrentTask().lastMovement = Now()
 				else
 					c_getmovementpath:evaluate()
 				end
@@ -569,61 +567,21 @@ function eso_task_combat:Process()
 			
 			if Player.ismoving then
 				SafeStop()
-				d("stop")
 			end
 			Player:SetFacing(pos.x,pos.y,pos.z)
 			--[[if (target.los or CanAttack(target.index)) then
 				SafeStop()
 			end]]
-			eso_skillmanager.Cast( target )
 		else
 			c_getmovementpath:evaluate()
 		end
-		
-		--[=[
-		if (ml_global_information.AttackRange > 5) then
-			if ((not InCombatRange(target.index) or (not target.los and not CanAttack(target.index)))) then
-				if (Now() > self.movementDelay) then
-					Player:BuildPath(pos.x,pos.y,pos.z, 0, 0, target.index)
-					self.movementDelay = Now() + 1000
-				end
-			end
-			if (InCombatRange(target.index)) then
-				--[[if (ai_mount:CanDismount()) then
-					ai_mount:Dismount()
-				end]]
-				if (Player:IsMoving() and (target.los or CanAttack(target.index))) then
-					SafeStop()
-				end
-				--if (not EntityIsFrontTight(target)) then
-					Player:SetFacing(pos.x,pos.y,pos.z) 
-				--end
-			end
-			if (InCombatRange(target.index) and target.health.current > 0) then
-				eso_skillmanager.Cast( target )
-			end
-		else
-			if (not InCombatRange(target.index) or (not target.los and not CanAttack(target.index))) then
-				Player:BuildPath(pos.x,pos.y,pos.z, 0, 0, target.index)
-				ml_task_hub:CurrentTask().lastMovement = Now()
-			end
-			if (target.distance <= 15) then
-				--[[if (ai_mount:CanDismount()) then
-					ai_mount:Dismount()
-				end]]
-			end
-			if (InCombatRange(target.index)) then
-				Player:SetFacing(pos.x,pos.y,pos.z) 
-				if (target.los or CanAttack(target.index)) then
-					Player:Stop()
-				end
-			end
+		if target.health.current > 0 then
 			eso_skillmanager.Cast( target )
-		end]=]
+		end
 	else
 		d("no valid target")
 	end
-      
+	
     --Process regular elements.
     if (TableSize(self.process_elements) > 0) then
 		ml_cne_hub.clear_queue()
@@ -637,8 +595,9 @@ function eso_task_combat:Process()
 end
 
 function eso_task_combat:task_complete_eval()
+	d("task_complete_eval")
 	local target = EntityList:Get(self.targetID)
-    if (not target or not target.alive or target.hp.percent == 0 or not target.attackable) then
+    if (not target or target.health.current < 1) then
         return true
     end
 end

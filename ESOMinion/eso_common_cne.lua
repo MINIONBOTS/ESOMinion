@@ -616,7 +616,16 @@ function c_getmovementpath:evaluate()
 						c_getmovementpath.lastOptimalPath = Now()
 					end
 					--d("Pulled a path with no avoids: Last Fallback ["..tostring(TimeSince(c_getmovementpath.lastFallback)).."], goal dist ["..tostring(math.distance3d(c_getmovementpath.lastGoal,gotoPos)).."]")
-					ml_debug("[GetMovementPath]: pathLength with no avoids = "..tostring(pathLength))
+					d("[GetMovementPath]: pathLength with no avoids = "..tostring(pathLength))
+				end
+				if (pathLength <= 0) then
+					pathLength = Player:BuildPath(tonumber(gotoPos.x), tonumber(gotoPos.y), tonumber(gotoPos.z),bit.bor(GLOBAL.FLOOR.BORDER,IsNull(ml_task_hub:CurrentTask().floorfilters,0)),bit.bor(GLOBAL.CUBE.AVOID,cubeFilter),navid)
+					if (pathLength > 0) then
+						--d("found optimal path")
+						c_getmovementpath.lastOptimalPath = Now()
+					end
+					--d("Pulled a path with no avoids: Last Fallback ["..tostring(TimeSince(c_getmovementpath.lastFallback)).."], goal dist ["..tostring(math.distance3d(c_getmovementpath.lastGoal,gotoPos)).."]")
+					d("[GetMovementPath]: pathLength with no borders = "..tostring(pathLength))
 				end
 				
 				if (TimeSince(c_getmovementpath.lastOptimalPath) > 2000 or not table.valid(c_getmovementpath.lastGoal) or math.distance3d(c_getmovementpath.lastGoal,gotoPos) > 2) then

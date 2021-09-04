@@ -15,7 +15,7 @@ function eso_task_grind.Create()
     newinst.currentMarker = false
 	newinst.filterLevel = true
 	
-	newinst.targetid = 0
+	newinst.targetID = 0
 	newinst.gatherid = 0
 	newinst.movementDelay = 0
 	newinst.lastMovement = 0
@@ -60,18 +60,18 @@ function eso_task_grind:Init()
 		
 	local ke_lootBodies = ml_element:create( "Loot", c_lootbodies, e_lootbodies, 100 )
 	self:add( ke_lootBodies, self.process_elements )
-	
+		
 	local ke_findGrindable = ml_element:create( "FindGrindable", c_findgrindable, e_findgrindable, 85 )
 	self:add( ke_findGrindable, self.process_elements )
 	
 	local ke_findnode = ml_element:create( "FindGatherable", c_findgatherable, e_findgatherable, 80 )
 	self:add( ke_findnode, self.process_elements )
 	
-	local ke_nextMarker = ml_element:create( "NextMarker", c_nextgrindmarker, e_nextgrindmarker, 75 )
-    self:add( ke_nextMarker, self.process_elements )
+	--local ke_nextMarker = ml_element:create( "NextMarker", c_nextgrindmarker, e_nextgrindmarker, 75 )
+    --self:add( ke_nextMarker, self.process_elements )
     
-	local ke_returnToMarker = ml_element:create( "ReturnToMarker", c_returntomarker, e_returntomarker, 70 )
-    self:add( ke_returnToMarker, self.process_elements)
+	--local ke_returnToMarker = ml_element:create( "ReturnToMarker", c_returntomarker, e_returntomarker, 70 )
+   --self:add( ke_returnToMarker, self.process_elements)
 	
 	local ke_nextGrindObjective = ml_element:create( "NextGrindObjective", c_nextgrindobjective, e_nextgrindobjective, 50 )
 	self:add( ke_nextGrindObjective, self.process_elements )
@@ -97,7 +97,7 @@ e_findgatherable = inheritsFrom(ml_effect)
 c_findgatherable.node = nil
 function c_findgatherable:evaluate()
 	local isInteracting = Player.interacting
-	if (InventoryFull() or isInteracting) then
+	if (InventoryFull() or isInteracting or Player.incombat) then
 		return false
 	end
 	
