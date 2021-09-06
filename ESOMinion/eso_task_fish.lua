@@ -586,7 +586,6 @@ function eso_task_fish:Init()
 	local kef_movetocustom = ml_element:create( "MoveToCustom", cf_movetonextpath, ef_movetonextpath, 4 )
 	self:add(kef_movetocustom, self.process_elements)	
 	
-	
 	local ke_fishing = ml_element:create( "Fishing", c_isfishing, e_isfishing, 2 )
 	self:add(ke_fishing, self.process_elements)
 	
@@ -838,6 +837,9 @@ function cf_findnode:evaluate()
 	if table.valid(eso_fish.currenttask) then
 		return false
 	end
+	if InventoryFull() then
+		return false
+	end
 		
 	local whitelist = ESOLib.Common.BuildWhiteFishlist()
 	local radius = 100
@@ -1019,6 +1021,7 @@ function cf_movetonextpath:evaluate()
 		if table.valid(positions[cf_movetonextpath.index +1]) then
 			eso_fish.thisPosition = positions[cf_movetonextpath.index +1] 
 			cf_movetonextpath.index = cf_movetonextpath.index + 1
+			return true
 		else
 			local closest = math.huge
 			local best = nil
@@ -1114,6 +1117,9 @@ function c_findbaits:evaluate()
 	d("[c_findbaits] false 1")
 		return false
 	end]]
+	if InventoryFull() then
+		return false
+	end
 	if InCombat() or not gFishBaits then
 	--d("[c_findbaits] false 1")
 		return false

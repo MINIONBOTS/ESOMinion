@@ -3,6 +3,11 @@ e_lootbodies = inheritsFrom(ml_effect)
 c_lootbodies.id = 0
 c_lootbodies.pos = nil
 function c_lootbodies:evaluate()
+
+	if InventoryFull() then
+		return false
+	end
+
 	--[[local isInteracting = Player.interacting	
 	if (InventoryFull() or isInteracting or ml_global_information.Player_InCombat or gLootBodies == "0") then
 		return false
