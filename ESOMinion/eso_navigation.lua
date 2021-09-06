@@ -308,7 +308,7 @@ function Player:MoveTo(x, y, z, staymounted, targetid, stoppingdistance, randomm
             -- We are not currently handling a NavConnection / ignore MacroMesh Connections, these have to be replaced with a proper path by calling this exact function here
             if (ml_navigation.navconnection) then
                 ---need to make unstuck
-                eso_unstuck.Reset()
+                ai_unstuck.Reset()
             end
             ml_navigation.navconnection = nil
 
@@ -324,7 +324,7 @@ function Player:MoveTo(x, y, z, staymounted, targetid, stoppingdistance, randomm
             end
 
             -- Handle stuck if we start off mesh
-            if eso_unstuck.HandleOffMesh(status) then
+            if ai_unstuck.HandleOffMesh(status) then
                 -- status -7 or -1
                 -- We're starting off the mesh, so return 0 (valid) to let unstuck handle moving without failing the moveto
                 return 0
@@ -728,10 +728,10 @@ function ml_navigation.Navigate(event, ticks)
                             if (ml_navigation:NextNodeReached(playerpos, nextnode, nextnextnode)) then
                                 ml_navigation.pathindex = ml_navigation.pathindex + 1
                                 NavigationManager.NavPathNode = ml_navigation.pathindex
-                                eso_unstuck.ResetPathStuck()
+                                ai_unstuck.ResetPathStuck()
                             else
                                 --- unstuck here // stuck checker
-                                local unstuck = eso_unstuck.HandlePathStuck(playerpos, lastnode, nextnode)
+                                local unstuck = ai_unstuck.HandlePathStuck(playerpos, lastnode, nextnode)
                                 -- todo:mount behavior // below is for gw2 behavior
                                 --[[
                                  -- Dismount when we are close to our target position, so we can get to the actual point and not overshooting it or similiar unprecise stuff
@@ -759,7 +759,7 @@ function ml_navigation.Navigate(event, ticks)
                             end
                             Player:StopMovement()
                             -- todo: need to make unstuck
-                            eso_unstuck.Reset()
+                            ai_unstuck.Reset()
                         end
                     end
                 end
