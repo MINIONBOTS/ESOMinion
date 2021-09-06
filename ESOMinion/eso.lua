@@ -212,6 +212,18 @@ esominion.GUI = {
 		visible = true,
 		colors = { r = 1, g = 1, b = 1, a = 1 },
 	},
+	grindedit = {
+		name = "Position Window",
+		open = false,
+		visible = true,
+		colors = { r = 1, g = 1, b = 1, a = 1 },
+	},
+	gatheredit = {
+		name = "Position Window",
+		open = false,
+		visible = true,
+		colors = { r = 1, g = 1, b = 1, a = 1 },
+	},
 	current_tab = 1,
 	draw_mode = 1,
 }
