@@ -118,6 +118,7 @@ function ai_unstuck.HandleStuck()
 	if ml_task_hub:CurrentTask() then
 		ml_task_hub:CurrentTask():SetDelay(math.random(1500,1750))
 	end
+	
 	ai_unstuck.stuckcounter = 0	
 end
 
@@ -358,9 +359,6 @@ function ai_unstuck.Reset()
 	ai_unstuck.ismoving = false
 	ai_unstuck.lastpos = nil
 	ai_unstuck.logoutTmr = 0
-	Player:SetMovement(0,2)
-	Player:SetMovement(0,3)
-	Player:SetMovement(0,4)
 end
 
 RegisterEventHandler("Gameloop.Stuck",ai_unstuck.stuckhandler) -- gets called by c++ when using the navigationsystem

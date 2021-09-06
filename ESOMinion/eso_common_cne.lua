@@ -606,38 +606,35 @@ function c_getmovementpath:evaluate()
 			
 			local dist = math.distance2d(gotoPos,Player.pos)
 			if (table.valid(c_getmovementpath.lastGoal)) then
-				d("new goal distance:"..tostring(math.distance3d(c_getmovementpath.lastGoal,gotoPos)))
+				ml_debug("new goal distance:"..tostring(math.distance3d(c_getmovementpath.lastGoal,gotoPos)))
 			end
-			local cubeFilter = IsNull(ml_task_hub:CurrentTask().cubefilters,0)
-			if (gBotMode == GetString("NavTest") and gTestNoFly) and not IsFlying() then
-				cubeFilter = 1
-			end
+			
 			if (pathLength <= 0) then
 				-- attempt to get a path with no avoidance first
 				if (TimeSince(c_getmovementpath.lastFallback) > 10000 or not table.valid(c_getmovementpath.lastGoal) or math.distance3d(c_getmovementpath.lastGoal,gotoPos) > 2) then
-					pathLength = Player:BuildPath(tonumber(gotoPos.x), tonumber(gotoPos.y), tonumber(gotoPos.z),bit.bor(GLOBAL.FLOOR.AVOID,IsNull(ml_task_hub:CurrentTask().floorfilters,0)),bit.bor(GLOBAL.CUBE.AVOID,cubeFilter),navid)
+					pathLength = Player:BuildPath(tonumber(gotoPos.x), tonumber(gotoPos.y), tonumber(gotoPos.z),12,0,navid)
 					if (pathLength > 0) then
-						--d("found optimal path")
+						ml_debug("found optimal path")
 						c_getmovementpath.lastOptimalPath = Now()
+						--d("Pulled a path with no avoids: Last Fallback ["..tostring(TimeSince(c_getmovementpath.lastFallback)).."], goal dist ["..tostring(math.distance3d(c_getmovementpath.lastGoal,gotoPos)).."]")
+						ml_debug("[GetMovementPath]: pathLength with no avoids and no borders = "..tostring(pathLength))
 					end
-					--d("Pulled a path with no avoids: Last Fallback ["..tostring(TimeSince(c_getmovementpath.lastFallback)).."], goal dist ["..tostring(math.distance3d(c_getmovementpath.lastGoal,gotoPos)).."]")
-					d("[GetMovementPath]: pathLength with no avoids = "..tostring(pathLength))
 				end
 				if (pathLength <= 0) then
-					pathLength = Player:BuildPath(tonumber(gotoPos.x), tonumber(gotoPos.y), tonumber(gotoPos.z),bit.bor(GLOBAL.FLOOR.BORDER,IsNull(ml_task_hub:CurrentTask().floorfilters,0)),bit.bor(GLOBAL.CUBE.AVOID,cubeFilter),navid)
+					pathLength = Player:BuildPath(tonumber(gotoPos.x), tonumber(gotoPos.y), tonumber(gotoPos.z),4,0,navid)
 					if (pathLength > 0) then
-						--d("found optimal path")
+						--d("found optimal path 2")
 						c_getmovementpath.lastOptimalPath = Now()
+						--d("Pulled a path with no avoids: Last Fallback ["..tostring(TimeSince(c_getmovementpath.lastFallback)).."], goal dist ["..tostring(math.distance3d(c_getmovementpath.lastGoal,gotoPos)).."]")
+						ml_debug("[GetMovementPath]: pathLength with no borders = "..tostring(pathLength))
 					end
-					--d("Pulled a path with no avoids: Last Fallback ["..tostring(TimeSince(c_getmovementpath.lastFallback)).."], goal dist ["..tostring(math.distance3d(c_getmovementpath.lastGoal,gotoPos)).."]")
-					d("[GetMovementPath]: pathLength with no borders = "..tostring(pathLength))
 				end
 				
 				if (TimeSince(c_getmovementpath.lastOptimalPath) > 2000 or not table.valid(c_getmovementpath.lastGoal) or math.distance3d(c_getmovementpath.lastGoal,gotoPos) > 2) then
 					if (pathLength <= 0) then
 						--d("found non-optimal path")
-						ml_debug("[GetMovementPath]: rebuild cube path..")
-						pathLength = Player:BuildPath(tonumber(gotoPos.x), tonumber(gotoPos.y), tonumber(gotoPos.z),IsNull(ml_task_hub:CurrentTask().floorfilters,0),IsNull(ml_task_hub:CurrentTask().cubefilters,0),navid)
+						ml_debug("[GetMovementPath]: rebuild last resort path..")
+						pathLength = Player:BuildPath(tonumber(gotoPos.x), tonumber(gotoPos.y), tonumber(gotoPos.z),0,0,navid)
 						c_getmovementpath.lastFallback = Now()
 						c_getmovementpath.lastGoal = gotoPos
 						ml_debug("[GetMovementPath]: pathLength cube path = "..tostring(pathLength))

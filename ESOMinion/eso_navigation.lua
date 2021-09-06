@@ -349,7 +349,7 @@ ml_navigation.lastconnectiontimer = 0
 ml_navigation.pathchanged = false
 function Player:BuildPath(x, y, z, floorfilters, cubefilters, targetid)
 	ml_navigation.debug = nil -- this is just for being able to click "Get Path to target" in the navmanager, so you see the current path and can check  the nodes / manually optimize that path without actually start flying
-	local floorfilters = IsNull(floorfilters,0,true)
+	local floorfilters = IsNull(floorfilters,12,true)
 	local cubefilters = IsNull(cubefilters,0,true)
 	if (targetid == 0) then
 		targetid = nil
@@ -388,7 +388,6 @@ function Player:BuildPath(x, y, z, floorfilters, cubefilters, targetid)
 	
 	NavigationManager:SetExcludeFilter(GLOBAL.NODETYPE.CUBE, cubefilters)
 	NavigationManager:SetExcludeFilter(GLOBAL.NODETYPE.FLOOR, floorfilters)
-	
 	--d("building path to ["..tostring(newGoal.x)..","..tostring(newGoal.y)..","..tostring(newGoal.z)..",floor:"..tostring(floorfilters)..",cube:"..tostring(cubefilters)..",tid:"..tostring(targetid))
 	local ret = ml_navigation:MoveTo(newGoal.x,newGoal.y,newGoal.z, targetid)
 	ml_navigation.lastPathUpdate = Now()

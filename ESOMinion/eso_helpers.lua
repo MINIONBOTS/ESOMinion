@@ -713,20 +713,39 @@ function MissingBuffs(list, buffNames)
 end
 function hasPet()
 	if esominion.petalive ~= nil and TimeSince(esominion.petalivecheck) < 10000 then
-		return esominion.petalive
+		return esominion.petalive, esominion.petid
 	end
 	local petAlive = e("DoesUnitExist(playerpet1)")
 	esominion.petalive = petAlive
 	esominion.petalivecheck = Now()
 	if petAlive then
-		local pet = EntityList:Get("playerpet1")
+		esominion.petid = getPetID()
+		--[[local pet = EntityList:Get("playerpet1")
 		if table.valid(pet) then
 			esominion.petid = pet.id
-		end
+		end]]
 	end
-	return petAlive 
+	return petAlive, esominion.petid
 end
 
+function getPetID()
+	if hasPet() then
+		if esominion.petid == 0 then
+			local petList = MEntityList("maxdistance=100,friendly,isnpc,interactype=0,nocritter")
+			if table.valid(petList) then
+				for i,e in pairs(petList) do
+					if e.health and e.health.percent > 0 then
+						esominion.petid = e.id
+						return esominion.petid
+					end
+				end
+			end
+		end
+	else
+		esominion.petid = 0
+	end
+	return 0
+end
 function IsLootOpen()
 
 	return esominion.lootOpen

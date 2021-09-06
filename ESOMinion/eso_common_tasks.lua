@@ -229,6 +229,9 @@ end
 
 function eso_task_movetopos:Init()	
 	
+	local ke_findaggro = ml_element:create( "FindAggro", c_findaggro, e_findaggro, 99 )
+	self:add(ke_findaggro, self.process_elements)
+	
 	local ke_getMovementPath = ml_element:create( "GetMovementPath", c_getmovementpath, e_getmovementpath, 85 )
     self:add( ke_getMovementPath, self.process_elements)
 	
@@ -237,10 +240,7 @@ function eso_task_movetopos:Init()
     
     local ke_sprint = ml_element:create( "Sprint", c_sprint, e_sprint, 15 )
     self:add( ke_sprint, self.process_elements)
-    
-    local ke_walkToPos = ml_element:create( "WalkToPos", c_walktopos, e_walktopos, 5 )
-    self:add( ke_walkToPos, self.process_elements)
-    
+        
     self:AddTaskCheckCEs()
 end
 
@@ -348,6 +348,9 @@ end
 
 function eso_task_movetointeract:Init()	
 	
+	local ke_findaggro = ml_element:create( "FindAggro", c_findaggro, e_findaggro, 99 )
+	self:add(ke_findaggro, self.process_elements)
+	
 	local ke_getMovementPath = ml_element:create( "GetMovementPath", c_getmovementpath, e_getmovementpath, 85 )
     self:add( ke_getMovementPath, self.process_elements)
 	
@@ -356,10 +359,7 @@ function eso_task_movetointeract:Init()
     
     local ke_sprint = ml_element:create( "Sprint", c_sprint, e_sprint, 15 )
     self:add( ke_sprint, self.process_elements)
-	
-	local ke_walkToPos = ml_element:create( "WalkToPos", c_walktopos, e_walktopos, 5 )
-    self:add( ke_walkToPos, self.process_elements)
-	
+		
 	self:AddTaskCheckCEs()
 end
 
@@ -555,7 +555,7 @@ function eso_task_combat:Process()
 		if not InCombatRange(target.index) or IsSwimming() then
 			if (not target.los or not CanAttack(target.index)) or IsSwimming() then
 				if not ml_navigation:HasPath() then
-					Player:BuildPath(pos.x,pos.y,pos.z, 0, 0, target.index)
+					Player:MoveTo(pos.x,pos.y,pos.z, 2, 0, 0, target.index)
 				else
 					c_getmovementpath:evaluate()
 				end
