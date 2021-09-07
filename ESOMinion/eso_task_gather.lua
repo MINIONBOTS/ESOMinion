@@ -171,6 +171,89 @@ function eso_task_gather:Init()
 	self:AddTaskCheckCEs()
 end
 
+cga_movetonextpath = inheritsFrom( ml_cause )
+ega_movetonextpath = inheritsFrom( ml_effect )
+cga_movetonextpath.index = 0
+function cga_movetonextpath:evaluate()
+
+	local gatherid = 0
+	local targetid = 0
+	if ml_task_hub:CurrentTask() then
+		gatherid = ml_task_hub:CurrentTask().gatherid or 0
+		targetid = ml_task_hub:CurrentTask().targetid or 0
+	end
+	if (gatherid ~= 0 and targetid ~= 0) then
+		--d("[cga_movetonextpath] false 1")
+		return false
+	end
+	if InCombat() then
+		--d("[cga_movetonextpath] false 3")
+		return false
+	end
+	
+	local positions = gGatherPosition[Player.mapid]
+	if not table.valid(positions) then
+		--d("[cga_movetonextpath] false 4")
+		return false
+	end
+	local ppos = Player.pos
+	if not table.valid(eso_task_grind.thisPosition) then
+		if table.valid(positions[cga_movetonextpath.index +1]) then
+			eso_task_grind.thisPosition = positions[cga_movetonextpath.index +1] 
+			cga_movetonextpath.index = cga_movetonextpath.index + 1
+			return true
+		else
+			local closest = math.huge
+			local best = nil
+			for i = 1,table.size(positions) do
+				local testPos = positions[i]
+				if NavigationManager:IsReachable(testPos) and cga_movetonextpath.index ~= i then
+					local dist = math.distance2d(testPos.x, testPos.z, ppos.x, ppos.z)
+					d(dist)
+					if dist < closest then
+						closest = dist
+						best = testPos
+						
+					end
+				end
+			end
+			if best then
+				eso_task_grind.thisPosition = best
+				return true
+			end
+		end
+	else
+		return true
+	end
+	d("[cga_movetonextpath] false 5")
+	return false
+end
+function ega_movetonextpath:execute()
+	
+	local positions = gGatherPosition[Player.mapid]
+	local nextPos = eso_task_grind.thisPosition
+	if (table.valid(nextPos)) then
+		local rpos = nextPos
+		local myPos = Player.pos
+		local dist = math.distance2d(myPos.x, myPos.z, rpos.x, rpos.z)
+		if (table.valid(rpos)) then
+			if dist > 5 then
+				local newTask = eso_task_movetopos.Create()
+				newTask.pos = rpos
+				newTask.range = math.random(2,5)
+				newTask.remainMounted = false
+				ml_task_hub:CurrentTask():AddSubTask(newTask)
+			else
+				eso_task_grind.lastPosition = eso_task_grind.thisPosition
+				eso_task_grind.thisPosition = {}
+				d("has position close by")
+				if table.size(positions) == cga_movetonextpath.index then
+					cga_movetonextpath.index = 0
+				end
+			end
+		end
+	end
+end
 function eso_task_gather:InitExtras()
 	local overwatch_elements = self.addon_overwatch_elements
 	if (table.valid(overwatch_elements)) then
@@ -501,6 +584,10 @@ function c_movetorandom:evaluate()
 	end
 	if InCombat() then
 	--d("[c_movetorandom] false 3")
+		return false
+	end
+	local positions = gGatherPosition[Player.mapid]
+	if table.valid(positions) then
 		return false
 	end
 	local ppos = Player.pos

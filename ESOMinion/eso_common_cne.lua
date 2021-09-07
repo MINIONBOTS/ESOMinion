@@ -487,33 +487,33 @@ end
 c_findaggro = inheritsFrom( ml_cause )
 e_findaggro = inheritsFrom( ml_effect )
 function c_findaggro:evaluate()
+
 	if eso_gather.killtargetid ~= 0 then
 		return false
 	end
-	
-	local targetList = MEntityList("maxdistance=20,hostile,aggro")
-	if not table.valid(targetList) then
-		targetList = MEntityList("maxdistance=20,hostile,targetingme")
-	end
-	if not table.valid(targetList) and hasPet() then
-		if esominion.petid ~= 0 then
-			targetList = MEntityList("maxdistance=20,hostile,targeting="..tostring(esominion.petid))
-		end
-	end
+	local targetList = EntityList("maxdistance=50,hostile,aggro")
 	if table.valid(targetList) then
 		local best = nil
 		local lowestHP = math.huge
 		for i,e in pairs(targetList) do
 			if e.health.current > 0 then
-				if e.health.current < lowestHP then
+				if not best or e.health.current < lowestHP then
 					lowestHP = e.health.current
 					best = e
 				end
 			end
 		end
 		if best then
-			eso_gather.killtargetid = best.index
-			return best
+			--eso_gather.killtargetid = best.index
+			local target = MGetEntity(best.index)
+			if table.valid(target) then
+				local newTask = eso_task_combat.Create()
+				newTask.targetID = target.index
+				c_nextgrindobjective.task = newTask
+				d("kill task")
+				ml_task_hub:CurrentTask():AddSubTask(newTask)
+				return true
+			end
 		end
 	end
 	
@@ -547,7 +547,7 @@ function e_killaggro:execute()
 		local newTask = eso_task_combat.Create()
 		newTask.targetID = target.index
 		c_nextgrindobjective.task = newTask
-		d("kill task")
+		d("kill task 2")
 		ml_task_hub:CurrentTask():AddSubTask(newTask)	
 	else
 		eso_gather.killtargetid = 0
