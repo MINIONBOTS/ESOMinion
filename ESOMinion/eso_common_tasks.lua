@@ -606,14 +606,14 @@ function eso_task_combat:task_complete_execute()
 	self.completed = true
 end
 
-function eso_task_combat:task_fail_eval()	
-	if (not Player.alive or Player.isswimming) then
+function eso_task_combat:task_fail_eval()
+	if (Player.health.current < 1 or IsSwimming()) then
 		return true
 	end
 	
 	return false
 end
-function eso_task_combat:task_fail_execute()
+function eso_task_combat:task_fail_execute()	
 	Player:Stop()
 	self.valid = false
 end

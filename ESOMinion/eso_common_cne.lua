@@ -425,7 +425,7 @@ function c_usepotion:evaluate()
 	local mpp = ml_global_information.Player_Magicka.percent
 	local spp = ml_global_information.Player_Stamina.percent
 	
-	if (tonumber(gPotionHP) > 0 and hpp <= tonumber(gPotionHP)) then
+	if (tonumber(IsNull(gPotionHP,0)) > 0 and hpp <= tonumber(IsNull(gPotionHP,0))) then
 		local slot = FindHealthPotion()
 		if (slot) then
 			c_usepotion.slot = slot
@@ -433,7 +433,7 @@ function c_usepotion:evaluate()
 		end
 	end
 	
-	if (tonumber(gPotionMP) > 0 and mpp <= tonumber(gPotionMP)) then
+	if (tonumber(IsNull(gPotionMP,0)) > 0 and mpp <= tonumber(IsNull(gPotionMP,0))) then
 		local slot = FindMagickaPotion()
 		if (slot) then
 			c_usepotion.slot = slot
@@ -441,7 +441,7 @@ function c_usepotion:evaluate()
 		end
 	end
 	
-	if (tonumber(gPotionSP) > 0 and spp <= tonumber(gPotionSP)) then
+	if (tonumber(IsNull(gPotionSP,0)) > 0 and spp <= tonumber(IsNull(gPotionSP,0))) then
 		local slot = FindStaminaPotion()
 		if (slot) then
 			c_usepotion.slot = slot
@@ -490,6 +490,11 @@ function c_findaggro:evaluate()
 
 	if eso_gather.killtargetid ~= 0 then
 		return false
+	end
+	if ml_task_hub:CurrentTask() then
+		if IsNull(ml_task_hub:CurrentTask().targetID,0) ~= 0 then
+			return false
+		end
 	end
 	local targetList = EntityList("maxdistance=50,hostile,aggro")
 	if table.valid(targetList) then
