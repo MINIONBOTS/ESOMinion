@@ -535,6 +535,8 @@ function eso_task_combat:Init()
     self:AddTaskCheckCEs()
 end
 eso_task_combat.failedcasts = 0
+eso_task_combat.failedTracker = 0
+eso_task_combat.InitiateCombats = {}
 function eso_task_combat:Process()	
 	target = EntityList:Get(self.targetID)
 	if ValidTable(target) then
@@ -551,7 +553,12 @@ function eso_task_combat:Process()
 		local range = ml_global_information.AttackRange
 		
 		--local dist = Distance2D(ppos,pos)
-		local forceMove = eso_task_combat.failedcasts > 5 or not target.los or not InCombatRange(target.index)
+		local loopTrap = 0
+		-- add something for aggro loss loop
+		if eso_task_combat.InitiateCombats[target.index] then
+			loopTrap = eso_task_combat.InitiateCombats[target.index]
+		end
+		local forceMove = eso_task_combat.failedcasts > 5 or not target.los or not InCombatRange(target.index) or loopTrap >= 3
 		if IsSwimming() or forceMove then
 			if not ml_navigation:HasPath() then
 				Player:MoveTo(pos.x,pos.y,pos.z, 2, 0, 0, target.index)
@@ -578,6 +585,11 @@ function eso_task_combat:Process()
 				eso_task_combat.failedcasts = eso_task_combat.failedcasts + 1
 			else
 				eso_task_combat.failedcasts = 0
+				if not Player.incombat and TimeSince(eso_task_combat.failedTracker) > 1000 and target.los and InCombatRange(target.index) then
+					eso_task_combat.InitiateCombats[target.index] = IsNull(eso_task_combat.InitiateCombats[target.index],0) + 1
+					d("eso_task_combat.InitiateCombats[target.index] = "..tostring(eso_task_combat.InitiateCombats[target.index]))
+					eso_task_combat.failedTracker = Now()
+				end
 			end
 		end
 		if eso_task_combat.failedcasts > 5 then
