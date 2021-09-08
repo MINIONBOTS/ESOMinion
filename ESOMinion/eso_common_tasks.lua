@@ -407,7 +407,7 @@ function eso_task_movetointeract:task_complete_eval()
 		end
 	end
 	
-	--[[if (self.interact ~= 0) then
+	if (self.interact ~= 0) then
 		local interact = EntityList:Get(tonumber(self.interact))
 		if (interact and interact.targetable and interact.distance < 15) then
 			--Player:SetTarget(interact.id)
@@ -420,7 +420,7 @@ function eso_task_movetointeract:task_complete_eval()
 				end
 			end
 		end
-	end]]
+	end
 	
 	if (self.interact ~= 0 and Now() > self.lastinteract) then
 		if (not isInteracting) then
@@ -534,7 +534,7 @@ function eso_task_combat:Init()
 	
     self:AddTaskCheckCEs()
 end
-
+eso_task_combat.failedcasts = 0
 function eso_task_combat:Process()	
 	target = EntityList:Get(self.targetID)
 	if ValidTable(target) then
@@ -551,14 +551,12 @@ function eso_task_combat:Process()
 		local range = ml_global_information.AttackRange
 		
 		--local dist = Distance2D(ppos,pos)
-		
-		if not InCombatRange(target.index) or IsSwimming() then
-			if (not target.los or not CanAttack(target.index)) or IsSwimming() then
-				if not ml_navigation:HasPath() then
-					Player:MoveTo(pos.x,pos.y,pos.z, 2, 0, 0, target.index)
-				else
-					c_getmovementpath:evaluate()
-				end
+		local forceMove = eso_task_combat.failedcasts > 5 or not target.los or not InCombatRange(target.index)
+		if IsSwimming() or forceMove then
+			if not ml_navigation:HasPath() then
+				Player:MoveTo(pos.x,pos.y,pos.z, 2, 0, 0, target.index)
+			else
+				c_getmovementpath:evaluate()
 			end
 		elseif target.los then
 			--[[if (ai_mount:CanDismount()) then
@@ -575,8 +573,15 @@ function eso_task_combat:Process()
 		--[[elseif Player.ismoving then
 			c_getmovementpath:evaluate()]]
 		end
-		if target.health.current > 0 then
-			eso_skillmanager.Cast( target )
+		if target.health.current > 0 and InCombatRange(target.index) and target.los then
+			if not eso_skillmanager.Cast( target ) then
+				eso_task_combat.failedcasts = eso_task_combat.failedcasts + 1
+			else
+				eso_task_combat.failedcasts = 0
+			end
+		end
+		if eso_task_combat.failedcasts > 5 then
+			Player:MoveTo(pos.x,pos.y,pos.z, 2, 0, 0, target.index)
 		end
 	else
 		d("no valid target")

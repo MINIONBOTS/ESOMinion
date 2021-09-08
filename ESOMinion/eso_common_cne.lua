@@ -1,6 +1,6 @@
 c_lootbodies = inheritsFrom(ml_cause)
 e_lootbodies = inheritsFrom(ml_effect)
-c_lootbodies.id = 0
+c_lootbodies.index = 0
 c_lootbodies.pos = nil
 function c_lootbodies:evaluate()
 
@@ -8,8 +8,8 @@ function c_lootbodies:evaluate()
 		return false
 	end
 
-	--[[local isInteracting = Player.interacting	
-	if (InventoryFull() or isInteracting or ml_global_information.Player_InCombat or gLootBodies == "0") then
+	local isInteracting = Player.interacting	
+	if (InventoryFull() or isInteracting or ml_global_information.Player_InCombat or not gLootBodies) then
 		return false
 	end
 	
@@ -21,11 +21,11 @@ function c_lootbodies:evaluate()
 	if (ValidTable(lootables)) then
 		local id,entity = next(lootables)
 		if (ValidTable(entity) and not IsBlacklisted(entity)) then
-			c_lootbodies.id = entity.id
+			c_lootbodies.index = entity.index
 			c_lootbodies.pos = entity.pos
 			return true
 		end
-	end]]
+	end
 	
 	return false
 end
@@ -34,7 +34,7 @@ function e_lootbodies:execute()
 	local newTask = eso_task_movetointeract.Create()
 	newTask.creator = "lootbodies"
 	newTask.pos = c_lootbodies.pos
-	newTask.interact = c_lootbodies.id
+	newTask.interact = c_lootbodies.index
 	newTask.interactRange = 4
 	newTask.avoidPlayers = true
 	newTask.checkLootable = true
@@ -700,4 +700,24 @@ function c_findnode:evaluate()
 	return false
 end
 function e_findnode:execute()
+end
+
+c_requiresstealth = inheritsFrom( ml_cause )
+e_requiresstealth = inheritsFrom( ml_effect )
+function c_requiresstealth:evaluate()
+	if not ml_global_information.Player_Stealthed then
+		if ml_task_hub:CurrentTask() and ml_task_hub:CurrentTask().requiresStealth then
+			return true
+		end
+	else
+		if ml_task_hub:CurrentTask() and not ml_task_hub:CurrentTask().requiresStealth then
+			return true
+		end
+	end	
+	return false
+end
+function e_requiresstealth:execute()
+
+
+
 end

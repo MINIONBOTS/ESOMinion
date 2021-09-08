@@ -470,7 +470,7 @@ function GetNearestGrind()
 	local ppos = Player.pos
 	if (ValidTable(el)) then
 		for i,e in pairs(el) do
-			if e.health.current > 0 then
+			if e.health.current > 0 and NavigationManager:IsReachable(e.pos) then
 				local dist = math.distance2d(ppos,e.pos)
 				if dist < closest then
 					closest = dist
@@ -880,7 +880,8 @@ function fish_bite(eventName, eventCode, bagId, slotId, isNewItem, itemSoundCate
 	end
 end
 function loadEvents()
-
+esominion.eventsLoaded = true
+d("load events")
 RegisterForEvent("EVENT_LOOT_RECEIVED", true)
 RegisterEventHandler("GAME_EVENT_LOOT_RECEIVED", loot_update, "Loot Open")
 RegisterForEvent("EVENT_LOOT_CLOSED", true)

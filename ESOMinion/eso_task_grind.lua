@@ -92,9 +92,26 @@ function eso_task_grind:Draw()
 	--local tabindex, tabname = GUI_DrawTabs(self.GUI.main_tabs)
 	GUI:AlignFirstTextHeightToWidgets() 
 	
+	local contentwidth = GUI:GetContentRegionAvailWidth()
+	GUI:PushItemWidth(contentwidth)
+	if ( GUI:Button("Add Position")) then
+		if not gGrindPosition[Player.mapid] then
+			gGrindPosition[Player.mapid] = {}
+		end
+		table.insert(gGrindPosition[Player.mapid],Player.pos)
+		Settings.ESOMINION.gGrindPosition = gGrindPosition
+	end
+	GUI:SameLine(0,5)
+	if ( GUI:Button("Edit Positions")) then
+		esominion.GUI.grindedit.open = not esominion.GUI.grindedit.open
+	end
 	gGather, changed = GUI:Checkbox("Gather##gGather", gGather) 
 	if (changed) then
 		Settings.ESOMINION["gGather"] = gGather
+	end 
+	gLootBodies, changed = GUI:Checkbox("Loot Bodies##gLootBodies", gLootBodies) 
+	if (changed) then
+		Settings.ESOMINION["gLootBodies"] = gLootBodies
 	end 
 	gGatherTailoring, changed = GUI:Checkbox("Tailoring##gGatherTailoring", gGatherTailoring) 
 	if (changed) then
@@ -121,18 +138,6 @@ function eso_task_grind:Draw()
 		Settings.ESOMINION["gGatherJewlery"] = gGatherJewlery
 	end 	
 
-	local contentwidth = GUI:GetContentRegionAvailWidth()
-	GUI:PushItemWidth(contentwidth)
-	if ( GUI:Button("Add Position")) then
-		if not gGrindPosition[Player.mapid] then
-			gGrindPosition[Player.mapid] = {}
-		end
-		table.insert(gGrindPosition[Player.mapid],Player.pos)
-		Settings.ESOMINION.gGrindPosition = gGrindPosition
-	end
-	if ( GUI:Button("Edit Positions")) then
-		esominion.GUI.grindedit.open = not esominion.GUI.grindedit.open
-	end
 	GUI:PopItemWidth()
 	if esominion.GUI.grindedit.open then
 		GUI:SetNextWindowSize(200,400,GUI.SetCond_Once) --set the next window size, only on first ever	

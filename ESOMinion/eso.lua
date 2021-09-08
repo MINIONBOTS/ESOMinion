@@ -5,6 +5,7 @@ esominion.lootOpen = false
 esominion.lootTime = 0
 esominion.playerdead = false
 esominion.incombat = false
+esominion.eventsLoaded = false
 esominion.lureType = 0
 esominion.lureTypes = {}
 esominion.activeTip = 0
@@ -76,6 +77,7 @@ function esominion.SetMainVars()
 	gSMnewname = ""
 	
 	
+	gLootBodies = esominion.GetSetting("gLootBodies",false)
 	ESO_Common_BotRunning = false
 end
 
@@ -476,6 +478,12 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 	
 	memoize = {}
 	if (table.valid(esominion.modesToLoad)) then
+		ml_globals.UpdateGlobals()
+		esominion.LoadModes()
+		loadEvents()
+		ESO_Common_BotRunning = false
+	end
+	if (table.valid(esominion.modes) and not esominion.eventsLoaded) then
 		ml_globals.UpdateGlobals()
 		esominion.LoadModes()
 		loadEvents()
