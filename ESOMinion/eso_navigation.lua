@@ -752,11 +752,13 @@ function ml_navigation.Navigate(event, ticks)
                             end
                             return
                         else
-                            d("[Navigation] - Path end reached.")
-                            if (Player.ismounted and ml_navigation.staymounted == false) then
-                                Player:Dismount()
-                            end
-                            Player:StopMovement()
+							if Player.ismoving then
+								d("[Navigation] - Path end reached.")
+								if (Player.ismounted and ml_navigation.staymounted == false) then
+									Player:Dismount()
+								end
+								SafeStop()
+							end
                             -- todo: need to make unstuck
                             ai_unstuck.Reset()
                         end
@@ -770,7 +772,7 @@ function ml_navigation.Navigate(event, ticks)
                     else
                         ml_error("[Navigation] - Breaking out of not handled NavConnection.")
                     end
-                    Player:StopMovement()
+                    SafeStop()
                 end
             end
         end

@@ -520,8 +520,8 @@ function eso_task_combat.Create()
 end
 function eso_task_combat:Init()	
 	
-	local ke_getMovementPath = ml_element:create( "GetMovementPath", c_getmovementpath, e_getmovementpath, 85 )
-    self:add( ke_getMovementPath, self.process_elements)
+	--local ke_getMovementPath = ml_element:create( "GetMovementPath", c_getmovementpath, e_getmovementpath, 85 )
+    --self:add( ke_getMovementPath, self.process_elements)
 	
 	local ke_usePotion = ml_element:create( "UsePotion", c_usepotion, e_usepotion, 25 )
     self:add(ke_usePotion, self.process_elements)
@@ -572,8 +572,8 @@ function eso_task_combat:Process()
 			--[[if (target.los or CanAttack(target.index)) then
 				SafeStop()
 			end]]
-		else
-			c_getmovementpath:evaluate()
+		--[[elseif Player.ismoving then
+			c_getmovementpath:evaluate()]]
 		end
 		if target.health.current > 0 then
 			eso_skillmanager.Cast( target )
@@ -595,7 +595,6 @@ function eso_task_combat:Process()
 end
 
 function eso_task_combat:task_complete_eval()
-	d("task_complete_eval")
 	local target = EntityList:Get(self.targetID)
     if (not target or target.health.current < 1) then
         return true
@@ -613,7 +612,7 @@ function eso_task_combat:task_fail_eval()
 	
 	return false
 end
-function eso_task_combat:task_fail_execute()	
+function eso_task_combat:task_fail_execute()
 	Player:Stop()
 	self.valid = false
 end

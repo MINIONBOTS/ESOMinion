@@ -52,7 +52,7 @@ function eso_task_grind:Init()
 	local ke_rest = ml_element:create( "Rest", c_rest, e_rest, 250 )
     self:add( ke_rest, self.overwatch_elements )
 	
-	local ke_aggro = ml_element:create( "Aggro", c_aggro, e_aggro, 200 )
+	local ke_aggro = ml_element:create( "Aggro", c_findaggro, e_findaggro, 200 )
 	self:add( ke_aggro, self.overwatch_elements )
 	
 	local ke_autoEquip = ml_element:create( "AutoEquip", c_autoequip, e_autoequip, 200 )
