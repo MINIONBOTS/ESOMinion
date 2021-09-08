@@ -52,6 +52,14 @@ function eso_task_assist:Process()
 			end
 		elseif gAssistTargetModeSetting == "Scanner" then
 			target = eso_task_assist.GetTarget()
+		elseif gAssistTargetModeSetting == "Aggro" then
+			local TargetList = MEntityList("lowesthealth,hostile,aggro,maxdistance=28")
+			if table.valid(TargetList) then
+				local id,entry = next(TargetList)
+				if (id and entry ) then
+					target = entry
+				end
+			end
 		end
 		
 		if ( gAssistInitCombat or Player.incombat ) then
@@ -122,6 +130,7 @@ function eso_task_assist:UIInit()
 	gAssistDoBreak = esominion.GetSetting("gAssistDoBreak",true)
 	gAssistDoAvoid = esominion.GetSetting("gAssistDoAvoid",true)
 	gAssistInitCombat = esominion.GetSetting("gAssistInitCombat",false)
+	gSKMShowAll = false
 	
 	gAssistTargetModeIndex = esominion.GetSetting("gAssistTargetModeIndex",1)
 	gAssistTargetModeSetting = esominion.GetSetting("gAssistTargetModeSetting","Reticle")
@@ -168,7 +177,7 @@ function eso_task_assist:Draw()
 	GUI:PushItemWidth(columnWidth)
 	
 	GUI:AlignFirstTextHeightToWidgets() 
-	GUI_Combo("##targetingMode","gAssistTargetModeIndex","gAssistTargetModeSetting",{"Reticle","Highlighted","Scanner"});
+	GUI_Combo("##targetingMode","gAssistTargetModeIndex","gAssistTargetModeSetting",{"Reticle","Highlighted","Scanner","Aggro"});
 	if In(gAssistTargetModeIndex,3) then
 		GUI:AlignFirstTextHeightToWidgets() 
 		GUI_Combo("##targetingassist","gAssistTargetTypeIndex","gAssistTargetTypeSetting",{"None","LowestHealth","Closest","Biggest Crowd"});
