@@ -536,12 +536,11 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		if eso_skillmanager.roll then
 			e("RollDodgeStop()")
 		end
-		
-		if (ESO_Common_BotRunning) then
+		if (ESO_Common_BotRunning) then		
 			local breakable = esominion.activeTip == eso_skillmanager.TIP_BREAK
 			if (breakable) then
 				if (not isAssistMode or (isAssistMode and gAssistDoBreak)) then
-					if (TimeSince(eso_skillmanager.lastBreak) > 1000) then
+					if (TimeSince(eso_skillmanager.lastBreak) > 3000) then
 						e("RollDodgeStart()")
 						eso_skillmanager.roll = true
 						eso_skillmanager.latencyTimer = Now() + 300
@@ -555,7 +554,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 			local avoidable = esominion.activeTip == eso_skillmanager.TIP_AVOID
 			if (avoidable) then
 				if (not isAssistMode or (isAssistMode and gAssistDoAvoid)) then
-					if (TimeSince(eso_skillmanager.lastAvoid) > 2000) then
+					if (TimeSince(eso_skillmanager.lastAvoid) > 3000) then
 						if (Player.stamina.percent > 50) then
 							e("RollDodgeStart()")
 							eso_skillmanager.roll = true

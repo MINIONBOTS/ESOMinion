@@ -66,11 +66,50 @@ function Dev.DrawCall(event, ticks )
 	if ( Dev.GUI.open  ) then 
 		GUI:SetNextWindowPosCenter(GUI.SetCond_Appearing)
 		GUI:SetNextWindowSize(500,400,GUI.SetCond_FirstUseEver) --set the next window size, only on first ever
-		Dev.GUI.visible, Dev.GUI.open = GUI:Begin("Dev-Monitor", Dev.GUI.open)
+		Dev.GUI.visible, Dev.GUI.open = GUI:Begin("Dev-Monitor", Dev.GUI.open, GUI.WindowFlags_NoCollapse)
 		if ( Dev.GUI.visible ) then 
 			local gamestate = GetGameState()									
 			GUI:PushStyleVar(GUI.StyleVar_FramePadding, 4, 0)
 			GUI:PushStyleVar(GUI.StyleVar_ItemSpacing, 8, 2)
+			
+			if ( GetGameState() == 3)  then
+				local el = EntityList("nearest,hostile")
+				if (table.valid(el)) then
+					for index,entity in spairs(el) do
+						if not entity.name or entity.name == "" then
+							entity.name = GetString("No Name")
+						end
+						if(entity.ischanneling) then
+							if GUI:TreeNode(entity.index .. " - " .. entity.name ) then
+								
+								GUI:BulletText(".id = "..tostring(entity.id))
+								GUI:BulletText(".castinfo.starttime = "..tostring(entity.castinfo.starttime))
+								GUI:BulletText(".castinfo.endtime = "..tostring(entity.castinfo.endtime))
+								GUI:BulletText(".castinfo.timeleft = "..tostring(entity.castinfo.timeleft))
+								GUI:BulletText(".castinfo.24 = "..tostring(string.format( "%X",entity.castinfo.unk024)))
+								GUI:BulletText(".castinfo.28 = "..tostring(Player.castinfo.unk028))
+								GUI:BulletText(".castinfo.40 = "..tostring(string.format( "%X",entity.castinfo.unk040)))
+								GUI:BulletText(".castinfo.98 = "..tostring(string.format( "%X",entity.castinfo.unk098)))
+								GUI:BulletText(".castinfo.a0 = "..tostring(string.format( "%X",entity.castinfo.unk0a0)))            
+								if ValidTable(entity.pos) then
+									if GUI:TreeNode(".pos") then
+										GUI:BulletText(".x = "..tostring(entity.pos.x))
+										GUI:BulletText(".y = "..tostring(entity.pos.y))
+										GUI:BulletText(".z = "..tostring(entity.pos.z))
+										GUI:TreePop()
+									end
+								end
+								if (GUI:Button(GetString("Interact"),150,15)) then
+									entity:Interact()
+								end
+								
+								GUI:TreePop()
+							end
+						end
+					end        
+				end
+			end
+			
 			if ( GUI:TreeNode("Player") ) then
 				if( gamestate == 3 ) then 
 					if ( GUI:TreeNode("Stats") ) then
@@ -113,6 +152,30 @@ function Dev.DrawCall(event, ticks )
 						GUI:BulletText(".movementspeed = "..tostring(Player.movementspeed))
 						GUI:TreePop()
 					end
+					
+					if GUI:TreeNode("Buffs") then
+						if table.valid(esominion.buffList[Player.index]) then
+							for i,e in pairs(esominion.buffList[Player.index]) do
+								GUI:BulletText(tostring(i)..tostring(" - ")..tostring(e))
+							end
+						end
+						GUI:TreePop()
+					end
+					if GUI:TreeNode("castinfo") then
+						if(Player.ischanneling) then
+							GUI:BulletText(".castinfo.starttime = "..tostring(Player.castinfo.starttime))
+							GUI:BulletText(".castinfo.endtime = "..tostring(Player.castinfo.endtime))
+							GUI:BulletText(".castinfo.timeleft = "..tostring(Player.castinfo.timeleft))
+							GUI:BulletText(".castinfo.24 = "..tostring(string.format( "%X",Player.castinfo.unk024)))
+							GUI:BulletText(".castinfo.28 = "..tostring(Player.castinfo.unk028))
+							GUI:BulletText(".castinfo.40 = "..tostring(string.format( "%X",Player.castinfo.unk040)))
+							GUI:BulletText(".castinfo.98 = "..tostring(string.format( "%X",Player.castinfo.unk098)))
+							GUI:BulletText(".castinfo.a0 = "..tostring(string.format( "%X",Player.castinfo.unk0a0))) 
+							
+						end
+					GUI:TreePop()
+					end
+								
 					if ( GUI:TreeNode("Position") ) then
 						GUI:BulletText(".mapid = "..tostring(Player.mapid))
 						GUI:BulletText(".mapcontenttype = "..tostring(Player.mapcontenttype))
@@ -349,6 +412,29 @@ function Dev.DrawCall(event, ticks )
 								Dev.targetable = GUI:Checkbox(".targetable", Dev.targetable)
 								GUI:PushItemWidth(100); Dev.targeting = GUI:InputText("targeting",Dev.targeting); GUI:PopItemWidth();
 								Dev.targetingme = GUI:Checkbox(".targetingme", Dev.targetingme)
+								
+								if GUI:TreeNode("Buffs") then
+									if table.valid(esominion.buffList[Dev.index]) then
+										for i,e in pairs(esominion.buffList[Dev.index]) do
+											GUI:BulletText(tostring(i)..tostring(" - ")..tostring(e))
+										end
+									end
+									GUI:TreePop()
+								end
+								if GUI:TreeNode("Castinfo") then
+									if(Dev.ischanneling) then
+										GUI:BulletText(".castinfo.starttime = "..tostring(Dev.castinfo.starttime))
+										GUI:BulletText(".castinfo.endtime = "..tostring(Dev.castinfo.endtime))
+										GUI:BulletText(".castinfo.timeleft = "..tostring(Dev.castinfo.timeleft))
+										GUI:BulletText(".castinfo.24 = "..tostring(string.format( "%X",Dev.castinfo.unk024)))
+										GUI:BulletText(".castinfo.28 = "..tostring(Player.castinfo.unk028))
+										GUI:BulletText(".castinfo.40 = "..tostring(string.format( "%X",Dev.castinfo.unk040)))
+										GUI:BulletText(".castinfo.98 = "..tostring(string.format( "%X",Dev.castinfo.unk098)))
+										GUI:BulletText(".castinfo.a0 = "..tostring(string.format( "%X",Dev.castinfo.unk0a0))) 
+										
+									end
+									GUI:TreePop()
+								end
 								GUI:PopStyleVar()
 							GUI:EndChild()
 							GUI:Unindent()
@@ -533,6 +619,30 @@ function Dev.DrawCall(event, ticks )
 										GUI:BulletText(".istargetable = "..tostring(entity.istargetable))
 										GUI:BulletText(".iscritter = "..tostring(entity.iscritter))
 										GUI:BulletText(".isnpc = "..tostring(entity.isnpc))
+										
+										if GUI:TreeNode("Buffs") then
+											if table.valid(esominion.buffList[entity.index]) then
+												for i,e in pairs(esominion.buffList[entity.index]) do
+													GUI:BulletText(tostring(i)..tostring(" - ")..tostring(e))
+												end
+											end
+											GUI:TreePop()
+										end
+								
+										if GUI:TreeNode("Castinfo") then
+											if(entity.ischanneling) then
+												GUI:BulletText(".castinfo.starttime = "..tostring(entity.castinfo.starttime))
+												GUI:BulletText(".castinfo.endtime = "..tostring(entity.castinfo.endtime))
+												GUI:BulletText(".castinfo.timeleft = "..tostring(entity.castinfo.timeleft))
+												GUI:BulletText(".castinfo.24 = "..tostring(string.format( "%X",entity.castinfo.unk024)))
+												GUI:BulletText(".castinfo.28 = "..tostring(Player.castinfo.unk028))
+												GUI:BulletText(".castinfo.40 = "..tostring(string.format( "%X",entity.castinfo.unk040)))
+												GUI:BulletText(".castinfo.98 = "..tostring(string.format( "%X",entity.castinfo.unk098)))
+												GUI:BulletText(".castinfo.a0 = "..tostring(string.format( "%X",entity.castinfo.unk0a0))) 
+												
+											end
+											GUI:TreePop()
+										end
 										if ValidTable(entity.health) then
 											if GUI:TreeNode(".health") then
 												GUI:BulletText(".percent = "..tostring(entity.health.percent))

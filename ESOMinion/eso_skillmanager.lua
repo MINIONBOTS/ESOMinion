@@ -1007,12 +1007,25 @@ function eso_skillmanager.Cast( entity )
 	--Check for blocks/interrupts.
 	local isAssistMode = (gBotMode == GetString("assistMode"))
 	
+	local tipTarget = entity
+	if IsNull(esominion.activeTip,0) ~= 0 then
+		local TargetList = MEntityList("hostile,aggro,maxdistance=50")
+		if table.valid(TargetList) then
+			for i,e in pairs (TargetList) do
+				if e.castinfo and e.castinfo.timeleft > 0 and e.castinfo.timeleft < 1000 then
+					tipTarget = e
+					break
+				end
+			end
+		end
+	end
 	local blockable = esominion.activeTip == eso_skillmanager.TIP_BLOCK
 	if (blockable) then
 		if (not isAssistMode or (isAssistMode and gAssistDoBlock)) then
 			d("Attempting block.")
 			e("StartBlock()")
 			local newTask = eso_task_block.Create()
+			newTask.blockTarget = tipTarget.index
 			ml_task_hub:CurrentTask():AddSubTask(newTask)
 			return true
 		end
@@ -1023,10 +1036,10 @@ function eso_skillmanager.Cast( entity )
 		if (not isAssistMode or (isAssistMode and gAssistDoExploit)) then
 			local heavyAttack = eso_skillmanager.skillsbyname["DefaultHeavy"]
 			if heavyAttack then
-				if ((entity.distance and heavyAttack.range) and entity.distance < heavyAttack.range) and (AbilityList:CanCast(heavyAttack.id,entity.id) == 10) then
-					AbilityList:Cast(heavyAttack.id,entity.id)
+				if ((tipTarget.distance and heavyAttack.range) and tipTarget.distance < heavyAttack.range) and (AbilityList:CanCast(heavyAttack.id,tipTarget.id) == 10) then
+					AbilityList:Cast(heavyAttack.id,tipTarget.id)
 					eso_skillmanager.latencyTimer = Now() + 600
-					d("Attempting to exploit enemy with skill ID :"..tostring(entity.id))
+					d("Attempting to exploit enemy with skill ID :"..tostring(tipTarget.id))
 					return true
 				end
 			end
@@ -1284,6 +1297,7 @@ function eso_task_block.Create()
     --ffxiv_task_killtarget members
     newinst.name = "RT_TIP_BLOCK"
     newinst.maxTime = Now() + 3000
+    newinst.blockTarget = 0
 	
     return newinst
 end
@@ -1295,6 +1309,14 @@ end
 function eso_task_block:task_complete_eval()	
 	local activeTip = esominion.activeTip == eso_skillmanager.TIP_BLOCK
 	if (activeTip) then 
+		local target = MGetEntity(self.blockTarget)
+		if table.valid(target) then
+		d("valid block target")		
+			Player:SetFacing(target.pos,true)
+		else
+		d("no valid block target")		
+		end
+			
 		return false
 	else
 		return true
