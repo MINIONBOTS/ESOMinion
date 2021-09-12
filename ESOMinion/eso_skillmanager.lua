@@ -186,9 +186,17 @@ eso_skillmanager.Variables = {
 	-- player
 	SKM_PHPGT = { default = 0, cast = "number", profile = "phpgt", section = "fighting"   },
 	SKM_PHPLT = { default = 0, cast = "number", profile = "phplt", section = "fighting"   },
+	SKM_PHPEQ = { default = 0, cast = "number", profile = "phpeq", section = "fighting"   },
+	SKM_PHCGT = { default = 0, cast = "number", profile = "phcgt", section = "fighting"   },
+	SKM_PHCLT = { default = 0, cast = "number", profile = "phclt", section = "fighting"   },
+	SKM_PHCEQ = { default = 0, cast = "number", profile = "phceq", section = "fighting"   },
 	SKM_POWERTYPE = { default = "Magicka", cast = "string", profile = "powertype", section = "fighting"},
 	SKM_PPowGT = { default = 0, cast = "number", profile = "ppowgt", section = "fighting"   },
 	SKM_PPowLT = { default = 0, cast = "number", profile = "ppowlt", section = "fighting"   },
+	SKM_PPowEQ = { default = 0, cast = "number", profile = "ppoweq", section = "fighting"   },
+	SKM_PCowGT = { default = 0, cast = "number", profile = "pcowgt", section = "fighting"   },
+	SKM_PCowLT = { default = 0, cast = "number", profile = "pcowlt", section = "fighting"   },
+	SKM_PCowEQ = { default = 0, cast = "number", profile = "pcoweq", section = "fighting"   },
 	
 	-- target
 	SKM_TRG = { default = "Target", cast = "string", profile = "trg", section = "fighting"  },
@@ -743,8 +751,13 @@ function eso_skillmanager.UpdateCurrentProfileData()
 		gSkillProfileNewIndex = GetKeyByValue(gSMprofile,eso_skillmanager.SkillProfiles)
 	end
 end
+eso_skillmanager.mandatoryskills = {
+	[61874] = true,
+	[61875] = true,
+}
 function eso_skillmanager.BuildSkillsBook()
 	d("build new skill book")
+	local list = {}
 	eso_skillmanager.skillsbyindex = {}
 	eso_skillmanager.skillsbyid = {}
 	eso_skillmanager.skillsbyname = {}
@@ -754,7 +767,7 @@ function eso_skillmanager.BuildSkillsBook()
 			if skillid ~= 0 then
 				local skillData = AbilityList:Get(skillid)
 				if skillData then
-					eso_skillmanager.skillsbyindex[i] = skillData
+					list[i] = skillData
 					eso_skillmanager.skillsbyid[skillid] = skillData
 					eso_skillmanager.skillsbyname[skillData.name] = skillData
 				
@@ -769,13 +782,32 @@ function eso_skillmanager.BuildSkillsBook()
 			end
 		end
 	end
+	for i,bool in pairs(eso_skillmanager.mandatoryskills) do
+		local skillid = i
+		if skillid ~= 0 then
+			local skillData = AbilityList:Get(skillid)
+			if skillData then
+				list[i] = skillData
+				eso_skillmanager.skillsbyid[skillid] = skillData
+				eso_skillmanager.skillsbyname[skillData.name] = skillData
+			
+				if string.contains(skillData.name,"Light Attack") then
+					eso_skillmanager.skillsbyname["Default"] = skillData
+				end
+				if string.contains(skillData.name,"Heavy Attack") then
+					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+				end
+				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
+			end
+		end
+	end
 	for i = 1,8 do
 		local skillid = AbilityList:GetSlotInfo(i) 
 		if skillid ~= 0 then
 			local skillData = AbilityList:Get(skillid)
 			if skillData then
 				if not eso_skillmanager.skillsbyid[skillid] then
-					table.insert(eso_skillmanager.skillsbyindex,skillData)
+					table.insert(list,skillData)
 				end
 				eso_skillmanager.skillsbyid[skillid] = skillData
 				eso_skillmanager.skillsbyname[skillData.name] = skillData
@@ -797,7 +829,7 @@ function eso_skillmanager.BuildSkillsBook()
 				local skillData = AbilityList:Get(skillid)
 				if skillData then
 					if not eso_skillmanager.skillsbyid[skillid] then
-						table.insert(eso_skillmanager.skillsbyindex,skillData)
+						table.insert(list,skillData)
 					end
 			
 					eso_skillmanager.skillsbyid[skillid] = skillData
@@ -806,7 +838,15 @@ function eso_skillmanager.BuildSkillsBook()
 			end
 		end
 	end
-	
+	if table.valid(list) then
+		local added = {}
+		for i,e in pairs(list) do
+			if not added[e.id] then
+				added[e.id] = true
+				table.insert(eso_skillmanager.skillsbyindex,e)
+			end
+		end
+	end
 	return eso_skillmanager.skillsbyindex
 end
 function eso_skillmanager.BuildSkillsList()
@@ -1626,7 +1666,16 @@ function eso_skillmanager.AddDefaultConditions()
 		local target = eso_skillmanager.CurrentTarget
 		if Player.health.percent > 0 then
 			if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) > Player.health.percent) or 
-				(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < Player.health.percent))
+				(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < Player.health.percent) or 
+				(tonumber(skill.phpeq) > 0 and tonumber(skill.phpeq) ~= Player.health.percent))
+			then
+				return true
+			end
+		end
+		if Player.health.current > 0 then
+			if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) > Player.health.current) or 
+				(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < Player.health.current) or 
+				(tonumber(skill.phpeq) > 0 and tonumber(skill.phpeq) ~= Player.health.percent))
 			then
 				return true
 			end
@@ -1639,7 +1688,14 @@ function eso_skillmanager.AddDefaultConditions()
 				return true
 			end
 			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.magicka.percent) or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.magicka.percent))
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.magicka.percent) or 
+				(tonumber(skill.phpeq) > 0 and tonumber(skill.phpeq) ~= Player.magicka.percent))
+			then 
+				return true
+			end
+			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) > Player.magicka.current) or 
+				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) < Player.magicka.current) or 
+				(tonumber(skill.phpeq) > 0 and tonumber(skill.phpeq) ~= Player.magicka.current))
 			then 
 				return true
 			end
@@ -1648,16 +1704,30 @@ function eso_skillmanager.AddDefaultConditions()
 				return true
 			end
 			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.stamina.percent) or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.stamina.percent))
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.stamina.percent) or 
+				(tonumber(skill.ppoweq) > 0 and tonumber(skill.ppoweq) ~= Player.stamina.percent))
 			then 
 				return true
 			end
-		--[[elseif (skill.powertype == "Ultimate") then -- cost type 10
-			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > ml_global_information.Player_Ultimate.percent)	or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < ml_global_information.Player_Ultimate.percent))
+			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) > Player.stamina.current) or 
+				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) < Player.stamina.current) or 
+				(tonumber(skill.pcoweq) > 0 and tonumber(skill.pcoweq) ~= Player.stamina.current))
 			then 
 				return true
-			end]]
+			end
+		elseif (skill.powertype == "Ultimate") then -- cost type 10
+			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > ml_global_information.Player_Ultimate.percent)	or 
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < ml_global_information.Player_Ultimate.percent) or 
+				(tonumber(skill.ppoweq) > 0 and tonumber(skill.ppoweq) ~= ml_global_information.Player_Ultimate.percent))
+			then 
+				return true
+			end
+			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) > ml_global_information.Player_Ultimate.current)	or 
+				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) < ml_global_information.Player_Ultimate.current) or 
+				(tonumber(skill.pcoweq) > 0 and tonumber(skill.pcoweq) ~= ml_global_information.Player_Ultimate.current))
+			then 
+				return true
+			end
 		end				
 		return false
 	end
@@ -2089,11 +2159,19 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Player HP %% >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player HP is greater than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHPGT",SKM_PHPGT,0,0),"SKM_PHPGT"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Player HP %% <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player HP is less than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHPLT",SKM_PHPLT,0,0),"SKM_PHPLT"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Player HP %% ==",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player HP is less than this percent.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHPEQ",SKM_PHPEQ,0,0),"SKM_PHPEQ"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Player HP >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Current Player HP is greater than this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHCGT",SKM_PHCGT,0,0),"SKM_PHCGT"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Player HP <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Current Player HP is less than this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHCLT",SKM_PHCLT,0,0),"SKM_PHCLT"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Player HP ==",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Current Player HP is equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PHCEQ",SKM_PHCEQ,0,0),"SKM_PHCEQ"); GUI:NextColumn();
 		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power Type")); GUI:NextColumn(); SKM_Combo("##SKM_POWERTYPE","gSMBattlePowerTypeIndex","SKM_POWERTYPE",gSMBattlePowerTypes); GUI:NextColumn();
 		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power %% >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player Power is more than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PPowGT",SKM_PPowGT,0,0),"SKM_PPowGT"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power %% <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player Power is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PPowLT",SKM_PPowLT,0,0),"SKM_PPowLT"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power %% ==",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Player Power is equal to this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PPowEQ",SKM_PPowEQ,0,0),"SKM_PPowEQ"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Current Player Power is more than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PCowGT",SKM_PCowGT,0,0),"SKM_PCowGT"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Current Player Power is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PCowLT",SKM_PCowLT,0,0),"SKM_PCowLT"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Power ==",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when Current Player Power is equal to this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PCowEQ",SKM_PCowEQ,0,0),"SKM_PCowEQ"); GUI:NextColumn();
 		
 		GUI:Columns(1)
 	end
