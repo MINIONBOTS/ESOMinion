@@ -270,11 +270,15 @@ eso_skillmanager.Variables = {
 	SKM_PBuff = { default = "", cast = "string", profile = "pbuff", section = "fighting"  },
 	SKM_PNBuffThis = { default = false, cast = "boolean", profile = "pnbuffthis", section = "fighting"  },
 	SKM_PNBuff = { default = "", cast = "string", profile = "pnbuff", section = "fighting"  },
+	SKM_PBuffCount = { default = 0, cast = "number", profile = "pbuffc", section = "fighting"   },
+	SKM_PDBuffCount = { default = 0, cast = "number", profile = "pdbuffc", section = "fighting"   },
 		
 	SKM_TBuffThis = { default = false, cast = "boolean", profile = "tbuffthis", section = "fighting"  },
 	SKM_TBuff = { default = "", cast = "string", profile = "tbuff", section = "fighting"  },
 	SKM_TNBuffThis = { default = false, cast = "boolean", profile = "tnbuffthis", section = "fighting"  },
 	SKM_TNBuff = { default = "", cast = "string", profile = "tnbuff", section = "fighting"  },
+	SKM_TBuffCount = { default = 0, cast = "number", profile = "tbuffc", section = "fighting"   },
+	SKM_TDBuffCount = { default = 0, cast = "number", profile = "tdbuffc", section = "fighting"   },
 	
 	
 	
@@ -1041,7 +1045,7 @@ function eso_skillmanager.Cast( entity )
 			return false
 		end
 	end
-	if not esominion.buffList[entity.index] then
+	if not esominion.masterbuffList[entity.index] then
 		BuildBuffsByIndex(entity.index)
 	end
 	--Check for blocks/interrupts.
@@ -1062,12 +1066,21 @@ function eso_skillmanager.Cast( entity )
 	local blockable = esominion.activeTip == eso_skillmanager.TIP_BLOCK
 	if (blockable) then
 		if (not isAssistMode or (isAssistMode and gAssistDoBlock)) then
-			d("Attempting block.")
-			e("StartBlock()")
-			local newTask = eso_task_block.Create()
-			newTask.blockTarget = tipTarget.index
-			ml_task_hub:CurrentTask():AddSubTask(newTask)
-			return true
+			if tipTarget then
+				if tipTarget.castinfo and tipTarget.castinfo.timeleft < 500 then
+					d(tipTarget.castinfo.timeleft)
+					d("Attempting block.")
+					e("StartBlock()")
+					local newTask = eso_task_block.Create()
+					newTask.blockTarget = tipTarget.index
+					ml_task_hub:CurrentTask():AddSubTask(newTask)
+					return true
+				else
+					d("block target not casting")
+				end
+			else
+				d("no block target")
+			end
 		end
 	end
 	
@@ -1738,7 +1751,7 @@ function eso_skillmanager.AddDefaultConditions()
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
-		local playerBuffs = esominion.buffList[Player.index]
+		local playerBuffs = esominion.masterbuffList[Player.index]
 		if (skill.pbuffthis == true) then
 			if not HasBuff(playerBuffs, realskilldata.id) then 
 				return true
@@ -1748,7 +1761,13 @@ function eso_skillmanager.AddDefaultConditions()
 			if not MissingBuff(playerBuffs, realskilldata.id) then 
 				return true
 			end
-		end			
+		end
+		if (tonumber(skill.pbuffc) > 0 and tonumber(skill.pbuffc) < IsNull(table.size(esominion.buffList[Player.index]),0)) then
+			return true
+		end
+		if (tonumber(skill.pdbuffc) > 0 and tonumber(skill.pdbuffc) < IsNull(table.size(esominion.buffList[Player.index]),0)) then
+			return true
+		end
 		return false
 	end
 	}
@@ -1759,7 +1778,7 @@ function eso_skillmanager.AddDefaultConditions()
 		local skill = eso_skillmanager.CurrentSkill
 		local target = eso_skillmanager.CurrentTarget
 		local realskilldata = eso_skillmanager.CurrentSkillData
-		local targetBuffs = esominion.buffList[target.index]
+		local targetBuffs = esominion.masterbuffList[target.index]
 		
 		if (skill.tbuffthis == true) then
 			if not HasBuff(targetBuffs, realskilldata.id) then 
@@ -1770,7 +1789,13 @@ function eso_skillmanager.AddDefaultConditions()
 			if not MissingBuff(targetBuffs, realskilldata.id) then 
 				return true
 			end
-		end			
+		end	
+		if (tonumber(skill.tbuffc) > 0 and tonumber(skill.tbuffc) < table.size(esominion.buffList[target.index])) then
+			return true
+		end
+		if (tonumber(skill.tdbuffc) > 0 and tonumber(skill.tdbuffc) < table.size(esominion.debuffList[target.index])) then
+			return true
+		end
 		return false
 	end
 	}
@@ -1780,7 +1805,7 @@ function eso_skillmanager.AddDefaultConditions()
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
-		local playerBuffs = esominion.buffList[Player.index]
+		local playerBuffs = esominion.masterbuffList[Player.index]
 		if (skill.pbuff ~= "") then
 			if not HasBuffs(playerBuffs, skill.pbuff) then 
 				return true
@@ -1801,7 +1826,7 @@ function eso_skillmanager.AddDefaultConditions()
 		local skill = eso_skillmanager.CurrentSkill
 		local target = eso_skillmanager.CurrentTarget
 		local realskilldata = eso_skillmanager.CurrentSkillData
-		local targetBuffs = esominion.buffList[target.index]
+		local targetBuffs = esominion.masterbuffList[target.index]
 		
 		if (skill.pbuff ~= "") then
 			if not HasBuffs(targetBuffs, skill.tbuff) then 
@@ -2233,6 +2258,8 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:Text(GetString("Has Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PBuff",SKM_PBuff),"SKM_PBuff"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PNBuffThis",SKM_PNBuffThis),"SKM_PNBuffThis"); GUI:NextColumn();	
 		GUI:Text(GetString("Miss Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PNBuff",SKM_PNBuff),"SKM_PNBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Buff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of buffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PBuffCount",SKM_PBuffCount,0,0),"SKM_PBuffCount"); GUI:NextColumn();
+		GUI:Text(GetString("Debuff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of debuffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PDBuffCount",SKM_PDBuffCount,0,0),"SKM_PDBuffCount"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)
@@ -2247,6 +2274,8 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:Text(GetString("Has Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TBuff",SKM_TBuff),"SKM_TBuff"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TNBuffThis",SKM_TNBuffThis),"SKM_TNBuffThis"); GUI:NextColumn();	
 		GUI:Text(GetString("Missing Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNBuff",SKM_TNBuff),"SKM_TNBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Buff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of buffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TBuffCount",SKM_TBuffCount,0,0),"SKM_TBuffCount"); GUI:NextColumn();
+		GUI:Text(GetString("Debuff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of debuffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TDBuffCount",SKM_TDBuffCount,0,0),"SKM_TDBuffCount"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)
