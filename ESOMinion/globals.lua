@@ -109,6 +109,7 @@ function ml_globals.UpdateGlobals()
 		ml_global_information.CurrentClass = e("GetUnitClassId(player)")
 		ml_global_information.Player_Position = Player.pos
 		ml_global_information.Player_Stealthed = e("GetUnitStealthState(player)") ~= 0
+		ml_global_information.Player_Blocking = e("IsBlockActive()")
 		
 		ml_global_information.Player_Magicka = Player.magicka
 		

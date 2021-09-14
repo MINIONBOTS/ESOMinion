@@ -12,6 +12,8 @@ esominion.activeTip = 0
 esominion.petalive = nil
 esominion.petalivecheck = 0
 esominion.buffList = {}
+esominion.debuffList = {}
+esominion.masterbuffList = {}
 esominion.currentfishinghole = {}
 esominion.hooked = false
 esominion.hooktimer = 0
@@ -503,6 +505,8 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_globals.UpdateGlobals()
 		
 		esominion.buffList = {}
+		esominion.debuffList = {}
+		esominion.masterbuffList = {}
 		BuildBuffsByIndex(Player.index)
 		if esominion.smartrecord and not NavigationManager.ProcessingFloorMesh then
 			--if Player.isswimming == 1 then
@@ -564,6 +568,11 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 							return true
 						end
 					end
+				end
+			end
+			if ml_global_information.Player_Blocking then
+				if not Player.incombat then
+					e("StopBlock()")
 				end
 			end
 		end

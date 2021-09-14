@@ -395,12 +395,12 @@ function Player:BuildPath(x, y, z, floorfilters, cubefilters, targetid)
 	ml_navigation.lastconnectiontimer = 0
 	
 	if (ret <= 0) then
-		if (hasPreviousPath) then
+		--[[if (hasPreviousPath) then
 			d("[NAVIGATION]: Encountered an issue on path pull, using previous path, errors may be encountered here.")
 			return currentPathSize
-		else
+		else]]
 			ml_navigation:ResetCurrentPath()
-		end
+		--end
 		local ppos = Player.pos
 		ml_navigation.startposition = { x=0, y=0, z=0 }
 		ml_navigation.targetposition = { x=0, y=0, z=0 }
@@ -1010,7 +1010,7 @@ function ml_navigation:IsStillOnPath(ppos, lastnode, nextnode, deviationthreshol
                 d("[Navigation] - Player left the path - 2D-Distance to Path: " .. tostring(math.distancepointline(from, to, playerpos)) .. " > " .. tostring(deviationthreshold))
                 --NavigationManager:UpdatePathStart()  -- this seems to cause some weird twitching loops sometimes..not sure why
                 NavigationManager:ResetPath()
-                ml_navigation:MoveTo(ml_navigation.targetposition.x, ml_navigation.targetposition.y, ml_navigation.targetposition.z, ml_navigation.targetid)
+                Player:MoveTo(ml_navigation.targetposition.x, ml_navigation.targetposition.y, ml_navigation.targetposition.z, ml_navigation.targetid)
                 return false
             end
             ---when comes to handling 3d
@@ -1024,7 +1024,7 @@ function ml_navigation:IsStillOnPath(ppos, lastnode, nextnode, deviationthreshol
                                 d("[Navigation] - Player not on Path anymore. - Distance to Path: " .. tostring(math.distancepointline(lastnode, nextnode, ppos)) .. " > " .. tostring(deviationthreshold))
                                 --NavigationManager:UpdatePathStart()
                                 NavigationManager:ResetPath()
-                                ml_navigation:MoveTo(ml_navigation.targetposition.x, ml_navigation.targetposition.y, ml_navigation.targetposition.z, ml_navigation.targetid)
+                                Player:MoveTo(ml_navigation.targetposition.x, ml_navigation.targetposition.y, ml_navigation.targetposition.z, ml_navigation.targetid)
                                 return false
                             end
                         end
