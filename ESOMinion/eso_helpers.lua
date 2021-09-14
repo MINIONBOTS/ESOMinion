@@ -680,7 +680,7 @@ end
 
 function HasBuff(list, buffName)
 	if table.valid(list) and buffName then
-		if list[buffNames] then
+		if list[tonumber(buffName)] then
 			return true
 		end
 	end
@@ -689,7 +689,7 @@ end
 
 function MissingBuff(list, buffName)
 	if table.valid(list) and buffName then
-		if list[buffName] then
+		if list[tonumber(buffName)] then
 			return false
 		end
 	end
