@@ -504,10 +504,9 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		-- Update global variables \\ THIS MUST REMAIN THE FIRST UPDATE, OTHERWISE THERE WILL BE MISSING GLOBALS.
 		ml_globals.UpdateGlobals()
 		
-		esominion.buffList = {}
-		esominion.debuffList = {}
-		esominion.masterbuffList = {}
-		BuildBuffsByIndex(Player.index)
+		if (ESO_Common_BotRunning) then	
+			BuildBuffsByIndex(Player.index)
+		end
 		if esominion.smartrecord and not NavigationManager.ProcessingFloorMesh then
 			--if Player.isswimming == 1 then
 			if ml_mesh_mgr.data.flooreditormode ~= 5 then

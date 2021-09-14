@@ -1045,9 +1045,7 @@ function eso_skillmanager.Cast( entity )
 			return false
 		end
 	end
-	if not esominion.masterbuffList[entity.index] then
-		BuildBuffsByIndex(entity.index)
-	end
+	BuildBuffsByIndex(entity.index)
 	--Check for blocks/interrupts.
 	local isAssistMode = (gBotMode == GetString("assistMode"))
 	
@@ -1827,13 +1825,12 @@ function eso_skillmanager.AddDefaultConditions()
 		local target = eso_skillmanager.CurrentTarget
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local targetBuffs = esominion.masterbuffList[target.index]
-		
-		if (skill.pbuff ~= "") then
+		if (skill.tbuff ~= "") then
 			if not HasBuffs(targetBuffs, skill.tbuff) then 
 				return true
 			end 
 		end
-		if (skill.pnbuff ~= "") then
+		if (skill.tnbuff ~= "") then
 			if not MissingBuffs(targetBuffs, skill.tnbuff) then 
 				return true
 			end

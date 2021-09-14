@@ -658,15 +658,10 @@ end
 function BuildBuffsByIndex(index)
 	local target = EntityList:Get(index)
 	if table.valid(target) then
-		if not esominion.buffList[index] then
-			esominion.buffList[index] = {}
-		end
-		if not esominion.debuffList[index] then
-			esominion.debuffList[index] = {}
-		end
-		if not esominion.masterbuffList[index] then
-			esominion.masterbuffList[index] = {}
-		end
+		esominion.buffList[index] = {}
+		esominion.debuffList[index] = {}
+		esominion.masterbuffList[index] = {}
+		
 		local buffCount = e("GetNumBuffs("..tostring(index)..")")
 		if buffCount > 0 then
 			for buff = 1 , buffCount do
@@ -704,7 +699,7 @@ end
 function HasBuffs(list, buffNames)
 	if table.valid(list) and (buffNames and type(buffNames) == "string") then
 		for _orids in StringSplit(buffNames,",") do
-			if list[_orids] then
+			if list[tonumber(_orids)] then
 				return true
 			end
 		end
@@ -713,9 +708,10 @@ function HasBuffs(list, buffNames)
 end
 
 function MissingBuffs(list, buffNames)
+
 	if table.valid(list) and (buffNames and type(buffNames) == "string") then
 		for _orids in StringSplit(buffNames,",") do
-			if list[_orids] then
+			if list[tonumber(_orids)] then
 				return false
 			end
 		end
