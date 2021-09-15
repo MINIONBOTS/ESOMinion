@@ -260,11 +260,11 @@ eso_skillmanager.Variables = {
 	SKM_PTNBuff = { default = "", cast = "string", profile = "ptnbuff", section = "fighting"  },
 	--]]
 	
-	--[[ ------- Target Casting
+	 ------- Target Casting
 	SKM_TCASTID = { default = "", cast = "string", profile = "tcastids", section = "fighting"  },
 	SKM_TCASTTM = { default = "0", cast = "string", profile = "tcastonme", section = "fighting"  },
 	SKM_TCASTTIME = { default = "0.0", cast = "string", profile = "tcasttime", section = "fighting"  },
-	--]]
+	
 	
 	SKM_PBuffThis = { default = false, cast = "boolean", profile = "pbuffthis", section = "fighting"  },
 	SKM_PBuff = { default = "", cast = "string", profile = "pbuff", section = "fighting"  },
@@ -805,8 +805,47 @@ function eso_skillmanager.BuildSkillsBook()
 			end
 		end
 	end
+	
+	--[[local skillList = AbilityList:Get() 
+	if table.valid(skillList) then
+		for skillid,skillData in pairs (skillList) do
+			if not eso_skillmanager.skillsbyid[skillid] then
+				table.insert(list,skillData)
+			end
+			eso_skillmanager.skillsbyid[skillid] = skillData
+			eso_skillmanager.skillsbyname[skillData.name] = skillData
+		
+			if string.contains(skillData.name,"Light Attack") then
+				eso_skillmanager.skillsbyname["Default"] = skillData
+			end
+			if string.contains(skillData.name,"Heavy Attack") then
+				eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+			end
+			ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
+		end
+	end]]
+	
 	for i = 1,8 do
-		local skillid = AbilityList:GetSlotInfo(i) 
+		local skillid = AbilityList:GetSlotInfo(i,0) 
+		if skillid ~= 0 then
+			local skillData = AbilityList:Get(skillid)
+			if skillData then
+				if not eso_skillmanager.skillsbyid[skillid] then
+					table.insert(list,skillData)
+				end
+				eso_skillmanager.skillsbyid[skillid] = skillData
+				eso_skillmanager.skillsbyname[skillData.name] = skillData
+			
+				if string.contains(skillData.name,"Light Attack") then
+					eso_skillmanager.skillsbyname["Default"] = skillData
+				end
+				if string.contains(skillData.name,"Heavy Attack") then
+					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+				end
+				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
+			end
+		end
+		local skillid = AbilityList:GetSlotInfo(i,1) 
 		if skillid ~= 0 then
 			local skillData = AbilityList:Get(skillid)
 			if skillData then
@@ -1018,7 +1057,7 @@ function eso_skillmanager.Cast( entity )
 			return false
 		end
 	--end
-
+	local activeHotbar = AbilityList:GetActiveHotBar()
 	--if eso_skillmanager.needsrebuild then
 		eso_skillmanager.BuildSkillsList()
 	--end
@@ -1032,9 +1071,9 @@ function eso_skillmanager.Cast( entity )
 		eso_skillmanager.BuildSkillsList()
 	end
 	if eso_skillmanager.latencyTimer == 0 then
-		local GCDRemain3,GCDDuration3 = AbilityList:GetSlotCooldownInfo(3)
-		local GCDRemain4,GCDDuration4 = AbilityList:GetSlotCooldownInfo(4)
-		local GCDRemain5,GCDDuration5 = AbilityList:GetSlotCooldownInfo(5)
+		local GCDRemain3,GCDDuration3 = AbilityList:GetSlotCooldownInfo(3,activeHotbar)
+		local GCDRemain4,GCDDuration4 = AbilityList:GetSlotCooldownInfo(4,activeHotbar)
+		local GCDRemain5,GCDDuration5 = AbilityList:GetSlotCooldownInfo(5,activeHotbar)
 		local GCDRemain = GetHighestValue(GCDRemain3,GCDRemain4,GCDRemain5)
 		
 		if GCDRemain > 0 then
@@ -2197,6 +2236,14 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		
 		GUI:Columns(1)
 	end
+	--[[if (GUI:CollapsingHeader(GetString("casting"),"battle-casting-header")) then
+		GUI:Columns(2,"#battle-casting-main",false)
+		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
+		GUI:Text(GetString("skmTCASTID")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must be channelling one of the listed spell IDs (comma-separated list).")) end GUI:NextColumn(); SkillMgr.CaptureElement(GUI:InputText("##SKM_TCASTID",SKM_TCASTID),"SKM_TCASTID"); GUI:NextColumn();
+		--GUI:Text(GetString("skmTCASTTM")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must be casting the spell on me (self).")) end GUI:NextColumn(); SkillMgr.CaptureElement(GUI:Checkbox("##SKM_TCASTTM",SKM_TCASTTM),"SKM_TCASTTM"); GUI:NextColumn();
+		GUI:Text(GetString("skmTCASTTIME")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Cast time left on the current spell must be greater than or equal to (>=) this time in seconds.")) end GUI:NextColumn(); SkillMgr.CaptureElement(GUI:InputText("##SKM_TCASTTIME",SKM_TCASTTIME),"SKM_TCASTTIME"); GUI:NextColumn();		
+		GUI:Columns(1)
+	end]]
 	
 	if (GUI:CollapsingHeader(GetString("Target Stats"),"battle-target-header")) then
 		GUI:Columns(2,"#battle-target-main",false)
@@ -2251,10 +2298,10 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:PushItemWidth(100)
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PBuffThis",SKM_PBuffThis),"SKM_PBuffThis"); GUI:NextColumn();	
-		GUI:Text(GetString("Has Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PBuff",SKM_PBuff),"SKM_PBuff"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PNBuffThis",SKM_PNBuffThis),"SKM_PNBuffThis"); GUI:NextColumn();	
-		GUI:Text(GetString("Miss Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PNBuff",SKM_PNBuff),"SKM_PNBuff"); GUI:NextColumn();
+		--GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has this effect")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PBuffThis",SKM_PBuffThis),"SKM_PBuffThis"); GUI:NextColumn();	
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this effect")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PNBuffThis",SKM_PNBuffThis),"SKM_PNBuffThis"); GUI:NextColumn();	
+		GUI:Text(GetString("Has buffs/debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PBuff",SKM_PBuff),"SKM_PBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Missing buffs/debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PNBuff",SKM_PNBuff),"SKM_PNBuff"); GUI:NextColumn();
 		GUI:Text(GetString("Buff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of buffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PBuffCount",SKM_PBuffCount,0,0),"SKM_PBuffCount"); GUI:NextColumn();
 		GUI:Text(GetString("Debuff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of debuffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PDBuffCount",SKM_PDBuffCount,0,0),"SKM_PDBuffCount"); GUI:NextColumn();
 		GUI:PopItemWidth()
@@ -2267,10 +2314,10 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:PushItemWidth(100)
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TBuffThis",SKM_TBuffThis),"SKM_TBuffThis"); GUI:NextColumn();	
-		GUI:Text(GetString("Has Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TBuff",SKM_TBuff),"SKM_TBuff"); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this Buff")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TNBuffThis",SKM_TNBuffThis),"SKM_TNBuffThis"); GUI:NextColumn();	
-		GUI:Text(GetString("Missing Buffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNBuff",SKM_TNBuff),"SKM_TNBuff"); GUI:NextColumn();
+		--GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has this effect")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TBuffThis",SKM_TBuffThis),"SKM_TBuffThis"); GUI:NextColumn();	
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this effect")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TNBuffThis",SKM_TNBuffThis),"SKM_TNBuffThis"); GUI:NextColumn();	
+		GUI:Text(GetString("Has Has buffs/debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TBuff",SKM_TBuff),"SKM_TBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Missing buffs/debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNBuff",SKM_TNBuff),"SKM_TNBuff"); GUI:NextColumn();
 		GUI:Text(GetString("Buff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of buffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TBuffCount",SKM_TBuffCount,0,0),"SKM_TBuffCount"); GUI:NextColumn();
 		GUI:Text(GetString("Debuff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of debuffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TDBuffCount",SKM_TDBuffCount,0,0),"SKM_TDBuffCount"); GUI:NextColumn();
 		GUI:PopItemWidth()

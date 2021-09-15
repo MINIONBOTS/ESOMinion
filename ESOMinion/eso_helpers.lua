@@ -667,11 +667,17 @@ function BuildBuffsByIndex(index)
 			for buff = 1 , buffCount do
 				local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = e("GetUnitBuffInfo("..tostring(index)..", "..buff..")")
 				if (effectType == 1) then
-					esominion.buffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+					if not esominion.buffList[index][abilityId] or castByPlayer then
+						esominion.buffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+					end
 				elseif (effectType == 1) then
-					esominion.debuffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+					if not esominion.buffList[index][abilityId] or castByPlayer then
+						esominion.debuffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+					end
 				end
-				esominion.masterbuffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+				if not esominion.buffList[index][abilityId] or castByPlayer then
+					esominion.masterbuffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+				end
 			end
 		end
 	end
