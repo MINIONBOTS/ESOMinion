@@ -857,12 +857,6 @@ function eso_skillmanager.BuildSkillsBook()
 				eso_skillmanager.skillsbyid[skillid] = skillData
 				eso_skillmanager.skillsbyname[skillData.name] = skillData
 			
-				if string.contains(skillData.name,"Light Attack") then
-					eso_skillmanager.skillsbyname["Default"] = skillData
-				end
-				if string.contains(skillData.name,"Heavy Attack") then
-					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
-				end
 				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
 			end
 		end
@@ -911,10 +905,10 @@ function eso_skillmanager.BuildSkillsList()
 			
 				if activeHotbar == 0 then
 					if string.contains(skillData.name,"Light Attack") then
-						eso_skillmanager.skillsbyname["Default"] = skillData
+						eso_skillmanager.skillsbyname["Default0"] = skillData
 					end
 					if string.contains(skillData.name,"Heavy Attack") then
-						eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+						eso_skillmanager.skillsbyname["DefaultHeavy0"] = skillData
 					end
 				end
 				eso_skillmanager.activeSkillsBar[skillid] = 0
@@ -933,10 +927,10 @@ function eso_skillmanager.BuildSkillsList()
 				eso_skillmanager.skillsbyname[skillData.name] = skillData
 				if activeHotbar == 1 then
 					if string.contains(skillData.name,"Light Attack") then
-						eso_skillmanager.skillsbyname["Default"] = skillData
+						eso_skillmanager.skillsbyname["Default1"] = skillData
 					end
 					if string.contains(skillData.name,"Heavy Attack") then
-						eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+						eso_skillmanager.skillsbyname["DefaultHeavy1"] = skillData
 					end
 				end
 				eso_skillmanager.activeSkillsBar[skillid] = 1
@@ -1090,11 +1084,11 @@ function eso_skillmanager.Cast( entity )
 	--if eso_skillmanager.needsrebuild then
 		eso_skillmanager.BuildSkillsList()
 	--end
-		
-	local defaultAttack = eso_skillmanager.skillsbyname["Default"]
+	local defaultName = "Default"..tostring(activeHotbar)
+	local defaultAttack = eso_skillmanager.skillsbyname[defaultName]
 	if not defaultAttack then
 		eso_skillmanager.BuildSkillsList()
-		defaultAttack = eso_skillmanager.skillsbyname["Default"]
+		defaultAttack = eso_skillmanager.skillsbyname[defaultName]
 	end
 	if AbilityList:GetSlotInfo(1) ~= defaultAttack.id then
 		eso_skillmanager.BuildSkillsList()
@@ -1236,7 +1230,7 @@ function eso_skillmanager.Cast( entity )
 							end]]
 							e("OnWeaponSwap()")
 							eso_skillmanager.latencyTimer = 0
-							ml_global_information.nextRun = Now()
+							ml_global_information.nextRun = Now() + 300
 							 return true
 						end
 					end
