@@ -48,6 +48,7 @@ eso_skillmanager.skillsbyname = {}
 eso_skillmanager.lastskillidcheck = 0
 eso_skillmanager.lastskillindexcheck = 0
 eso_skillmanager.skillsearchstring = ""
+eso_skillmanager.activeSkillsBar = {}
 eso_skillmanager.GUI = {
 	skillbook = {
 		name = GetString("Skill Book"),
@@ -177,6 +178,7 @@ eso_skillmanager.Variables = {
 	SKM_ENABLED = { default = "0", cast = "string", profile = "enabled", section = "main"},	
 	
 	SKM_Combat = { default = "In Combat", cast = "string", profile = "ooc", section = "fighting"  },
+	SKM_Swap = { default = false, cast = "boolean", profile = "forceswap", section = "fighting"  },
 	SKM_Summon = { default = false, cast = "boolean", profile = "summonskill", section = "fighting"  },
 	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"   },
 	SKM_MinR = { default = 0, cast = "number", profile = "minRange", section = "fighting"   },
@@ -894,10 +896,12 @@ function eso_skillmanager.BuildSkillsBook()
 end
 function eso_skillmanager.BuildSkillsList()
 	
+	eso_skillmanager.activeSkillsBar = {}
+	local activeHotbar = AbilityList:GetActiveHotBar()
 	eso_skillmanager.skillsbyid = {}
 	eso_skillmanager.skillsbyname = {}
 	for i = 1,8 do
-		local skillid = AbilityList:GetSlotInfo(i) 
+		local skillid = AbilityList:GetSlotInfo(i,0) 
 		if skillid ~= 0 then
 			local skillData = AbilityList:Get(skillid)
 			if skillData then
@@ -905,12 +909,37 @@ function eso_skillmanager.BuildSkillsList()
 				eso_skillmanager.skillsbyid[skillid] = skillData
 				eso_skillmanager.skillsbyname[skillData.name] = skillData
 			
-				if string.contains(skillData.name,"Light Attack") then
-					eso_skillmanager.skillsbyname["Default"] = skillData
+				if activeHotbar == 0 then
+					if string.contains(skillData.name,"Light Attack") then
+						eso_skillmanager.skillsbyname["Default"] = skillData
+					end
+					if string.contains(skillData.name,"Heavy Attack") then
+						eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+					end
 				end
-				if string.contains(skillData.name,"Heavy Attack") then
-					eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+				eso_skillmanager.activeSkillsBar[skillid] = 0
+				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
+			end
+		end
+	end
+	
+	for i = 1,8 do
+		local skillid = AbilityList:GetSlotInfo(i,1) 
+		if skillid ~= 0 then
+			local skillData = AbilityList:Get(skillid)
+			if skillData then
+		
+				eso_skillmanager.skillsbyid[skillid] = skillData
+				eso_skillmanager.skillsbyname[skillData.name] = skillData
+				if activeHotbar == 1 then
+					if string.contains(skillData.name,"Light Attack") then
+						eso_skillmanager.skillsbyname["Default"] = skillData
+					end
+					if string.contains(skillData.name,"Heavy Attack") then
+						eso_skillmanager.skillsbyname["DefaultHeavy"] = skillData
+					end
 				end
+				eso_skillmanager.activeSkillsBar[skillid] = 1
 				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
 			end
 		end
@@ -1187,12 +1216,41 @@ function eso_skillmanager.Cast( entity )
 		for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
 			local result = eso_skillmanager.CanCast(prio, entity)
 			if (result ~= 0) then
+			
+			--check swapable before checking conditions
+				local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
+				if skill.forceswap then
+					
+					if skillOnBar ~= nil then
+						if activeHotbar ~= skillOnBar then
+							-- swap bars
+							d("need swap for skill ["..tostring(prio).."]")
+							--[[if skillOnBar == 0 then
+								if (AbilityList:Cast(61874,Player.id)) then
+									d("swap weapon to bar 0")
+								end
+							elseif skillOnBar == 1 then
+								if (AbilityList:Cast(61875,Player.id)) then
+									d("swap weapon to bar 1")
+								end
+							end]]
+							e("OnWeaponSwap()")
+							eso_skillmanager.latencyTimer = 0
+							ml_global_information.nextRun = Now()
+							 return true
+						end
+					end
+				end
+			
+			
+			
 				local TID = result
 				--local realID = tonumber(skill.skillID)
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				--local action = AbilityList:Get(realID)
 				local canCast = AbilityList:CanCast(realID,TID)
-				if canCast == 10 then
+				d("canCast = "..tostring(prio).." "..tostring(canCast))
+				if canCast == 10 and activeHotbar == skillOnBar then
 					if (AbilityList:Cast(realID,TID)) then
 						--d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
 						skill.timelastused = Now() + 2000
@@ -1524,6 +1582,23 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)
 	
+	conditional = { name = "Swap Bar Check"
+	, eval = function()	
+		local activeHotbar = AbilityList:GetActiveHotBar()
+		local skill = eso_skillmanager.CurrentSkill
+		
+		if (In(activeHotbar,0) and In(skill.id,61874)) then
+			return true
+		end
+		if (In(activeHotbar,1) and In(skill.id,61875)) then
+			return true
+		end
+		
+		return false
+	end
+	}
+	eso_skillmanager.AddConditional(conditional)
+	
 	conditional = { name = "Summon Skill Check"
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
@@ -1541,6 +1616,42 @@ function eso_skillmanager.AddDefaultConditions()
 	eso_skillmanager.AddConditional(conditional)
 	
 	
+	conditional = { name = "Target Casting Checks"	
+	, eval = function()	
+		local skill = eso_skillmanager.CurrentSkill
+		local realskilldata = eso_skillmanager.CurrentSkillData
+		local target = eso_skillmanager.CurrentTarget
+		local TID = eso_skillmanager.CurrentTID
+		
+		local casttime = tonumber(skill.tcasttime)
+		if casttime == nil then casttime = 0 end
+		
+		if (( casttime > 0 or skill.tcastids ~= "")) then
+			if (TableSize(target.castinginfo) == 0) then
+				return true
+			elseif target.castinginfo.timeleft == 0 then
+				return true
+			elseif (skill.tcastids == "" and casttime ~= nil) then
+				if target.castinginfo.timeleft < casttime then
+					return true
+				end
+			elseif (skill.tcastids ~= "") then					
+				local isCasting = false	
+				for castid in StringSplit(skill.tcastids,",") do	
+					if castid == target.castinginfo.a0 then
+						isCasting = true
+					end
+				end
+				local ctid = (skill.tcastonme  and Player.id or nil)
+				if ( not isCasting ) then
+					return true
+				end
+			end
+		end
+		return false
+	end
+	}
+	eso_skillmanager.AddConditional(conditional)
 	
 	
 	conditional = { name = "Skill Slotted Check"
@@ -2204,6 +2315,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Combat Status")); GUI:NextColumn(); SKM_Combo("##SKM_Combat","gSMBattleStatusIndex","SKM_Combat",gSMBattleStatuses); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Allow Weapon Swap")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Swap",SKM_Swap),"SKM_Swap"); GUI:NextColumn();	
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Summon Skill")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Summon",SKM_Summon),"SKM_Summon"); GUI:NextColumn();		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Min Range")); GUI:NextColumn(); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Minimum range the skill can be used.")) end eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_MinR",SKM_MinR,0,0),"SKM_MinR");  GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Max Range")); GUI:NextColumn(); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Maximum range the skill can be used.")) end eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_MaxR",SKM_MaxR,0,0),"SKM_MaxR"); GUI:NextColumn();
@@ -2236,14 +2348,14 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		
 		GUI:Columns(1)
 	end
-	--[[if (GUI:CollapsingHeader(GetString("casting"),"battle-casting-header")) then
+	if (GUI:CollapsingHeader(GetString("casting"),"battle-casting-header")) then
 		GUI:Columns(2,"#battle-casting-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
-		GUI:Text(GetString("skmTCASTID")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must be channelling one of the listed spell IDs (comma-separated list).")) end GUI:NextColumn(); SkillMgr.CaptureElement(GUI:InputText("##SKM_TCASTID",SKM_TCASTID),"SKM_TCASTID"); GUI:NextColumn();
-		--GUI:Text(GetString("skmTCASTTM")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must be casting the spell on me (self).")) end GUI:NextColumn(); SkillMgr.CaptureElement(GUI:Checkbox("##SKM_TCASTTM",SKM_TCASTTM),"SKM_TCASTTM"); GUI:NextColumn();
-		GUI:Text(GetString("skmTCASTTIME")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Cast time left on the current spell must be greater than or equal to (>=) this time in seconds.")) end GUI:NextColumn(); SkillMgr.CaptureElement(GUI:InputText("##SKM_TCASTTIME",SKM_TCASTTIME),"SKM_TCASTTIME"); GUI:NextColumn();		
+		GUI:Text(GetString("skmTCASTID")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must be channelling one of the listed spell IDs (comma-separated list).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TCASTID",SKM_TCASTID),"SKM_TCASTID"); GUI:NextColumn();
+		--GUI:Text(GetString("skmTCASTTM")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Target must be casting the spell on me (self).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TCASTTM",SKM_TCASTTM),"SKM_TCASTTM"); GUI:NextColumn();
+		--GUI:Text(GetString("skmTCASTTIME")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Cast time left on the current spell must be greater than or equal to (>=) this time in seconds.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TCASTTIME",SKM_TCASTTIME),"SKM_TCASTTIME"); GUI:NextColumn();		
 		GUI:Columns(1)
-	end]]
+	end
 	
 	if (GUI:CollapsingHeader(GetString("Target Stats"),"battle-target-header")) then
 		GUI:Columns(2,"#battle-target-main",false)
