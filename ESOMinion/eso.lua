@@ -1038,7 +1038,20 @@ function AdvancedSettings.Draw()
 			if (tabindex == 1) then
 				GUI:BeginChild("##main-header-general", 0, GUI_GetFrameHeight(10), true)
 				AdvancedSettings.shouldUseSoulGem = GUI:Checkbox("Use SoulGem on death", AdvancedSettings.shouldUseSoulGem)
+				GUI:PushItemWidth(80)
+				local newVal, changed = GUI:InputInt("Weave Delay",gSKMWeaveDelay,25,50)
+				if newVal < 100 then
+					newVal = 100
+				elseif newVal > 300 then
+					newVal = 300
+				end
+				if changed and newVal ~= gSKMWeaveDelay then
+					gSKMWeaveDelay = newVal
+					GUI_Set("gSKMWeaveDelay",newVal)
+				end
+				GUI:PopItemWidth()
 				GUI:EndChild()
+				
 			end
 			GUI:EndChild()
 		end

@@ -331,6 +331,7 @@ function eso_skillmanager.ModuleInit()
 	gSMBattlePowerTypeIndex = 1
 	
 	gSKMFilter = esominion.GetSetting("gSKMFilter",false)
+	gSKMWeaveDelay = esominion.GetSetting("gSKMWeaveDelay",100)
 	
 	eso_skillmanager.UpdateProfiles()
 	eso_skillmanager.UseDefaultProfile()
@@ -1198,6 +1199,8 @@ function eso_skillmanager.Cast( entity )
 					--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
 					eso_skillmanager.prevSkillID = defaultAttack.id
 					eso_skillmanager.lastdefault = Now()
+					eso_skillmanager.latencyTimer = 0
+					ml_global_information.nextRun = Now() + gSKMWeaveDelay
 					return true
 				end
 			elseif canCast == -110 then -- stunned
