@@ -33,10 +33,6 @@ eso_task_assist.lastidcheck = 0
 eso_task_assist.lastprocess = 0
 eso_task_assist.lootattempt = false
 function eso_task_assist:Process()
-	--d("AssistMode_Process->")
-	--d("timesince last = "..tostring(TimeSince(eso_task_assist.lastprocess)))
-	--eso_task_assist.lastprocess = Now()
-	  
 		
 	if (not esominion.playerdead) then
 		-- the client does not clear the target offsets since the 1.6 patch
@@ -62,10 +58,12 @@ function eso_task_assist:Process()
 			end
 		end
 		
-		if ( gAssistInitCombat or Player.incombat ) then
+		if ( gAssistInitCombat or Player.incombat or gAssistAllowOOC) then
 			if ( target and target.hostile and target.health.current > 0) then
 				eso_skillmanager.Cast( target )
-			end		
+			elseif gAssistAllowOOC then
+				eso_skillmanager.Cast( Player )
+			end	
 		end
 	end
 end
@@ -130,6 +128,7 @@ function eso_task_assist:UIInit()
 	gAssistDoBreak = esominion.GetSetting("gAssistDoBreak",true)
 	gAssistDoAvoid = esominion.GetSetting("gAssistDoAvoid",true)
 	gAssistInitCombat = esominion.GetSetting("gAssistInitCombat",false)
+	gAssistAllowOOC = esominion.GetSetting("gAssistAllowOOC",false)
 	gSKMShowAll = false
 	
 	gAssistTargetModeIndex = esominion.GetSetting("gAssistTargetModeIndex",1)
@@ -165,6 +164,8 @@ function eso_task_assist:Draw()
 	GUI:AlignFirstTextHeightToWidgets() 
 	GUI:Text(GetString("Start Combat"))
 	GUI:AlignFirstTextHeightToWidgets() 
+	GUI:Text(GetString("Allow OOC Casting"))
+	GUI:AlignFirstTextHeightToWidgets() 
 	GUI:Text(GetString("Prevent Attacking Innocents"))
 	GUI:AlignFirstTextHeightToWidgets() 
 	GUI:Text(GetString("Do Block"))
@@ -187,7 +188,11 @@ function eso_task_assist:Draw()
 		GUI_Combo("##targetingassist","gAssistTargetTypeIndex","gAssistTargetTypeSetting",{"None","LowestHealth","Closest","Biggest Crowd"});
 	end
 	GUI:AlignFirstTextHeightToWidgets() 
+	
+	
 	GUI_Capture(GUI:Checkbox("##"..GetString("Start Combat"),gAssistInitCombat),"gAssistInitCombat")
+	GUI:AlignFirstTextHeightToWidgets() 
+	GUI_Capture(GUI:Checkbox("##"..GetString("Allow OOC Casting"),gAssistAllowOOC),"gAssistAllowOOC")
 	GUI:AlignFirstTextHeightToWidgets() 
 	GUI_Capture(GUI:Checkbox("##"..GetString("gPreventAttackingInnocents"),gPreventAttackingInnocents),"gPreventAttackingInnocents")
 	GUI:AlignFirstTextHeightToWidgets() 

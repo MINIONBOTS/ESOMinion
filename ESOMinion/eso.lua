@@ -1057,6 +1057,17 @@ function AdvancedSettings.Draw()
 					gSKMWeaveDelay = newVal
 					GUI_Set("gSKMWeaveDelay",newVal)
 				end
+				GUI:PushItemWidth(80)
+				local newVal, changed = GUI:InputInt("Weapon Swap Delay",gSKMSwapDelay,25,50)
+				if newVal < 100 then
+					newVal = 100
+				elseif newVal > 500 then
+					newVal = 500
+				end
+				if changed and newVal ~= gSKMSwapDelay then
+					gSKMSwapDelay = newVal
+					GUI_Set("gSKMSwapDelay",newVal)
+				end
 				GUI:PopItemWidth()
 				GUI:EndChild()
 				

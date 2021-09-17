@@ -661,22 +661,23 @@ function BuildBuffsByIndex(index)
 		esominion.buffList[index] = {}
 		esominion.debuffList[index] = {}
 		esominion.masterbuffList[index] = {}
-		
+		local currentTime = ml_global_information.CurrentTime / 1000
 		local buffCount = e("GetNumBuffs("..tostring(index)..")")
 		if buffCount > 0 then
 			for buff = 1 , buffCount do
 				local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = e("GetUnitBuffInfo("..tostring(index)..", "..buff..")")
+				local remaining = math.max((timeEnding - currentTime),0)
 				if (effectType == 1) then
 					if not esominion.buffList[index][abilityId] or castByPlayer then
-						esominion.buffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+						esominion.buffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount, remaining = remaining, duration = (timeEnding - timeStarted)}
 					end
 				elseif (effectType == 1) then
-					if not esominion.buffList[index][abilityId] or castByPlayer then
-						esominion.debuffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+					if not esominion.debuffList[index][abilityId] or castByPlayer then
+						esominion.debuffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount, remaining = remaining, duration = (timeEnding - timeStarted)}
 					end
 				end
-				if not esominion.buffList[index][abilityId] or castByPlayer then
-					esominion.masterbuffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount}
+				if not esominion.masterbuffList[index][abilityId] or castByPlayer then
+					esominion.masterbuffList[index][abilityId] = {name = buffName, buff = (effectType == 1), debuff = (effectType == 2), owned = castByPlayer, stack = stackCount, remaining = remaining, duration = (timeEnding - timeStarted)}
 				end
 			end
 		end
@@ -684,28 +685,37 @@ function BuildBuffsByIndex(index)
 end
 
 
-function HasBuff(list, buffName)
+function HasBuff(list, buffName, remaining)
+	local remaining = IsNull(remaining,0)
+	
 	if table.valid(list) and buffName then
-		if list[tonumber(buffName)] then
+		local buffDetails =  list[tonumber(buffName)]
+		if buffDetails and buffDetails.remaining > remaining then
 			return true
 		end
 	end
 	return false
 end
 
-function MissingBuff(list, buffName)
+function MissingBuff(list, buffName, remaining)
+	local remaining = IsNull(remaining,0)
+	
 	if table.valid(list) and buffName then
-		if list[tonumber(buffName)] then
+		local buffDetails =  list[tonumber(buffName)]
+		if buffDetails and buffDetails.remaining > remaining then
 			return false
 		end
 	end
 	return true
 end
 
-function HasBuffs(list, buffNames)
+function HasBuffs(list, buffNames, remaining)
+	local remaining = IsNull(remaining,0)
+	
 	if table.valid(list) and (buffNames and type(buffNames) == "string") then
 		for _orids in StringSplit(buffNames,",") do
-			if list[tonumber(_orids)] then
+			local buffDetails =  list[tonumber(_orids)]
+			if buffDetails and buffDetails.remaining > remaining then
 				return true
 			end
 		end
@@ -713,11 +723,13 @@ function HasBuffs(list, buffNames)
 	return false
 end
 
-function MissingBuffs(list, buffNames)
+function MissingBuffs(list, buffNames, remaining)
+	local remaining = IsNull(remaining,0)
 
 	if table.valid(list) and (buffNames and type(buffNames) == "string") then
 		for _orids in StringSplit(buffNames,",") do
-			if list[tonumber(_orids)] then
+			local buffDetails =  list[tonumber(_orids)]
+			if buffDetails and buffDetails.remaining > remaining then
 				return false
 			end
 		end
@@ -865,7 +877,6 @@ function death_update_dead(eventName, eventCode)
 end
 
 function changeCombatState(eventName, eventCode, inCombat)
-d("in combat state changed")
 	Player.incombat = toboolean(inCombat)
 	esominion.incombat = toboolean(inCombat)
 end

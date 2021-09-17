@@ -104,6 +104,7 @@ function ml_globals.UpdateGlobals()
 		-- Returns: number stealthState 
 
 		ml_global_information.Player_Health = Player.health or { current = 0, max = 0, percent = 0 }
+		ml_global_information.CurrentTime = GetClientRunningTime()
 		ml_global_information.CurrentMapID = Player.mapid
 		ml_global_information.CurrentLevel = select(3, e("GetCharacterInfo(1)"))
 		ml_global_information.CurrentClass = e("GetUnitClassId(player)")

@@ -272,6 +272,8 @@ eso_skillmanager.Variables = {
 	SKM_PBuff = { default = "", cast = "string", profile = "pbuff", section = "fighting"  },
 	SKM_PNBuffThis = { default = false, cast = "boolean", profile = "pnbuffthis", section = "fighting"  },
 	SKM_PNBuff = { default = "", cast = "string", profile = "pnbuff", section = "fighting"  },
+	SKM_PBuffRemaining = { default = 0, cast = "number", profile = "pbuffr", section = "fighting"   },
+	SKM_PNBuffRemaining = { default = 0, cast = "number", profile = "pnbuffr", section = "fighting"   },
 	SKM_PBuffCount = { default = 0, cast = "number", profile = "pbuffc", section = "fighting"   },
 	SKM_PDBuffCount = { default = 0, cast = "number", profile = "pdbuffc", section = "fighting"   },
 		
@@ -279,6 +281,8 @@ eso_skillmanager.Variables = {
 	SKM_TBuff = { default = "", cast = "string", profile = "tbuff", section = "fighting"  },
 	SKM_TNBuffThis = { default = false, cast = "boolean", profile = "tnbuffthis", section = "fighting"  },
 	SKM_TNBuff = { default = "", cast = "string", profile = "tnbuff", section = "fighting"  },
+	SKM_TBuffRemaining = { default = 0, cast = "number", profile = "tbuffr", section = "fighting"   },
+	SKM_TNBuffRemaining = { default = 0, cast = "number", profile = "tnbuffr", section = "fighting"   },
 	SKM_TBuffCount = { default = 0, cast = "number", profile = "tbuffc", section = "fighting"   },
 	SKM_TDBuffCount = { default = 0, cast = "number", profile = "tdbuffc", section = "fighting"   },
 	
@@ -324,7 +328,7 @@ function eso_skillmanager.ModuleInit()
 	if (Settings.ESOMINION.SMDefaultProfiles[6] == nil) then
 		Settings.ESOMINION.SMDefaultProfiles[6] = "Templar"
 	end
-	
+	gSMTargets = { GetString("Target"), GetString("Self") }
 	gSMBattleStatuses = { GetString("In Combat"), GetString("Out of Combat"), GetString("Any") }
 	gSMBattleStatusIndex = 1
 	gSMBattlePowerTypes = {"Magicka","Stamina","Ultimate"}
@@ -332,6 +336,7 @@ function eso_skillmanager.ModuleInit()
 	
 	gSKMFilter = esominion.GetSetting("gSKMFilter",false)
 	gSKMWeaveDelay = esominion.GetSetting("gSKMWeaveDelay",100)
+	gSKMSwapDelay = esominion.GetSetting("gSKMSwapDelay",300)
 	
 	eso_skillmanager.UpdateProfiles()
 	eso_skillmanager.UseDefaultProfile()
@@ -1186,7 +1191,7 @@ function eso_skillmanager.Cast( entity )
 		end
 	end
 		
-	if gSKMWeaving then
+	if gSKMWeaving and entity.id ~= Player.id then
 		if TimeSince(eso_skillmanager.lastcast) > 2000 then
 			eso_skillmanager.prevSkillID = 0
 		end
@@ -1222,19 +1227,10 @@ function eso_skillmanager.Cast( entity )
 						if activeHotbar ~= skillOnBar then
 							-- swap bars
 							d("need swap for skill ["..tostring(prio).."]")
-							--[[if skillOnBar == 0 then
-								if (AbilityList:Cast(61874,Player.id)) then
-									d("swap weapon to bar 0")
-								end
-							elseif skillOnBar == 1 then
-								if (AbilityList:Cast(61875,Player.id)) then
-									d("swap weapon to bar 1")
-								end
-							end]]
 							e("OnWeaponSwap()")
 							eso_skillmanager.latencyTimer = 0
-							ml_global_information.nextRun = Now() + 300
-							 return true
+							ml_global_information.nextRun = Now() + gSKMSwapDelay
+							return true
 						end
 					end
 				end
@@ -1419,6 +1415,13 @@ function eso_skillmanager.CanCast(prio, entity)
 		end
 	end
 	--]]
+	local activeHotbar = AbilityList:GetActiveHotBar()
+	local defaultName = "Default"..tostring(activeHotbar)
+	local defaultAttack = eso_skillmanager.skillsbyname[defaultName]
+	local notUsable = (defaultAttack.id == realID and not Player.incombat)
+	if notUsable then
+		castable = false
+	end		
 	
 	if (castable) then
 		return entity.id
@@ -1764,10 +1767,10 @@ function eso_skillmanager.AddDefaultConditions()
 		local target = eso_skillmanager.CurrentTarget
 		local preCombat = eso_skillmanager.preCombat
 		
-		if (((skill.combat == "Out of Combat") and (preCombat == false or esominion.incombat)) or
-			((skill.combat == "In Combat") and (preCombat == true)) or
-			((skill.combat == "In Combat") and not esominion.incombat and skill.trg ~= "Target") or
-			((skill.combat == "In Combat") and not esominion.incombat and not target.attackable))
+		if (((skill.ooc == "Out of Combat") and (preCombat == false or Player.incombat)) or
+			((skill.ooc == "In Combat") and (preCombat == true)) or
+			((skill.ooc == "In Combat") and not Player.incombat and skill.trg ~= "Target") or
+			((skill.ooc == "In Combat") and not Player.incombat and not target.attackable))
 		then 
 			return true
 		end
@@ -1952,12 +1955,12 @@ function eso_skillmanager.AddDefaultConditions()
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local playerBuffs = esominion.masterbuffList[Player.index]
 		if (skill.pbuff ~= "") then
-			if not HasBuffs(playerBuffs, skill.pbuff) then 
+			if not HasBuffs(playerBuffs, skill.pbuff, skill.pbuffr) then 
 				return true
 			end 
 		end
 		if (skill.pnbuff ~= "") then
-			if not MissingBuffs(playerBuffs, skill.pnbuff) then 
+			if not MissingBuffs(playerBuffs, skill.pnbuff, skill.pnbuffr) then 
 				return true
 			end
 		end			
@@ -1973,12 +1976,12 @@ function eso_skillmanager.AddDefaultConditions()
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local targetBuffs = esominion.masterbuffList[target.index]
 		if (skill.tbuff ~= "") then
-			if not HasBuffs(targetBuffs, skill.tbuff) then 
+			if not HasBuffs(targetBuffs, skill.tbuff, skill.tbuffr) then 
 				return true
 			end 
 		end
 		if (skill.tnbuff ~= "") then
-			if not MissingBuffs(targetBuffs, skill.tnbuff) then 
+			if not MissingBuffs(targetBuffs, skill.tnbuff, skill.tnbuffr) then 
 				return true
 			end
 		end			
@@ -2311,6 +2314,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:Columns(2,"#battle-basic-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Skill Target")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select the target of the skill.")) end GUI:NextColumn(); SKM_Combo("##SKM_TRG","gSMTarget","SKM_TRG",gSMTargets); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Combat Status")); GUI:NextColumn(); SKM_Combo("##SKM_Combat","gSMBattleStatusIndex","SKM_Combat",gSMBattleStatuses); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Allow Weapon Swap")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Swap",SKM_Swap),"SKM_Swap"); GUI:NextColumn();	
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Summon Skill")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Summon",SKM_Summon),"SKM_Summon"); GUI:NextColumn();		
@@ -2410,7 +2414,9 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		--GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has this effect")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PBuffThis",SKM_PBuffThis),"SKM_PBuffThis"); GUI:NextColumn();	
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this effect")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PNBuffThis",SKM_PNBuffThis),"SKM_PNBuffThis"); GUI:NextColumn();	
 		GUI:Text(GetString("Has buffs/debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PBuff",SKM_PBuff),"SKM_PBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Buff remaining >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("In seconds")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PBuffRemaining",SKM_PBuffRemaining,0,0),"SKM_PBuffRemaining"); GUI:NextColumn();
 		GUI:Text(GetString("Missing buffs/debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Player is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PNBuff",SKM_PNBuff),"SKM_PNBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Buff remaining <=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("In seconds")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PNBuffRemaining",SKM_PNBuffRemaining,0,0),"SKM_PNBuffRemaining"); GUI:NextColumn();
 		GUI:Text(GetString("Buff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of buffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PBuffCount",SKM_PBuffCount,0,0),"SKM_PBuffCount"); GUI:NextColumn();
 		GUI:Text(GetString("Debuff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of debuffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PDBuffCount",SKM_PDBuffCount,0,0),"SKM_PDBuffCount"); GUI:NextColumn();
 		GUI:PopItemWidth()
@@ -2426,7 +2432,9 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		--GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Has this effect")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TBuffThis",SKM_TBuffThis),"SKM_TBuffThis"); GUI:NextColumn();	
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Missing this effect")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_TNBuffThis",SKM_TNBuffThis),"SKM_TNBuffThis"); GUI:NextColumn();	
 		GUI:Text(GetString("Has Has buffs/debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TBuff",SKM_TBuff),"SKM_TBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Buff remaining >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("In seconds")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TBuffRemaining",SKM_TBuffRemaining,0,0),"SKM_TBuffRemaining"); GUI:NextColumn();
 		GUI:Text(GetString("Missing buffs/debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the Target is not being affected by a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_TNBuff",SKM_TNBuff),"SKM_TNBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Buff remaining <=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("In seconds")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TNBuffRemaining",SKM_TNBuffRemaining,0,0),"SKM_TNBuffRemaining"); GUI:NextColumn();
 		GUI:Text(GetString("Buff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of buffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TBuffCount",SKM_TBuffCount,0,0),"SKM_TBuffCount"); GUI:NextColumn();
 		GUI:Text(GetString("Debuff Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of debuffs is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TDBuffCount",SKM_TDBuffCount,0,0),"SKM_TDBuffCount"); GUI:NextColumn();
 		GUI:PopItemWidth()
