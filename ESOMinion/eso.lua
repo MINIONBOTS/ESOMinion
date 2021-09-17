@@ -77,8 +77,8 @@ function esominion.SetMainVars()
 	gSMlastprofileNew = esominion.GetSetting("gSMlastprofileNew",GetString("none"))
 	gSMprofile = GetString("none")
 	gSMnewname = ""
-	
-	
+	gDefaultWeapon = esominion.GetSetting("gDefaultWeapon",0)
+	gDefaultWeaponSwap = esominion.GetSetting("gDefaultWeaponSwap",false)
 	gLootBodies = esominion.GetSetting("gLootBodies",false)
 	ESO_Common_BotRunning = false
 end
@@ -574,6 +574,15 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 					e("StopBlock()")
 				end
 			end
+			if gDefaultWeaponSwap and not IsSwimming() then
+				local activeHotbar = AbilityList:GetActiveHotBar()
+				if TimeSince(eso_skillmanager.lastcast) > 2000 or (not table.valid(eso_skillmanager.queueSkill) and AbilityList:GetSlotInfo(1) == 23604) then
+					if activeHotbar ~= gDefaultWeapon then
+						d("need swap back to default weapon.")
+						e("OnWeaponSwap()")
+					end
+				end
+			end
 		end
 	
 		if (ml_task_hub.shouldRun) then
@@ -1057,7 +1066,6 @@ function AdvancedSettings.Draw()
 					gSKMWeaveDelay = newVal
 					GUI_Set("gSKMWeaveDelay",newVal)
 				end
-				GUI:PushItemWidth(80)
 				local newVal, changed = GUI:InputInt("Weapon Swap Delay",gSKMSwapDelay,25,50)
 				if newVal < 100 then
 					newVal = 100
@@ -1067,6 +1075,19 @@ function AdvancedSettings.Draw()
 				if changed and newVal ~= gSKMSwapDelay then
 					gSKMSwapDelay = newVal
 					GUI_Set("gSKMSwapDelay",newVal)
+				end
+				GUI:PopItemWidth()
+				GUI_Capture(GUI:Checkbox(GetString("Swap to Default Weapon (OOC)"),gDefaultWeaponSwap),"gDefaultWeaponSwap")
+				GUI:PushItemWidth(80)
+				local newVal, changed = GUI:InputInt("Return to Weapon",gDefaultWeapon,25,50)
+				if newVal < 0 then
+					newVal = 0
+				elseif newVal > 1 then
+					newVal = 1
+				end
+				if changed and newVal ~= gDefaultWeapon then
+					gDefaultWeapon = newVal
+					GUI_Set("gDefaultWeapon",newVal)
 				end
 				GUI:PopItemWidth()
 				GUI:EndChild()

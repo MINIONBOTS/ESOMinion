@@ -33,7 +33,7 @@ eso_skillmanager.lastAvoid = 0
 eso_skillmanager.lastBreak = 0
 eso_skillmanager.lastInterrupt = 0
 eso_skillmanager.needsrebuild = true
-
+eso_skillmanager.queueSkill = {}
 eso_skillmanager.TIP_BLOCK = 1
 eso_skillmanager.TIP_EXPLOIT = 2
 eso_skillmanager.TIP_INTERRUPT = 3
@@ -178,7 +178,7 @@ eso_skillmanager.Variables = {
 	SKM_ENABLED = { default = "0", cast = "string", profile = "enabled", section = "main"},	
 	
 	SKM_Combat = { default = "In Combat", cast = "string", profile = "ooc", section = "fighting"  },
-	SKM_Swap = { default = false, cast = "boolean", profile = "forceswap", section = "fighting"  },
+	--SKM_Swap = { default = false, cast = "boolean", profile = "forceswap", section = "fighting"  },
 	SKM_Summon = { default = false, cast = "boolean", profile = "summonskill", section = "fighting"  },
 	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"   },
 	SKM_MinR = { default = 0, cast = "number", profile = "minRange", section = "fighting"   },
@@ -1086,9 +1086,44 @@ function eso_skillmanager.Cast( entity )
 			return false
 		end
 	--end
+	eso_skillmanager.BuildSkillsList()
 	local activeHotbar = AbilityList:GetActiveHotBar()
+	if table.valid(eso_skillmanager.queueSkill) then
+		local skill = eso_skillmanager.queueSkill
+		local prio = skill.prio
+		local TID = eso_skillmanager.CanCast(prio, entity)
+		local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
+		local canCast = AbilityList:CanCast(realID,TID)
+		local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
+		d("canCast Queued = "..tostring(prio).." "..tostring(canCast))
+		if canCast == 10 and activeHotbar == skillOnBar then
+			if (AbilityList:Cast(realID,TID)) then
+				--d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
+				skill.timelastused = Now() + 2000
+				eso_skillmanager.prevSkillID = realID
+				eso_skillmanager.ComboSkillID = realID
+				eso_skillmanager.resetTimer = Now() + 4000
+				if gSKMWeaving then
+					eso_skillmanager.latencyTimer = 0
+					--d("last skill weave was "..tostring(Now() - eso_skillmanager.lastdefault))
+				else
+					eso_skillmanager.latencyTimer = Now() + math.random(500,700)
+				end
+				--d("last skill cast was "..tostring(Now() - eso_skillmanager.lastcast))
+				eso_skillmanager.lastcast = Now()
+				eso_skillmanager.queueSkill = {}
+				return true
+			end
+		elseif canCast == -110 then -- stunned
+			eso_skillmanager.queueSkill = {}
+			return false
+		else
+			eso_skillmanager.queueSkill = {}
+			d("cant cast queued skill, check others")
+		end
+	
+	end
 	--if eso_skillmanager.needsrebuild then
-		eso_skillmanager.BuildSkillsList()
 	--end
 	local defaultName = "Default"..tostring(activeHotbar)
 	local defaultAttack = eso_skillmanager.skillsbyname[defaultName]
@@ -1221,19 +1256,21 @@ function eso_skillmanager.Cast( entity )
 			
 			--check swapable before checking conditions
 				local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
-				if skill.forceswap then
+				--if skill.forceswap then
 					
 					if skillOnBar ~= nil then
 						if activeHotbar ~= skillOnBar then
 							-- swap bars
-							d("need swap for skill ["..tostring(prio).."]")
+							d("need swap to bar "..tostring(skillOnBar).." for skill ["..tostring(prio).."]")
 							e("OnWeaponSwap()")
 							eso_skillmanager.latencyTimer = 0
 							ml_global_information.nextRun = Now() + gSKMSwapDelay
+							eso_skillmanager.lastcast = Now()
+							eso_skillmanager.queueSkill = skill
 							return true
 						end
 					end
-				end
+				--end
 			
 			
 			
@@ -1242,7 +1279,7 @@ function eso_skillmanager.Cast( entity )
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				--local action = AbilityList:Get(realID)
 				local canCast = AbilityList:CanCast(realID,TID)
-				d("canCast = "..tostring(prio).." "..tostring(canCast))
+				--d("canCast = "..tostring(prio).." "..tostring(canCast))
 				if canCast == 10 and activeHotbar == skillOnBar then
 					if (AbilityList:Cast(realID,TID)) then
 						--d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
@@ -2316,7 +2353,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Skill Target")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select the target of the skill.")) end GUI:NextColumn(); SKM_Combo("##SKM_TRG","gSMTarget","SKM_TRG",gSMTargets); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Combat Status")); GUI:NextColumn(); SKM_Combo("##SKM_Combat","gSMBattleStatusIndex","SKM_Combat",gSMBattleStatuses); GUI:NextColumn();
-		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Allow Weapon Swap")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Swap",SKM_Swap),"SKM_Swap"); GUI:NextColumn();	
+		--GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Allow Weapon Swap")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Swap",SKM_Swap),"SKM_Swap"); GUI:NextColumn();	
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Summon Skill")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_Summon",SKM_Summon),"SKM_Summon"); GUI:NextColumn();		
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Min Range")); GUI:NextColumn(); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Minimum range the skill can be used.")) end eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_MinR",SKM_MinR,0,0),"SKM_MinR");  GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Max Range")); GUI:NextColumn(); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Maximum range the skill can be used.")) end eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_MaxR",SKM_MaxR,0,0),"SKM_MaxR"); GUI:NextColumn();
