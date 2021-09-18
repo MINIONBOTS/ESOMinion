@@ -34,6 +34,7 @@ eso_skillmanager.lastBreak = 0
 eso_skillmanager.lastInterrupt = 0
 eso_skillmanager.needsrebuild = true
 eso_skillmanager.queueSkill = {}
+eso_skillmanager.lastcastunique = {}
 eso_skillmanager.TIP_BLOCK = 1
 eso_skillmanager.TIP_EXPLOIT = 2
 eso_skillmanager.TIP_INTERRUPT = 3
@@ -185,6 +186,7 @@ eso_skillmanager.Variables = {
 	SKM_MaxR = { default = 30, cast = "number", profile = "maxRange", section = "fighting"   },
 	
 	SKM_THROTTLE = { default = 0, cast = "number", profile = "throttle", section = "fighting" },  
+	SKM_THROTTLET = { default = 0, cast = "number", profile = "throttlet", section = "fighting" },  
 	-- player
 	SKM_PHPGT = { default = 0, cast = "number", profile = "phpgt", section = "fighting"   },
 	SKM_PHPLT = { default = 0, cast = "number", profile = "phplt", section = "fighting"   },
@@ -1097,10 +1099,23 @@ function eso_skillmanager.Cast( entity )
 		local canCast = AbilityList:CanCast(realID,TID)
 		local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
 		d("canCast Queued = "..tostring(prio).." "..tostring(canCast))
-		if canCast == 10 and activeHotbar == skillOnBar then
+		local skillCastable = true
+		if skill.throttlet > 0 then
+			if eso_skillmanager.lastcastunique[entity.index] and eso_skillmanager.lastcastunique[entity.index][realID] then
+				if TimeSince(eso_skillmanager.lastcastunique[entity.index][realID]) < (skill.throttlet * 1000) then
+					skillCastable = false
+				end
+			end
+		end
+		
+		if skillCastable and canCast == 10 and activeHotbar == skillOnBar then
 			if (AbilityList:Cast(realID,TID)) then
 				--d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
 				skill.timelastused = Now() + 2000
+				if not eso_skillmanager.lastcastunique[entity.index] then
+					eso_skillmanager.lastcastunique[entity.index] = {}
+				end
+				eso_skillmanager.lastcastunique[entity.index][realID] = Now()
 				eso_skillmanager.prevSkillID = realID
 				eso_skillmanager.ComboSkillID = realID
 				eso_skillmanager.resetTimer = Now() + 4000
@@ -1280,11 +1295,23 @@ function eso_skillmanager.Cast( entity )
 				--local realID = tonumber(skill.skillID)
 				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
 				--local action = AbilityList:Get(realID)
+				local skillCastable = true
+				if skill.throttlet > 0 then
+					if eso_skillmanager.lastcastunique[entity.index] and eso_skillmanager.lastcastunique[entity.index][realID] then
+						if TimeSince(eso_skillmanager.lastcastunique[entity.index][realID]) < (skill.throttlet * 1000) then
+							skillCastable = false
+						end
+					end
+				end
 				local canCast = AbilityList:CanCast(realID,TID)
 				--d("canCast = "..tostring(prio).." "..tostring(canCast))
-				if canCast == 10 and activeHotbar == skillOnBar then
+				if skillCastable and canCast == 10 and activeHotbar == skillOnBar then
 					if (AbilityList:Cast(realID,TID)) then
 						--d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
+						if not eso_skillmanager.lastcastunique[entity.index] then
+							eso_skillmanager.lastcastunique[entity.index] = {}
+						end
+						eso_skillmanager.lastcastunique[entity.index][realID] = Now()
 						skill.timelastused = Now() + 2000
 						eso_skillmanager.prevSkillID = realID
 						eso_skillmanager.ComboSkillID = realID
@@ -2101,13 +2128,13 @@ function eso_skillmanager.AddDefaultConditions()
 					end
 				end
 				local hits = table.size(targets)
-			
-				if hits < tecount then
-					--d("front cone aoe more than check failed "..tostring(table.size(targets)))
+				d("AOE will hit "..tostring(hits).." targets")
+				if tecount > 0 and hits < tecount then
+					d("front cone aoe more than check failed "..tostring(table.size(targets)))
 					return true
 				end
-				if hits > tecount2 then
-					--d("front cone aoe less than check failed "..tostring(table.size(targets)))
+				if tecount2 > 0 and hits > tecount2 then
+					d("front cone aoe less than check failed "..tostring(table.size(targets)))
 					return true
 				end
 			end
@@ -2394,6 +2421,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PSkillID",SKM_PSkillID),"SKM_PSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Previous Skill NOT")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("If this skill should NOT be used immediately after another skill that is not on the GCD, put the ID of that skill here.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_NPSkillID",SKM_NPSkillID),"SKM_NPSkillID"); GUI:NextColumn();
 		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Throttle Skill",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Delay reuse of skill. (seconds)")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THROTTLE",SKM_THROTTLE,0,0),"SKM_THROTTLE"); GUI:NextColumn();
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Throttle Unique",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Delay reuse of skill. (seconds) Target Specific")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_THROTTLET",SKM_THROTTLET,0,0),"SKM_THROTTLET"); GUI:NextColumn();
 		GUI:Columns(1)
 	end
 	
@@ -2472,7 +2500,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:Text(GetString("Frontal Cone")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select this option if the skill has a frontal cone effect.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_FrontalConeAOE",SKM_FrontalConeAOE),"SKM_FrontalConeAOE"); GUI:NextColumn();
 		GUI:Text(GetString("Enemy Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount",SKM_TECount,0,0),"SKM_TECount"); GUI:NextColumn();
 		GUI:Text(GetString("Enemy Count <=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is less than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount2",SKM_TECount2,0,0),"SKM_TECount2"); GUI:NextColumn();
-		GUI:Text(GetString("Radius")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when enemies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TERange",SKM_TERange,0,0),"SKM_TERange"); GUI:NextColumn();
+		GUI:Text(GetString("Range")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when enemies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TERange",SKM_TERange,0,0),"SKM_TERange"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		
 		GUI:Columns(1)
