@@ -149,7 +149,15 @@ writers = {
 end
 
 function ConvertHeading(heading)
-	local heading = heading -(1.5708)
+	local heading = heading - (1.5708)
+	if (heading < 0) then
+		return heading + 2 * math.pi
+	else
+		return heading
+	end
+end
+function ConvertHeading2(heading)
+	local heading = heading - (1.5708 * 2)
 	if (heading < 0) then
 		return heading + 2 * math.pi
 	else
@@ -431,36 +439,22 @@ function GetNearestGrind()
 			end
 		elseif (blacklist and blacklist ~= "") then
 			local filterstring = "shortestpath,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist
-			if (gPreventAttackingInnocents) then
-				filterstring = filterstring..",hostile"
-			end
+			
 			el = MEntityList(filterstring)
 			if (not ValidTable(el)) then
 				filterstring = "nearest,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel..",exclude_contentid="..blacklist
-				if (gPreventAttackingInnocents) then
-					filterstring = filterstring..",hostile"
-				end
 				el = MEntityList(filterstring)
 			end
 		else
 			d("Checking other section.")
 			local filterstring = "shortestpath,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel
-			if (gPreventAttackingInnocents) then
-				filterstring = filterstring..",hostile"
-			end
 			el = MEntityList(filterstring)
 			if (not ValidTable(el)) then
 				filterstring = "nearest,attackable,alive,nocritter,onmesh,minlevel="..minLevel..",maxlevel="..maxLevel
-				if (gPreventAttackingInnocents) then
-					filterstring = filterstring..",hostile"
-				end
 				el = MEntityList(filterstring)
 			end
 			if (not ValidTable(el)) then
 				filterstring = "nearest,attackable,alive,nocritter,onmesh"
-				if (gPreventAttackingInnocents) then
-					filterstring = filterstring..",hostile"
-				end
 				el = MEntityList(filterstring)
 			end
 		end
@@ -794,6 +788,23 @@ function SetBait(pondtype)
 		return false
 	end
 	return true
+end
+
+function EntityIsFrontWide(entity)
+	if not entity or entity.index == Player.index then return false end
+	
+	local ppos = Player.pos
+	local epos = entity.pos
+	local playerHeading = ConvertHeading2(ppos.h)
+	local playerAngle = math.atan2(epos.x - ppos.x, epos.z - ppos.z) 
+	local deviation = playerAngle - playerHeading
+	local absDeviation = math.abs(deviation)
+	local leftover = math.abs(absDeviation - math.pi)
+	
+	if (leftover > (math.pi * .70) and leftover < (math.pi * 1.30)) then
+		return true
+	end
+    return false
 end
 
 function GetNearestFromList(strList,pos,radius,excludelist)

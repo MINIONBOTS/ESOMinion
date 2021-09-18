@@ -208,6 +208,7 @@ eso_skillmanager.Variables = {
 	SKM_THPCLT = { default = 0, cast = "number", profile = "thpclt", section = "fighting"  },
 	SKM_THPADV = { default = 0, cast = "number", profile = "thpadv", section = "fighting"  },
 	
+	SKM_FrontalConeAOE = { default = false, cast = "boolean", profile = "frontalconeaoe", readable = "", section = "fighting", group = ""   },
 	-- aoe count
 	SKM_TECount = { default = 0, cast = "number", profile = "tecount", section = "fighting"  },
 	SKM_TECount2 = { default = 0, cast = "number", profile = "tecount2", section = "fighting" },
@@ -2078,9 +2079,6 @@ function eso_skillmanager.AddDefaultConditions()
 		local tlistAE = nil
 		if (tecount > 0 or tecount2 > 0) then
 			local elstring = "alive,attackable,nocritter,maxdistance="..tostring(skill.terange)..",distanceto="..tostring(target.id)
-			if (gPreventAttackingInnocents) then
-				elstring = elstring..",hostile"
-			end
 			
 			tlistAE = EntityList(elstring)
 			local attackTable = TableSize(tlistAE) or 0
@@ -2092,6 +2090,28 @@ function eso_skillmanager.AddDefaultConditions()
 				return true
 			end
 		end	
+		if skill.frontalconeaoe then
+			local targets = {}
+			local tlistAE = EntityList("alive,attackable,nocritter,maxdistance="..tostring(skill.terange))
+			
+			if table.valid(tlistAE) then
+				for i,entity in pairs(tlistAE) do
+					if EntityIsFrontWide(entity) then
+						targets[entity.index] = entity
+					end
+				end
+				local hits = table.size(targets)
+			
+				if hits < tecount then
+					--d("front cone aoe more than check failed "..tostring(table.size(targets)))
+					return true
+				end
+				if hits > tecount2 then
+					--d("front cone aoe less than check failed "..tostring(table.size(targets)))
+					return true
+				end
+			end
+		end
 		
 		return false
 	end
@@ -2449,6 +2469,7 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:PushItemWidth(100)
+		GUI:Text(GetString("Frontal Cone")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select this option if the skill has a frontal cone effect.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_FrontalConeAOE",SKM_FrontalConeAOE),"SKM_FrontalConeAOE"); GUI:NextColumn();
 		GUI:Text(GetString("Enemy Count >=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is greater than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount",SKM_TECount,0,0),"SKM_TECount"); GUI:NextColumn();
 		GUI:Text(GetString("Enemy Count <=")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of enemies is less than or equal to this number.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TECount2",SKM_TECount2,0,0),"SKM_TECount2"); GUI:NextColumn();
 		GUI:Text(GetString("Radius")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when enemies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_TERange",SKM_TERange,0,0),"SKM_TERange"); GUI:NextColumn();
