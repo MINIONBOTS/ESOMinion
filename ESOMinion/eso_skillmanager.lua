@@ -1877,17 +1877,17 @@ function eso_skillmanager.AddDefaultConditions()
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local target = eso_skillmanager.CurrentTarget
 		if Player.health.percent > 0 then
-			if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) > Player.health.percent) or 
-				(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < Player.health.percent) or 
+			if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) >= Player.health.percent) or 
+				(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) <= Player.health.percent) or 
 				(tonumber(skill.phpeq) > 0 and tonumber(skill.phpeq) ~= Player.health.percent))
 			then
 				return true
 			end
 		end
 		if Player.health.current > 0 then
-			if ((tonumber(skill.phpgt) > 0 and tonumber(skill.phpgt) > Player.health.current) or 
-				(tonumber(skill.phplt) > 0 and tonumber(skill.phplt) < Player.health.current) or 
-				(tonumber(skill.phpeq) > 0 and tonumber(skill.phpeq) ~= Player.health.percent))
+			if ((tonumber(skill.phcgt) > 0 and tonumber(skill.phcgt) >= Player.health.current) or 
+				(tonumber(skill.phclt) > 0 and tonumber(skill.phclt) <= Player.health.current) or 
+				(tonumber(skill.phceq) > 0 and tonumber(skill.phceq) ~= Player.health.current))
 			then
 				return true
 			end
@@ -1899,15 +1899,15 @@ function eso_skillmanager.AddDefaultConditions()
 			if Player.magicka.current < IsNull(eso_skillmanager.skillsbyid[skill.skillID].cost,0) then
 				return true
 			end
-			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.magicka.percent) or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.magicka.percent) or 
-				(tonumber(skill.phpeq) > 0 and tonumber(skill.phpeq) ~= Player.magicka.percent))
+			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) >= Player.magicka.percent) or 
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) <= Player.magicka.percent) or 
+				(tonumber(skill.ppoweq) > 0 and tonumber(skill.ppoweq) ~= Player.magicka.percent))
 			then 
 				return true
 			end
-			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) > Player.magicka.current) or 
-				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) < Player.magicka.current) or 
-				(tonumber(skill.phpeq) > 0 and tonumber(skill.phpeq) ~= Player.magicka.current))
+			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) >= Player.magicka.current) or 
+				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) <= Player.magicka.current) or 
+				(tonumber(skill.pcoweq) > 0 and tonumber(skill.pcoweq) ~= Player.magicka.current))
 			then 
 				return true
 			end
@@ -1915,27 +1915,27 @@ function eso_skillmanager.AddDefaultConditions()
 			if Player.stamina.current < IsNull(eso_skillmanager.skillsbyid[skill.skillID].cost,0) then
 				return true
 			end
-			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > Player.stamina.percent) or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < Player.stamina.percent) or 
+			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) >= Player.stamina.percent) or 
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) <= Player.stamina.percent) or 
 				(tonumber(skill.ppoweq) > 0 and tonumber(skill.ppoweq) ~= Player.stamina.percent))
 			then 
 				return true
 			end
-			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) > Player.stamina.current) or 
-				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) < Player.stamina.current) or 
+			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) >= Player.stamina.current) or 
+				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) <= Player.stamina.current) or 
 				(tonumber(skill.pcoweq) > 0 and tonumber(skill.pcoweq) ~= Player.stamina.current))
 			then 
 				return true
 			end
 		elseif (skill.powertype == "Ultimate") then -- cost type 10
-			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) > ml_global_information.Player_Ultimate.percent)	or 
-				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) < ml_global_information.Player_Ultimate.percent) or 
+			if ((tonumber(skill.ppowgt) > 0 and tonumber(skill.ppowgt) >= ml_global_information.Player_Ultimate.percent)	or 
+				(tonumber(skill.ppowlt) > 0 and tonumber(skill.ppowlt) <= ml_global_information.Player_Ultimate.percent) or 
 				(tonumber(skill.ppoweq) > 0 and tonumber(skill.ppoweq) ~= ml_global_information.Player_Ultimate.percent))
 			then 
 				return true
 			end
-			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) > ml_global_information.Player_Ultimate.current)	or 
-				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) < ml_global_information.Player_Ultimate.current) or 
+			if ((tonumber(skill.pcowgt) > 0 and tonumber(skill.pcowgt) >= ml_global_information.Player_Ultimate.current)	or 
+				(tonumber(skill.pcowlt) > 0 and tonumber(skill.pcowlt) <= ml_global_information.Player_Ultimate.current) or 
 				(tonumber(skill.pcoweq) > 0 and tonumber(skill.pcoweq) ~= ml_global_information.Player_Ultimate.current))
 			then 
 				return true
