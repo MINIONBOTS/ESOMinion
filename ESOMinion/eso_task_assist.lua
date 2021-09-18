@@ -231,7 +231,8 @@ function Lockpicker.OnUpdate()
 						Lockpicker.timer = Now() + e("GetLockpickingTimeLeft()")
 					end
 					local timeRemaining = Lockpicker.timeRemaining()
-					if (timeRemaining > 0) then
+					local lockpicksRemaining = e("GetNumLockpicksLeft()")
+					if (timeRemaining > 0 and lockpicksRemaining > 0) then
 						esominion.GUI.lockpicking.open = true
 						if Lockpicker.chamber == 0 then
 							for i = 1,5 do
@@ -270,6 +271,8 @@ function Lockpicker.OnUpdate()
 							end
 							return true
 						end
+					else
+						d("exit window here")
 					end
 				end
 			else
