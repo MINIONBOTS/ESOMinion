@@ -1226,7 +1226,8 @@ function eso_skillmanager.Cast( entity )
 		end
 	end
 		
-	if gSKMWeaving and entity.id ~= Player.id then
+	if gSKMWeaving and entity.id ~= Player.id and (gAssistInitCombat or Player.incombat) then
+		
 		if TimeSince(eso_skillmanager.lastcast) > 2000 then
 			eso_skillmanager.prevSkillID = 0
 		end
@@ -1652,6 +1653,19 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)
 	
+	conditional = { name = "Player Target Checks"	
+	, eval = function()	
+		local skill = eso_skillmanager.CurrentSkill
+		local realskilldata = eso_skillmanager.CurrentSkillData
+		local target = eso_skillmanager.CurrentTarget
+		
+		if (skill.trg == "Self") and (target.index ~= Player.index) then 
+			return true
+		end
+		return false
+	end
+	}
+	eso_skillmanager.AddConditional(conditional)
 	
 	conditional = { name = "Target Casting Checks"	
 	, eval = function()	
