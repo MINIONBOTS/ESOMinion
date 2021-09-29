@@ -321,7 +321,7 @@ function eso_skillmanager.ModuleInit()
 	if (Settings.ESOMINION.SMDefaultProfiles[6] == nil) then
 		Settings.ESOMINION.SMDefaultProfiles[6] = "Templar"
 	end
-	gSMTargets = { GetString("Target"), GetString("Self") }
+	gSMTargets = { GetString("Target"), GetString("Self"), GetString("Party") }
 	gSMBattleStatuses = { GetString("In Combat"), GetString("Out of Combat"), GetString("Any") }
 	gSMBattleStatusIndex = 1
 	gSMBattlePowerTypes = {"Magicka","Stamina","Ultimate"}
@@ -338,7 +338,6 @@ function eso_skillmanager.ModuleInit()
 end
 
 function eso_skillmanager.CheckPreferedList(weaponID)
-	d("check prefered skillProfiles")
 	if table.valid(gSkillManagerPrefered) then
 		if weaponID ~= 0 then
 			local checkProfile = gSkillManagerPrefered[weaponID]
@@ -1997,12 +1996,17 @@ function eso_skillmanager.AddDefaultConditions()
 		local allyHP = nil
 		local allyMP = nil
 		local allyTP = nil
+		local allyHits = 0
 		
 		local ptcount = tonumber(skill.ptcount) or 0
 		local pthpl = tonumber(skill.pthpl) or 0
 		local pthpb = tonumber(skill.pthpb) or 0
 		if (pthpl ~= 0 or skill.pthpb ~= 0 ) then
-			allyHP = GetLowestHPParty( skill )
+			allyHits = CountLowHPParty( skill )
+			if skill.trg == GetString("Party") then
+				allyHP = GetLowestHPParty( skill )
+			end
+			-- check if target based skill
 			if ( ptcount > 0 and allyHP ~= nil ) then
 			
 				if ((pthpl > 0 and pthpl >= allyHP.health.percent ) or
@@ -2010,9 +2014,8 @@ function eso_skillmanager.AddDefaultConditions()
 				then 
 					return true
 				end
-			elseif (ptcount > 0 and not allyHP) then
-				return true
-			else
+			-- check aoe count for local skills
+			elseif (ptcount > 0 and (ptcount > allyHits)) then
 				return true
 			end
 		end
@@ -2467,6 +2470,8 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:Columns(1)
 	end
 	if (GUI:CollapsingHeader(GetString("Party"),"battle-party-header")) then
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("AOE Self cast need Skill Target set to Self."));if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("AOE Self cast need Skill Target set to Self.")) end
+		GUI:AlignFirstTextHeightToWidgets(); GUI:Text(GetString("Targeted Heals set to Target or Party."));if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Targeted Heals set to Target or Party.")) end
 		GUI:Columns(2,"#battle-party-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		

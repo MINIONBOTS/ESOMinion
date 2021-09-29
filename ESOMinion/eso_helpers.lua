@@ -252,17 +252,13 @@ function CountLowHPParty( skill )
 	range = skill.ptrange or ml_global_information.AttackRange
 	count = skill.ptcount or 0
 	minHP = skill.pthpb or 0
-	
-	local lowest = nil
-	local lowestHP = 101
-	local el = nil
 	local memCount = 0
 	
 	if (count ~= 0 and minHP > 0) then
 		local party = ml_global_information.Party
 		for i, member in pairs(party) do
 			if EntityIsFrontWide(member) or not skill.partyfrontalconeaoe then
-				if (((not npc and member.type == 1) or npc) and	member.index ~= 0 and member.targetable and member.distance <= range and member.health.percent <= minHP) then
+				if (member.index ~= 0 and member.distance <= range and member.health.percent <= minHP) then
 					memCount = memCount + 1
 				end
 			end
