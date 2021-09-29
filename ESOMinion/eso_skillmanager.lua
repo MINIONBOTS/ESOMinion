@@ -178,130 +178,120 @@ eso_skillmanager.Variables = {
 	SKM_ATKRNG = { default = "0", cast = "string", profile = "atkrng", section = "main"},
 	SKM_ENABLED = { default = "0", cast = "string", profile = "enabled", section = "main"},	
 	
-	SKM_Combat = { default = "In Combat", cast = "string", profile = "ooc", section = "fighting"  },
-	--SKM_Swap = { default = false, cast = "boolean", profile = "forceswap", section = "fighting"  },
-	SKM_Summon = { default = false, cast = "boolean", profile = "summonskill", section = "fighting"  },
-	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"   },
-	SKM_MinR = { default = 0, cast = "number", profile = "minRange", section = "fighting"   },
-	SKM_MaxR = { default = 30, cast = "number", profile = "maxRange", section = "fighting"   },
+	SKM_Combat = { default = "In Combat", cast = "string", profile = "ooc", section = "fighting"},
+	SKM_Summon = { default = false, cast = "boolean", profile = "summonskill", section = "fighting"},
+	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"},
+	SKM_MinR = { default = 0, cast = "number", profile = "minRange", section = "fighting"},
+	SKM_MaxR = { default = 30, cast = "number", profile = "maxRange", section = "fighting"},
 	
-	SKM_THROTTLE = { default = 0, cast = "number", profile = "throttle", section = "fighting" },  
-	SKM_THROTTLET = { default = 0, cast = "number", profile = "throttlet", section = "fighting" },  
+	SKM_THROTTLE = { default = 0, cast = "number", profile = "throttle", section = "fighting"},  
+	SKM_THROTTLET = { default = 0, cast = "number", profile = "throttlet", section = "fighting"},  
 	-- player
-	SKM_PHPGT = { default = 0, cast = "number", profile = "phpgt", section = "fighting"   },
-	SKM_PHPLT = { default = 0, cast = "number", profile = "phplt", section = "fighting"   },
-	SKM_PHPEQ = { default = 0, cast = "number", profile = "phpeq", section = "fighting"   },
-	SKM_PHCGT = { default = 0, cast = "number", profile = "phcgt", section = "fighting"   },
-	SKM_PHCLT = { default = 0, cast = "number", profile = "phclt", section = "fighting"   },
-	SKM_PHCEQ = { default = 0, cast = "number", profile = "phceq", section = "fighting"   },
+	SKM_PHPGT = { default = 0, cast = "number", profile = "phpgt", section = "fighting"},
+	SKM_PHPLT = { default = 0, cast = "number", profile = "phplt", section = "fighting"},
+	SKM_PHPEQ = { default = 0, cast = "number", profile = "phpeq", section = "fighting"},
+	SKM_PHCGT = { default = 0, cast = "number", profile = "phcgt", section = "fighting"},
+	SKM_PHCLT = { default = 0, cast = "number", profile = "phclt", section = "fighting"},
+	SKM_PHCEQ = { default = 0, cast = "number", profile = "phceq", section = "fighting"},
 	SKM_POWERTYPE = { default = "Magicka", cast = "string", profile = "powertype", section = "fighting"},
-	SKM_PPowGT = { default = 0, cast = "number", profile = "ppowgt", section = "fighting"   },
-	SKM_PPowLT = { default = 0, cast = "number", profile = "ppowlt", section = "fighting"   },
-	SKM_PPowEQ = { default = 0, cast = "number", profile = "ppoweq", section = "fighting"   },
-	SKM_PCowGT = { default = 0, cast = "number", profile = "pcowgt", section = "fighting"   },
-	SKM_PCowLT = { default = 0, cast = "number", profile = "pcowlt", section = "fighting"   },
-	SKM_PCowEQ = { default = 0, cast = "number", profile = "pcoweq", section = "fighting"   },
+	SKM_PPowGT = { default = 0, cast = "number", profile = "ppowgt", section = "fighting"},
+	SKM_PPowLT = { default = 0, cast = "number", profile = "ppowlt", section = "fighting"},
+	SKM_PPowEQ = { default = 0, cast = "number", profile = "ppoweq", section = "fighting"},
+	SKM_PCowGT = { default = 0, cast = "number", profile = "pcowgt", section = "fighting"},
+	SKM_PCowLT = { default = 0, cast = "number", profile = "pcowlt", section = "fighting"},
+	SKM_PCowEQ = { default = 0, cast = "number", profile = "pcoweq", section = "fighting"},
 	
 	-- target
-	SKM_TRG = { default = "Target", cast = "string", profile = "trg", section = "fighting"  },
-	SKM_THPGT = { default = 0, cast = "number", profile = "thpgt", section = "fighting"  },
-	SKM_THPLT = { default = 0, cast = "number", profile = "thplt", section = "fighting"  },
-	SKM_THPCGT = { default = 0, cast = "number", profile = "thpcgt", section = "fighting"  },
-	SKM_THPCLT = { default = 0, cast = "number", profile = "thpclt", section = "fighting"  },
-	SKM_THPADV = { default = 0, cast = "number", profile = "thpadv", section = "fighting"  },
+	SKM_TRG = { default = "Target", cast = "string", profile = "trg", section = "fighting"},
+	SKM_THPGT = { default = 0, cast = "number", profile = "thpgt", section = "fighting"},
+	SKM_THPLT = { default = 0, cast = "number", profile = "thplt", section = "fighting"},
+	SKM_THPCGT = { default = 0, cast = "number", profile = "thpcgt", section = "fighting"},
+	SKM_THPCLT = { default = 0, cast = "number", profile = "thpclt", section = "fighting"},
+	SKM_THPADV = { default = 0, cast = "number", profile = "thpadv", section = "fighting"},
 	
-	SKM_FrontalConeAOE = { default = false, cast = "boolean", profile = "frontalconeaoe", readable = "", section = "fighting", group = ""   },
 	-- aoe count
-	SKM_TECount = { default = 0, cast = "number", profile = "tecount", section = "fighting"  },
-	SKM_TECount2 = { default = 0, cast = "number", profile = "tecount2", section = "fighting" },
-	SKM_TERange = { default = 0, cast = "number", profile = "terange", section = "fighting"  },
+	SKM_FrontalConeAOE = { default = false, cast = "boolean", profile = "frontalconeaoe", section = "fighting"},
+	SKM_TECount = { default = 0, cast = "number", profile = "tecount", section = "fighting"},
+	SKM_TECount2 = { default = 0, cast = "number", profile = "tecount2", section = "fighting"},
+	SKM_TERange = { default = 0, cast = "number", profile = "terange", section = "fighting"},
 	
 	 -------Skill Chains
-	SKM_PSkillID = { default = "", cast = "string", profile = "pskill", section = "fighting"  },
-	SKM_NPSkillID = { default = "", cast = "string", profile = "npskill", section = "fighting"  },
-	SKM_PCSkillID = { default = "", cast = "string", profile = "pcskill", section = "fighting"  },
-	SKM_NPCSkillID = { default = "", cast = "string", profile = "npcskill", section = "fighting"  },
-	SKM_NSkillID = { default = "", cast = "string", profile = "nskill", section = "fighting"  },
-	SKM_NSkillPrio = { default = "", cast = "string", profile = "nskillprio", section = "fighting"  },
+	SKM_PSkillID = { default = "", cast = "string", profile = "pskill", section = "fighting"},
+	SKM_NPSkillID = { default = "", cast = "string", profile = "npskill", section = "fighting"},
+	SKM_PCSkillID = { default = "", cast = "string", profile = "pcskill", section = "fighting"},
+	SKM_NPCSkillID = { default = "", cast = "string", profile = "npcskill", section = "fighting"},
+	SKM_NSkillID = { default = "", cast = "string", profile = "nskill", section = "fighting"},
+	SKM_NSkillPrio = { default = "", cast = "string", profile = "nskillprio", section = "fighting"},
 	
-	SKM_PHPL = { default = 0, cast = "number", profile = "phpl", section = "fighting"   },
-	SKM_PHPB = { default = 0, cast = "number", profile = "phpb", section = "fighting"   },
-	SKM_PUnderAttack = { default = false, cast = "boolean", profile = "punderattack", section = "fighting"  },
-	SKM_PUnderAttackMelee = { default = false, cast = "boolean", profile = "punderattackmelee", section = "fighting"  },
-	SKM_PPowL = { default = 0, cast = "number", profile = "ppowl", section = "fighting"   },
-	SKM_PPowB = { default = 0, cast = "number", profile = "ppowb", section = "fighting"   },
-	SKM_PMPPL = { default = 0, cast = "number", profile = "pmppl", section = "fighting"   },
-	SKM_PMPPB = { default = 0, cast = "number", profile = "pmppb", section = "fighting"   },
+	SKM_PHPL = { default = 0, cast = "number", profile = "phpl", section = "fighting"},
+	SKM_PHPB = { default = 0, cast = "number", profile = "phpb", section = "fighting"},
+	SKM_PUnderAttack = { default = false, cast = "boolean", profile = "punderattack", section = "fighting"},
+	SKM_PUnderAttackMelee = { default = false, cast = "boolean", profile = "punderattackmelee", section = "fighting"},
+	SKM_PPowL = { default = 0, cast = "number", profile = "ppowl", section = "fighting"},
+	SKM_PPowB = { default = 0, cast = "number", profile = "ppowb", section = "fighting"},
+	SKM_PMPPL = { default = 0, cast = "number", profile = "pmppl", section = "fighting"},
+	SKM_PMPPB = { default = 0, cast = "number", profile = "pmppb", section = "fighting"},
 	
 
-	--SKM_OnlySolo = { default = "0", cast = "string", profile = "onlysolo", section = "fighting"  },
-	--SKM_OnlyParty = { default = "0", cast = "string", profile = "onlyparty", section = "fighting"  },
+	--SKM_OnlySolo = { default = "0", cast = "string", profile = "onlysolo", section = "fighting"},
+	--SKM_OnlyParty = { default = "0", cast = "string", profile = "onlyparty", section = "fighting"},
 	
-	--[[ -------Dynamic Filters
-	SKM_FilterOne = { default = "Ignore", cast = "string", profile = "filterone", section = "fighting"  },
-	SKM_FilterTwo = { default = "Ignore", cast = "string", profile = "filtertwo", section = "fighting"  },
-	SKM_FilterThree = { default = "Ignore", cast = "string", profile = "filterthree", section = "fighting"  },
-	SKM_FilterFour = { default = "Ignore", cast = "string", profile = "filterfour", section = "fighting"  },
-	SKM_FilterFive = { default = "Ignore", cast = "string", profile = "filterfive", section = "fighting"  },
-	--]]
 	
 	--[[ -------Party
-	SKM_HPRIOHP = { default = false, cast = "number", profile = "hpriohp", section = "fighting"  },
-	SKM_HPRIO1 = { default = "None", cast = "string", profile = "hprio1", section = "fighting"  },
-	SKM_HPRIO2 = { default = "None", cast = "string", profile = "hprio2", section = "fighting"  },
-	SKM_HPRIO3 = { default = "None", cast = "string", profile = "hprio3", section = "fighting"  },
-	SKM_HPRIO4 = { default = "None", cast = "string", profile = "hprio4", section = "fighting"  },
+	SKM_HPRIOHP = { default = false, cast = "number", profile = "hpriohp", section = "fighting"},
+	SKM_HPRIO1 = { default = "None", cast = "string", profile = "hprio1", section = "fighting"},
+	SKM_HPRIO2 = { default = "None", cast = "string", profile = "hprio2", section = "fighting"},
+	SKM_HPRIO3 = { default = "None", cast = "string", profile = "hprio3", section = "fighting"},
+	SKM_HPRIO4 = { default = "None", cast = "string", profile = "hprio4", section = "fighting"},
 	--]]
 	
-	--[[ -------Party
-	SKM_PTCount = { default = false, cast = "number", profile = "ptcount", section = "fighting"   },
-	SKM_PTHPL = { default = false, cast = "number", profile = "pthpl", section = "fighting"   },
-	SKM_PTHPB = { default = false, cast = "number", profile = "pthpb", section = "fighting"   },
-	SKM_PTMPL = { default = false, cast = "number", profile = "ptmpl", section = "fighting"   },
-	SKM_PTMPB = { default = false, cast = "number", profile = "ptmpb", section = "fighting"   },
-	SKM_PTTPL = { default = false, cast = "number", profile = "pttpl", section = "fighting"   },
-	SKM_PTTPB = { default = false, cast = "number", profile = "pttpb", section = "fighting"   },
-	SKM_PTBuff = { default = "", cast = "string", profile = "ptbuff", section = "fighting"  },
-	SKM_PTNBuff = { default = "", cast = "string", profile = "ptnbuff", section = "fighting"  },
-	--]]
+	 -------Party
+	SKM_PartyFrontalConeAOE = { default = false, cast = "boolean", profile = "partyfrontalconeaoe", section = "fighting"},
+	SKM_PartyRange = { default = 0, cast = "number", profile = "ptrange", section = "fighting"},
+	SKM_PTCount = { default = 0, cast = "number", profile = "ptcount", section = "fighting"},
+	SKM_PTHPL = { default = 0, cast = "number", profile = "pthpl", section = "fighting"},
+	SKM_PTHPB = { default = 0, cast = "number", profile = "pthpb", section = "fighting"},
+	SKM_PTBuff = { default = "", cast = "string", profile = "ptbuff", section = "fighting"},
+	SKM_PTNBuff = { default = "", cast = "string", profile = "ptnbuff", section = "fighting"},
+	
 	
 	 ------- Target Casting
-	SKM_TCASTID = { default = "", cast = "string", profile = "tcastids", section = "fighting"  },
-	SKM_TCASTTM = { default = "0", cast = "string", profile = "tcastonme", section = "fighting"  },
-	SKM_TCASTTIME = { default = "0.0", cast = "string", profile = "tcasttime", section = "fighting"  },
+	SKM_TCASTID = { default = "", cast = "string", profile = "tcastids", section = "fighting"},
+	SKM_TCASTTM = { default = "0", cast = "string", profile = "tcastonme", section = "fighting"},
+	SKM_TCASTTIME = { default = "0.0", cast = "string", profile = "tcasttime", section = "fighting"},
 	
 	
-	SKM_PBuffThis = { default = false, cast = "boolean", profile = "pbuffthis", section = "fighting"  },
-	SKM_PBuff = { default = "", cast = "string", profile = "pbuff", section = "fighting"  },
-	SKM_PNBuffThis = { default = false, cast = "boolean", profile = "pnbuffthis", section = "fighting"  },
-	SKM_PNBuff = { default = "", cast = "string", profile = "pnbuff", section = "fighting"  },
-	SKM_PBuffRemaining = { default = 0, cast = "number", profile = "pbuffr", section = "fighting"   },
-	SKM_PNBuffRemaining = { default = 0, cast = "number", profile = "pnbuffr", section = "fighting"   },
-	SKM_PBuffCount = { default = 0, cast = "number", profile = "pbuffc", section = "fighting"   },
-	SKM_PDBuffCount = { default = 0, cast = "number", profile = "pdbuffc", section = "fighting"   },
+	SKM_PBuffThis = { default = false, cast = "boolean", profile = "pbuffthis", section = "fighting"},
+	SKM_PBuff = { default = "", cast = "string", profile = "pbuff", section = "fighting"},
+	SKM_PNBuffThis = { default = false, cast = "boolean", profile = "pnbuffthis", section = "fighting"},
+	SKM_PNBuff = { default = "", cast = "string", profile = "pnbuff", section = "fighting"},
+	SKM_PBuffRemaining = { default = 0, cast = "number", profile = "pbuffr", section = "fighting"},
+	SKM_PNBuffRemaining = { default = 0, cast = "number", profile = "pnbuffr", section = "fighting"},
+	SKM_PBuffCount = { default = 0, cast = "number", profile = "pbuffc", section = "fighting"},
+	SKM_PDBuffCount = { default = 0, cast = "number", profile = "pdbuffc", section = "fighting"},
 		
-	SKM_TBuffThis = { default = false, cast = "boolean", profile = "tbuffthis", section = "fighting"  },
-	SKM_TBuff = { default = "", cast = "string", profile = "tbuff", section = "fighting"  },
-	SKM_TNBuffThis = { default = false, cast = "boolean", profile = "tnbuffthis", section = "fighting"  },
-	SKM_TNBuff = { default = "", cast = "string", profile = "tnbuff", section = "fighting"  },
-	SKM_TBuffRemaining = { default = 0, cast = "number", profile = "tbuffr", section = "fighting"   },
-	SKM_TNBuffRemaining = { default = 0, cast = "number", profile = "tnbuffr", section = "fighting"   },
-	SKM_TBuffCount = { default = 0, cast = "number", profile = "tbuffc", section = "fighting"   },
-	SKM_TDBuffCount = { default = 0, cast = "number", profile = "tdbuffc", section = "fighting"   },
+	SKM_TBuffThis = { default = false, cast = "boolean", profile = "tbuffthis", section = "fighting"},
+	SKM_TBuff = { default = "", cast = "string", profile = "tbuff", section = "fighting"},
+	SKM_TNBuffThis = { default = false, cast = "boolean", profile = "tnbuffthis", section = "fighting"},
+	SKM_TNBuff = { default = "", cast = "string", profile = "tnbuff", section = "fighting"},
+	SKM_TBuffRemaining = { default = 0, cast = "number", profile = "tbuffr", section = "fighting"},
+	SKM_TNBuffRemaining = { default = 0, cast = "number", profile = "tnbuffr", section = "fighting"},
+	SKM_TBuffCount = { default = 0, cast = "number", profile = "tbuffc", section = "fighting"},
+	SKM_TDBuffCount = { default = 0, cast = "number", profile = "tdbuffc", section = "fighting"},
 	
 	
 	
-	--SKM_PPos = { default = "None", cast = "string", profile = "ppos", section = "fighting"  },
+	--SKM_PPos = { default = "None", cast = "string", profile = "ppos", section = "fighting"},
 	
 	--[[ ------- Other Skill Checks
-	SKM_SKREADY = { default = "", cast = "string", profile = "skready", section = "fighting" },
-	SKM_SKOFFCD = { default = "", cast = "string", profile = "skoffcd", section = "fighting" },
-	SKM_SKNREADY = { default = "", cast = "string", profile = "sknready", section = "fighting" },
-	SKM_SKNOFFCD = { default = "", cast = "string", profile = "sknoffcd", section = "fighting" },
-	SKM_SKNCDTIMEMIN = { default = "", cast = "string", profile = "skncdtimemin", section = "fighting" },
-	SKM_SKNCDTIMEMAX = { default = "", cast = "string", profile = "skncdtimemax", section = "fighting" },
+	SKM_SKREADY = { default = "", cast = "string", profile = "skready", section = "fighting"},
+	SKM_SKOFFCD = { default = "", cast = "string", profile = "skoffcd", section = "fighting"},
+	SKM_SKNREADY = { default = "", cast = "string", profile = "sknready", section = "fighting"},
+	SKM_SKNOFFCD = { default = "", cast = "string", profile = "sknoffcd", section = "fighting"},
+	SKM_SKNCDTIMEMIN = { default = "", cast = "string", profile = "skncdtimemin", section = "fighting"},
+	SKM_SKNCDTIMEMAX = { default = "", cast = "string", profile = "skncdtimemax", section = "fighting"},
 	SKM_SKTYPE = { default = "Action", cast = "string", profile = "sktype", section = "fighting"},
-	SKM_NCURRENTACTION = { default = "", cast = "string", profile = "ncurrentaction", section = "fighting" },
+	SKM_NCURRENTACTION = { default = "", cast = "string", profile = "ncurrentaction", section = "fighting"},
 	--]]
 }
 
@@ -1273,23 +1263,19 @@ function eso_skillmanager.Cast( entity )
 			
 			--check swapable before checking conditions
 				local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
-				--if skill.forceswap then
-					
-					if skillOnBar ~= nil then
-						if activeHotbar ~= skillOnBar then
-							-- swap bars
-							d("need swap to bar "..tostring(skillOnBar).." for skill ["..tostring(prio).."]")
-							e("OnWeaponSwap()")
-							eso_skillmanager.latencyTimer = 0
-							ml_global_information.nextRun = Now() + gSKMSwapDelay
-							eso_skillmanager.lastcast = Now()
-							eso_skillmanager.queueSkill = skill
-							return true
-						end
+				
+				if skillOnBar ~= nil then
+					if activeHotbar ~= skillOnBar then
+						-- swap bars
+						d("need swap to bar "..tostring(skillOnBar).." for skill ["..tostring(prio).."]")
+						e("OnWeaponSwap()")
+						eso_skillmanager.latencyTimer = 0
+						ml_global_information.nextRun = Now() + gSKMSwapDelay
+						eso_skillmanager.lastcast = Now()
+						eso_skillmanager.queueSkill = skill
+						return true
 					end
-				--end
-			
-			
+				end
 			
 				local TID = result
 				--local realID = tonumber(skill.skillID)
@@ -1857,33 +1843,7 @@ function eso_skillmanager.AddDefaultConditions()
 	end
 	}
 	eso_skillmanager.AddConditional(conditional)
-	
-	
-	--[[ - No Filter Checks yet.
-	conditional = { name = "Filter Checks"	
-	, eval = function()	
-		local skill = eso_skillmanager.CurrentSkill
-		local realskilldata = eso_skillmanager.CurrentSkillData
 		
-		if 	((gAssistFilter1 == "1" and skill.filterone == "Off") or 
-			(gAssistFilter1 == "0" and skill.filterone == "On" ) or 
-			(gAssistFilter2 == "1" and skill.filtertwo == "Off") or
-			(gAssistFilter2 == "0" and skill.filtertwo == "On" ) or
-			(gAssistFilter3 == "1" and skill.filterthree == "Off") or
-			(gAssistFilter3 == "0" and skill.filterthree == "On" ) or
-			(gAssistFilter4 == "1" and skill.filterfour == "Off") or
-			(gAssistFilter4 == "0" and skill.filterfour == "On" ) or
-			(gAssistFilter5 == "1" and skill.filterfive == "Off") or
-			(gAssistFilter5 == "0" and skill.filterfive == "On" ))
-		then
-			return true
-		end
-		return false
-	end
-	}
-	eso_skillmanager.AddConditional(conditional)
-	--]]
-	
 	conditional = { name = "Throttled Check"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
@@ -2023,6 +1983,40 @@ function eso_skillmanager.AddDefaultConditions()
 		if (tonumber(skill.tdbuffc) > 0 and tonumber(skill.tdbuffc) < table.size(esominion.debuffList[target.index])) then
 			return true
 		end
+		return false
+	end
+	}
+	eso_skillmanager.AddConditional(conditional)
+	
+	conditional = { name = "Party HP/MP/TP Checks"	
+	, eval = function()	
+		local skill = eso_skillmanager.CurrentSkill
+		local realskilldata = eso_skillmanager.CurrentSkillData
+		local target = eso_skillmanager.CurrentTarget
+		
+		local allyHP = nil
+		local allyMP = nil
+		local allyTP = nil
+		
+		local ptcount = tonumber(skill.ptcount) or 0
+		local pthpl = tonumber(skill.pthpl) or 0
+		local pthpb = tonumber(skill.pthpb) or 0
+		if (pthpl ~= 0 or skill.pthpb ~= 0 ) then
+			allyHP = GetLowestHPParty( skill )
+			if ( ptcount > 0 and allyHP ~= nil ) then
+			
+				if ((pthpl > 0 and pthpl >= allyHP.health.percent ) or
+					(pthpb > 0 and pthpb <= allyHP.health.percent )) 
+				then 
+					return true
+				end
+			elseif (ptcount > 0 and not allyHP) then
+				return true
+			else
+				return true
+			end
+		end
+		
 		return false
 	end
 	}
@@ -2472,24 +2466,22 @@ function eso_skillmanager.DrawBattleEditor(skill)
 		GUI:PopItemWidth()
 		GUI:Columns(1)
 	end
-	--[[if (GUI:CollapsingHeader(GetString("Party"),"battle-party-header")) then
+	if (GUI:CollapsingHeader(GetString("Party"),"battle-party-header")) then
 		GUI:Columns(2,"#battle-party-main",false)
 		GUI:SetColumnOffset(1,150); GUI:SetColumnOffset(2,450);
 		
 		GUI:PushItemWidth(100)
-		GUI:Text(GetString("skmPTCount")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTCount",SKM_PTCount,0,0),"SKM_PTCount"); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of party members is more or equal to this number.")) end GUI:NextColumn();
-		GUI:Text(GetString("skmPTHPL",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when a party members' HP is greater than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTHPL",SKM_PTHPL,0,0),"SKM_PTHPL"); GUI:NextColumn();
-		GUI:Text(GetString("skmPTHPB",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when a party members' HP is less than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTHPB",SKM_PTHPB,0,0),"SKM_PTHPB"); GUI:NextColumn();
-		GUI:Text(GetString("skmPTMPL",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when a party members' MP is greater than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTMPL",SKM_PTMPL,0,0),"SKM_PTMPL"); GUI:NextColumn();
-		GUI:Text(GetString("skmPTMPB",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when a party members' MP is less than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTMPB",SKM_PTMPB,0,0),"SKM_PTMPB"); GUI:NextColumn();
-		GUI:Text(GetString("skmPTTPL",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when a party members' TP is greater than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTTPL",SKM_PTTPL,0,0),"SKM_PTTPL"); GUI:NextColumn();
-		GUI:Text(GetString("skmPTTPB",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when a party members' TP is less than this value.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTTPB",SKM_PTTPB,0,0),"SKM_PTTPB"); GUI:NextColumn();
-		GUI:Text(GetString("skmHasBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill if a party member is being affected by buffs with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PTBuff",SKM_PTBuff),"SKM_PTBuff"); GUI:NextColumn();
-		GUI:Text(GetString("Known Debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When selected, use this skill when being affected by a Minion-maintained list of debuffs (helpful for Esuna skills).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PTKBuff",SKM_PTKBuff),"SKM_PTKBuff"); GUI:NextColumn();
-		GUI:Text(GetString("skmMissBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill if a party member is missing a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PTNBuff",SKM_PTNBuff),"SKM_PTNBuff"); GUI:NextColumn();
+		GUI:Text(GetString("Party Count")); GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTCount",SKM_PTCount,0,0),"SKM_PTCount"); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when the number of party members is more or equal to this number.")) end GUI:NextColumn();
+		GUI:Text(GetString("Frontal Cone")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Select this option if the skill has a frontal cone effect.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PartyFrontalConeAOE",SKM_PartyFrontalConeAOE),"SKM_PartyFrontalConeAOE"); GUI:NextColumn();
+		GUI:Text(GetString("Range")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when enemies are within this range (150 = size of the minimap).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PartyRange",SKM_PartyRange,0,0),"SKM_PartyRange"); GUI:NextColumn();
+		GUI:Text(GetString("Party HP >",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when a party members' HP is greater than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTHPL",SKM_PTHPL,0,0),"SKM_PTHPL"); GUI:NextColumn();
+		GUI:Text(GetString("Party HP <",true)); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill when a party members' HP is less than this percentage.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputInt("##SKM_PTHPB",SKM_PTHPB,0,0),"SKM_PTHPB"); GUI:NextColumn();
+		--GUI:Text(GetString("skmHasBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill if a party member is being affected by buffs with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PTBuff",SKM_PTBuff),"SKM_PTBuff"); GUI:NextColumn();
+		--GUI:Text(GetString("Known Debuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("When selected, use this skill when being affected by a Minion-maintained list of debuffs (helpful for Esuna skills).")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:Checkbox("##SKM_PTKBuff",SKM_PTKBuff),"SKM_PTKBuff"); GUI:NextColumn();
+		--GUI:Text(GetString("skmMissBuffs")); if (GUI:IsItemHovered()) then GUI:SetTooltip(GetString("Use this skill if a party member is missing a buff with the ID entered.")) end GUI:NextColumn(); eso_skillmanager.CaptureElement(GUI:InputText("##SKM_PTNBuff",SKM_PTNBuff),"SKM_PTNBuff"); GUI:NextColumn();
 		GUI:PopItemWidth()
 		GUI:Columns(1)
-	end]]
+	end
 	
 	
 	if (GUI:CollapsingHeader(GetString("aoe"),"battle-aoe-header")) then

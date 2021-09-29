@@ -164,6 +164,7 @@ function ConvertHeading2(heading)
 		return heading
 	end
 end
+
 function GetLowestValue(...)
 	local lowestValue = math.huge
 	
@@ -205,6 +206,71 @@ function In(var,...)
 	
 	return false
 end
+function GetParty()
+	local party = {}
+	local partySize = tonumber(e("GetGroupSize()"))
+	if ( partySize > 0) then
+		for i = 1, partySize do
+			local member =  EntityList:Get("group"..tostring(i))
+			if table.valid(member) then
+				party[member.index] = member
+			end
+		end
+	end
+	--party[Player.index] = nil
+	return party
+end
+function GetLowestHPParty( skill )
+	range = skill.ptrange or ml_global_information.AttackRange
+	
+	local lowest = nil
+	local lowestHP = 101
+	local el = ml_global_information.Party
+	local memCount = 0
+	if ( table.valid(el) ) then
+		for i,entity in pairs(el) do
+			--if (IsValidHealTarget(entity)) then
+				if EntityIsFrontWide(entity) or not skill.partyfrontalconeaoe then
+					if (not lowest or entity.health.percent < lowestHP) then
+						lowest = entity
+						lowestHP = entity.health.percent
+					end
+				end
+			--end
+		end
+	end
+	
+	if (Player.health.current > 0 and Player.health.percent < lowestHP) then
+		lowest = Player
+		lowestHP = Player.health.percent
+	end
+	
+	return lowest
+end
+function CountLowHPParty( skill )
+    npc = (skill.npc )
+	range = skill.ptrange or ml_global_information.AttackRange
+	count = skill.ptcount or 0
+	minHP = skill.pthpb or 0
+	
+	local lowest = nil
+	local lowestHP = 101
+	local el = nil
+	local memCount = 0
+	
+	if (count ~= 0 and minHP > 0) then
+		local party = ml_global_information.Party
+		for i, member in pairs(party) do
+			if EntityIsFrontWide(member) or not skill.partyfrontalconeaoe then
+				if (((not npc and member.type == 1) or npc) and	member.index ~= 0 and member.targetable and member.distance <= range and member.health.percent <= minHP) then
+					memCount = memCount + 1
+				end
+			end
+		end
+	end
+	return memCount
+end
+
 function SafeStop()
 	if (Player.issprinting) then
 		e("OnSpecialMoveKeyUp(1)")

@@ -111,11 +111,10 @@ function ml_globals.UpdateGlobals()
 		ml_global_information.Player_Position = Player.pos
 		ml_global_information.Player_Stealthed = e("GetUnitStealthState(player)") ~= 0
 		ml_global_information.Player_Blocking = e("IsBlockActive()")
+		ml_global_information.Party = GetParty()
 		
 		ml_global_information.Player_Magicka = Player.magicka
-		
 		ml_global_information.Player_Stamina = Player.stamina
-		
 		ml_global_information.Player_Ultimate = {} 
 		local powertypeUltimate = 10
 		ml_global_information.Player_Ultimate.current,ml_global_information.Player_Ultimate.max,ml_global_information.Player_Ultimate.effectiveMax = e("GetUnitPower(player,"..powertypeUltimate..")")
