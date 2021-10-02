@@ -1159,7 +1159,7 @@ function eso_skillmanager.Cast( entity )
 	
 	local tipTarget = entity
 	if IsNull(esominion.activeTip,0) ~= 0 then
-		local TargetList = MEntityList("hostile,aggro,maxdistance=50")
+		local TargetList = MEntityList("attackable,aggro,maxdistance=50")
 		if table.valid(TargetList) then
 			for i,e in pairs (TargetList) do
 				if e.castinfo and e.castinfo.timeleft > 0 and e.castinfo.timeleft < 1000 then
@@ -2124,10 +2124,13 @@ function eso_skillmanager.AddDefaultConditions()
 		local tecount = tonumber(skill.tecount) or 0
 		local tecount2 = tonumber(skill.tecount2) or 0
 		local terange = tonumber(skill.terange) or 5
-		
+		local skillTarget = target
+		if skill.trg == "Player" then
+			skillTarget = Player
+		end
 		local tlistAE = nil
 		if (tecount > 0 or tecount2 > 0) then
-			local elstring = "alive,attackable,nocritter,maxdistance="..tostring(skill.terange)..",distanceto="..tostring(target.id)
+			local elstring = "alive,attackable,nocritter,maxdistance="..tostring(skill.terange)..",distanceto="..tostring(skillTarget.id)
 			
 			tlistAE = EntityList(elstring)
 			local attackTable = TableSize(tlistAE) or 0

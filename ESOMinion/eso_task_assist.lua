@@ -48,7 +48,7 @@ function eso_task_assist:Process()
 		elseif gAssistTargetModeSetting == "Scanner" then
 			target = eso_task_assist.GetTarget()
 		elseif gAssistTargetModeSetting == "Aggro" then
-			local TargetList = MEntityList("lowesthealth,hostile,aggro,maxdistance=28")
+			local TargetList = MEntityList("lowesthealth,attackable,aggro,maxdistance=28")
 			if table.valid(TargetList) then
 				local id,entry = next(TargetList)
 				if (id and entry ) then
@@ -57,7 +57,7 @@ function eso_task_assist:Process()
 			end
 		end
 		if ( gAssistInitCombat or Player.incombat or gAssistAllowOOC) then
-			if ( target and target.hostile and target.health.current > 0) then
+			if ( target and target.attackable and target.health.current > 0) then
 				eso_skillmanager.Cast( target )
 			elseif gAssistAllowOOC then
 				eso_skillmanager.Cast( Player )
@@ -68,7 +68,7 @@ end
 
 
 function eso_task_assist.SelectTargetExtended(maxrange, los, aggro)
-	local filterstring = "hostile,targetable,alive,nocritter,maxdistance="..tostring(maxrange)
+	local filterstring = "attackable,targetable,alive,nocritter,maxdistance="..tostring(maxrange)
 	if (los) then filterstring = filterstring..",los" end
 	if (aggro) then filterstring = filterstring..",aggro" end
 	--if (gAssistTargetType == "Players Only") then filterstring = filterstring..",player" end
