@@ -758,9 +758,9 @@ end
 eso_skillmanager.mandatoryskills = {
 	[61874] = true,
 	[61875] = true,
+	[26832] = true,
 }
 function eso_skillmanager.BuildSkillsBook()
-	d("build new skill book")
 	local list = {}
 	eso_skillmanager.skillsbyindex = {}
 	eso_skillmanager.skillsbyid = {}
@@ -1080,6 +1080,7 @@ function eso_skillmanager.Cast( entity )
 	--end
 	eso_skillmanager.BuildSkillsList()
 	local activeHotbar = AbilityList:GetActiveHotBar()
+	
 	if table.valid(eso_skillmanager.queueSkill) then
 		local skill = eso_skillmanager.queueSkill
 		local prio = skill.prio
@@ -1126,7 +1127,18 @@ function eso_skillmanager.Cast( entity )
 			eso_skillmanager.queueSkill = {}
 			d("cant cast queued skill, check others")
 		end
-	
+	end
+	if gAssistBlessedShards then
+		local blessedCastable = AbilityList:CanCast(26832,Player.id)
+		if blessedCastable == 10 then
+			if (AbilityList:Cast(26832,Player.id)) then
+			d("USING BLESSED SHARD!")
+				if not eso_skillmanager.lastcastunique[Player.index] then
+					eso_skillmanager.lastcastunique[Player.index] = {}
+				end
+				eso_skillmanager.lastcastunique[Player.index][26832] = Now()
+			end
+		end
 	end
 	--if eso_skillmanager.needsrebuild then
 	--end

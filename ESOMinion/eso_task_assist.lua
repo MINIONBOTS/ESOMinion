@@ -114,6 +114,7 @@ end
 
 function eso_task_assist:UIInit()
 	
+	gAssistBlessedShards = esominion.GetSetting("gAssistBlessedShards",false)
 	gAssistDoLockpick = esominion.GetSetting("gAssistDoLockpick",true)
 	gAssistUsePotions = esominion.GetSetting("gAssistUsePotions",true)
 	gSKMWeaving = esominion.GetSetting("gSKMWeaving",false)
