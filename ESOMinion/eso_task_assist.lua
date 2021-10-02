@@ -126,6 +126,7 @@ function eso_task_assist:UIInit()
 	gAssistInitCombat = esominion.GetSetting("gAssistInitCombat",false)
 	gAssistAllowOOC = esominion.GetSetting("gAssistAllowOOC",false)
 	gSKMShowAll = false
+	gAssistIsDummy = false
 	
 	gAssistTargetModeIndex = esominion.GetSetting("gAssistTargetModeIndex",1)
 	gAssistTargetModeSetting = esominion.GetSetting("gAssistTargetModeSetting","Reticle")

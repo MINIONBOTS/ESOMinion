@@ -1829,20 +1829,45 @@ function eso_skillmanager.AddDefaultConditions()
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
 		local target = eso_skillmanager.CurrentTarget
-		local preCombat = eso_skillmanager.preCombat
-		
-		if (((skill.ooc == "Out of Combat") and (preCombat == false or Player.incombat)) or
-			((skill.ooc == "In Combat") and (preCombat == true)) or
-			((skill.ooc == "In Combat") and not Player.incombat and skill.trg ~= "Target") or
-			((skill.ooc == "In Combat") and not Player.incombat and not target.attackable))
-		then 
-			return true
+		if skill.trg == "Target" then
+			if ((skill.ooc == "Out of Combat" and not Player.incombat and not gAssistInitCombat) or 
+				((skill.ooc == "In Combat") and (not Player.incombat and not gAssistInitCombat))) then
+				d("check 1 = "..tostring(skill.ooc == "Out of Combat" and not Player.incombat and not gAssistInitCombat))
+				d("check 2 = "..tostring((skill.ooc == "In Combat") and (not Player.incombat and not gAssistInitCombat)))
+				return true
+			end
+			
+		else
+			if ((skill.ooc == "Out of Combat" and not Player.incombat) or 
+				(skill.ooc == "In Combat" and not Player.incombat)) then
+				d("check 3 = "..tostring(skill.ooc == "Out of Combat" and not Player.incombat))
+				d("check 4 = "..tostring(skill.ooc == "In Combat" and not Player.incombat))
+				return true
+			end
 		end
 		return false
 	end
 	}
 	eso_skillmanager.AddConditional(conditional)
+	--[[
+	 -- Pre Combat
+	conditional = { name = "Pre Combat Status Check"	
+	, eval = function()	
+		local skill = eso_skillmanager.CurrentSkill
+		local realskilldata = eso_skillmanager.CurrentSkillData
+		local target = eso_skillmanager.CurrentTarget
+		local isDummy = gAssistIsDummy
+		if not Player.incombat then
+			if ((skill.ooc == "Out of Combat" and skill.trg == "Target" ) and not gAssistInitCombat) then 
 		
+				return true
+			end
+		end
+		return false
+	end
+	}
+	eso_skillmanager.AddConditional(conditional)]]
+	
 	conditional = { name = "Throttled Check"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
