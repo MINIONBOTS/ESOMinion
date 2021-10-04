@@ -50,6 +50,7 @@ eso_skillmanager.lastskillidcheck = 0
 eso_skillmanager.lastskillindexcheck = 0
 eso_skillmanager.skillsearchstring = ""
 eso_skillmanager.activeSkillsBar = {}
+eso_skillmanager.activeSkillsSlot = {}
 eso_skillmanager.GUI = {
 	skillbook = {
 		name = GetString("Skill Book"),
@@ -910,6 +911,7 @@ function eso_skillmanager.BuildSkillsList()
 					end
 				end
 				eso_skillmanager.activeSkillsBar[skillid] = 0
+				eso_skillmanager.activeSkillsSlot[skillid] = i
 				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
 			end
 		end
@@ -932,6 +934,7 @@ function eso_skillmanager.BuildSkillsList()
 					end
 				end
 				eso_skillmanager.activeSkillsBar[skillid] = 1
+				eso_skillmanager.activeSkillsSlot[skillid] = i
 				ml_global_information.AttackRange = math.max(skillData.range,ml_global_information.AttackRange)
 			end
 		end
@@ -1120,6 +1123,25 @@ function eso_skillmanager.Cast( entity )
 				eso_skillmanager.queueSkill = {}
 				return true
 			end
+		elseif activeHotbar ~= skillOnBar then
+			local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
+			d("swap for queued")
+			if skillOnBar ~= nil then
+				if activeHotbar ~= skillOnBar then
+					local skillSlot = eso_skillmanager.activeSkillsSlot[skill.skillID]
+					--d("skillSlot = " ..tostring(skillSlot))
+					--local actionRemain,actionDuration = AbilityList:GetSlotCooldownInfo(skillSlot,skillOnBar)
+					--if actionRemain < gSKMSwapDelay then 
+						-- swap bars
+						d("need swap to bar "..tostring(skillOnBar).." for skill ["..tostring(prio).."]")
+						e("OnWeaponSwap()")
+						eso_skillmanager.latencyTimer = 0
+						ml_global_information.nextRun = Now() + gSKMSwapDelay
+						eso_skillmanager.lastcast = Now()
+						return true
+					--end
+				end
+			end
 		elseif canCast == -110 then -- stunned
 			eso_skillmanager.queueSkill = {}
 			return false
@@ -1270,36 +1292,41 @@ function eso_skillmanager.Cast( entity )
 	if (ValidTable(eso_skillmanager.SkillProfile)) then
 		for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
 			local result = eso_skillmanager.CanCast(prio, entity)
-			if (result ~= 0) then
-			
-			--check swapable before checking conditions
+			local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
+			--local action = AbilityList:Get(realID)
+			local skillCastable = true
+			if skill.throttlet > 0 then
+				if eso_skillmanager.lastcastunique[entity.index] and eso_skillmanager.lastcastunique[entity.index][realID] then
+					if TimeSince(eso_skillmanager.lastcastunique[entity.index][realID]) < (skill.throttlet * 1000) then
+						skillCastable = false
+						--d("skill not castable 2 "..tostring(prio))
+					end
+				end
+			end
+			if (result ~= 0) and skillCastable then
+				--check swapable before checking conditions
 				local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
 				
 				if skillOnBar ~= nil then
 					if activeHotbar ~= skillOnBar then
-						-- swap bars
-						d("need swap to bar "..tostring(skillOnBar).." for skill ["..tostring(prio).."]")
-						e("OnWeaponSwap()")
-						eso_skillmanager.latencyTimer = 0
-						ml_global_information.nextRun = Now() + gSKMSwapDelay
-						eso_skillmanager.lastcast = Now()
-						eso_skillmanager.queueSkill = skill
-						return true
+						local skillSlot = eso_skillmanager.activeSkillsSlot[skill.skillID]
+						--d("skillSlot = " ..tostring(skillSlot))
+						--local actionRemain,actionDuration = AbilityList:GetSlotCooldownInfo(skillSlot,skillOnBar)
+						--if actionRemain < gSKMSwapDelay then 
+							-- swap bars
+							d("need swap to bar "..tostring(skillOnBar).." for skill ["..tostring(prio).."]")
+							e("OnWeaponSwap()")
+							eso_skillmanager.latencyTimer = 0
+							ml_global_information.nextRun = Now() + gSKMSwapDelay
+							eso_skillmanager.lastcast = Now()
+							eso_skillmanager.queueSkill = skill
+							return true
+						--end
 					end
 				end
 			
 				local TID = result
 				--local realID = tonumber(skill.skillID)
-				local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
-				--local action = AbilityList:Get(realID)
-				local skillCastable = true
-				if skill.throttlet > 0 then
-					if eso_skillmanager.lastcastunique[entity.index] and eso_skillmanager.lastcastunique[entity.index][realID] then
-						if TimeSince(eso_skillmanager.lastcastunique[entity.index][realID]) < (skill.throttlet * 1000) then
-							skillCastable = false
-						end
-					end
-				end
 				local canCast = AbilityList:CanCast(realID,TID)
 				--d("canCast = "..tostring(prio).." "..tostring(canCast))
 				if skillCastable and canCast == 10 and activeHotbar == skillOnBar then
@@ -1448,6 +1475,9 @@ function eso_skillmanager.CanCast(prio, entity)
 	
 	if (skill.trg == "Self") then
 		entity = Player
+	end
+	if (skill.trg == "Target" and entity.id == Player.id ) then
+		return 0
 	end
 	
 	eso_skillmanager.CurrentSkill = skill
@@ -2013,10 +2043,10 @@ function eso_skillmanager.AddDefaultConditions()
 				return true
 			end
 		end	
-		if (tonumber(skill.tbuffc) > 0 and tonumber(skill.tbuffc) < table.size(esominion.buffList[target.index])) then
+		if (tonumber(skill.tbuffc) > 0 and (not table.valid(esominion.buffList[target.index]) or (tonumber(skill.tbuffc) < table.size(esominion.buffList[target.index])))) then
 			return true
 		end
-		if (tonumber(skill.tdbuffc) > 0 and tonumber(skill.tdbuffc) < table.size(esominion.debuffList[target.index])) then
+		if (tonumber(skill.tdbuffc) > 0 and (not table.valid(esominion.debuffList[target.index]) or (tonumber(skill.tdbuffc) < table.size(esominion.debuffList[target.index])))) then
 			return true
 		end
 		return false
