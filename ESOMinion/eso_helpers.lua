@@ -276,6 +276,9 @@ end
 function IsSwimming()
 	return Player.isswimming == 1
 end
+function IsMounted()
+	return ml_global_information.Player_IsMounted
+end
 	
 function InventoryNearlyFull()
 	return (ml_global_information.Player_InventoryFreeSlots <= 5)

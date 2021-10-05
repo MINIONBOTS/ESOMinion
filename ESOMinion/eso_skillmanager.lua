@@ -183,7 +183,7 @@ eso_skillmanager.Variables = {
 	SKM_Summon = { default = false, cast = "boolean", profile = "summonskill", section = "fighting"},
 	SKM_CASTTIME = { default = 0, cast = "number", profile = "casttime", section = "fighting"},
 	SKM_MinR = { default = 0, cast = "number", profile = "minRange", section = "fighting"},
-	SKM_MaxR = { default = 30, cast = "number", profile = "maxRange", section = "fighting"},
+	SKM_MaxR = { default = 28, cast = "number", profile = "maxRange", section = "fighting"},
 	
 	SKM_THROTTLE = { default = 0, cast = "number", profile = "throttle", section = "fighting"},  
 	SKM_THROTTLET = { default = 0, cast = "number", profile = "throttlet", section = "fighting"},  
@@ -1092,16 +1092,8 @@ function eso_skillmanager.Cast( entity )
 		local canCast = AbilityList:CanCast(realID,TID)
 		local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
 		d("canCast Queued = "..tostring(prio).." "..tostring(canCast))
-		local skillCastable = true
-		if skill.throttlet > 0 then
-			if eso_skillmanager.lastcastunique[entity.index] and eso_skillmanager.lastcastunique[entity.index][realID] then
-				if TimeSince(eso_skillmanager.lastcastunique[entity.index][realID]) < (skill.throttlet * 1000) then
-					skillCastable = false
-				end
-			end
-		end
 		
-		if skillCastable and canCast == 10 and activeHotbar == skillOnBar then
+		if canCast == 10 and activeHotbar == skillOnBar then
 			if (AbilityList:Cast(realID,TID)) then
 				--d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
 				skill.timelastused = Now() + 2000
@@ -1293,43 +1285,26 @@ function eso_skillmanager.Cast( entity )
 		for prio,skill in pairsByKeys(eso_skillmanager.SkillProfile) do
 			local result = eso_skillmanager.CanCast(prio, entity)
 			local realID = eso_skillmanager.GetRealSkillID(skill.skillID)
-			--local action = AbilityList:Get(realID)
-			local skillCastable = true
-			if skill.throttlet > 0 then
-				if eso_skillmanager.lastcastunique[entity.index] and eso_skillmanager.lastcastunique[entity.index][realID] then
-					if TimeSince(eso_skillmanager.lastcastunique[entity.index][realID]) < (skill.throttlet * 1000) then
-						skillCastable = false
-						--d("skill not castable 2 "..tostring(prio))
-					end
-				end
-			end
-			if (result ~= 0) and skillCastable then
+			if (result ~= 0) then
 				--check swapable before checking conditions
 				local skillOnBar = eso_skillmanager.activeSkillsBar[skill.skillID]
 				
 				if skillOnBar ~= nil then
 					if activeHotbar ~= skillOnBar then
 						local skillSlot = eso_skillmanager.activeSkillsSlot[skill.skillID]
-						--d("skillSlot = " ..tostring(skillSlot))
-						--local actionRemain,actionDuration = AbilityList:GetSlotCooldownInfo(skillSlot,skillOnBar)
-						--if actionRemain < gSKMSwapDelay then 
-							-- swap bars
-							d("need swap to bar "..tostring(skillOnBar).." for skill ["..tostring(prio).."]")
-							e("OnWeaponSwap()")
-							eso_skillmanager.latencyTimer = 0
-							ml_global_information.nextRun = Now() + gSKMSwapDelay
-							eso_skillmanager.lastcast = Now()
-							eso_skillmanager.queueSkill = skill
-							return true
-						--end
+						d("need swap to bar "..tostring(skillOnBar).." for skill ["..tostring(prio).."]")
+						e("OnWeaponSwap()")
+						eso_skillmanager.latencyTimer = 0
+						ml_global_information.nextRun = Now() + gSKMSwapDelay
+						eso_skillmanager.lastcast = Now()
+						eso_skillmanager.queueSkill = skill
+						return true
 					end
 				end
 			
 				local TID = result
-				--local realID = tonumber(skill.skillID)
 				local canCast = AbilityList:CanCast(realID,TID)
-				--d("canCast = "..tostring(prio).." "..tostring(canCast))
-				if skillCastable and canCast == 10 and activeHotbar == skillOnBar then
+				if canCast == 10 and activeHotbar == skillOnBar then
 					if (AbilityList:Cast(realID,TID)) then
 						--d("Attempting to cast ability ID : "..tostring(realID).." ["..tostring(skill.name).."]")
 						if not eso_skillmanager.lastcastunique[entity.index] then
@@ -1910,7 +1885,7 @@ function eso_skillmanager.AddDefaultConditions()
 	}
 	eso_skillmanager.AddConditional(conditional)]]
 	
-	conditional = { name = "Throttled Check"	
+	conditional = { name = "Throttle Check"	
 	, eval = function()	
 		local skill = eso_skillmanager.CurrentSkill
 		local realskilldata = eso_skillmanager.CurrentSkillData
@@ -1920,6 +1895,26 @@ function eso_skillmanager.AddDefaultConditions()
 		if ( throttle > 0 and skill.timelastused and TimeSince(skill.timelastused) < throttle) then 
 			return true
 		end
+		return false
+	end
+	}
+	eso_skillmanager.AddConditional(conditional)
+	
+	conditional = { name = "Unique Throttle Check"	
+	, eval = function()	
+		local skill = eso_skillmanager.CurrentSkill
+		local realskilldata = eso_skillmanager.CurrentSkillData
+		local target = eso_skillmanager.CurrentTarget
+		
+		local throttle = tonumber(skill.throttlet) * 1000 or 0
+		if throttle > 0 then
+			if eso_skillmanager.lastcastunique[target.index] and eso_skillmanager.lastcastunique[target.index][skill.skillID] then
+				if TimeSince(eso_skillmanager.lastcastunique[target.index][skill.skillID]) < (throttle) then
+					return true
+				end
+			end
+		end
+			
 		return false
 	end
 	}

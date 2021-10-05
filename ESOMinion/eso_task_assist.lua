@@ -56,12 +56,14 @@ function eso_task_assist:Process()
 				end
 			end
 		end
-		if ( gAssistInitCombat or Player.incombat or gAssistAllowOOC) then
-			if ( target and target.attackable and target.health.current > 0) then
-				eso_skillmanager.Cast( target )
-			elseif gAssistAllowOOC then
-				eso_skillmanager.Cast( Player )
-			end	
+		if not IsMounted() and not Player.interacting then
+			if ( gAssistInitCombat or Player.incombat or gAssistAllowOOC) then
+				if ( target and target.attackable and target.health.current > 0) then
+					eso_skillmanager.Cast( target )
+				elseif gAssistAllowOOC then
+					eso_skillmanager.Cast( Player )
+				end	
+			end
 		end
 	end
 end
