@@ -496,6 +496,7 @@ function ml_global_information.InGameOnUpdate( event, tickcount )
 		ml_global_information.autoStartQueued = false
 		ml_global_information:ToggleRun() -- convert
 	end
+	local isAssistMode = (gBotMode == GetString("assistMode"))
 	
 	if (Now() >= ml_global_information.nextRun) then
 		if esominion.hooked and TimeSince(esominion.hooktimer) > 5000 then
